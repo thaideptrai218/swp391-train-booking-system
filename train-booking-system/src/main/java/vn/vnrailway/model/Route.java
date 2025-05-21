@@ -1,4 +1,4 @@
-package com.tshami.model;
+package vn.vnrailway.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

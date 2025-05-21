@@ -1,17 +1,14 @@
-package com.tshami.model;
+package vn.vnrailway.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PassengerType {
-    private int passengerTypeID;
+public class TrainType {
+    private int trainTypeID;
     private String typeName;
-    private BigDecimal discountPercentage;
     private String description; // Có thể null
-    private boolean requiresDocument;
 }

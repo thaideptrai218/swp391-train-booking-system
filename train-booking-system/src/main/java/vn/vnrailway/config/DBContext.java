@@ -1,4 +1,4 @@
-package com.tshami.dal;
+package vn.vnrailway.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
