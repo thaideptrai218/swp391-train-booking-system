@@ -2,105 +2,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Tìm kiếm chuyến đi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search-trip.css">
+    <title>Tìm kiếm vé tàu</title>
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/search-trip.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <div class="booking-container">
-        <h1>Đặt vé tàu trực tuyến</h1>
-        <div class="booking-form-block">
-            <form method="POST" action="${pageContext.request.contextPath}/searchTrip" id="searchTripForm">
-                <div class="form-input-bar">
-                    <div class="station-inputs">
-                        <div class="input-group origin-station-group">
-                            <img src="${pageContext.request.contextPath}/assets/icons/origin_marker_icon.png" alt="Origin Icon" class="input-icon">
-                            <div class="input-field-wrapper">
-                                <label for="originStation">Nơi xuất phát</label>
-                                <input type="text" id="originStation" name="originStation" placeholder="Chọn nơi xuất phát">
-                            </div>
-                        </div>
-                        <button type="button" id="switchStationsBtn" class="switch-stations-btn">
-                            <!-- SVG for switch arrows will be added via CSS or inline later -->
-                            <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 6H17M17 6L12 1M17 6L12 11" stroke="#10375C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M17 6H1M1 6L6 1M1 6L6 11" stroke="#10375C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 9 6)"/>
-                            </svg>
-                        </button>
-                        <div class="input-group destination-station-group">
-                            <img src="${pageContext.request.contextPath}/assets/icons/destination_marker_icon.png" alt="Destination Icon" class="input-icon">
-                            <div class="input-field-wrapper">
-                                <label for="destinationStation">Nơi đến</label>
-                                <input type="text" id="destinationStation" name="destinationStation" placeholder="Chọn nơi đến">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="date-inputs">
-                        <div class="input-group departure-date-group">
-                            <img src="${pageContext.request.contextPath}/assets/icons/calendar_icon.png" alt="Calendar Icon" class="input-icon">
-                            <div class="input-field-wrapper">
-                                <label for="departureDate">Ngày đi</label>
-                                <input type="date" id="departureDate" name="departureDate">
-                            </div>
-                        </div>
-                        <div class="input-group return-date-group">
-                            <button type="button" id="addReturnDateBtn">+ Thêm ngày về</button>
-                            <div class="input-field-wrapper" id="returnDateFieldWrapper" style="display:none;">
-                                <img src="${pageContext.request.contextPath}/assets/icons/calendar_icon.png" alt="Calendar Icon" class="input-icon">
-                                <label for="returnDate">Ngày về</label>
-                                <input type="date" id="returnDate" name="returnDate">
-                            </div>
-                        </div>
+    <div class="search-trip-wrapper">
+        <%-- <h1>Tìm vé tàu</h1> --%> <%-- Title can be removed if the search bar is self-explanatory --%>
+        <div class="search-panel">
+            <form action="${pageContext.request.contextPath}/searchTrip" method="POST" id="searchTripForm" class="search-form-flex">
+                
+                <div class="search-field-group origin-field">
+                    <img src="${pageContext.request.contextPath}/assets/icons/origin_marker_icon.png" alt="Origin Icon" class="field-icon">
+                    <div class="input-wrapper">
+                        <input type="text" id="origin" name="originStationCode" required>
+                        <label for="origin">Nơi xuất phát</label>
+                        <%-- Secondary text like "Ga Hà Nội" could be added here dynamically if needed --%>
                     </div>
                 </div>
 
-                <div class="passenger-selection-bar">
-                    <div class="total-passenger-display" id="totalPassengerDisplay">
-                        <img src="${pageContext.request.contextPath}/assets/icons/people_icon.png" alt="People Icon">
-                        <span id="totalPassengerText">1 Hành khách</span>
-                    </div>
-                    <div class="passenger-dropdown" id="passengerDropdown" style="display:none;">
-                        <div class="passenger-type">
-                            <img src="${pageContext.request.contextPath}/assets/icons/adult_icon.png" alt="Adult Icon">
-                            <label for="numAdults">Người lớn</label>
-                            <input type="number" id="numAdults" name="numAdults" value="1" min="1">
-                        </div>
-                        <div class="passenger-type">
-                            <img src="${pageContext.request.contextPath}/assets/icons/child_icon.png" alt="Child Icon">
-                            <label for="numChildren">Trẻ em (dưới 10 tuổi)</label>
-                            <input type="number" id="numChildren" name="numChildren" value="0" min="0">
-                            <span class="discount-badge">-25%</span>
-                        </div>
-                        <div class="passenger-type">
-                            <img src="${pageContext.request.contextPath}/assets/icons/student_icon.png" alt="Student Icon">
-                            <label for="numStudents">Sinh viên</label>
-                            <input type="number" id="numStudents" name="numStudents" value="0" min="0">
-                            <span class="discount-badge">-10%</span>
-                        </div>
-                        <div class="passenger-type">
-                            <img src="${pageContext.request.contextPath}/assets/icons/elderly_icon.png" alt="Elderly Icon">
-                            <label for="numElderly">Người cao tuổi (trên 60)</label>
-                            <input type="number" id="numElderly" name="numElderly" value="0" min="0">
-                            <span class="discount-badge">-15%</span>
-                        </div>
-                        <div class="passenger-type">
-                            <img src="${pageContext.request.contextPath}/assets/icons/group_icon.png" alt="Group Icon">
-                            <label for="numGroup">Đoàn viên công đoàn (ĐVCĐ)</label>
-                            <input type="number" id="numGroup" name="numGroup" value="0" min="0">
-                            <span class="discount-badge">-5%</span>
-                        </div>
+                <button type="button" id="swapStationsBtn" class="swap-stations-btn" title="Đổi chiều">&#8646;</button>
+
+                <div class="search-field-group destination-field">
+                    <img src="${pageContext.request.contextPath}/assets/icons/destination_marker_icon.png" alt="Destination Icon" class="field-icon">
+                    <div class="input-wrapper">
+                        <input type="text" id="destination" name="destinationStationCode" required>
+                        <label for="destination">Nơi đến</label>
+                         <%-- Secondary text like "Ga Đà Nẵng" could be added here dynamically if needed --%>
                     </div>
                 </div>
 
-                <div class="submit-bar">
-                    <button type="submit" class="search-button">Tìm kiếm</button>
+                <div class="separator"></div>
+
+                <div class="search-field-group date-field">
+                    <img src="${pageContext.request.contextPath}/assets/icons/calendar_icon.png" alt="Calendar Icon" class="field-icon">
+                    <div class="input-wrapper">
+                        <input type="text" id="departureDate" name="departureDate" placeholder="Chọn ngày đi" required onfocus="(this.type='date')" onblur="(this.type='text')">
+                        <label for="departureDate">Ngày đi</label>
+                    </div>
                 </div>
+                
+                <div class="separator"></div>
+
+                <div class="search-field-group return-date-field">
+                     <a href="#" id="addReturnDateLink" class="add-return-link">+ Thêm ngày về</a>
+                    <div class="input-wrapper" id="returnDateInputWrapper" style="display:none;">
+                        <%-- Icon can be added here if needed when visible --%>
+                        <%-- <img src="${pageContext.request.contextPath}/assets/icons/calendar_icon.png" alt="Calendar Icon" class="field-icon"> --%>
+                        <input type="text" id="returnDate" name="returnDate" placeholder="Chọn ngày về" onfocus="(this.type='date')" onblur="(this.type='text')">
+                        <label for="returnDate">Ngày về</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="search-action-btn">Tìm kiếm</button>
             </form>
         </div>
+        
+        <%-- Placeholder for displaying search results or error messages --%>
+        <%-- Example:
+        <c:if test="${not empty searchResults}">
+            <h2>Kết quả tìm kiếm:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tàu</th>
+                        <th>Ga đi</th>
+                        <th>Ga đến</th>
+                        <th>Giờ đi</th>
+                        <th>Giờ đến</th>
+                        <th>Giá vé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="trip" items="${searchResults}">
+                        <tr>
+                            <td>${trip.trainName}</td>
+                            <td>${trip.originStation}</td>
+                            <td>${trip.destinationStation}</td>
+                            <td>${trip.departureTime}</td>
+                            <td>${trip.arrivalTime}</td>
+                            <td>${trip.price}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <p style="color: red;">${errorMessage}</p>
+        </c:if>
+        --%>
     </div>
+
     <script src="${pageContext.request.contextPath}/js/search-trip.js"></script>
 </body>
 </html>

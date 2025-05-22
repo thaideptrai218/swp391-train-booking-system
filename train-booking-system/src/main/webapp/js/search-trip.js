@@ -1,152 +1,156 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const switchStationsBtn = document.getElementById('switchStationsBtn');
-    const originStationInput = document.getElementById('originStation');
-    const destinationStationInput = document.getElementById('destinationStation');
+document.addEventListener("DOMContentLoaded", function () {
+    const originInput = document.getElementById("origin");
+    const destinationInput = document.getElementById("destination");
+    const swapButton = document.getElementById("swapStationsBtn");
+    const departureDateInput = document.getElementById("departureDate");
+    const returnDateInput = document.getElementById("returnDate");
+    const searchForm = document.getElementById("searchTripForm");
+    const addReturnDateLink = document.getElementById("addReturnDateLink");
+    const returnDateInputWrapper = document.getElementById(
+        "returnDateInputWrapper"
+    );
+    const returnDateField = document.querySelector(".return-date-field");
 
-    const addReturnDateBtn = document.getElementById('addReturnDateBtn');
-    const returnDateFieldWrapper = document.getElementById('returnDateFieldWrapper');
-    const returnDateInput = document.getElementById('returnDate');
+    // Function to handle label animation based on input value
+    const handleInputLabel = (inputElement) => {
+        if (!inputElement) return;
 
-    const totalPassengerDisplay = document.getElementById('totalPassengerDisplay');
-    const passengerDropdown = document.getElementById('passengerDropdown');
-    const totalPassengerText = document.getElementById('totalPassengerText');
-
-    const numAdultsInput = document.getElementById('numAdults');
-    const numChildrenInput = document.getElementById('numChildren');
-    const numStudentsInput = document.getElementById('numStudents');
-    const numElderlyInput = document.getElementById('numElderly');
-    const numGroupInput = document.getElementById('numGroup');
-
-    // Switch Origin and Destination
-    if (switchStationsBtn && originStationInput && destinationStationInput) {
-        switchStationsBtn.addEventListener('click', function () {
-            const temp = originStationInput.value;
-            originStationInput.value = destinationStationInput.value;
-            destinationStationInput.value = temp;
-        });
-    }
-
-    // Toggle Return Date
-    if (addReturnDateBtn && returnDateFieldWrapper && returnDateInput) {
-        addReturnDateBtn.addEventListener('click', function () {
-            if (returnDateFieldWrapper.style.display === 'none') {
-                returnDateFieldWrapper.style.display = 'flex';
-                addReturnDateBtn.textContent = '- Bỏ ngày về';
-                // Optionally, set a default return date or focus
+        const checkValue = () => {
+            if (inputElement.value) {
+                inputElement.classList.add("has-value");
             } else {
-                returnDateFieldWrapper.style.display = 'none';
-                returnDateInput.value = ''; // Clear return date
-                addReturnDateBtn.textContent = '+ Thêm ngày về';
+                inputElement.classList.remove("has-value");
             }
+        };
+        inputElement.addEventListener("input", checkValue);
+        inputElement.addEventListener("change", checkValue); // For date inputs after selection
+        inputElement.addEventListener("blur", checkValue); // Ensure class is set on blur
+        checkValue(); // Initial check in case of pre-filled values
+    };
+
+    handleInputLabel(originInput);
+    handleInputLabel(destinationInput);
+    handleInputLabel(departureDateInput);
+    handleInputLabel(returnDateInput);
+
+    // Swap stations functionality
+    if (swapButton && originInput && destinationInput) {
+        swapButton.addEventListener("click", function () {
+            const tempOriginValue = originInput.value;
+            originInput.value = destinationInput.value;
+            destinationInput.value = tempOriginValue;
+
+            // Trigger input event to update label state
+            originInput.dispatchEvent(new Event("input"));
+            destinationInput.dispatchEvent(new Event("input"));
         });
     }
 
-    // Toggle Passenger Dropdown
-    if (totalPassengerDisplay && passengerDropdown) {
-        totalPassengerDisplay.addEventListener('click', function () {
-            passengerDropdown.style.display = passengerDropdown.style.display === 'none' ? 'flex' : 'none';
-        });
-    }
-
-    // Update Total Passenger Count
-    function updateTotalPassengerDisplay() {
-        if (!totalPassengerText || !numAdultsInput || !numChildrenInput || !numStudentsInput || !numElderlyInput || !numGroupInput) return;
-
-        const adults = parseInt(numAdultsInput.value) || 0;
-        const children = parseInt(numChildrenInput.value) || 0;
-        const students = parseInt(numStudentsInput.value) || 0;
-        const elderly = parseInt(numElderlyInput.value) || 0;
-        const group = parseInt(numGroupInput.value) || 0;
-
-        const total = adults + children + students + elderly + group;
-
-        if (total === 1 && adults === 1 && children === 0 && students === 0 && elderly === 0 && group === 0) {
-            totalPassengerText.textContent = '1 Hành khách';
-        } else {
-            totalPassengerText.textContent = total + ' Hành khách';
+    // Function to set min date for date inputs
+    const setMinDate = (inputElement) => {
+        const today = new Date().toISOString().split("T")[0];
+        if (inputElement) {
+            if (inputElement.type === "date") {
+                inputElement.setAttribute("min", today);
+            }
+            inputElement.dataset.minDate = today;
         }
+    };
+
+    setMinDate(departureDateInput);
+    setMinDate(returnDateInput);
+
+    // Show return date input when link is clicked
+    if (addReturnDateLink && returnDateInputWrapper && returnDateField) {
+        addReturnDateLink.addEventListener("click", function (event) {
+            event.preventDefault();
+            addReturnDateLink.style.display = "none";
+            returnDateInputWrapper.style.display = "flex";
+            returnDateField.classList.add("active");
+            returnDateInput.focus();
+            // If you want to add an icon dynamically for return date when it appears:
+            // const iconImg = document.createElement('img');
+            // iconImg.src = "${pageContext.request.contextPath}/assets/icons/calendar_icon.png"; // This needs context path, tricky in pure JS.
+            // iconImg.alt = "Calendar Icon";
+            // iconImg.classList.add('field-icon');
+            // returnDateInputWrapper.insertBefore(iconImg, returnDateInputWrapper.firstChild);
+        });
     }
 
-    const passengerInputs = [numAdultsInput, numChildrenInput, numStudentsInput, numElderlyInput, numGroupInput];
-    passengerInputs.forEach(input => {
-        if (input) {
-            input.addEventListener('change', updateTotalPassengerDisplay);
-            input.addEventListener('input', updateTotalPassengerDisplay); // For immediate update as user types/uses spinners
+    // Date input placeholder and type switching logic (HTML onfocus/onblur handles this)
+    // Add 'has-value' class management for date inputs as well
+    [departureDateInput, returnDateInput].forEach((dateInput) => {
+        if (dateInput) {
+            dateInput.addEventListener("focus", function () {
+                this.type = "date";
+                if (this.dataset.minDate) {
+                    this.setAttribute("min", this.dataset.minDate);
+                }
+            });
+            dateInput.addEventListener("blur", function () {
+                if (!this.value) {
+                    this.type = "text";
+                    this.classList.remove("has-value"); // Ensure label goes back if empty
+                } else {
+                    this.classList.add("has-value");
+                }
+            });
+            // Initial check for date inputs if they might be pre-filled
+            if (dateInput.value) {
+                dateInput.classList.add("has-value");
+                // If pre-filled and type is text, it won't look like a date.
+                // This case is less common for fresh forms but good for robustness.
+            }
         }
     });
 
-    // Initial call to set passenger display correctly
-    updateTotalPassengerDisplay();
+    // Validate dates on form submission
+    if (searchForm) {
+        searchForm.addEventListener("submit", function (event) {
+            const departureDateValue = departureDateInput.value;
+            const returnDateValue = returnDateInput.value;
 
-    // Basic Form Validation (Client-side)
-    const searchTripForm = document.getElementById('searchTripForm');
-    if (searchTripForm) {
-        searchTripForm.addEventListener('submit', function(event) {
-            let isValid = true;
-            let errorMessage = '';
-
-            if (!originStationInput.value.trim()) {
-                isValid = false;
-                errorMessage += 'Vui lòng chọn nơi xuất phát.\n';
-                originStationInput.classList.add('input-error');
-            } else {
-                originStationInput.classList.remove('input-error');
+            if (!departureDateValue) {
+                alert("Vui lòng chọn ngày đi.");
+                event.preventDefault();
+                departureDateInput.focus();
+                return;
             }
 
-            if (!destinationStationInput.value.trim()) {
-                isValid = false;
-                errorMessage += 'Vui lòng chọn nơi đến.\n';
-                destinationStationInput.classList.add('input-error');
-            } else {
-                destinationStationInput.classList.remove('input-error');
-            }
+            const departureDate = new Date(departureDateValue);
 
-            const departureDateInput = document.getElementById('departureDate');
-            if (!departureDateInput.value) {
-                isValid = false;
-                errorMessage += 'Vui lòng chọn ngày đi.\n';
-                departureDateInput.classList.add('input-error');
-            } else {
-                departureDateInput.classList.remove('input-error');
-            }
-            
-            // Ensure at least one adult
-            if (numAdultsInput && (parseInt(numAdultsInput.value) || 0) < 1) {
-                 const totalPassengers = (parseInt(numAdultsInput.value) || 0) +
-                                    (parseInt(numChildrenInput.value) || 0) +
-                                    (parseInt(numStudentsInput.value) || 0) +
-                                    (parseInt(numElderlyInput.value) || 0) +
-                                    (parseInt(numGroupInput.value) || 0);
-                if (totalPassengers > 0) { // Only enforce if other passengers are selected
-                    isValid = false;
-                    errorMessage += 'Phải có ít nhất 1 người lớn đi kèm.\n';
-                    numAdultsInput.classList.add('input-error');
-                } else if (totalPassengers === 0) { // If no passengers at all
-                     isValid = false;
-                    errorMessage += 'Vui lòng chọn ít nhất 1 hành khách.\n';
-                    numAdultsInput.classList.add('input-error');
+            // If return date input is visible and has a value
+            if (
+                returnDateInputWrapper.style.display !== "none" &&
+                returnDateValue
+            ) {
+                const returnDateObj = new Date(returnDateValue);
+                if (departureDate > returnDateObj) {
+                    alert("Ngày về phải sau hoặc trùng với ngày đi.");
+                    event.preventDefault();
+                    returnDateInput.focus();
+                    return;
                 }
-            } else if (numAdultsInput) {
-                numAdultsInput.classList.remove('input-error');
             }
-
-
-            if (!isValid) {
-                event.preventDefault(); // Stop form submission
-                alert('Lỗi:\n' + errorMessage);
-            }
+            // Add any other client-side validation as needed
         });
+    }
 
-        // Remove error class on input
-        [originStationInput, destinationStationInput, document.getElementById('departureDate'), numAdultsInput].forEach(input => {
-            if (input) {
-                input.addEventListener('input', () => input.classList.remove('input-error'));
+    // Ensure return date is not before departure date dynamically
+    if (departureDateInput && returnDateInput) {
+        departureDateInput.addEventListener("change", function () {
+            const depDate = departureDateInput.value;
+            if (depDate) {
+                returnDateInput.setAttribute("min", depDate);
+                // If return date is already set and now invalid, clear or adjust it
+                if (returnDateInput.value && returnDateInput.value < depDate) {
+                    returnDateInput.value = depDate; // Or clear: returnDateInput.value = '';
+                }
+            } else {
+                // If departure date is cleared, reset min for return date to today or remove it
+                const today = new Date().toISOString().split("T")[0];
+                returnDateInput.setAttribute("min", today);
             }
         });
     }
-    // Add a class for input error styling in CSS
-    const style = document.createElement('style');
-    style.innerHTML = `.input-error { border-color: red !important; }`;
-    document.head.appendChild(style);
-
 });
