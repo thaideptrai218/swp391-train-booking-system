@@ -1,229 +1,344 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
     margin: 0;
-    padding: 20px;
-    background-color: #eef1f5; /* Light greyish blue background */
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    font-size: 16px; /* Base font size for scaling */
+    padding: 40px;
+    text-align: center;
 }
 
 .search-trip-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: calc(100% - 20%);
     width: 100%;
-    max-width: 1125px; /* Increased from 900px (900 * 1.25) */
-    margin-top: 50px;
 }
 
 .search-panel {
-    background-color: #fff;
-    border-radius: 15px; /* Increased (12 * 1.25) */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); /* Increased shadow */
-    padding: 8px; /* Increased (5 * 1.25, rounded) */
 }
 
-.search-form-flex {
+.search-bar {
     display: flex;
-    align-items: center; /* Vertically align items in the flex container */
-    width: 100%;
 }
 
-.search-field-group {
+.search-bar .input-section {
+    width: 100%;
+    display: flex;
+}
+
+.input-section {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping, always keep children in one line */
+    overflow-x: hidden; /* Changed from auto to hidden */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-icon-group {
+    flex: 1 1 0;
+    min-width: 0; /* Allows shrinking */
+    max-width: 200px; /* Default max-width for station inputs */
     display: flex;
     align-items: center;
-    padding: 12px 18px; /* Increased (10px 15px * 1.25, rounded) */
-    flex-grow: 1;
-    position: relative; 
+    justify-content: center;
+    border-top: 0.5px solid rgba(72, 72, 72, 0.2);
+    border-bottom: 0.5px solid rgba(72, 72, 72, 0.2);
+    border-right: 0.5px solid rgba(72, 72, 72, 0.2);
+    transition: border-color 0.2s, border-width 0.2s;
+    padding: 15px 8px;
+    position: relative;
+    background-color: white; /* Ensure inputs have a background */
+    /* Remove thick border-bottom for focus */
 }
 
-.search-field-group .field-icon {
-    width: 25px; /* Increased (20 * 1.25) */
-    height: 25px; /* Increased (20 * 1.25) */
-    margin-right: 12px; /* Increased (10 * 1.25, rounded) */
-    opacity: 0.7;
+.input-icon-group.date-group {
+    cursor: pointer;
+    width: 180px; /* Fixed width to ensure stability */
+    /* Align items to the start if the prompt is shorter */
+    align-items: center;
+    justify-content: center; /* Center prompt or form group */
 }
 
-.search-field-group .input-wrapper {
-    display: flex;
-    flex-direction: column;
-    position: relative; /* Needed for absolute positioning of label */
-    width: 100%; 
+.add-return-date-prompt {
+    display: flex; /* Initially visible */
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    font-size: 1em;
+    color: #007bff;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
 }
 
-/* Animated Label Styling */
-.search-field-group label {
+.add-return-date-prompt i {
+    margin-right: 5px;
+}
+
+/* Styles for when the return date is active */
+.input-icon-group.return-date-active .add-return-date-prompt {
+    display: none;
+}
+
+/* Temporary state for positioning Flatpickr correctly for the return date */
+/* This makes the icon and form group part of the layout but visually hidden */
+#return-date-group.picker-positioning-active .add-return-date-prompt {
+    display: none; /* Hide the prompt during positioning phase as well */
+}
+#return-date-group.picker-positioning-active .return-date-icon-element,
+#return-date-group.picker-positioning-active .return-date-form-group-element {
+    display: flex !important; /* Override inline display:none and ensure it takes space */
+    opacity: 0 !important; /* Make it visually hidden */
+    pointer-events: none !important; /* Prevent any interaction */
+}
+
+/* Show the moved icon for the return date */
+#return-date-group.return-date-active .return-date-icon-element {
+    display: flex !important; /* Override inline display:none and match .input-icon display type */
+}
+
+.input-icon-group.return-date-active .form-group {
+    display: flex !important; /* Show the form group */
+    align-items: center; /* Re-align icon and input for date */
+}
+
+.clear-return-date {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.9em;
+    cursor: pointer;
+    padding: 0 5px;
     position: absolute;
-    left: 0; 
+    top: 50%; /* Vertically center */
+    transform: translateY(-50%);
+    right: 8px; /* Adjust as needed */
+    z-index: 3; /* Above label */
+}
+
+.clear-return-date:hover {
+    color: #e53935;
+}
+
+/* Ensure the form-group for return date takes full width when active */
+#return-date-group.return-date-active .form-group {
+    width: 100%;
+    justify-content: flex-start; /* Align icon to left */
+}
+
+/*
+    Removed specific padding overrides for .input-icon-group.date-group based on .return-date-active state.
+    This allows .input-icon-group.date-group (including #return-date-group)
+    to consistently use the padding defined by .input-icon-group (15px 8px),
+    which should prevent width changes when toggling between prompt and input.
+*/
+
+.input-icon-group:first-child {
+    border-left: 0.5px solid rgba(72, 72, 72, 0.2);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.input-icon-group:last-child {
+    /* This applies to the last input group in the input-section */
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Base style for the ::after pseudo-element on relevant input groups */
+.input-icon-group:has(#original-station)::after,
+.input-icon-group:has(#destination-station)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0; /* Default state: no height */
+    background-color: transparent; /* Default state: transparent background */
+    border-radius: 2px;
+    z-index: 2;
+    transition: background-color 0.2s, height 0.2s;
+}
+
+.input-icon-group:has(#original-station:focus)::after,
+.input-icon-group:has(#original-station.has-value)::after {
+    height: 3px; /* Height on focus or when it has value */
+    background-color: #1890ff;
+}
+
+.input-icon-group:has(#destination-station:focus)::after,
+.input-icon-group:has(#destination-station.has-value)::after {
+    height: 3px; /* Height on focus or when it has value */
+    background-color: #e53935;
+}
+
+.input-icon-group:has(#original-station:focus),
+.input-icon-group:has(#destination-station:focus) {
+    border-bottom: 0.5px solid rgba(72, 72, 72, 0.2); /* Keep original border */
+}
+
+.input-icon-group.date-group {
+    /* General styles for date groups, including departure */
+    /* padding: 15px 8px; Already inherited from .input-icon-group */
+}
+
+.form-group {
+    display: flex;
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 0;
+    position: relative;
+    align-items: center; /* Vertically align items in form-group */
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1.1em;
+    color: #222;
+    width: 100%;
+    z-index: 1;
+    position: relative;
+    opacity: 0;
+    height: 36px;
+    transition: opacity 0.2s;
+    padding: 0; /* Remove browser default padding */
+}
+/* Specific padding for date inputs if needed, but height should control size */
+/* .form-group input[type="date"] { padding: 20px 0; } */
+
+.form-group input[type="text"]:focus,
+.form-group input[type="text"].has-value,
+.form-group input[type="date"]:focus,
+.form-group input[type="date"].has-value {
+    opacity: 1;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="text"].has-value {
+    transform: translateY(10%);
+}
+
+.form-group label {
+    position: absolute;
+    left: 0px; /* Small padding from left */
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1em; /* Initial size, same as input */
-    color: #aaa; /* Initial color, same as placeholder */
+    font-size: 1.2em;
+    color: #888;
     pointer-events: none;
-    transition: all 0.2s ease-out;
-    background-color: #fff; /* To cover input text when label is on top */
-    padding: 0 2px; /* Small padding so it doesn't touch text directly */
+    /* padding: 0 4px; */ /* Removed to use left positioning */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    transform-origin: left center;
+    white-space: nowrap;
 }
 
-.search-field-group input[type="text"]:focus + label,
-.search-field-group input[type="text"].has-value + label, /* JS will add .has-value */
-.search-field-group input[type="date"]:focus + label, /* For date inputs if needed */
-.search-field-group input[type="date"].has-value + label {
-    top: -10px; /* Move label up */
-    font-size: 0.7em; /* Smaller font size */
-    color: #007bff; /* Active label color */
+.form-group input[type="text"]:focus + label,
+.form-group input[type="text"].has-value + label {
+    top: -2px; /* Adjust for floating label */
+    transform: translateY(-50%) scale(0.75); /* translateY was -40% */
+    font-weight: 500;
+    background-color: white; /* Ensure label background for overlap */
+    padding: 0 2px; /* Padding for label background */
 }
 
-
-.search-field-group input[type="text"],
-.search-field-group input[type="date"] {
-    border: none;
-    outline: none;
-    font-size: 1.05em; /* Slightly increased (1em * 1.25, adjusted) */
-    color: #333;
-    background-color: transparent;
-    width: 100%;
-    padding: 8px 0 5px 0; /* Adjusted padding: top, right, bottom, left. More bottom padding for border */
-    position: relative; /* To ensure it's above the label initially if label is not moved */
-    z-index: 1; /* Ensure input is clickable over label */
+.form-group input[type="date"]:focus + label,
+.form-group input[type="date"].has-value + label {
+    top: -2px; /* Adjust for floating label */
+    transform: translateY(-50%) scale(0.7); /* translateY was -10% */
+    font-weight: 500;
+    background-color: white; /* Ensure label background for overlap */
+    padding: 0 2px; /* Padding for label background */
 }
 
-/* Remove browser's default placeholder when label is used as placeholder */
-.search-field-group input[type="text"]::placeholder {
-    color: transparent; 
-}
-/* Keep placeholder for date inputs as they behave differently with onfocus type change */
-.search-field-group input[type="date"]::placeholder {
-    color: #aaa;
-    font-weight: normal;
-}
-
-/* Border-bottom on focus for input-wrapper */
-.search-field-group .input-wrapper {
-    border-bottom: 1.5px solid #ddd; /* Default subtle border */
-    transition: border-bottom-color 0.2s ease-out;
-}
-.search-field-group input[type="text"]:focus ~ .input-wrapper, /* This selector is incorrect, input is inside wrapper */
-.search-field-group .input-wrapper:has(input[type="text"]:focus),
-.search-field-group .input-wrapper:has(input[type="date"]:focus) {
-    border-bottom-color: #007bff; /* Active border color */
-}
-
-
-.swap-stations-btn {
-    background-color: #f0f0f0; 
-    border: 1px solid #e0e0e0;
-    border-radius: 50%; 
-    width: 45px; /* Increased (36 * 1.25) */
-    height: 45px; /* Increased (36 * 1.25) */
+.input-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    opacity: 0.8;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    font-size: 1.25em; /* Increased (1.1 * 1.25, rounded) */
-    color: #555;
-    margin: 0 8px; /* Increased (5 * 1.25, rounded) */
-    flex-shrink: 0;
-}
-.swap-stations-btn:hover {
-    background-color: #e5e5e5;
+    font-size: 20px;
+    margin-right: 5px; /* Space between icon and form-group */
 }
 
-.separator {
-    width: 1px;
-    background-color: #e0e0e0; 
-    height: 50px; /* Increased (40 * 1.25) */
-    align-self: center;
+/* Color for the first input icon (train icon) */
+.input-section .input-icon-group:first-child .input-icon i.fa-train-subway {
+    color: #1890ff; /* Blue color, matching its focus highlight */
 }
 
-/* Specific widths for fields to balance layout - adjust percentages if needed after scaling */
-.origin-field { flex-basis: 28%; } /* Adjusted for new scale */
-.destination-field { flex-basis: 28%; } /* Adjusted for new scale */
-.date-field { flex-basis: 22%; } /* Adjusted for new scale */
-.return-date-field { 
-    flex-basis: 22%; /* Adjusted for new scale */
-    display: flex; 
-    align-items: center;
-    justify-content: center;
+/* Color for the second input icon (location icon) */
+.input-section .input-icon-group:nth-child(2) .input-icon i.fa-location-dot {
+    color: #e53935; /* Red color, matching its focus highlight */
 }
 
-
-.add-return-link {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 1em; /* Increased (0.9 * 1.25, rounded) */
-    white-space: nowrap;
-    padding: 12px 0; /* Increased (10 * 1.25, rounded) */
-}
-.add-return-link:hover {
-    text-decoration: underline;
+/* Color for the third input icon (calendar icon for departure date) */
+.input-section .input-icon-group:nth-child(3) .input-icon i.fa-calendar-days {
+    color: #28a745; /* Green color */
 }
 
-/* When return date input is shown */
-.return-date-field .input-wrapper {
-    width: 100%; 
-}
-.return-date-field.active {
-    justify-content: flex-start; 
-}
-.return-date-field.active .field-icon { 
-    display: inline-block;
-}
-
-
-.search-action-btn {
-    background-color: #ffc107; 
-    color: #333; 
+/* Submit Button Styles */
+.submit-button {
+    background-color: #007bff; /* Primary blue */
+    color: white;
     border: none;
-    border-radius: 10px; /* Increased (8 * 1.25) */
-    padding: 18px 30px; /* Increased (15px 25px * 1.25, rounded) */
-    font-size: 1.05em; /* Slightly Increased (1em * 1.25, adjusted) */
+    padding: 15px 25px; /* Consistent vertical padding with input groups */
+    font-family: Arial, sans-serif;
+    font-size: 1.1em; /* Similar to input text */
     font-weight: bold;
     cursor: pointer;
-    margin-left: 10px; /* Space before search button */
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-.search-action-btn:hover {
-    background-color: #ffb300; /* Darker yellow on hover */
+    border-radius: 8px; /* Rounded corners */
+    margin-left: 10px; /* Space from input section */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    outline: none; /* Remove default browser outline */
 }
 
+.submit-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
 
-/* Responsive adjustments (example) */
-@media (max-width: 850px) {
-    .search-form-flex {
+.submit-button:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4); /* Focus ring */
+}
+
+.submit-button:active {
+    background-color: #004085; /* Even darker blue when pressed */
+    transform: scale(0.98); /* Slight press effect */
+}
+
+/* Media Queries */
+@media (max-width: 800px) {
+    .input-section {
         flex-direction: column;
-        align-items: stretch;
-        padding: 10px;
+        gap: 8px;
+        flex-wrap: wrap;
+        overflow-x: visible;
     }
-    .search-panel {
-        padding: 10px;
-    }
-    .search-field-group,
-    .swap-stations-btn,
-    .search-action-btn {
+    .input-icon-group {
         width: 100%;
-        margin-bottom: 10px;
+        max-width: none;
     }
-    .swap-stations-btn {
-        margin: 5px auto 15px; /* Center swap button */
-        order: 1; /* Change order if needed */
+    .input-icon-group.date-group {
+        /* Ensure date groups also take full width */
+        width: 100%;
     }
-    .origin-field { order: 0; }
-    .destination-field { order: 2;}
-    .date-field { order: 3; }
-    .return-date-field { order: 4; }
-    .search-action-btn { order: 5; margin-left: 0;}
 
-    .separator {
-        display: none; /* Hide separators on stack */
+    .search-bar {
+        flex-direction: column;
+        gap: 10px;
     }
-    .search-field-group {
-        border-bottom: 1px solid #e0e0e0; /* Add bottom border for separation */
-        padding-bottom: 15px;
-    }
-    .search-field-group:last-of-type {
-        border-bottom: none;
+    .submit-button {
+        margin-left: 0;
+        width: 100%;
     }
 }

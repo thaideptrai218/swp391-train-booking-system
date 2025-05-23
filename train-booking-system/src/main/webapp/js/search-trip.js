@@ -1,156 +1,189 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const originInput = document.getElementById("origin");
-    const destinationInput = document.getElementById("destination");
-    const swapButton = document.getElementById("swapStationsBtn");
-    const departureDateInput = document.getElementById("departureDate");
-    const returnDateInput = document.getElementById("returnDate");
-    const searchForm = document.getElementById("searchTripForm");
-    const addReturnDateLink = document.getElementById("addReturnDateLink");
-    const returnDateInputWrapper = document.getElementById(
-        "returnDateInputWrapper"
-    );
-    const returnDateField = document.querySelector(".return-date-field");
+    // ...existing code...
+    const departureDateInput = document.getElementById("departure-date");
+    const returnDateInput = document.getElementById("return-date");
 
-    // Function to handle label animation based on input value
-    const handleInputLabel = (inputElement) => {
-        if (!inputElement) return;
-
-        const checkValue = () => {
-            if (inputElement.value) {
-                inputElement.classList.add("has-value");
+    const commonDateConfig = {
+        dateFormat: "d/m/Y",
+        allowInput: true, // Allows manual input, which can be styled
+        disableMobile: "true", // Uses Flatpickr on mobile too
+        // Removed onOpen custom theme class, using material_blue now
+        onChange: function (selectedDates, dateStr, instance) {
+            const input = instance.element;
+            const label = input.nextElementSibling; // Label is now the next sibling
+            if (dateStr) {
+                input.classList.add("has-value");
+                if (label) label.classList.add("has-value");
             } else {
-                inputElement.classList.remove("has-value");
+                input.classList.remove("has-value");
+                if (label) label.classList.remove("has-value");
             }
-        };
-        inputElement.addEventListener("input", checkValue);
-        inputElement.addEventListener("change", checkValue); // For date inputs after selection
-        inputElement.addEventListener("blur", checkValue); // Ensure class is set on blur
-        checkValue(); // Initial check in case of pre-filled values
+        },
     };
 
-    handleInputLabel(originInput);
-    handleInputLabel(destinationInput);
-    handleInputLabel(departureDateInput);
-    handleInputLabel(returnDateInput);
-
-    // Swap stations functionality
-    if (swapButton && originInput && destinationInput) {
-        swapButton.addEventListener("click", function () {
-            const tempOriginValue = originInput.value;
-            originInput.value = destinationInput.value;
-            destinationInput.value = tempOriginValue;
-
-            // Trigger input event to update label state
-            originInput.dispatchEvent(new Event("input"));
-            destinationInput.dispatchEvent(new Event("input"));
-        });
-    }
-
-    // Function to set min date for date inputs
-    const setMinDate = (inputElement) => {
-        const today = new Date().toISOString().split("T")[0];
-        if (inputElement) {
-            if (inputElement.type === "date") {
-                inputElement.setAttribute("min", today);
+    const departureFlatpickr = flatpickr(departureDateInput, {
+        ...commonDateConfig,
+        minDate: "today",
+        onChange: function (selectedDates, dateStr, instance) {
+            commonDateConfig.onChange(selectedDates, dateStr, instance); // Call common handler
+            if (returnDateInput._flatpickr && selectedDates[0]) {
+                returnDateInput._flatpickr.set("minDate", selectedDates[0]);
             }
-            inputElement.dataset.minDate = today;
+        },
+    });
+
+    // Define DOM elements related to the return date functionality upfront
+    const returnDateGroup = document.getElementById("return-date-group");
+    const addReturnDatePrompt = returnDateGroup.querySelector(
+        ".add-return-date-prompt"
+    );
+    // Note: .form-group inside #return-date-group is specific, ensure this selector is robust
+    // In index.html, it's <div class="form-group return-date-form-group-element" ...>
+    const returnDateFormGroup = returnDateGroup.querySelector(
+        ".return-date-form-group-element"
+    );
+    const clearReturnDateBtn =
+        returnDateGroup.querySelector(".clear-return-date");
+    // The label is inside returnDateFormGroup
+    const returnDateLabel = returnDateFormGroup
+        ? returnDateFormGroup.querySelector('label[for="return-date"]')
+        : null;
+
+    const returnFlatpickr = flatpickr(returnDateInput, {
+        ...commonDateConfig,
+        minDate: departureDateInput.value
+            ? new Date(departureDateInput.value)
+            : "today",
+        onOpen: [
+            function (selectedDates, dateStr, instance) {
+                // Reposition the calendar just before it's shown,
+                // after picker-positioning-active styles have hopefully been applied.
+                instance.reposition();
+            },
+        ],
+        // appendTo: returnDateGroup, // Removed: Reverting to default body append
+    });
+
+    // Make the whole group clickable to open the date picker
+    // This loop applies to both departure and return date inputs
+    [departureDateInput, returnDateInput].forEach((input) => {
+        const group = input.closest(".input-icon-group");
+        const label = input.nextElementSibling;
+
+        if (group) {
+            group.addEventListener("click", (e) => {
+                // Prevent opening if the click is on the input itself or its label,
+                // or if it's the return date's clear button.
+                if (
+                    e.target !== input &&
+                    e.target !== label &&
+                    !e.target.closest(".clear-return-date")
+                ) {
+                    input._flatpickr.open();
+                }
+            });
         }
-    };
 
-    setMinDate(departureDateInput);
-    setMinDate(returnDateInput);
-
-    // Show return date input when link is clicked
-    if (addReturnDateLink && returnDateInputWrapper && returnDateField) {
-        addReturnDateLink.addEventListener("click", function (event) {
-            event.preventDefault();
-            addReturnDateLink.style.display = "none";
-            returnDateInputWrapper.style.display = "flex";
-            returnDateField.classList.add("active");
-            returnDateInput.focus();
-            // If you want to add an icon dynamically for return date when it appears:
-            // const iconImg = document.createElement('img');
-            // iconImg.src = "${pageContext.request.contextPath}/assets/icons/calendar_icon.png"; // This needs context path, tricky in pure JS.
-            // iconImg.alt = "Calendar Icon";
-            // iconImg.classList.add('field-icon');
-            // returnDateInputWrapper.insertBefore(iconImg, returnDateInputWrapper.firstChild);
+        // Handle focus and blur for label animation
+        input.addEventListener("focus", function () {
+            input.classList.add("has-value");
+            if (label) label.classList.add("has-value");
         });
-    }
 
-    // Date input placeholder and type switching logic (HTML onfocus/onblur handles this)
-    // Add 'has-value' class management for date inputs as well
-    [departureDateInput, returnDateInput].forEach((dateInput) => {
-        if (dateInput) {
-            dateInput.addEventListener("focus", function () {
-                this.type = "date";
-                if (this.dataset.minDate) {
-                    this.setAttribute("min", this.dataset.minDate);
-                }
-            });
-            dateInput.addEventListener("blur", function () {
-                if (!this.value) {
-                    this.type = "text";
-                    this.classList.remove("has-value"); // Ensure label goes back if empty
-                } else {
-                    this.classList.add("has-value");
-                }
-            });
-            // Initial check for date inputs if they might be pre-filled
-            if (dateInput.value) {
-                dateInput.classList.add("has-value");
-                // If pre-filled and type is text, it won't look like a date.
-                // This case is less common for fresh forms but good for robustness.
+        input.addEventListener("blur", function () {
+            if (!input.value) {
+                input.classList.remove("has-value");
+                if (label) label.classList.remove("has-value");
             }
+        });
+
+        // Initial check in case the date is pre-filled
+        if (input.value) {
+            input.classList.add("has-value");
+            if (label) label.classList.add("has-value");
         }
     });
 
-    // Validate dates on form submission
-    if (searchForm) {
-        searchForm.addEventListener("submit", function (event) {
-            const departureDateValue = departureDateInput.value;
-            const returnDateValue = returnDateInput.value;
+    // State variable to track if the return date picker was opened from the prompt
+    let openedFromPrompt = false;
 
-            if (!departureDateValue) {
-                alert("Vui lòng chọn ngày đi.");
-                event.preventDefault();
-                departureDateInput.focus();
-                return;
-            }
+    function showReturnDateField() {
+        returnDateGroup.classList.add("return-date-active");
+        if (returnDateInput.value) {
+            returnDateInput.classList.add("has-value");
+            if (returnDateLabel) returnDateLabel.classList.add("has-value");
+        } else {
+            returnDateInput.classList.remove("has-value");
+            if (returnDateLabel) returnDateLabel.classList.remove("has-value");
+        }
+    }
 
-            const departureDate = new Date(departureDateValue);
+    function showReturnDatePrompt() {
+        returnDateGroup.classList.remove("return-date-active");
+        returnDateInput.value = "";
+        returnDateInput.classList.remove("has-value");
+        if (returnDateLabel) returnDateLabel.classList.remove("has-value");
+    }
 
-            // If return date input is visible and has a value
-            if (
-                returnDateInputWrapper.style.display !== "none" &&
-                returnDateValue
-            ) {
-                const returnDateObj = new Date(returnDateValue);
-                if (departureDate > returnDateObj) {
-                    alert("Ngày về phải sau hoặc trùng với ngày đi.");
-                    event.preventDefault();
-                    returnDateInput.focus();
-                    return;
-                }
-            }
-            // Add any other client-side validation as needed
+    if (addReturnDatePrompt) {
+        addReturnDatePrompt.addEventListener("click", function () {
+            returnDateGroup.classList.add("picker-positioning-active"); // Add class for positioning
+            openedFromPrompt = true;
+            returnDateInput._flatpickr.open();
         });
     }
 
-    // Ensure return date is not before departure date dynamically
-    if (departureDateInput && returnDateInput) {
-        departureDateInput.addEventListener("change", function () {
-            const depDate = departureDateInput.value;
-            if (depDate) {
-                returnDateInput.setAttribute("min", depDate);
-                // If return date is already set and now invalid, clear or adjust it
-                if (returnDateInput.value && returnDateInput.value < depDate) {
-                    returnDateInput.value = depDate; // Or clear: returnDateInput.value = '';
-                }
+    if (clearReturnDateBtn) {
+        clearReturnDateBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+            returnDateInput._flatpickr.close();
+            showReturnDatePrompt();
+        });
+    }
+
+    // Enhance returnFlatpickr configuration for onChange
+    const existingReturnOnChange = returnFlatpickr.config.onChange;
+    returnFlatpickr.config.onChange = [
+        ...(Array.isArray(existingReturnOnChange)
+            ? existingReturnOnChange
+            : [existingReturnOnChange].filter((f) => f)),
+        function (selectedDates, dateStr, instance) {
+            if (dateStr) {
+                showReturnDateField();
+                openedFromPrompt = false;
             } else {
-                // If departure date is cleared, reset min for return date to today or remove it
-                const today = new Date().toISOString().split("T")[0];
-                returnDateInput.setAttribute("min", today);
+                if (!instance.input.value) {
+                    showReturnDatePrompt();
+                }
             }
-        });
+            returnDateGroup.classList.remove("picker-positioning-active"); // Clean up positioning class
+        },
+    ].filter((f) => f);
+
+    // Enhance returnFlatpickr configuration for onClose
+    const existingReturnOnClose = returnFlatpickr.config.onClose || [];
+    returnFlatpickr.config.onClose = [
+        ...(Array.isArray(existingReturnOnClose)
+            ? existingReturnOnClose
+            : [existingReturnOnClose].filter((f) => f)),
+        function (selectedDates, dateStr, instance) {
+            if (
+                openedFromPrompt &&
+                selectedDates.length === 0 &&
+                !instance.input.value
+            ) {
+                showReturnDatePrompt();
+            }
+            openedFromPrompt = false;
+            returnDateGroup.classList.remove("picker-positioning-active"); // Clean up positioning class
+        },
+    ].filter((f) => f);
+
+    // Initial state check for return date
+    if (returnDateInput.value) {
+        showReturnDateField();
+    } else {
+        showReturnDatePrompt();
     }
+    // ...existing code...
 });
