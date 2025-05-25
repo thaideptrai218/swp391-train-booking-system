@@ -457,16 +457,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (passengerSummary) {
             passengerSummary.addEventListener("click", (e) => {
                 if (
-                    passengerDetails.style.display === "grid" &&
-                    (e.target.closest("button") ||
-                        e.target.closest(".input-block"))
+                    passengerDetails.classList.contains("expanded") && // Check if it's expanded
+                    (e.target.closest("button") || // Clicked on any button
+                        e.target.closest(".input-block")) // Clicked within an input-block
                 ) {
                     return; // Don't close if interacting with controls inside details
                 }
-                const isOpen = passengerDetails.style.display === "grid";
-                passengerDetails.style.display = isOpen ? "none" : "grid";
+                // const isOpen = passengerDetails.style.display === "grid";
+                // passengerDetails.style.display = isOpen ? "none" : "grid";
+                passengerDetails.classList.toggle("expanded");
                 // passengerSelector.classList.toggle("open", !isOpen); // Removed dropdown arrow related class toggle
-                if (!isOpen) {
+                if (passengerDetails.classList.contains("expanded")) {
                     // When opening
                     initializeButtonStates(); // Recalculate button states
                 }
@@ -475,7 +476,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (confirmBtn) {
             confirmBtn.addEventListener("click", () => {
-                passengerDetails.style.display = "none";
+                // passengerDetails.style.display = "none";
+                passengerDetails.classList.remove("expanded");
                 // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
                 updatePassengerSummary();
             });
@@ -484,9 +486,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener("click", function (event) {
             if (
                 !passengerSelector.contains(event.target) &&
-                passengerDetails.style.display === "grid" // Check if details are open directly
+                // passengerDetails.style.display === "grid" // Check if details are open directly
+                passengerDetails.classList.contains("expanded")
             ) {
-                passengerDetails.style.display = "none";
+                // passengerDetails.style.display = "none";
+                passengerDetails.classList.remove("expanded");
                 // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
             }
         });

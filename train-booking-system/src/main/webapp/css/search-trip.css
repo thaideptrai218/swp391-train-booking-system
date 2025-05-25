@@ -477,21 +477,41 @@ body {
 .passenger-details {
     background-color: white;
     border-radius: 0 0 8px 8px; /* Keep bottom rounding */
-    padding: 15px; /* Consistent padding */
+    /* padding: 15px; /* Consistent padding - will be controlled by expanded state */
     display: grid; /* Changed to grid */
     grid-template-columns: repeat(3, 1fr); /* 3x2 grid */
     gap: 15px; /* Gap between grid items */
     position: absolute; /* Positioned relative to its nearest positioned ancestor.
                            User feedback suggests this is currently .passenger-selector. */
     left: 0; /* Aligns with the left edge of its positioning context (e.g., .passenger-selector). */
-    top: 100%;          /* Places the top of .passenger-details below the main content block
+    top: 0; /* Places the top of .passenger-details below the main content block
                            of its positioning context. If .passenger-summary is the primary content
                            within .passenger-selector, this effectively positions .passenger-details after it. */
-    width: 100%;        /* Spans the full width of its positioning context (e.g., .passenger-selector). */
-    z-index: 10;        /* Ensure it's above other elements */
+    width: 100%; /* Spans the full width of its positioning context (e.g., .passenger-selector). */
+    z-index: 10; /* Ensure it's above other elements */
     box-sizing: border-box; /* Include padding and border in width calculation */
-    border-top: 1px solid #eee; /* Restored original border */
-    /* Note: JavaScript will control display: none/grid */
+    /* border-top: 1px solid #eee; /* Restored original border - will be controlled by expanded state */
+
+    /* Animation properties */
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: 0;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out,
+        padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out,
+        border-top 0.5s ease-in-out;
+}
+
+.passenger-details.expanded {
+    max-height: 500px; /* Adjust as needed to fit content */
+    opacity: 1;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px; /* Ensure original padding is restored */
+    padding-right: 15px; /* Ensure original padding is restored */
+    border-top: 1px solid #eee;
 }
 
 .passenger-group {
