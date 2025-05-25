@@ -161,7 +161,7 @@
                                         <span class="sub-label">VIP</span>
                                     </div>
                                 </div>
-                                <span class="dropdown-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+                                <%-- <span class="dropdown-arrow"><i class="fa-solid fa-chevron-down"></i></span> --%> <%-- Removed dropdown arrow --%>
                             </div>
                             <div class="passenger-details" style="display: none;">
                                 <div class="passenger-group" data-type="adult" data-min="0" data-max="10">

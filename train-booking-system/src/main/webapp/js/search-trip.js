@@ -455,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 const isOpen = passengerDetails.style.display === "grid";
                 passengerDetails.style.display = isOpen ? "none" : "grid";
-                passengerSelector.classList.toggle("open", !isOpen);
+                // passengerSelector.classList.toggle("open", !isOpen); // Removed dropdown arrow related class toggle
                 if (!isOpen) {
                     // When opening
                     initializeButtonStates(); // Recalculate button states
@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (confirmBtn) {
             confirmBtn.addEventListener("click", () => {
                 passengerDetails.style.display = "none";
-                passengerSelector.classList.remove("open");
+                // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
                 updatePassengerSummary();
             });
         }
@@ -474,10 +474,10 @@ document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener("click", function (event) {
             if (
                 !passengerSelector.contains(event.target) &&
-                passengerSelector.classList.contains("open")
+                passengerDetails.style.display === "grid" // Check if details are open directly
             ) {
                 passengerDetails.style.display = "none";
-                passengerSelector.classList.remove("open");
+                // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
             }
         });
 
