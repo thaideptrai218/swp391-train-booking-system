@@ -359,10 +359,7 @@ body {
     position: relative;
 }
 
-.passenger-summary:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-}
+/* .passenger-summary:focus rule removed */
 
 /* Removed .passenger-summary:hover and .passenger-count-display:hover rule */
 
@@ -394,28 +391,18 @@ body {
     white-space: nowrap; /* Prevent total text from wrapping */
 }
 
-/* This class is no longer in the HTML, can be removed or commented out */
-/* .passenger-breakdown-text {
-    font-size: 0.9em;
-    color: #777;
-    margin-left: 8px;
-} */
-
 .passenger-container {
+    position: relative;
     display: flex;
     flex-grow: 1;
     flex-wrap: nowrap;
     gap: 8px; /* Slightly reduced gap */
-    overflow-x: auto; /* Keep scrolling, make scrollbar visible by default */
     padding: 5px 0; /* Existing padding, can be adjusted if needed */
     align-items: center;
-    /* justify-content: center; /* Align left by default */
-    /* Scrollbar hiding removed */
     background-color: rgb(227, 237, 252); /* Light blue background */
     border-radius: 8px; /* Rounded corners for the container */
     padding: 8px 12px; /* Added padding to passenger-container */
 }
-/* .passenger-container::-webkit-scrollbar { display: none; } */
 
 .sub-container {
     display: flex;
@@ -487,19 +474,24 @@ body {
     display: none;
 }
 
-/* .dropdown-arrow rule removed */
-
-/* .passenger-selector.open .dropdown-arrow rule removed */
-
 .passenger-details {
     background-color: white;
-    border-top: 1px solid #eee;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 8px 8px; /* Keep bottom rounding */
     padding: 15px; /* Consistent padding */
     display: grid; /* Changed to grid */
     grid-template-columns: repeat(3, 1fr); /* 3x2 grid */
     gap: 15px; /* Gap between grid items */
-    /* This will naturally appear below .passenger-summary due to normal flow */
+    position: absolute; /* Positioned relative to its nearest positioned ancestor.
+                           User feedback suggests this is currently .passenger-selector. */
+    left: 0; /* Aligns with the left edge of its positioning context (e.g., .passenger-selector). */
+    top: 100%;          /* Places the top of .passenger-details below the main content block
+                           of its positioning context. If .passenger-summary is the primary content
+                           within .passenger-selector, this effectively positions .passenger-details after it. */
+    width: 100%;        /* Spans the full width of its positioning context (e.g., .passenger-selector). */
+    z-index: 10;        /* Ensure it's above other elements */
+    box-sizing: border-box; /* Include padding and border in width calculation */
+    border-top: 1px solid #eee; /* Restored original border */
+    /* Note: JavaScript will control display: none/grid */
 }
 
 .passenger-group {
@@ -511,12 +503,6 @@ body {
     border-radius: 6px;
     text-align: left; /* Align text to left */
 }
-
-/* Remove bottom border from passenger-group as it's now a grid cell */
-/* .passenger-group:last-of-type { 
-    border-bottom: none;
-    margin-bottom: 10px;
-} */
 
 .passenger-info {
     flex-grow: 1; /* Takes available space */
