@@ -21,7 +21,7 @@
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     </head>
     <body>
-        <div class="search-trip-wrapper">
+        <section class="search-trip-wrapper">
             <div class="search-panel">
                 <form
                     action="<c:url value='/searchTrip'/>"
@@ -241,7 +241,7 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </section>
 
         <script src="${pageContext.request.contextPath}/js/search-trip.js"></script>
     </body>
