@@ -19,8 +19,14 @@ body {
 
 /* Panel containing the search form */
 .search-panel {
-    /* Currently no specific styles, can be used for background, padding, shadow if needed */
+    background-color: #ffffff; /* White background for the panel */
+    padding: 30px; /* Add some internal spacing */
+    border-radius: 12px; /* Rounded corners for a softer look */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     width: 100%; /* Ensure panel takes up available width within wrapper */
+    max-width: 1000px; /* Control max width of the panel itself */
+    margin-left: auto; /* Center the panel */
+    margin-right: auto; /* Center the panel */
 }
 
 /* Form layout */
@@ -29,14 +35,18 @@ body {
     display: flex;
     flex-direction: column; /* Stacks search-bar and passengers-bar */
     gap: 30px; /* Space between search-bar and passengers-bar */
+    width: 100%; /* Fill the parent search-panel */
+    /* max-width: 1000px; Removed, parent .search-panel controls this */
+    /* margin: 0 auto; Removed, parent .search-panel controls this */
 }
 
 /* Main search bar containing inputs and submit button */
 .search-bar {
     display: flex;
-    justify-content: center;
-    max-width: 1000px; /* Max width for the search bar */
-    margin: 0 auto; /* Center the search bar */
+    /* justify-content: center; Removed to allow input-section to grow */
+    width: 100%; /* Take full width of parent search-form-flex */
+    /* max-width: 1000px; Removed, parent controls this */
+    /* margin: 0 auto; Removed, parent controls this */
 }
 
 /* Section containing all input groups */
@@ -45,13 +55,14 @@ body {
     flex-wrap: nowrap; /* Prevent wrapping, always keep children in one line */
     overflow-x: hidden; /* Hide overflow if items are too wide */
     box-sizing: border-box;
+    flex-grow: 1; /* Allow input section to take available space */
 }
 
 /* Individual input group (icon + form field) */
 .input-icon-group {
     flex: 1 1 0; /* Allow shrinking and growing */
     min-width: 0; /* Allows shrinking below content size */
-    max-width: 200px; /* Default max-width for station inputs */
+    /* max-width: 200px; Removed to allow flexible sizing */
     display: flex;
     align-items: center;
     justify-content: center; /* Center content if group is wider than content */
@@ -324,16 +335,16 @@ body {
 
 /* Passengers Bar Styles */
 .passengers-bar {
-    width: 100%;
-    max-width: 1000px; /* Max width similar to search bar items combined */
-    margin: 0 auto; /* Center it if it's narrower than search-panel */
+    width: 100%; /* Take full width of parent search-form-flex */
+    /* max-width: 1000px; Removed, parent controls this */
+    /* margin: 0 auto; Removed, parent controls this */
 }
 
 .passenger-selector {
     position: relative;
-    background-color: white;
-    border: 0.5px solid rgba(72, 72, 72, 0.2);
-    border-radius: 8px;
+    /* background-color: white; Removed */
+    /* border: 0.5px solid rgba(72, 72, 72, 0.2); Removed */
+    /* border-radius: 8px; Removed */
     cursor: pointer;
     text-align: left; /* Align text to left within selector */
 }
@@ -342,16 +353,15 @@ body {
     display: flex;
     flex-direction: row; /* Children side-by-side */
     align-items: center;
-    padding: 10px 12px;
+    /* padding: 10px 12px; Removed */
     line-height: 1.5;
     gap: 15px; /* Gap between count-display, container, and arrow */
     position: relative;
 }
 
-.passenger-summary:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-}
+/* .passenger-summary:focus rule removed */
+
+/* Removed .passenger-summary:hover and .passenger-count-display:hover rule */
 
 .passenger-count-display {
     display: flex;
@@ -359,6 +369,14 @@ body {
     gap: 8px;
     width: 160px; /* Adjusted width */
     flex-shrink: 0;
+    /* background-color: rgb(236, 244, 253); Removed, will be applied on hover */
+    padding: 18px; /* Added padding */
+    border-radius: 8px; /* Added border-radius */
+    transition: background-color 0.2s ease-in-out; /* Smooth transition for hover */
+}
+
+.passenger-count-display:hover {
+    background-color: rgb(236, 244, 253); /* Background color on hover */
 }
 
 .passenger-icon {
@@ -373,25 +391,18 @@ body {
     white-space: nowrap; /* Prevent total text from wrapping */
 }
 
-/* This class is no longer in the HTML, can be removed or commented out */
-/* .passenger-breakdown-text {
-    font-size: 0.9em;
-    color: #777;
-    margin-left: 8px;
-} */
-
 .passenger-container {
+    position: relative;
     display: flex;
     flex-grow: 1;
     flex-wrap: nowrap;
     gap: 8px; /* Slightly reduced gap */
-    overflow-x: auto; /* Keep scrolling, make scrollbar visible by default */
-    padding: 5px 0;
+    padding: 5px 0; /* Existing padding, can be adjusted if needed */
     align-items: center;
-    /* justify-content: center; /* Align left by default */
-    /* Scrollbar hiding removed */
+    background-color: rgb(227, 237, 252); /* Light blue background */
+    border-radius: 8px; /* Rounded corners for the container */
+    padding: 8px 12px; /* Added padding to passenger-container */
 }
-/* .passenger-container::-webkit-scrollbar { display: none; } */
 
 .sub-container {
     display: flex;
@@ -463,28 +474,44 @@ body {
     display: none;
 }
 
-.dropdown-arrow {
-    font-size: 0.9em;
-    color: #555;
-    transition: transform 0.3s ease;
-    margin-left: auto; /* Pushes arrow to the far right in a flex row */
-    padding-left: 10px; /* Space from passenger-container */
-    flex-shrink: 0;
-}
-
-.passenger-selector.open .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
 .passenger-details {
     background-color: white;
-    border-top: 1px solid #eee;
-    border-radius: 0 0 8px 8px;
-    padding: 15px; /* Consistent padding */
+    border-radius: 0 0 8px 8px; /* Keep bottom rounding */
+    /* padding: 15px; /* Consistent padding - will be controlled by expanded state */
     display: grid; /* Changed to grid */
     grid-template-columns: repeat(3, 1fr); /* 3x2 grid */
     gap: 15px; /* Gap between grid items */
-    /* This will naturally appear below .passenger-summary due to normal flow */
+    position: absolute; /* Positioned relative to its nearest positioned ancestor.
+                           User feedback suggests this is currently .passenger-selector. */
+    left: 0; /* Aligns with the left edge of its positioning context (e.g., .passenger-selector). */
+    top: 0; /* Places the top of .passenger-details below the main content block
+                           of its positioning context. If .passenger-summary is the primary content
+                           within .passenger-selector, this effectively positions .passenger-details after it. */
+    width: 100%; /* Spans the full width of its positioning context (e.g., .passenger-selector). */
+    z-index: 10; /* Ensure it's above other elements */
+    box-sizing: border-box; /* Include padding and border in width calculation */
+    /* border-top: 1px solid #eee; /* Restored original border - will be controlled by expanded state */
+
+    /* Animation properties */
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: 0;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out,
+        padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out,
+        border-top 0.5s ease-in-out;
+}
+
+.passenger-details.expanded {
+    max-height: 500px; /* Adjust as needed to fit content */
+    opacity: 1;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px; /* Ensure original padding is restored */
+    padding-right: 15px; /* Ensure original padding is restored */
+    border-top: 1px solid #eee;
 }
 
 .passenger-group {
@@ -496,12 +523,6 @@ body {
     border-radius: 6px;
     text-align: left; /* Align text to left */
 }
-
-/* Remove bottom border from passenger-group as it's now a grid cell */
-/* .passenger-group:last-of-type { 
-    border-bottom: none;
-    margin-bottom: 10px;
-} */
 
 .passenger-info {
     flex-grow: 1; /* Takes available space */

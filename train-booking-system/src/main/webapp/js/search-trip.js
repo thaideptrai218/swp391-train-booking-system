@@ -86,10 +86,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         !e.target.closest(".add-return-date-prompt") // Don't act if prompt itself is clicked
                     ) {
                         // If the return date field is not yet active (prompt is showing)
-                        if (!returnDateGroup.classList.contains("return-date-active")) {
+                        if (
+                            !returnDateGroup.classList.contains(
+                                "return-date-active"
+                            )
+                        ) {
                             // Mimic the prompt click's setup behavior
                             showReturnDateField(); // Make structure visible
-                            returnDateGroup.classList.add("picker-positioning-active");
+                            returnDateGroup.classList.add(
+                                "picker-positioning-active"
+                            );
                             if (returnDateFormGroup) {
                                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                 const _ = returnDateFormGroup.offsetHeight; // Force reflow
@@ -159,9 +165,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (addReturnDatePrompt) {
-        addReturnDatePrompt.addEventListener("click", function (event) { // Added event parameter
+        addReturnDatePrompt.addEventListener("click", function (event) {
+            // Added event parameter
             // If the calendar is already open, do nothing on subsequent clicks of the prompt
-            if (returnDateInput._flatpickr && returnDateInput._flatpickr.isOpen) {
+            if (
+                returnDateInput._flatpickr &&
+                returnDateInput._flatpickr.isOpen
+            ) {
                 event.stopPropagation(); // Stop event from bubbling to parent group listener
                 return;
             }
@@ -176,7 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const _ = returnDateFormGroup.offsetHeight;
             }
-            
+
             openedFromPrompt = true;
             returnDateInput._flatpickr.open();
         });
@@ -203,12 +213,12 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 // If date string is cleared but input still has a value (e.g. manual invalid entry),
                 // don't hide prompt yet. If input is truly empty, then hide.
-                if (!instance.input.value) { 
+                if (!instance.input.value) {
                     showReturnDatePrompt();
                 }
             }
             // Always remove picker-positioning-active after a change or if a date is selected
-            returnDateGroup.classList.remove("picker-positioning-active"); 
+            returnDateGroup.classList.remove("picker-positioning-active");
         },
     ].filter((f) => f);
 
@@ -447,16 +457,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (passengerSummary) {
             passengerSummary.addEventListener("click", (e) => {
                 if (
-                    passengerDetails.style.display === "grid" &&
-                    (e.target.closest("button") ||
-                        e.target.closest(".input-block"))
+                    passengerDetails.classList.contains("expanded") && // Check if it's expanded
+                    (e.target.closest("button") || // Clicked on any button
+                        e.target.closest(".input-block")) // Clicked within an input-block
                 ) {
                     return; // Don't close if interacting with controls inside details
                 }
-                const isOpen = passengerDetails.style.display === "grid";
-                passengerDetails.style.display = isOpen ? "none" : "grid";
-                passengerSelector.classList.toggle("open", !isOpen);
-                if (!isOpen) {
+                // const isOpen = passengerDetails.style.display === "grid";
+                // passengerDetails.style.display = isOpen ? "none" : "grid";
+                passengerDetails.classList.toggle("expanded");
+                // passengerSelector.classList.toggle("open", !isOpen); // Removed dropdown arrow related class toggle
+                if (passengerDetails.classList.contains("expanded")) {
                     // When opening
                     initializeButtonStates(); // Recalculate button states
                 }
@@ -465,8 +476,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (confirmBtn) {
             confirmBtn.addEventListener("click", () => {
-                passengerDetails.style.display = "none";
-                passengerSelector.classList.remove("open");
+                // passengerDetails.style.display = "none";
+                passengerDetails.classList.remove("expanded");
+                // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
                 updatePassengerSummary();
             });
         }
@@ -474,10 +486,12 @@ document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener("click", function (event) {
             if (
                 !passengerSelector.contains(event.target) &&
-                passengerSelector.classList.contains("open")
+                // passengerDetails.style.display === "grid" // Check if details are open directly
+                passengerDetails.classList.contains("expanded")
             ) {
-                passengerDetails.style.display = "none";
-                passengerSelector.classList.remove("open");
+                // passengerDetails.style.display = "none";
+                passengerDetails.classList.remove("expanded");
+                // passengerSelector.classList.remove("open"); // Removed dropdown arrow related class toggle
             }
         });
 
@@ -487,15 +501,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Window resize listener to reposition active Flatpickr instances
     let resizeTimeout;
-    window.addEventListener('resize', function() {
+    window.addEventListener("resize", function () {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
+        resizeTimeout = setTimeout(function () {
             if (departureFlatpickr && departureFlatpickr.isOpen) {
                 departureFlatpickr.reposition();
             }
             if (returnFlatpickr && returnFlatpickr.isOpen) {
                 // Ensure correct state for repositioning if opened from prompt
-                if (openedFromPrompt && returnDateGroup.classList.contains('picker-positioning-active')) {
+                if (
+                    openedFromPrompt &&
+                    returnDateGroup.classList.contains(
+                        "picker-positioning-active"
+                    )
+                ) {
                     // The class should already be set by the open logic, this is mostly for clarity
                 }
                 returnFlatpickr.reposition();

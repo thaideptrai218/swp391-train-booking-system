@@ -160,10 +160,7 @@
                                         <span class="sub-quantity">0</span>
                                         <span class="sub-label">VIP</span>
                                     </div>
-                                </div>
-                                <span class="dropdown-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                            </div>
-                            <div class="passenger-details" style="display: none;">
+                                    <div class="passenger-details">
                                 <div class="passenger-group" data-type="adult" data-min="0" data-max="10">
                                     <div class="passenger-info">
                                         <p class="title">Người lớn <span class="discount-detail-text">(GIẢM 0%)</span></p>
@@ -237,6 +234,9 @@
                                     </div>
                                 </div>
                             </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </form>
