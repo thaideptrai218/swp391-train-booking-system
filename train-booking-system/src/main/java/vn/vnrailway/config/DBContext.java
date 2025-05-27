@@ -12,33 +12,24 @@ public class DBContext {
     private static Properties dbProperties = new Properties();
 
     static {
-        // Path to the db.properties file relative to the project root directory
-        // This path is primarily for running directly (e.g., the main method from an
-        // IDE or command line)
-        // It is NOT reliable for WAR deployments if the working directory assumption is
-        // incorrect.
-        // Assumes the current working directory is C:\\Users\\PC\\SWP391 (i.e., the
-        // parent of 'train-booking-system')
-        String propertiesFilePath = "train-booking-system/src/main/java/vn/vnrailway/config/db.properties";
-
-        try (InputStream input = new java.io.FileInputStream(propertiesFilePath)) {
-            dbProperties.load(input);
-            // System.out.println("Successfully loaded db.properties from: " +
-            // propertiesFilePath); // Optional: for debugging
-        } catch (java.io.FileNotFoundException ex) {
-            System.err.println("CRITICAL ERROR: db.properties file not found at '" + propertiesFilePath
-                    + "'. Application cannot connect to the database. Please ensure the file exists at this location relative to the project root. Details: "
-                    + ex.getMessage());
-            // Consider throwing a RuntimeException to halt initialization if properties are
-            // essential
-            // throw new RuntimeException("Failed to load db.properties, file not found: " +
-            // propertiesFilePath, ex);
+        // Load db.properties from the classpath (src/main/resources)
+        String propertiesFileName = "db.properties";
+        try (InputStream input = DBContext.class.getClassLoader().getResourceAsStream(propertiesFileName)) {
+            if (input == null) {
+                System.err.println("CRITICAL ERROR: " + propertiesFileName + " file not found in classpath. "
+                        + "Application cannot connect to the database. "
+                        + "Please ensure the file exists in 'src/main/resources'.");
+                // Consider throwing a RuntimeException to halt initialization if properties are essential
+                // throw new RuntimeException("Failed to load " + propertiesFileName + ", file not found in classpath: " + propertiesFileName);
+            } else {
+                dbProperties.load(input);
+                // System.out.println("Successfully loaded " + propertiesFileName + " from classpath."); // Optional: for debugging
+            }
         } catch (IOException ex) {
-            System.err.println("CRITICAL ERROR: IOException while loading db.properties from '" + propertiesFilePath
-                    + "'. Details: " + ex.getMessage());
+            System.err.println("CRITICAL ERROR: IOException while loading " + propertiesFileName + " from classpath. Details: "
+                    + ex.getMessage());
             // Consider throwing a RuntimeException
-            // throw new RuntimeException("Failed to load db.properties due to IOException:
-            // " + propertiesFilePath, ex);
+            // throw new RuntimeException("Failed to load " + propertiesFileName + " due to IOException from classpath", ex);
         }
 
         // Load the JDBC driver
