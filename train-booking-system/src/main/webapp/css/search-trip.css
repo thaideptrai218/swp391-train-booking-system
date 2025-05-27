@@ -119,6 +119,40 @@ body {
     border-bottom: 0.5px solid rgba(72, 72, 72, 0.2);
 }
 
+/* Focus/Value highlight for date inputs */
+.input-icon-group:has(#departure-date)::after,
+.input-icon-group:has(#return-date)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0; /* Default state: no height */
+    background-color: transparent;
+    border-radius: 2px;
+    z-index: 2; 
+    transition: background-color 0.2s, height 0.2s;
+}
+
+.input-icon-group:has(#departure-date:focus)::after,
+.input-icon-group:has(#departure-date.has-value)::after {
+    height: 3px;
+    background-color: #28a745; /* Green for departure date */
+}
+
+.input-icon-group:has(#return-date:focus)::after,
+.input-icon-group:has(#return-date.has-value)::after {
+    height: 3px;
+    background-color: #ffa500; /* Orange for return date */
+}
+
+/* Keep original border on focus for date inputs, ::after provides the colored line */
+.input-icon-group:has(#departure-date:focus),
+.input-icon-group:has(#return-date:focus) {
+    border-bottom: 0.5px solid rgba(72, 72, 72, 0.2);
+}
+
+
 /* Styles for date input groups */
 .input-icon-group.date-group {
     cursor: pointer;
