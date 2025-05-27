@@ -86,6 +86,7 @@
                 type="text"
                 placeholder="Nhập từ khóa tìm kiếm..."
                 class="search-input-right"
+                id="stationSearchInput"
               />
             </div>
             <h3 class="sub-heading">Bản đồ hành trình</h3>
@@ -374,6 +375,7 @@
       </footer>
     </section>
 
+    <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
     <script src="${pageContext.request.contextPath}/js/script.js"></script>
   </body>
 </html>
