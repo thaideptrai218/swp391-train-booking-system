@@ -94,124 +94,124 @@
               <img src="${pageContext.request.contextPath}/assets/icons/landing/map.jpg" alt="Bản đồ hành trình" />
             </div>
           </div>
-        </div>
-      </div>
+        </div> <!-- End of main-content-area -->
 
-      <div class="introduce">
-        <!-- This section is outside the two-column layout -->
-        <h1 class="section-main-title">Đến với chúng tôi</h1>
-        <p>
-          Để khám phá hết vẻ đẹp của dải đất hình chữ S và trải nghiệm cuộc sống
-          thi vị, có lẽ không gì tuyệt vời hơn một chuyến tàu dọc theo chiều dài
-          đất nước. Khi đoàn tàu lăn bánh cũng là lúc hành khách được thư giãn
-          ngắm nhìn Việt Nam với khung cảnh thiên nhiên và cuộc sống thường ngày
-          bình dị qua ô cửa con tàu
-        </p>
-        <img class="img1" src="${pageContext.request.contextPath}/assets/icons/landing/img1.jpeg" />
-      </div>
-
-      <div class="hot-locations">
-        <div class="section-header">
-          <h1 class="section-main-title">Địa điểm nổi bật</h1>
-          <div class="carousel-navigation">
-            <a href="#" class="view-all-link"
-              >VIEW ALL <span class="arrow">&rarr;</span></a
-            >
-            <button class="nav-arrow prev-arrow"><</button>
-            <button class="nav-arrow next-arrow">></button>
-          </div>
+        <div class="introduce">
+          <!-- This section is outside the two-column layout -->
+          <h1 class="section-main-title">Đến với chúng tôi</h1>
+          <p>
+            Để khám phá hết vẻ đẹp của dải đất hình chữ S và trải nghiệm cuộc sống
+            thi vị, có lẽ không gì tuyệt vời hơn một chuyến tàu dọc theo chiều dài
+            đất nước. Khi đoàn tàu lăn bánh cũng là lúc hành khách được thư giãn
+            ngắm nhìn Việt Nam với khung cảnh thiên nhiên và cuộc sống thường ngày
+            bình dị qua ô cửa con tàu
+          </p>
+          <img class="img1" src="${pageContext.request.contextPath}/assets/icons/landing/img1.jpeg" />
         </div>
-        <div class="carousel-container">
-          <div class="carousel-track">
-            <!-- Placeholder Location Cards -->
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/FFC107/000000?text=Location+1"
-                alt="Location 1"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 1</h4>
-                <p class="card-description">
-                  Mô tả ngắn gọn về địa điểm hấp dẫn này.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
-            </div>
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Location+2"
-                alt="Location 2"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 2</h4>
-                <p class="card-description">
-                  Khám phá vẻ đẹp độc đáo và trải nghiệm thú vị.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
-            </div>
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Location+3"
-                alt="Location 3"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 3</h4>
-                <p class="card-description">
-                  Một điểm đến không thể bỏ qua cho kỳ nghỉ của bạn.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
-            </div>
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
-                alt="Location 4"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 4</h4>
-                <p class="card-description">
-                  Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
-            </div>
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/9C27B0/FFFFFF?text=Location+5"
-                alt="Location 5"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 5</h4>
-                <p class="card-description">
-                  Địa điểm lý tưởng cho những ai yêu thích khám phá.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
-            </div>
-            <div class="location-card">
-              <img
-                src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
-                alt="Location 4"
-                class="card-image"
-              />
-              <div class="card-content">
-                <h4 class="card-title">Tên Địa Điểm 4</h4>
-                <p class="card-description">
-                  Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
-                </p>
-                <button class="btn btn-card">Xem Chi Tiết</button>
-              </div>
+
+        <div class="hot-locations">
+          <div class="section-header">
+            <h1 class="section-main-title">Địa điểm nổi bật</h1>
+            <div class="carousel-navigation">
+              <a href="#" class="view-all-link"
+                >VIEW ALL <span class="arrow">&rarr;</span></a
+              >
+              <button class="nav-arrow prev-arrow"><</button>
+              <button class="nav-arrow next-arrow">></button>
             </div>
           </div>
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <!-- Placeholder Location Cards -->
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/FFC107/000000?text=Location+1"
+                  alt="Location 1"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 1</h4>
+                  <p class="card-description">
+                    Mô tả ngắn gọn về địa điểm hấp dẫn này.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Location+2"
+                  alt="Location 2"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 2</h4>
+                  <p class="card-description">
+                    Khám phá vẻ đẹp độc đáo và trải nghiệm thú vị.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Location+3"
+                  alt="Location 3"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 3</h4>
+                  <p class="card-description">
+                    Một điểm đến không thể bỏ qua cho kỳ nghỉ của bạn.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
+                  alt="Location 4"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 4</h4>
+                  <p class="card-description">
+                    Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/9C27B0/FFFFFF?text=Location+5"
+                  alt="Location 5"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 5</h4>
+                  <p class="card-description">
+                    Địa điểm lý tưởng cho những ai yêu thích khám phá.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+              <div class="location-card">
+                <img
+                  src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
+                  alt="Location 4"
+                  class="card-image"
+                />
+                <div class="card-content">
+                  <h4 class="card-title">Tên Địa Điểm 4</h4>
+                  <p class="card-description">
+                    Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
+                  </p>
+                  <button class="btn btn-card">Xem Chi Tiết</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </div> <!-- This is the closing div of the container that now holds introduce and hot-locations -->
+    </div> <!-- This is the closing div of class="body" -->
 
     <!-- New Site Info / Footer Section -->
     <section class="site-info-footer">
