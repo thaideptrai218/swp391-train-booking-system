@@ -12,6 +12,7 @@ public class Station {
     private String stationCode;
     private String stationName;
     private String address; // Có thể null
-    private String city;    // Có thể null
-    private String region;  // Có thể null
+    private String city; // Có thể null
+    private String region; // Có thể null
+    private String phoneNumber;
 }

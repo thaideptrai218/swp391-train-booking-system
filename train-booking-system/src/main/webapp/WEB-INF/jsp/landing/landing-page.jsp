@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -55,62 +56,27 @@
             <h2 class="column-title">Hành trình tàu</h2>
             <h3 class="sub-heading">Danh sách tuyến đường sắt và Ga</h3>
             <div class="location-list">
-              <!-- Placeholder for 4 location items -->
-              <div class="location-item">
-                <img
-                  src="https://via.placeholder.com/150x100"
-                  alt="Ga Lào Cai"
-                />
-                <div class="location-info">
-                  <h4>Lào Cai</h4>
-                  <p>Địa chỉ: Phường Phố Mới, thị xã Lào Cai, tỉnh Lào Cai</p>
-                  <p>Điện thoại: 020-830.093</p>
+              <c:if test="${not empty errorMessage}">
+                <p style="color: red;"><c:out value="${errorMessage}" /></p>
+              </c:if>
+              <c:if test="${empty stationList and empty errorMessage}">
+                <p>Không có thông tin ga tàu nào để hiển thị.</p>
+              </c:if>
+              <c:forEach var="station" items="${stationList}">
+                <div class="location-item">
+                  <img
+                    src="${pageContext.request.contextPath}/assets/icons/landing/stations/station${station.stationID}.jpg"
+                    alt="Ga <c:out value='${station.stationName}'/>"
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/150x100?text=Image+Not+Found';" <%-- Fallback image --%>
+                    style="width: 150px; height: 100px; object-fit: cover;" <%-- Basic styling for consistency --%>
+                  />
+                  <div class="location-info">
+                    <h4><c:out value="${station.stationName}" /></h4>
+                    <p>Địa chỉ: <c:out value="${station.address}" /></p>
+                    <p>Điện thoại: <c:out value="${station.phoneNumber}" /></p>
+                  </div>
                 </div>
-              </div>
-              <div class="location-item">
-                <img
-                  src="https://via.placeholder.com/150x100"
-                  alt="Ga Lào Cai"
-                />
-                <div class="location-info">
-                  <h4>Hà Nội</h4>
-                  <p>Địa chỉ: 120 Lê Duẩn, Hoàn Kiếm, Hà Nội</p>
-                  <p>Điện thoại: 024-730-23023</p>
-                </div>
-              </div>
-              <div class="location-item">
-                <img
-                  src="https://via.placeholder.com/150x100"
-                  alt="Ga Lào Cai"
-                />
-                <div class="location-info">
-                  <h4>Hải Phòng</h4>
-                  <p>Địa chỉ: 75 đường Lương Khánh Thiện, quận Ngô Quyền, thành phố Hải Phòng</p>
-                  <p>Điện thoại: 031.921333</p>
-                </div>
-              </div>
-              <div class="location-item">
-                <img
-                  src="https://via.placeholder.com/150x100"
-                  alt="Ga Lào Cai"
-                />
-                <div class="location-info">
-                  <h4>Lào Cai</h4>
-                  <p>Địa chỉ: Phường Phố Mới, thị xã Lào Cai, tỉnh Lào Cai</p>
-                  <p>Điện thoại: 020-830.093</p>
-                </div>
-              </div>
-              <div class="location-item">
-                <img
-                  src="https://via.placeholder.com/150x100"
-                  alt="Ga Lào Cai"
-                />
-                <div class="location-info">
-                  <h4>Lào Cai</h4>
-                  <p>Địa chỉ: Phường Phố Mới, thị xã Lào Cai, tỉnh Lào Cai</p>
-                  <p>Điện thoại: 020-830.093</p>
-                </div>
-              </div>
+              </c:forEach>
             </div>
           </div>
           <div class="right-column">
