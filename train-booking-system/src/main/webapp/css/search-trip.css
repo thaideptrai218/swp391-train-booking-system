@@ -53,7 +53,6 @@ body {
 .input-section {
     display: flex;
     flex-wrap: nowrap; /* Prevent wrapping, always keep children in one line */
-    overflow-x: hidden; /* Hide overflow if items are too wide */
     box-sizing: border-box;
     flex-grow: 1; /* Allow input section to take available space */
 }
@@ -625,6 +624,49 @@ body {
 /* Flatpickr Z-index Fix */
 .flatpickr-calendar {
     z-index: 10050 !important; /* Ensure it's above other elements */
+}
+
+/* Autocomplete Suggestions Styles */
+/* .form-group already has position: relative; which is good */
+
+.autocomplete-suggestions {
+    position: absolute;
+    top: 100%; /* Position below the input field's parent (.form-group) */
+    left: 0;
+    right: 0;
+    background-color: #ffffff; 
+    border: 1px solid #cccccc; /* Slightly more defined border */
+    border-top: none; /* Avoid double border with the input-icon-group bottom border */
+    border-radius: 0 0 8px 8px; /* Match border-radius of input groups */
+    max-height: 220px; /* Allow a bit more space for items */
+    overflow-y: auto;
+    z-index: 1000; /* Ensure it's above other page elements */
+    display: none; /* Hidden by default, shown by JavaScript */
+    box-shadow: 0 5px 12px rgba(0,0,0,0.15); /* Softer, slightly more pronounced shadow */
+    box-sizing: border-box; 
+}
+
+.suggestion-item {
+    padding: 12px 15px; /* More comfortable padding */
+    cursor: pointer;
+    font-size: 1em; /* Consistent with other text, or adjust as needed e.g., 0.95em */
+    color: #333333; /* Standard dark gray for text */
+    border-bottom: 1px solid #f0f0f0; /* Light separator line between items */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Show ellipsis for long station names */
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out; /* Smooth transitions */
+}
+
+.suggestion-item:last-child {
+    border-bottom: none; /* No border for the very last item */
+    border-radius: 0 0 7px 7px; /* Ensure bottom radius is maintained if it's the only item or last visible */
+}
+
+.suggestion-item:hover,
+.suggestion-item.active { /* .active class can be used by JS for keyboard navigation */
+    background-color: #e9f5ff; /* Light, friendly blue for hover/active state */
+    color: #0056b3; /* Darker blue text for better contrast on hover */
 }
 
 /* Media Queries for Responsiveness */
