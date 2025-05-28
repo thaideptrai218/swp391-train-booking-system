@@ -38,4 +38,33 @@ public class TripSearchResultDTO {
     
     // Other relevant information
     private String tripStatus;                  // Status of the trip (e.g., "Scheduled"), SP filters on T.TripStatus
+
+    // Getter for JSTL fmt:formatDate compatibility
+    public java.util.Date getScheduledDepartureAsDate() {
+        if (this.scheduledDeparture == null) {
+            return null;
+        }
+        return java.util.Date.from(this.scheduledDeparture.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getScheduledArrivalAsDate() {
+        if (this.scheduledArrival == null) {
+            return null;
+        }
+        return java.util.Date.from(this.scheduledArrival.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getTripOverallDepartureTimeAsDate() {
+        if (this.tripOverallDepartureTime == null) {
+            return null;
+        }
+        return java.util.Date.from(this.tripOverallDepartureTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getTripOverallArrivalTimeAsDate() {
+        if (this.tripOverallArrivalTime == null) {
+            return null;
+        }
+        return java.util.Date.from(this.tripOverallArrivalTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
 }
