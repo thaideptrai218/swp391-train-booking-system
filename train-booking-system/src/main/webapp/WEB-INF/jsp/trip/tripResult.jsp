@@ -76,6 +76,7 @@
     <title>Kết quả tìm kiếm chuyến tàu</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/reset.css"/>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css" />
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/trip-result.css" />
     <%-- Consider adding Font Awesome CDN link if not globally available in your project --%>
@@ -99,7 +100,13 @@
         <main class="main-results-content">
             <%-- Outbound Trips Section --%>
             <section class="trip-section outbound-section">
-                <h2>Chiều đi: <c:out value="${departureDateDisplay}"/> từ <c:out value="${originStationDisplay}"/> đến <c:out value="${destinationStationDisplay}"/></h2>
+                <div class="trip-header">
+                    <h2 class="title">Chiều đi: <c:out value="${departureDateDisplay}"/> từ <c:out value="${originStationDisplay}"/> đến <c:out value="${destinationStationDisplay}"/></h2>
+
+                    <button class="change-station-btn" type="button" onclick="window.location.href='${pageContext.request.contextPath}/searchTrip'">
+                        <i class="fas fa-exchange-alt"></i> Thay đổi ga
+                    </button>
+                </div>
                 <c:choose>
                     <c:when test="${not empty outboundTrips}">
                         <div class="train-list">

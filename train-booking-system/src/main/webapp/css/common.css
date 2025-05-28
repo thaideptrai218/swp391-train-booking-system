@@ -1,6 +1,18 @@
 /* common.css */
+
+/* Apply box-sizing to all elements for more intuitive sizing */
+html {
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: "Inter", sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
@@ -8,18 +20,35 @@ body {
     line-height: 1.6;
 }
 
+
+
 .container {
     max-width: 1200px; /* Adjust as needed */
     margin: 0 auto;
     padding: 20px;
-    background-color: #fff; /* Optional: if containers should have a white background */
 }
 
 /* Basic heading styles (optional, can be expanded) */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     margin-top: 0;
-    font-weight: normal;
+    margin-bottom: 0.5em; /* Add some default bottom margin */
+    font-weight: bold; /* Typically headings are bold by default, reset might remove this */
+    line-height: 1.2; /* Adjust line height for headings */
 }
+
+/* Example font sizes for headings - adjust as needed */
+h1 { font-size: 2.5em; }
+h2 { font-size: 2em; }
+h3 { font-size: 1.75em; }
+h4 { font-size: 1.5em; }
+h5 { font-size: 1.25em; }
+h6 { font-size: 1em; }
+
 
 /* Basic link styling */
 a {
