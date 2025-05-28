@@ -115,13 +115,13 @@
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
-                                            <fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="HH:mm" /> - ${trip.originStationName}
+                                            <fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="dd/MM HH:mm" /> - ${trip.originStationName}
                                         </span>
                                         <span class="duration-arrow">
                                             <i class="fas fa-long-arrow-alt-right"></i> ${trip.durationMinutes} phút
                                         </span>
                                         <span class="arrival-info">
-                                            <fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="HH:mm" /> - ${trip.destinationStationName}
+                                            <fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="dd/MM HH:mm" /> - ${trip.destinationStationName}
                                         </span>
                                         <span class="seats-info">
                                             Còn trống: -- <br/> Đã đặt: --
