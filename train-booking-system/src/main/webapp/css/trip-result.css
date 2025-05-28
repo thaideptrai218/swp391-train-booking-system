@@ -1,0 +1,204 @@
+.page-wrapper {
+    display: flex;
+    flex-direction: row-reverse; /* This will place the sidebar on the right */
+    gap: 20px; /* Space between sidebar and main content */
+    padding: 20px; /* Padding for the overall page wrapper if not using .container from common.css directly on it */
+}
+
+.sidebar {
+    max-width: 250px; /* Minimum width for the sidebar */
+    min-width: 200px;
+    background-color: #f9f9f9; /* Light background for sidebar */
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.shopping-cart-placeholder,
+.mini-search-placeholder {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    min-height: 100px; /* Placeholder height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #777;
+}
+
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trip-header .title {
+    padding: 10px;
+    color: #fff;
+    border-radius: 5px;
+    background: #0082c4;
+    text-align: center;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.change-station-btn {
+    padding: 8px 15px;
+    background: #10375C;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+    box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.02);
+    color: #FFF;
+    text-align: center;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 27px;
+}
+
+.change-station-btn:hover {
+    background-color: #0d2b49;
+}
+
+.main-results-content {
+    width: 75%; /* Adjust as needed */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between outbound and return sections */
+}
+
+
+.train-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between train items */
+}
+
+.train-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.train-item:hover,
+.train-item.expanded {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.train-item-collapsed-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.train-item-collapsed-summary span {
+    flex-shrink: 0; /* Prevent items from shrinking too much */
+}
+.train-item-collapsed-summary .train-name {
+    font-weight: bold;
+    color: #333;
+    min-width: 100px; /* Example min-width */
+}
+.train-item-collapsed-summary .departure-info,
+.train-item-collapsed-summary .arrival-info {
+    font-size: 0.9em;
+    color: #555;
+    min-width: 150px; /* Example min-width */
+}
+.train-item-collapsed-summary .duration-arrow {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    color: #777;
+}
+.train-item-collapsed-summary .seats-info {
+    font-size: 0.85em;
+    color: #666;
+    text-align: right;
+    min-width: 120px; /* Example min-width */
+}
+
+.expanded-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.carriage-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto; /* Allow horizontal scrolling for many carriages */
+    padding-bottom: 10px; /* Space for scrollbar */
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.carriage-item {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    white-space: nowrap; /* Prevent carriage text from wrapping */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.carriage-item:hover {
+    background-color: #e0e0e0;
+}
+
+.carriage-item.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+.carriage-item.active .fa-train {
+    color: white; /* Ensure icon color contrasts with active background */
+}
+
+.seat-details-block {
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px dashed #ccc;
+    min-height: 150px; /* Placeholder height */
+    background-color: #fdfdfd;
+    text-align: center;
+    color: #777;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    font-size: 1.1em;
+    color: #777;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
