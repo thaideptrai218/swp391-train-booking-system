@@ -12,7 +12,6 @@ public class DBContext {
     private static Properties dbProperties = new Properties();
 
     static {
-        // Load db.properties from the classpath (src/main/resources)
         try (InputStream input = DBContext.class.getClassLoader().getResourceAsStream("db.properties")) {
             if (input == null) {
                 System.err.println("CRITICAL ERROR: db.properties file not found in classpath. Application cannot connect to the database. Please ensure 'db.properties' is in 'src/main/resources'.");
@@ -26,6 +25,7 @@ public class DBContext {
             System.err.println("CRITICAL ERROR: IOException while loading db.properties from classpath. Details: " + ex.getMessage());
             // Optionally throw an exception
             // throw new RuntimeException("Failed to load db.properties from classpath due to IOException", ex);
+
         }
 
         // Load the JDBC driver

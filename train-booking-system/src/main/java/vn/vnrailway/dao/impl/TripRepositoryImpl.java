@@ -37,6 +37,22 @@ public class TripRepositoryImpl implements TripRepository {
         return trip;
     }
 
+    // Helper method to get Station Code by ID
+    private String getStationCodeById(int stationId, Connection conn) throws SQLException {
+        String sql = "SELECT StationCode FROM dbo.Stations WHERE StationID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("StationCode");
+                } else {
+                    // Consider if a more specific exception or error handling is needed
+                    throw new SQLException("Station code not found for ID: " + stationId + ". This station may not exist or may not have a code.");
+                }
+            }
+        }
+    }
+
     @Override
     public Optional<Trip> findById(int tripId) throws SQLException {
         String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier FROM Trips WHERE TripID = ?";
@@ -165,69 +181,76 @@ public class TripRepositoryImpl implements TripRepository {
     @Override
     public List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId, LocalDate departureDate) throws SQLException {
         List<TripSearchResultDTO> results = new ArrayList<>();
-        String sql = "SELECT " +
-                     "t.TripID, ts_orig.ScheduledDeparture, ts_dest.ScheduledArrival, t.TripStatus, t.IsHolidayTrip, " +
-                     "tr.TrainID, tr.TrainName, ro.RouteID, ro.RouteName, " +
-                     "s_orig.StationID AS OriginStationID, s_orig.StationName AS OriginStationName, s_orig.StationCode AS OriginStationCode, " +
-                     "s_dest.StationID AS DestinationStationID, s_dest.StationName AS DestinationStationName, s_dest.StationCode AS DestinationStationCode, " +
-                     "t.BasePriceMultiplier " +
-                     "FROM Trips t " +
-                     "JOIN Trains tr ON t.TrainID = tr.TrainID " +
-                     "JOIN Routes ro ON t.RouteID = ro.RouteID " +
-                     "JOIN TripStations ts_orig ON t.TripID = ts_orig.TripID " +
-                     "JOIN Stations s_orig ON ts_orig.StationID = s_orig.StationID " +
-                     "JOIN TripStations ts_dest ON t.TripID = ts_dest.TripID " +
-                     "JOIN Stations s_dest ON ts_dest.StationID = s_dest.StationID " +
-                     "WHERE ts_orig.StationID = ? " + // originStationId
-                     "AND ts_dest.StationID = ? " +   // destinationStationId
-                     "AND ts_orig.SequenceNumber < ts_dest.SequenceNumber " +
-                     "AND CONVERT(date, ts_orig.ScheduledDeparture) = ? " + // departureDate
-                     "AND t.TripStatus = 'Scheduled' " + // Assuming 'Scheduled' status for bookable trips
-                     "ORDER BY ts_orig.ScheduledDeparture";
+        String originStationCode;
+        String destinationStationCode;
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String callSP = "{CALL dbo.SearchTrips(?, ?, ?, ?)}"; // Params: OriginCode, DestCode, DepartureDate, ReturnDate (NULL for one-way)
 
-            ps.setInt(1, originStationId);
-            ps.setInt(2, destinationStationId);
-            ps.setDate(3, Date.valueOf(departureDate));
+        try (Connection conn = DBContext.getConnection()) {
+            // Fetch station codes using the provided IDs
+            originStationCode = getStationCodeById(originStationId, conn);
+            destinationStationCode = getStationCodeById(destinationStationId, conn);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    TripSearchResultDTO dto = new TripSearchResultDTO();
-                    dto.setTripID(rs.getInt("TripID"));
+            try (CallableStatement cs = conn.prepareCall(callSP)) {
+                cs.setString(1, originStationCode);
+                cs.setString(2, destinationStationCode);
+                cs.setDate(3, Date.valueOf(departureDate));
+                cs.setNull(4, Types.DATE); // @ReturnDate = NULL for one-way search
 
-                    Timestamp depTimestamp = rs.getTimestamp("ScheduledDeparture");
-                    if (depTimestamp != null) {
-                        dto.setDepartureDateTime(depTimestamp.toLocalDateTime());
-                        dto.setScheduledDepartureFromOrigin(depTimestamp.toLocalDateTime());
+                try (ResultSet rs = cs.executeQuery()) {
+                    while (rs.next()) {
+                        TripSearchResultDTO dto = new TripSearchResultDTO();
+                        
+                        dto.setLegType(rs.getString("LegType"));
+                        dto.setTripId(rs.getInt("TripID"));
+                        dto.setTrainName(rs.getString("TrainName"));
+                        dto.setRouteName(rs.getString("RouteName"));
+                        dto.setOriginStationName(rs.getString("OriginStation"));
+
+                        Timestamp depTimestamp = rs.getTimestamp("DepartureTime");
+                        if (depTimestamp != null) {
+                            dto.setScheduledDeparture(depTimestamp.toLocalDateTime());
+                        }
+
+                        dto.setDestinationStationName(rs.getString("DestinationStation"));
+                        Timestamp arrTimestamp = rs.getTimestamp("ArrivalTime");
+                        if (arrTimestamp != null) {
+                            dto.setScheduledArrival(arrTimestamp.toLocalDateTime());
+                        }
+                        
+                        dto.setDurationMinutes(rs.getInt("DurationMinutes"));
+
+                        Timestamp overallDepTimestamp = rs.getTimestamp("TripOverallDeparture");
+                        if (overallDepTimestamp != null) {
+                            dto.setTripOverallDepartureTime(overallDepTimestamp.toLocalDateTime());
+                        }
+
+                        Timestamp overallArrTimestamp = rs.getTimestamp("TripOverallArrival");
+                        if (overallArrTimestamp != null) {
+                            dto.setTripOverallArrivalTime(overallArrTimestamp.toLocalDateTime());
+                        }
+                        
+                        // Populate fields that are known or can be derived
+                        dto.setTripStatus("Scheduled"); // The SP filters for 'Scheduled' trips
+                        dto.setOriginStationId(originStationId); // From method parameter
+                        dto.setDestinationStationId(destinationStationId); // From method parameter
+                        
+                        // trainId and routeId are not directly returned by the SP's final SELECT.
+                        // They will remain as default (0 for int) unless the SP is modified or
+                        // they are populated in a service layer.
+                        // For now, we are not setting them from the ResultSet here.
+
+                        results.add(dto);
                     }
-                    Timestamp arrTimestamp = rs.getTimestamp("ScheduledArrival");
-                    if (arrTimestamp != null) {
-                        dto.setArrivalDateTime(arrTimestamp.toLocalDateTime());
-                        dto.setScheduledArrivalAtDestination(arrTimestamp.toLocalDateTime());
-                    }
-
-                    dto.setTripStatus(rs.getString("TripStatus"));
-                    dto.setHolidayTrip(rs.getBoolean("IsHolidayTrip"));
-                    dto.setTrainID(rs.getInt("TrainID"));
-                    dto.setTrainName(rs.getString("TrainName"));
-                    dto.setRouteID(rs.getInt("RouteID"));
-                    dto.setRouteName(rs.getString("RouteName"));
-                    dto.setOriginStationID(rs.getInt("OriginStationID"));
-                    dto.setOriginStationName(rs.getString("OriginStationName"));
-                    dto.setOriginStationCode(rs.getString("OriginStationCode"));
-                    dto.setDestinationStationID(rs.getInt("DestinationStationID"));
-                    dto.setDestinationStationName(rs.getString("DestinationStationName"));
-                    dto.setDestinationStationCode(rs.getString("DestinationStationCode"));
-                    
-                    // Using BasePriceMultiplier as a placeholder for estimated price.
-                    // Actual price calculation will likely be more complex and handled in the service layer.
-                    dto.setEstimatedPrice(rs.getBigDecimal("BasePriceMultiplier")); 
-                                        
-                    results.add(dto);
                 }
             }
+        } catch (SQLException e) {
+            // It's good practice to log the error or wrap it in a custom application exception
+            System.err.println("SQL Error in searchAvailableTrips: " + e.getMessage() + 
+                               " (OriginID: " + originStationId + ", DestID: " + destinationStationId + 
+                               ", Date: " + departureDate + ")");
+            // e.printStackTrace(); // For detailed debugging during development
+            throw e; // Re-throw to allow higher layers to handle it
         }
         return results;
     }
