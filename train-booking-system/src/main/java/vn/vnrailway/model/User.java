@@ -3,20 +3,33 @@ package vn.vnrailway.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime; // Hoặc java.sql.Timestamp
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
     private int userID;
+    private String userName;
+    private String password;
+    private String passwordHash;
     private String fullName;
     private String email;
     private String phoneNumber;
-    private String passwordHash; // Thường không lấy ra ngoài, nhưng có thể cần cho việc quản lý
-    private String idCardNumber; // Có thể null
-    private String role; // "Customer", "Staff", "Admin" (Có thể dùng Enum trong Java)
+    private String idCardNumber;
+    private String role;
     private boolean isActive;
-    private LocalDateTime createdAt; // Hoặc Timestamp
-    private LocalDateTime lastLogin; // Có thể null, hoặc Timestamp
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
+
+    public User(String userName, String password, String fullName, String email,
+                String phoneNumber, String idCardNumber, String role) {
+        this.userName = userName;
+        this.password = password;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.idCardNumber = idCardNumber;
+        this.role = role;
+    }
 }
