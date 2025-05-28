@@ -248,6 +248,7 @@
         </section>
 
         <script src="${pageContext.request.contextPath}/js/search-trip.js"></script>
+        <script src="${pageContext.request.contextPath}/js/passenger-selector.js"></script>
         <script src="${pageContext.request.contextPath}/js/station-autocomplete.js"></script>
     </body>
 </html>
