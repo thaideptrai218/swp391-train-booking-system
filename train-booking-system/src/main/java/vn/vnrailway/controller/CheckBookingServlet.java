@@ -15,7 +15,7 @@ public class CheckBookingServlet extends HttpServlet {
             throws ServletException, IOException {
         // Forward to the booking check form
         response.setContentType("text/html;charset=UTF-8");
-        request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-tiket.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
     }
 
     @Override

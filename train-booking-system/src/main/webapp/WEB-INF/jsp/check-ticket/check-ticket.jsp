@@ -4,7 +4,7 @@
         <html>
 
         <head>
-            <title>Tìm kiếm vé tàu</title>
+            <title>Tra cứu thông tin đặt vé</title>
             <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/check-booking.css" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             
@@ -13,7 +13,7 @@
         <body>
             <header>
                 <div class="navbar">
-                    <img src="images/logo.png" class="logo" alt="Logo">
+                    <img src="${pageContext.request.contextPath}/assets/images/logo.png" class="logo" alt="Logo">
 
                     <nav>
                         <a href="#">Tìm vé</a>
@@ -30,7 +30,7 @@
 
             <main class="main-content">
                 <div>
-                    <img src="images/image-26-72.png" class="news" alt="news">
+                    <img src="${pageContext.request.contextPath}/assets/images/image-26-72.png" class="news" alt="news">
                 </div>
 
 
@@ -63,7 +63,7 @@
                 </section>
 
                 <div>
-                    <img src="images/image-27-73.png" class="news" alt="news">
+                    <img src="${pageContext.request.contextPath}/assets/images/image-27-73.png" class="news" alt="news">
                 </div>
 
             </main>
@@ -79,16 +79,16 @@
                 <div class="footer-social">
                     <p>Kết nối với chúng tôi thông qua mạng xã hội</p>
                     <div class="social-icons">
-                        <a href="#"><img src="icons/facebook.png" alt="Facebook"></a>
-                        <a href="#"><img src="icons/twitter.png" alt="Twitter"></a>
-                        <a href="#"><img src="icons/instagram.png" alt="Instagram"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/facebook.png" alt="Facebook"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/twitter.png" alt="Twitter"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/instagram.png" alt="Instagram"></a>
                         <!-- <a href="#"><img src="icons/telegram.png" alt="Telegram"></a> -->
-                        <a href="#"><img src="icons/youtube.png" alt="YouTube"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/youtube.png" alt="YouTube"></a>
                     </div>
                 </div>
 
                 <div class="footer-bottom">
-                    <img src="images/logo.png" alt="Logo" class="footer-logo">
+                    <img src="${pageContext.request.contextPath}/assets/images/logo.png" alt="Logo" class="footer-logo">
                     <p>Sự thỏa mãn của bạn là niềm vui của chúng tôi</p>
                     <hr>
                     <p class="copyright">2025. Copyright and All rights reserved.</p>
