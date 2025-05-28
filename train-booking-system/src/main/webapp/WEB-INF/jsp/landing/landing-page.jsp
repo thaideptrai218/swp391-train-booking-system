@@ -122,91 +122,26 @@
           </div>
           <div class="carousel-container">
             <div class="carousel-track">
-              <!-- Placeholder Location Cards -->
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/FFC107/000000?text=Location+1"
-                  alt="Location 1"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 1</h4>
-                  <p class="card-description">
-                    Mô tả ngắn gọn về địa điểm hấp dẫn này.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
+              <c:if test="${not empty locationErrorMessage}">
+                <p style="color: red;"><c:out value="${locationErrorMessage}" /></p>
+              </c:if>
+              <c:if test="${empty locationList and empty locationErrorMessage}">
+                <p>Không có địa điểm nổi bật nào để hiển thị.</p>
+              </c:if>
+              <c:forEach var="location" items="${locationList}">
+                <div class="location-card">
+                  <img
+                    src="${pageContext.request.contextPath}/assets/icons/landing/locations/location${location.locationID}.jpg"
+                    alt="<c:out value='${location.locationName}'/>"
+                    class="card-image"
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';" <%-- Fallback image --%>
+                  />
+                  <div class="card-content">
+                    <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
+                    <button class="btn btn-card">Xem Chi Tiết</button>
+                  </div>
                 </div>
-              </div>
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Location+2"
-                  alt="Location 2"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 2</h4>
-                  <p class="card-description">
-                    Khám phá vẻ đẹp độc đáo và trải nghiệm thú vị.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
-                </div>
-              </div>
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Location+3"
-                  alt="Location 3"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 3</h4>
-                  <p class="card-description">
-                    Một điểm đến không thể bỏ qua cho kỳ nghỉ của bạn.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
-                </div>
-              </div>
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
-                  alt="Location 4"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 4</h4>
-                  <p class="card-description">
-                    Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
-                </div>
-              </div>
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/9C27B0/FFFFFF?text=Location+5"
-                  alt="Location 5"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 5</h4>
-                  <p class="card-description">
-                    Địa điểm lý tưởng cho những ai yêu thích khám phá.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
-                </div>
-              </div>
-              <div class="location-card">
-                <img
-                  src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Location+4"
-                  alt="Location 4"
-                  class="card-image"
-                />
-                <div class="card-content">
-                  <h4 class="card-title">Tên Địa Điểm 4</h4>
-                  <p class="card-description">
-                    Tận hưởng không gian yên bình và cảnh quan tuyệt đẹp.
-                  </p>
-                  <button class="btn btn-card">Xem Chi Tiết</button>
-                </div>
-              </div>
+              </c:forEach>
             </div>
           </div>
         </div>
