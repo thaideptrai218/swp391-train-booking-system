@@ -1,0 +1,50 @@
+/* common.css */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px; /* Adjust as needed */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff; /* Optional: if containers should have a white background */
+}
+
+/* Basic heading styles (optional, can be expanded) */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    font-weight: normal;
+}
+
+/* Basic link styling */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Basic button styling (can be a base for more specific buttons) */
+.button-common {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+}
+
+.button-common:hover {
+    background-color: #0056b3;
+}
