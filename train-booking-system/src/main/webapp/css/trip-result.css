@@ -120,14 +120,25 @@
 .train-item-collapsed-summary .train-name {
     font-weight: bold;
     color: #333;
-    min-width: 100px; /* Example min-width */
 }
 .train-item-collapsed-summary .departure-info,
 .train-item-collapsed-summary .arrival-info {
     font-size: 0.9em;
     color: #555;
     min-width: 150px; /* Example min-width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Align items to the start of the flex container */
 }
+
+.train-item-collapsed-summary .departure-info .trip-station,
+.train-item-collapsed-summary .arrival-info .trip-station {
+    font-weight: bold; /* Optionally make station name bold */
+    margin-top: 2px; /* Add a small space between time and station */
+}
+
+/* Remove or comment out old duration-arrow style if it exists */
+/*
 .train-item-collapsed-summary .duration-arrow {
     display: flex;
     align-items: center;
@@ -135,6 +146,26 @@
     font-size: 0.9em;
     color: #777;
 }
+*/
+
+.train-item-collapsed-summary .duration-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center icon and text */
+    gap: 2px; /* Space between icon and text */
+    min-width: 100px; /* Adjust as needed */
+}
+
+.train-item-collapsed-summary .duration-info .train-duration-icon {
+    width: 24px; /* Adjust icon size as needed */
+    height: 24px; /* Adjust icon size as needed */
+}
+
+.train-item-collapsed-summary .duration-info .duration-text {
+    font-size: 0.9em;
+    color: #555;
+}
+
 .train-item-collapsed-summary .seats-info {
     font-size: 0.85em;
     color: #666;

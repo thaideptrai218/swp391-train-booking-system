@@ -1,73 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="vn.vnrailway.utils.FormatUtils" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<%-- For mock data --%>
-<jsp:useBean id="mockOutboundTrips" class="java.util.ArrayList" scope="request"/>
-<jsp:useBean id="mockReturnTrips" class="java.util.ArrayList" scope="request"/>
-<jsp:useBean id="now" class="java.util.Date" />
-
-<%--
-    NOTE: The following 'c:set' blocks are for MOCK DATA for layout demonstration.
-    This should be REMOVED when the SearchTripServlet provides actual 'outboundTrips', 
-    'returnTrips', 'departureDateDisplay', 'originStationDisplay', 
-    and 'destinationStationDisplay' attributes.
---%>
-<c:if test="${empty outboundTrips and empty requestScope.outboundTripsFromServlet}">
-    <c:set var="departureDateDisplay" value="2024-12-25" scope="request"/>
-    <c:set var="originStationDisplay" value="Ga Hà Nội" scope="request"/>
-    <c:set var="destinationStationDisplay" value="Ga Sài Gòn" scope="request"/>
-    <c:set var="returnDateDisplay" value="2024-12-30" scope="request"/>
-
-    <%-- Mock Outbound Trip 1 --%>
-    <jsp:useBean id="mockTrip1" class="vn.vnrailway.dto.TripSearchResultDTO"/>
-    <c:set target="${mockTrip1}" property="legType" value="Outbound"/>
-    <c:set target="${mockTrip1}" property="tripId" value="101"/>
-    <c:set target="${mockTrip1}" property="trainName" value="SE1"/>
-    <c:set target="${mockTrip1}" property="routeName" value="Hà Nội - Sài Gòn"/>
-    <c:set target="${mockTrip1}" property="originStationName" value="Ga Hà Nội"/>
-    <c:set target="${mockTrip1}" property="scheduledDeparture" value="${now}"/>
-    <c:set target="${mockTrip1}" property="destinationStationName" value="Ga Sài Gòn"/>
-    <c:set target="${mockTrip1}" property="scheduledArrival" value="${now}"/>
-    <c:set target="${mockTrip1}" property="durationMinutes" value="1200"/>
-    <c:set target="${mockTrip1}" property="tripOverallDepartureTime" value="${now}"/>
-    <c:set target="${mockTrip1}" property="tripOverallArrivalTime" value="${now}"/>
-    <c:set target="${mockTrip1}" property="tripStatus" value="Scheduled"/>
-    <c:set target="${mockTrip1}" property="trainId" value="1"/>
-    <c:set target="${mockTrip1}" property="routeId" value="1"/>
-    <c:set target="${mockTrip1}" property="originStationId" value="1"/>
-    <c:set target="${mockTrip1}" property="destinationStationId" value="2"/>
-    <c:set target="${mockOutboundTrips}" property="add" value="${mockTrip1}"/>
-
-    <%-- Mock Outbound Trip 2 --%>
-    <jsp:useBean id="mockTrip2" class="vn.vnrailway.dto.TripSearchResultDTO"/>
-    <c:set target="${mockTrip2}" property="legType" value="Outbound"/>
-    <c:set target="${mockTrip2}" property="tripId" value="102"/>
-    <c:set target="${mockTrip2}" property="trainName" value="SE3"/>
-    <c:set target="${mockTrip2}" property="routeName" value="Hà Nội - Sài Gòn"/>
-    <c:set target="${mockTrip2}" property="originStationName" value="Ga Hà Nội"/>
-    <c:set target="${mockTrip2}" property="scheduledDeparture" value="${now}"/>
-    <c:set target="${mockTrip2}" property="destinationStationName" value="Ga Sài Gòn"/>
-    <c:set target="${mockTrip2}" property="scheduledArrival" value="${now}"/>
-    <c:set target="${mockTrip2}" property="durationMinutes" value="1250"/>
-    <c:set target="${mockTrip2}" property="tripStatus" value="Scheduled"/>
-    <c:set target="${mockOutboundTrips}" property="add" value="${mockTrip2}"/>
-    <c:set var="outboundTrips" value="${mockOutboundTrips}" scope="request"/>
-
-    <%-- Mock Return Trip 1 --%>
-    <jsp:useBean id="mockReturnTrip1" class="vn.vnrailway.dto.TripSearchResultDTO"/>
-    <c:set target="${mockReturnTrip1}" property="legType" value="Return"/>
-    <c:set target="${mockReturnTrip1}" property="tripId" value="201"/>
-    <c:set target="${mockReturnTrip1}" property="trainName" value="SE2"/>
-    <c:set target="${mockReturnTrip1}" property="routeName" value="Sài Gòn - Hà Nội"/>
-    <c:set target="${mockReturnTrip1}" property="originStationName" value="Ga Sài Gòn"/>
-    <c:set target="${mockReturnTrip1}" property="scheduledDeparture" value="${now}"/>
-    <c:set target="${mockReturnTrip1}" property="destinationStationName" value="Ga Hà Nội"/>
-    <c:set target="${mockReturnTrip1}" property="scheduledArrival" value="${now}"/>
-    <c:set target="${mockReturnTrip1}" property="durationMinutes" value="1220"/>
-    <c:set target="${mockReturnTrip1}" property="tripStatus" value="Scheduled"/>
-    <c:set target="${mockReturnTrips}" property="add" value="${mockReturnTrip1}"/>
-    <c:set var="returnTrips" value="${mockReturnTrips}" scope="request"/>
-</c:if>
 
 
 <!DOCTYPE html>
@@ -79,7 +13,6 @@
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/reset.css"/>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css" />
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/trip-result.css" />
-    <%-- Consider adding Font Awesome CDN link if not globally available in your project --%>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 </head>
@@ -115,13 +48,16 @@
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
-                                            <fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="dd/MM HH:mm" /> - ${trip.originStationName}
+                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="dd/MM HH:mm" /></span>
+                                            <span class="trip-station">${trip.originStationName}</span>
                                         </span>
-                                        <span class="duration-arrow">
-                                            <i class="fas fa-long-arrow-alt-right"></i> ${trip.durationMinutes} phút
+                                        <span class="duration-info">
+                                            <img src="${pageContext.request.contextPath}/assets/icons/train-icon.png" alt="Train Icon" class="train-duration-icon"/>
+                                            <span class="duration-text">${FormatUtils.formatDuration(trip.durationMinutes)}</span>
                                         </span>
                                         <span class="arrival-info">
-                                            <fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="dd/MM HH:mm" /> - ${trip.destinationStationName}
+                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="dd/MM HH:mm" /></span>
+                                            <span class="trip-station">${trip.destinationStationName}</span>
                                         </span>
                                         <span class="seats-info">
                                             Còn trống: -- <br/> Đã đặt: --
@@ -161,13 +97,16 @@
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
-                                            <fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="HH:mm" /> - ${trip.originStationName}
+                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="HH:mm" /></span>
+                                            <span class="trip-station">${trip.originStationName}</span>
                                         </span>
-                                        <span class="duration-arrow">
-                                            <i class="fas fa-long-arrow-alt-right"></i> ${trip.durationMinutes} phút
+                                        <span class="duration-info">
+                                            <img src="${pageContext.request.contextPath}/assets/icons/train-icon.png" alt="Train Icon" class="train-duration-icon"/>
+                                            <span class="duration-text">${FormatUtils.formatDuration(trip.durationMinutes)}</span>
                                         </span>
                                         <span class="arrival-info">
-                                            <fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="HH:mm" /> - ${trip.destinationStationName}
+                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="HH:mm" /></span>
+                                            <span class="trip-station">${trip.destinationStationName}</span>
                                         </span>
                                         <span class="seats-info">
                                                 Còn trống: -- <br/> Đã đặt: --
