@@ -46,6 +46,13 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="idCardNumber">Số CMND/CCCD</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-id-card icon"></i> <!-- Assuming a suitable icon for ID card -->
+                        <input type="text" id="idCardNumber" name="idCardNumber" placeholder="Nhập số CMND/CCCD của bạn" required>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="confirmPassword">Xác nhận mật khẩu</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-lock icon"></i>
@@ -53,6 +60,11 @@
                         <i class="fa-solid fa-eye-slash toggle-password" id="toggleConfirmPassword"></i>
                     </div>
                 </div>
+                <%-- Display error message if present --%>
+                <% String errorMessage = (String) request.getAttribute("errorMessage"); %>
+                <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
+                    <p style="color: #dc3545; text-align: center; margin-top: -10px;"><%= errorMessage %></p>
+                <% } %>
                 <button type="submit" class="register-button">Xác Nhận</button>
             </form>
             <div class="login-section">

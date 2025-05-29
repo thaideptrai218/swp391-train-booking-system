@@ -17,10 +17,10 @@
             </div>
             <form action="login" method="post" class="login-form">
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="username">Tên đăng nhập</label>
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-envelope icon"></i>
-                        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
+                        <i class="fa-solid fa-user icon"></i> <!-- Changed icon to user for username -->
+                        <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập của bạn" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -31,6 +31,11 @@
                         <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
                     </div>
                 </div>
+                <%-- Display error message if present --%>
+                <% String errorMessage = (String) request.getAttribute("errorMessage"); %>
+                <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
+                    <p style="color: #dc3545; text-align: center; margin-top: -10px;"><%= errorMessage %></p>
+                <% } %>
                 <div class="form-actions">
                     <a href="#" class="forgot-password">Quên mật khẩu?</a>
                     <button type="submit" class="login-button">Đăng nhập</button>
