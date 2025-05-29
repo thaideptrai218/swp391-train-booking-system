@@ -3,53 +3,51 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập</title>
     <link rel="stylesheet" href="css/login.css">
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
-<div class="login">
-    <div class="overlap-wrapper">
-        <div class="overlap"> 
-            <div class="overlap-group">
-                <div class="group">
-
-                    <!-- Icon Home -->
-<i class="fa-solid fa-house fa-xl"></i>
-<!--                    <img class="fi-home" src="assets/icons/fi_home.svg" />-->
-                    <div class="text-wrapper">Đăng Nhập</div>
-                    <div class="div">Email</div>
-                    <div class="text-wrapper-2">Nhập email</div>
-                    <div class="rectangle"></div>
-
-                    <div class="text-wrapper-3">Mật khẩu</div>
-                    <div class="text-wrapper-4">Nhập mật khẩu</div>
-                    <div class="rectangle-2"></div>
-
-                    <div class="div-wrapper">
-                        <div class="text-wrapper-5">Đăng nhập</div>
-                    </div>
-
-                    <div class="text-wrapper-6">Đăng ký</div>
-                    <div class="text-wrapper-7">Tạo tài khoản</div>
-
-                    <p class="p">Bạn đã có tài khoản?</p>
-
-                    <div class="text-wrapper-8">Quên mật khẩu?</div>
-                    <div class="text-wrapper-9">Nhấn vào đây</div>
-                    <div class="text-wrapper-10">Tài khoản Google</div>
-
-                    <!-- Icon Eye -->
-                    <i class="fa-solid fa-eye fa-xl fi-eye"></i>
-
-                </div>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fa-solid fa-house fa-xl home-icon"></i>
+                <h2>Đăng Nhập</h2>
             </div>
-            <div class="hero"></div>
+            <form action="login" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope icon"></i>
+                        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock icon"></i>
+                        <input type="password" id="password" name="password" placeholder="Nhập mật khẩu của bạn" required>
+                        <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                    <button type="submit" class="login-button">Đăng nhập</button>
+                </div>
+            </form>
+            <div class="social-login">
+                <p>Hoặc đăng nhập với</p>
+                <button class="google-login-button">
+                    <i class="fa-brands fa-google"></i> Tài khoản Google
+                </button>
+            </div>
+            <div class="register-section">
+                <p>Bạn chưa có tài khoản?</p>
+                <a href="register.jsp" class="register-link">Đăng ký ngay</a>
+            </div>
         </div>
     </div>
-</div>
+    <script src="js/login.js"></script>
 </body>
 </html>
