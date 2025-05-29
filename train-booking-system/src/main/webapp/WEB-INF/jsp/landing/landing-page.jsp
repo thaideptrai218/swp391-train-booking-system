@@ -13,7 +13,7 @@
       <header class="navbar">
         <div class="container">
           <div class="logo-block">
-            <img src="${pageContext.request.contextPath}/assets/icons/landing/logo.svg" alt="Logo" class="logo" />
+            <img src="${pageContext.request.contextPath}/assets/images/landing/logo.svg" alt="Logo" class="logo" />
           </div>
           <nav>
             <ul class="nav-list">
@@ -38,7 +38,7 @@
             <button class="btn btn-primary">Tìm hiểu thêm</button>
             <button class="btn btn-secondary">
               <img
-                src="${pageContext.request.contextPath}/assets/icons/landing/phone.png"
+                src="${pageContext.request.contextPath}/assets/images/landing/phone.png"
                 alt="Phone"
                 class="phone-icon"
               />0983868888
@@ -65,7 +65,7 @@
               <c:forEach var="station" items="${stationList}">
                 <div class="location-item">
                   <img
-                    src="${pageContext.request.contextPath}/assets/icons/landing/stations/station${station.stationID}.jpg"
+                    src="${pageContext.request.contextPath}/assets/images/landing/stations/station${station.stationID}.jpg"
                     alt="Ga <c:out value='${station.stationName}'/>"
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/150x100?text=Image+Not+Found';" <%-- Fallback image --%>
                     style="width: 150px; height: 100px; object-fit: cover;" <%-- Basic styling for consistency --%>
@@ -91,7 +91,7 @@
             </div>
             <h3 class="sub-heading">Bản đồ hành trình</h3>
             <div class="map-placeholder">
-              <img src="${pageContext.request.contextPath}/assets/icons/landing/map.jpg" alt="Bản đồ hành trình" />
+              <img src="${pageContext.request.contextPath}/assets/images/landing/map.jpg" alt="Bản đồ hành trình" />
             </div>
           </div>
         </div> <!-- End of main-content-area -->
@@ -106,7 +106,7 @@
             ngắm nhìn Việt Nam với khung cảnh thiên nhiên và cuộc sống thường ngày
             bình dị qua ô cửa con tàu
           </p>
-          <img class="img1" src="${pageContext.request.contextPath}/assets/icons/landing/img1.jpeg" />
+          <img class="img1" src="${pageContext.request.contextPath}/assets/images/landing/img1.jpeg" />
         </div>
 
         <div class="hot-locations">
@@ -114,10 +114,8 @@
             <h1 class="section-main-title">Địa điểm nổi bật</h1>
             <div class="carousel-navigation">
               <a href="#" class="view-all-link"
-                >VIEW ALL <span class="arrow">&rarr;</span></a
+                >Xem thêm <span class="arrow">&rarr;</span></a
               >
-              <button class="nav-arrow prev-arrow"><</button>
-              <button class="nav-arrow next-arrow">></button>
             </div>
           </div>
           <div class="carousel-container">
@@ -131,14 +129,14 @@
               <c:forEach var="location" items="${locationList}">
                 <div class="location-card">
                   <img
-                    src="${pageContext.request.contextPath}/assets/icons/landing/locations/location${location.locationID}.jpg"
+                    src="${pageContext.request.contextPath}/assets/images/landing/locations/location${location.locationID}.jpg"
                     alt="<c:out value='${location.locationName}'/>"
                     class="card-image"
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';" <%-- Fallback image --%>
                   />
                   <div class="card-content">
                     <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
-                    <button class="btn btn-card">Xem Chi Tiết</button>
+                    <button class="btn btn-card"><a href="#">Xem Chi Tiết</a></button>
                   </div>
                 </div>
               </c:forEach>
@@ -253,61 +251,32 @@
         </div>
       </div>
 
-      <footer class="main-footer">
-        <div class="footer-top">
-          <div class="container">
-            <a href="#">Tin tức</a>
-            <a href="#">Hỗ trợ</a>
-            <a href="#">FAQ</a>
-            <a href="#">Liên hệ</a>
-          </div>
-        </div>
-        <div class="footer-middle">
-          <div class="container">
-            <span>Kết nối với chúng tôi thông qua mạng xã hội</span>
-            <div class="social-icons">
-              <a href="#"
-                ><img
-                  src="https://via.placeholder.com/32x32/3B5998/FFFFFF?text=f"
-                  alt="Facebook"
-              /></a>
-              <a href="#"
-                ><img
-                  src="https://via.placeholder.com/32x32/55ACEE/FFFFFF?text=t"
-                  alt="Twitter"
-              /></a>
-              <a href="#"
-                ><img
-                  src="https://via.placeholder.com/32x32/E4405F/FFFFFF?text=ig"
-                  alt="Instagram"
-              /></a>
-              <a href="#"
-                ><img
-                  src="https://via.placeholder.com/32x32/0088CC/FFFFFF?text=tg"
-                  alt="Telegram"
-              /></a>
-              <a href="#"
-                ><img
-                  src="https://via.placeholder.com/32x32/FF0000/FFFFFF?text=yt"
-                  alt="YouTube"
-              /></a>
-            </div>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <div class="container">
-            <img
-              src="https://via.placeholder.com/120x40?text=Vetaure.com"
-              alt="Vetaure.com Logo"
-              class="footer-logo"
-            />
-            <p>Sự thỏa mãn của bạn là niềm vui của chúng tôi</p>
-            <p class="copyright">
-              &copy; 2025. Copyright and All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+            <footer class="footer">
+                <div class="footer-top">
+                    <a href="#">Tin tức</a>
+                    <a href="#">Hỗ trợ</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Liên hệ</a>
+                </div>
+
+                <div class="footer-social">
+                    <p>Kết nối với chúng tôi thông qua mạng xã hội</p>
+                    <div class="social-icons">
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/icons/facebook.jpg" alt="Facebook"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/icons/twitter.jpg" alt="Twitter"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/icons/instagram.png" alt="Instagram"></a>
+                        <!-- <a href="#"><img src="icons/telegram.png" alt="Telegram"></a> -->
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/icons/youtube.jpg" alt="YouTube"></a>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <img src="${pageContext.request.contextPath}/assets/images/icons/logo.png" alt="Logo" class="footer-logo">
+                    <p>Sự thỏa mãn của bạn là niềm vui của chúng tôi</p>
+                    <hr>
+                    <p class="copyright">2025. Copyright and All rights reserved.</p>
+                </div>
+            </footer>
     </section>
 
     <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
