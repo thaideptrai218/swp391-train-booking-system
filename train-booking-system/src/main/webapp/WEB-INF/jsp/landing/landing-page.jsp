@@ -113,8 +113,7 @@
           <div class="section-header">
             <h1 class="section-main-title">Địa điểm nổi bật</h1>
             <div class="carousel-navigation">
-              <a href="#" class="view-all-link"
-                >Xem thêm <span class="arrow">&rarr;</span></a
+              <a href="#" class="view-all-link">Xem thêm <span class="arrow">&rarr;</span></a
               >
             </div>
           </div>
@@ -179,35 +178,35 @@
             <h3>Đối tác thanh toán</h3>
             <div class="logos-grid">
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/techcombank.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/techcombank.jpg"
                 alt="Techcombank"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/mbbank.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/mbbank.jpg"
                 alt="MB Bank"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/vietcombank.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/vietcombank.jpg"
                 alt="Vietcombank"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/momo.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/momo.jpg"
                 alt="Momo"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/visa.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/visa.jpg"
                 alt="Visa"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/mastercard.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/mastercard.jpg"
                 alt="Mastercard"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/spay.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/spay.jpg"
                 alt="S Pay"
               />
               <img
-                src="${pageContext.request.contextPath}/assets/images/footer/vpbank.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/vpbank.jpg"
                 alt="VPBank"
               />
             </div>

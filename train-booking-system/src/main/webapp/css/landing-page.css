@@ -701,8 +701,9 @@ table {
   align-items: center;
 }
 .logos-grid img {
-  max-width: 100%;
-  height: auto;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
 }
 
 .logos-list img {
