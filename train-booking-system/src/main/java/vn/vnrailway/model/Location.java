@@ -3,15 +3,15 @@ package vn.vnrailway.model;
 public class Location {
     private int locationID;
     private String locationName;
-    private String imageName; // To store the name of the image file, e.g., "location1.jpg"
+    private String link;
 
     public Location() {
     }
 
-    public Location(int locationID, String locationName, String imageName) {
+    public Location(int locationID, String locationName, String link) {
         this.locationID = locationID;
         this.locationName = locationName;
-        this.imageName = imageName;
+        this.link = link;
     }
 
     public int getLocationID() {
@@ -30,12 +30,12 @@ public class Location {
         this.locationName = locationName;
     }
 
-    public String getImageName() {
-        return imageName;
+    public String getLink() {
+        return link;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
+    public void setLink(String link) {
+        this.link = link;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Location {
         return "Location{" +
                 "locationID=" + locationID +
                 ", locationName='" + locationName + '\'' +
-                ", imageName='" + imageName + '\'' +
+                ", link='" + link + '\'' +
                 '}';
     }
 }

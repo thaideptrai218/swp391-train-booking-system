@@ -136,7 +136,7 @@
                   />
                   <div class="card-content">
                     <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
-                    <button class="btn btn-card"><a href="#">Xem Chi Tiết</a></button>
+                    <button class="btn btn-card"><a href="${location.link}" target="_blank">Xem Chi Tiết</a></button>
                   </div>
                 </div>
               </c:forEach>
@@ -179,36 +179,36 @@
             <h3>Đối tác thanh toán</h3>
             <div class="logos-grid">
               <img
-                src="https://via.placeholder.com/80x40?text=TCB"
+                src="${pageContext.request.contextPath}/assets/images/footer/techcombank.jpg"
                 alt="Techcombank"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=MB"
+                src="${pageContext.request.contextPath}/assets/images/footer/mbbank.jpg"
                 alt="MB Bank"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=VCB"
+                src="${pageContext.request.contextPath}/assets/images/footer/vietcombank.jpg"
                 alt="Vietcombank"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=Momo"
+                src="${pageContext.request.contextPath}/assets/images/footer/momo.jpg"
                 alt="Momo"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=Visa"
+                src="${pageContext.request.contextPath}/assets/images/footer/visa.jpg"
                 alt="Visa"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=Mastercard"
+                src="${pageContext.request.contextPath}/assets/images/footer/mastercard.jpg"
                 alt="Mastercard"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=SPay"
+                src="${pageContext.request.contextPath}/assets/images/footer/spay.jpg"
                 alt="S Pay"
               />
               <img
-                src="https://via.placeholder.com/80x40?text=VTPB"
-                alt="VTPank"
+                src="${pageContext.request.contextPath}/assets/images/footer/vpbank.jpg"
+                alt="VPBank"
               />
             </div>
           </div>
