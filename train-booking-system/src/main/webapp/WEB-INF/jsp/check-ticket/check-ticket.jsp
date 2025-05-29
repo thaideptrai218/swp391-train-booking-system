@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <!DOCTYPE html>
         <html>
 
@@ -7,7 +7,7 @@
             <title>Tra cứu thông tin đặt vé</title>
             <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/check-booking.css" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            
+
         </head>
 
         <body>
@@ -43,11 +43,12 @@
                                 <tbody>
                                     <tr>
                                         <td>Mã đặt chỗ <span style="color:red">*</span></td>
-                                        <td><input type="text" placeholder="Nhập mã đặt chỗ" required></td>
+                                        <td><input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ"
+                                                required></td>
                                     </tr>
                                     <tr>
-                                        <td>Điện thoại <span style="color:red">*</span></td>
-                                        <td><input type="text" placeholder="Nhập số điện thoại" required></td>
+                                        <td>Điện thoại</td>
+                                        <td><input type="text" placeholder="Nhập số điện thoại"></td>
                                     </tr>
                                     <tr>
                                         <td>Email</td>
@@ -60,6 +61,44 @@
                             </table>
                         </form>
                     </div>
+
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger">${error}</div>
+                    </c:if>
+
+                    <c:if test="${not empty booking}">
+                        <div class="booking-info">
+                            <h3>Thông tin đặt chỗ</h3>
+                            <p>Mã đặt chỗ: ${booking.bookingCode}</p>
+                            <!-- <p>Họ tên: ${user.fullName}</p>
+                            <p>Điện thoại: ${user.phoneNumber}</p>
+                            <p>Email: ${user.email}</p> -->
+                            <p>Trạng thái: ${booking.bookingStatus}</p>
+                        </div>
+                    </c:if>
+                        <!-- <div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã đặt chỗ</th>
+                                    <th>Họ tên</th>
+                                    <th>Điện thoại</th>
+                                    <th>Email</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${booking.bookingCode}</td>
+                                    <td>${user.fullName}</td>
+                                    <td>${user.phoneNumber}</td>
+                                    <td>${user.email}</td>
+                                    <td>${booking.bookingStatus}</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div> -->
                 </section>
 
                 <div>
@@ -79,11 +118,15 @@
                 <div class="footer-social">
                     <p>Kết nối với chúng tôi thông qua mạng xã hội</p>
                     <div class="social-icons">
-                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/facebook.png" alt="Facebook"></a>
-                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/twitter.png" alt="Twitter"></a>
-                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/instagram.png" alt="Instagram"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/facebook.png"
+                                alt="Facebook"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/twitter.png"
+                                alt="Twitter"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/instagram.png"
+                                alt="Instagram"></a>
                         <!-- <a href="#"><img src="icons/telegram.png" alt="Telegram"></a> -->
-                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/youtube.png" alt="YouTube"></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/icons/youtube.png"
+                                alt="YouTube"></a>
                     </div>
                 </div>
 
