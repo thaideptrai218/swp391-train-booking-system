@@ -541,14 +541,23 @@ table {
 }
 
 .carousel-container {
-  overflow-x: auto;
+  overflow-x: hidden; /* Hide scrollbar, will be controlled by JS */
   padding-bottom: 15px;
+  position: relative; /* For potential absolute positioning of arrows if needed */
+  scroll-behavior: smooth; /* Smooth scrolling for JS-driven scroll */
+  cursor: grab; /* Indicate draggable */
+  user-select: none; /* Prevent text selection during drag */
+}
+
+.carousel-container.grabbing {
+  cursor: grabbing; /* Change cursor when dragging */
 }
 
 .carousel-track {
   display: flex;
   gap: 20px;
   padding: 5px;
+  transition: transform 0.5s ease-in-out; /* For CSS transform-based sliding if used */
 }
 
 .location-card {
@@ -790,4 +799,143 @@ hr {
   margin: 5px 0;
   color: #ccc;
   font-size: 14px;
+}
+
+/* Station Name Link Style */
+.station-name-link {
+  color: inherit; /* Make link color same as parent h4 */
+  text-decoration: none; /* Remove underline */
+  cursor: pointer;
+}
+
+.station-name-link:hover {
+  text-decoration: underline; /* Optional: underline on hover */
+  color: var(--color-primary); /* Optional: change color on hover */
+}
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Slightly darker overlay */
+}
+
+.modal-content {
+  background-color: #fff; /* White background */
+  margin: 10% auto; /* More top margin */
+  padding: 0; /* Remove padding, will be handled by header/body/footer */
+  border: none; /* Remove border, rely on shadow */
+  width: 90%;
+  max-width: 700px; /* Wider modal for two-column layout */
+  border-radius: 8px; /* Softer radius */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-family: var(--font-primary);
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee; /* Separator line */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  /* For #modalHeaderStationName */
+  margin: 0;
+  font-family: var(--font-secondary);
+  font-size: 22px; /* Slightly smaller than previous h3 */
+  color: var(--color-text-default); /* Standard text color */
+  font-weight: 600;
+}
+
+.close-button {
+  /* For the 'X' */
+  color: #555; /* Darker grey */
+  font-size: 24px; /* Slightly smaller */
+  font-weight: bold;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: #000; /* Black on hover */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  gap: 20px; /* Space between image and text columns */
+}
+
+.modal-body-left {
+  flex: 1; /* Adjust flex basis as needed, e.g., 40% */
+  max-width: 40%; /* Limit image column width */
+}
+
+.modal-station-image {
+  width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  max-height: 300px; /* Adjust as needed */
+  object-fit: cover;
+  border-radius: var(--border-radius-input);
+  display: block;
+}
+
+.modal-body-right {
+  flex: 1.5; /* Adjust flex basis, e.g., 60% */
+}
+
+.modal-body-right h4 {
+  /* For #modalBodyStationName */
+  font-family: var(--font-secondary);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-default);
+  margin-top: 0; /* Remove top margin if image is present */
+  margin-bottom: 10px;
+}
+
+.modal-body-right p {
+  font-size: 14px; /* Smaller text for details */
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: var(--color-text-light);
+}
+
+.modal-body-right p strong {
+  color: var(--color-text-default); /* Strong text standard color */
+  font-weight: 600;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee; /* Separator line */
+  text-align: right; /* Align button to the right */
+}
+
+.btn-modal-close {
+  background-color: #6c757d; /* Bootstrap secondary-like color */
+  color: white;
+  padding: 8px 20px; /* Smaller padding */
+  font-size: 14px;
+  border-radius: var(--border-radius-input); /* Consistent radius */
+  border: none;
+  cursor: pointer;
+}
+
+.btn-modal-close:hover {
+  background-color: #5a6268; /* Darker shade on hover */
 }

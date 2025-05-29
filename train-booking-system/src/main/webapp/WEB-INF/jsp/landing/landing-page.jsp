@@ -8,7 +8,7 @@
     <title>Landing Page</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing-page.css" />
   </head>
-  <body>
+  <body data-context-path="${pageContext.request.contextPath}">
     <section class="hero">
       <header class="navbar">
         <div class="container">
@@ -71,7 +71,11 @@
                     style="width: 150px; height: 100px; object-fit: cover;" <%-- Basic styling for consistency --%>
                   />
                   <div class="location-info">
-                    <h4><c:out value="${station.stationName}" /></h4>
+                    <h4 id="station-name-${station.stationID}">
+                      <a href="#" onclick="showStationPopup('${station.stationName}', '${station.address}', '${station.phoneNumber}', '${station.stationID}'); return false;" class="station-name-link">
+                        <c:out value="${station.stationName}" />
+                      </a>
+                    </h4>
                     <p>Địa chỉ: <c:out value="${station.address}" /></p>
                     <p>Điện thoại: <c:out value="${station.phoneNumber}" /></p>
                   </div>
@@ -109,15 +113,16 @@
           <img class="img1" src="${pageContext.request.contextPath}/assets/images/landing/img1.jpeg" />
         </div>
 
-        <div class="hot-locations">
+          <div class="hot-locations">
           <div class="section-header">
             <h1 class="section-main-title">Địa điểm nổi bật</h1>
             <div class="carousel-navigation">
-              <a href="#" class="view-all-link">Xem thêm <span class="arrow">&rarr;</span></a
-              >
+              <button class="nav-arrow prev-location"><</button>
+              <button class="nav-arrow next-location">></button>
+              <a href="#" class="view-all-link">Xem thêm <span class="arrow">&rarr;</span></a>
             </div>
           </div>
-          <div class="carousel-container">
+          <div class="carousel-container" id="hotLocationsCarousel">
             <div class="carousel-track">
               <c:if test="${not empty locationErrorMessage}">
                 <p style="color: red;"><c:out value="${locationErrorMessage}" /></p>
@@ -280,5 +285,30 @@
 
     <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
     <script src="${pageContext.request.contextPath}/js/script.js"></script>
+
+    <!-- Station Info Modal -->
+    <div id="stationModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalHeaderStationName"></h3>
+          <span class="close-button" onclick="closeStationPopup()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-body-left">
+            <img id="modalStationImage" src="" alt="Station Image" class="modal-station-image"/>
+          </div>
+          <div class="modal-body-right">
+            <h4 id="modalBodyStationName"></h4>
+            <p><strong>Địa chỉ:</strong> <span id="modalStationAddress"></span></p>
+            <p><strong>Điện thoại:</strong> <span id="modalStationPhone"></span></p>
+            <!-- If there's a specific "Hotline" field, it can be added here -->
+            <!-- <p><strong>Hotline:</strong> <span id="modalStationHotline"></span></p> -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-modal-close" onclick="closeStationPopup()">Close</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
