@@ -12,7 +12,9 @@
     <div class="register-container">
         <div class="register-card">
             <div class="register-header">
-                <i class="fa-solid fa-house fa-xl home-icon"></i>
+                <a href="http://localhost:8080/train-booking-system/searchTrip" class="home-link">
+                    <i class="fa-solid fa-house fa-xl home-icon"></i>
+                </a>
                 <h2>Đăng Ký</h2>
             </div>
             <form action="register" method="post" class="register-form">

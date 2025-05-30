@@ -11,7 +11,9 @@
 <body>
     <div class="change-password-container">
         <div class="change-password-card">
-                <i class="fa-solid fa-house fa-xl home-icon"></i>
+                <a href="http://localhost:8080/train-booking-system/searchTrip" class="home-link">
+                    <i class="fa-solid fa-house fa-xl home-icon"></i>
+                </a>
             <div class="change-password-header">
                 <h2>Thay đổi mật khẩu</h2>
             </div>
