@@ -46,23 +46,46 @@ function toggleTrainItemDetails(trainItemElement) {
 }
 
 function selectCarriage(selectedCarriageElement, trainItemElement) {
-    // Remove 'active' class from all carriages within the same train item
-    const allCarriagesInTrain = trainItemElement.querySelectorAll('.carriage-item');
-    allCarriagesInTrain.forEach(c => c.classList.remove('active'));
+    // Find the parent .train-composition-display to scope the active class removal
+    const compositionDisplay = selectedCarriageElement.closest('.train-composition-display');
+    if (!compositionDisplay) return;
+
+    // Remove 'active' class from all carriages within the same composition display
+    const allCarriagesInComposition = compositionDisplay.querySelectorAll('.carriage-item');
+    allCarriagesInComposition.forEach(c => c.classList.remove('active'));
 
     // Add 'active' class to the clicked carriage
     selectedCarriageElement.classList.add('active');
 
+    // Retrieve data from the selected carriage
+    const coachTypeName = selectedCarriageElement.dataset.coachTypename;
+    const coachPosition = selectedCarriageElement.dataset.coachPosition;
+    const coachDescription = selectedCarriageElement.dataset.coachDescription;
+    const tripId = selectedCarriageElement.dataset.tripId;
+    const tripLeg = selectedCarriageElement.dataset.tripLeg; // 'outbound' or 'return'
+
+    // Update the carriage details description block
+    const descriptionBlockId = `carriageDescription-${tripLeg}-${tripId}`;
+    const descriptionBlock = document.getElementById(descriptionBlockId);
+    if (descriptionBlock) {
+        if (coachTypeName && coachPosition) {
+            let descriptionHtml = `<strong>${coachTypeName} - Toa ${coachPosition}</strong>`;
+            if (coachDescription && coachDescription !== "null" && coachDescription.trim() !== "") {
+                descriptionHtml += `<br>${coachDescription}`;
+            }
+            descriptionBlock.innerHTML = `<p>${descriptionHtml}</p>`;
+        } else {
+            descriptionBlock.innerHTML = `<p>Thông tin chi tiết không có sẵn.</p>`;
+        }
+    }
+
     // Update the seat details block (placeholder logic)
-    const seatDetailsBlock = trainItemElement.querySelector('.seat-details-block');
-    const carriageId = selectedCarriageElement.dataset.carriageId; // Assuming data-carriage-id="1", "2", etc.
-    
+    const seatDetailsBlockId = `seatDetailsBlock-${tripLeg}-${tripId}`;
+    const seatDetailsBlock = document.getElementById(seatDetailsBlockId);
     if (seatDetailsBlock) {
-        seatDetailsBlock.innerHTML = `<p>Hiển thị sơ đồ ghế cho Toa ${carriageId}.</p> 
+        seatDetailsBlock.innerHTML = `<p>Sơ đồ ghế cho Toa ${coachPosition}.</p> 
                                    <p>(Đây là placeholder - sơ đồ ghế thực tế sẽ được tải ở đây.)</p>`;
         // TODO: Implement actual seat loading/rendering logic here
-        // This might involve an AJAX call to fetch seat layout for the carriageId and tripId
-        // For now, it's just a placeholder message.
     }
 }
 

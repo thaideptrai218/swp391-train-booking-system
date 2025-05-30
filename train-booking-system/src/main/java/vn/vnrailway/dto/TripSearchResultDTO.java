@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List; // Added import
 
 @Data
 @NoArgsConstructor
@@ -38,6 +39,9 @@ public class TripSearchResultDTO {
     
     // Other relevant information
     private String tripStatus;                  // Status of the trip (e.g., "Scheduled"), SP filters on T.TripStatus
+
+    // List of coaches for this trip leg
+    private List<CoachInfoDTO> coaches;
 
     // Getter for JSTL fmt:formatDate compatibility
     public java.util.Date getScheduledDepartureAsDate() {

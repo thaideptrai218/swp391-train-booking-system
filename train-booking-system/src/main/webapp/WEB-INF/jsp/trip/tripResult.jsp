@@ -64,15 +64,34 @@
                                         </span>
                                     </div>
                                     <div class="expanded-details" style="display:none;">
-                                        <div class="carriage-list">
-                                            <c:forEach var="i" begin="1" end="15">
-                                                <div class="carriage-item ${i == 1 ? 'active' : ''}" data-carriage-id="${i}" tabindex="0">
-                                                    <i class="fas fa-train"></i> Toa ${i}
-                                                </div>
-                                            </c:forEach>
+                                        <div class="train-composition-display" id="trainComposition-outbound-${trip.tripId}">
+                                            <c:if test="${not empty trip.coaches}">
+                                                <c:forEach var="coachInfo" items="${trip.coaches}">
+                                                    <div class="carriage-item" 
+                                                         data-coach-id="${coachInfo.coachId}" 
+                                                         data-coach-typename="${coachInfo.coachTypeName}" 
+                                                         data-coach-position="${coachInfo.positionInTrain}"
+                                                         data-coach-description="${coachInfo.coachTypeDescription}"
+                                                         data-trip-id="${trip.tripId}"
+                                                         data-trip-leg="outbound"
+                                                         tabindex="0">
+                                                        <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" 
+                                                             alt="Toa ${coachInfo.positionInTrain}" class="carriage-svg-icon"/>
+                                                        <span class="carriage-number-label">${coachInfo.positionInTrain}</span>
+                                                    </div>
+                                                </c:forEach>
+                                            </c:if>
+                                            <div class="train-head-item">
+                                                <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" 
+                                                     alt="Đầu tàu ${trip.trainName}" class="train-head-svg-icon"/>
+                                                <span class="train-name-label">${trip.trainName}</span>
+                                            </div>
                                         </div>
-                                        <div class="seat-details-block">
-                                            <p>Sơ đồ ghế cho Toa 1.</p>
+                                        <div class="carriage-details-description" id="carriageDescription-outbound-${trip.tripId}">
+                                            <p>Chọn một toa để xem chi tiết.</p>
+                                        </div>
+                                        <div class="seat-details-block" id="seatDetailsBlock-outbound-${trip.tripId}">
+                                            <p>Sơ đồ ghế sẽ được hiển thị ở đây.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -110,21 +129,40 @@
                                         </span>
                                         <span class="seats-info">
                                                 Còn trống: -- <br/> Đã đặt: --
-                                            </span>
-                                        </div>
-                                        <div class="expanded-details" style="display:none;">
-                                            <div class="carriage-list">
-                                                <c:forEach var="i" begin="1" end="15">
-                                                    <div class="carriage-item ${i == 1 ? 'active' : ''}" data-carriage-id="${i}" tabindex="0">
-                                                        <i class="fas fa-train"></i> Toa ${i}
+                                        </span>
+                                    </div>
+                                    <div class="expanded-details" style="display:none;">
+                                        <div class="train-composition-display" id="trainComposition-return-${trip.tripId}">
+                                            <c:if test="${not empty trip.coaches}">
+                                                <c:forEach var="coachInfo" items="${trip.coaches}">
+                                                    <div class="carriage-item" 
+                                                         data-coach-id="${coachInfo.coachId}" 
+                                                         data-coach-typename="${coachInfo.coachTypeName}" 
+                                                         data-coach-position="${coachInfo.positionInTrain}"
+                                                         data-coach-description="${coachInfo.coachTypeDescription}"
+                                                         data-trip-id="${trip.tripId}"
+                                                         data-trip-leg="return"
+                                                         tabindex="0">
+                                                        <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" 
+                                                             alt="Toa ${coachInfo.positionInTrain}" class="carriage-svg-icon"/>
+                                                        <span class="carriage-number-label">Toa ${coachInfo.positionInTrain}</span>
                                                     </div>
                                                 </c:forEach>
-                                            </div>
-                                            <div class="seat-details-block">
-                                                <p>Sơ đồ ghế cho Toa 1.</p>
+                                            </c:if>
+                                            <div class="train-head-item">
+                                                <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" 
+                                                     alt="Đầu tàu ${trip.trainName}" class="train-head-svg-icon"/>
+                                                <span class="train-name-label">${trip.trainName}</span>
                                             </div>
                                         </div>
+                                        <div class="carriage-details-description" id="carriageDescription-return-${trip.tripId}">
+                                            <p>Chọn một toa để xem chi tiết.</p>
+                                        </div>
+                                        <div class="seat-details-block" id="seatDetailsBlock-return-${trip.tripId}">
+                                            <p>Sơ đồ ghế sẽ được hiển thị ở đây.</p>
+                                        </div>
                                     </div>
+                                </div>
                                 </c:forEach>
                             </div>
                         </c:when>

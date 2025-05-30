@@ -94,7 +94,7 @@
 }
 
 .train-item {
-    background: #EDF8FF;
+    background: #edf8ff;
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 15px;
@@ -179,11 +179,13 @@
     border-top: 1px solid #eee;
 }
 
+/* Old carriage list styles - commented out */
+/*
 .carriage-list {
     display: flex;
     flex-direction: row;
-    overflow-x: auto; /* Allow horizontal scrolling for many carriages */
-    padding-bottom: 10px; /* Space for scrollbar */
+    overflow-x: auto; 
+    padding-bottom: 10px; 
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -194,7 +196,7 @@
     border-radius: 4px;
     background-color: #f0f0f0;
     cursor: pointer;
-    white-space: nowrap; /* Prevent carriage text from wrapping */
+    white-space: nowrap; 
     transition: background-color 0.3s ease, border-color 0.3s ease;
     display: flex;
     align-items: center;
@@ -211,7 +213,72 @@
     border-color: #0056b3;
 }
 .carriage-item.active .fa-train {
-    color: white; /* Ensure icon color contrasts with active background */
+    color: white; 
+}
+*/
+
+/* New Train Composition Styles */
+.train-composition-display {
+    display: flex;
+    flex-direction: row; /* Coaches are sorted descending in backend, so train head is last item in DOM */
+    align-items: center; /* Align bottoms of SVGs */
+    padding: 10px 0;
+    margin-bottom: 15px;
+    overflow-x: auto; /* Enable horizontal scrolling if train is too long */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+}
+
+.train-composition-display .carriage-item,
+.train-composition-display .train-head-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent; /* For active state */
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0; /* Prevent items from shrinking */
+}
+
+.train-composition-display .carriage-item:hover,
+.train-composition-display .train-head-item:hover {
+    background-color: #e9ecef;
+}
+
+.train-composition-display .carriage-item.active {
+    border-color: #007bff;
+    background-color: #cfe2ff;
+}
+
+.train-composition-display .carriage-svg-icon {
+    height: 30px; /* Adjust as needed */
+    width: auto; /* Maintain aspect ratio */
+    margin-bottom: 3px;
+}
+
+.train-composition-display .train-head-svg-icon {
+    height: 30px; /* Adjust as needed, slightly taller than carriage */
+    width: auto;
+    margin-bottom: 3px;
+}
+
+.train-composition-display .carriage-number-label,
+.train-composition-display .train-name-label {
+    font-size: 0.8em;
+    color: #333;
+    white-space: nowrap;
+}
+
+.carriage-details-description {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    min-height: 30px; /* Adjust as needed */
+    font-size: 0.9em;
+    color: #444;
 }
 
 .seat-details-block {
