@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <!DOCTYPE html>
         <html>
 
@@ -43,16 +43,15 @@
                                 <tbody>
                                     <tr>
                                         <td>Mã đặt chỗ <span style="color:red">*</span></td>
-                                        <td><input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ"
-                                                required></td>
+                                        <td><input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ" value="${bookingCode}" required></td>
                                     </tr>
                                     <tr>
                                         <td>Điện thoại</td>
-                                        <td><input type="text" placeholder="Nhập số điện thoại"></td>
+                                        <td><input type="text" placeholder="Nhập số điện thoại" value="${checkBookingDTO.userPhoneNumber}"></td>
                                     </tr>
                                     <tr>
                                         <td>Email</td>
-                                        <td><input type="email" placeholder="Email"><br></td>
+                                        <td><input type="email" placeholder="Email" value="${checkBookingDTO.userEmail}"><br></td>
                                     </tr>
                                     <tr>
                                         <td><button type="submit">Xác Nhận</button></td>
@@ -62,43 +61,51 @@
                         </form>
                     </div>
 
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger">${error}</div>
-                    </c:if>
+                    <div>
+                        <c:if test="${not empty errorMessage}">
+                            <p style="color: red">${errorMessage}</p>
+                        </c:if>
 
-                    <c:if test="${not empty booking}">
-                        <div class="booking-info">
-                            <h3>Thông tin đặt chỗ</h3>
-                            <p>Mã đặt chỗ: ${booking.bookingCode}</p>
-                            <p>Họ tên: ${user.fullName}</p>
-                            <p>Điện thoại: ${user.phoneNumber}</p>
-                            <p>Email: ${user.email}</p>
-                            <p>Trạng thái: ${booking.bookingStatus}</p>
-                        </div>
-                    </c:if>
-                        <!-- <div>
-                        <table>
-                            <thead>
+                        <c:if test="${not empty checkBookingDTO}">
+                            <h3>Thông tin người đặt:</h3>
+                            <p>Họ tên: ${checkBookingDTO.userFullName}</p>
+                            <p>Email: ${checkBookingDTO.userEmail}</p>
+                            <p>CMND: ${checkBookingDTO.userIDCardNumber}</p>
+                            <p>SĐT: ${checkBookingDTO.userPhoneNumber}</p>
+
+                            <h3>Danh sách vé:</h3>
+                            <table border="1" cellpadding="5" cellspacing="0">
                                 <tr>
-                                    <th>Mã đặt chỗ</th>
-                                    <th>Họ tên</th>
-                                    <th>Điện thoại</th>
-                                    <th>Email</th>
+                                    <th>Hành khách</th>
+                                    <th>CMND</th>
+                                    <th>Loại</th>
+                                    <th>Ghế</th>
+                                    <th>Loại ghế</th>
+                                    <th>Toa</th>
+                                    <th>Tàu</th>
+                                    <th>Ga đi</th>
+                                    <th>Ga đến</th>
+                                    <th>Giá</th>
                                     <th>Trạng thái</th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>${booking.bookingCode}</td>
-                                    <td>${user.fullName}</td>
-                                    <td>${user.phoneNumber}</td>
-                                    <td>${user.email}</td>
-                                    <td>${booking.bookingStatus}</td>
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div> -->
+                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
+                                    <tr>
+                                        <td>${p.passengerFullName}</td>
+                                        <td>${p.passengerIDCard}</td>
+                                        <td>${p.passengerType}</td>
+                                        <td>${p.seatNumber}</td>
+                                        <td>${p.seatTypeName}</td>
+                                        <td>${p.coachName}</td>
+                                        <td>${p.trainName}</td>
+                                        <td>${p.startStationName}</td>
+                                        <td>${p.endStationName}</td>
+                                        <td>${p.price}</td>
+                                        <td>${p.ticketStatus}</td>
+                                    </tr>
+                                </c:forEach>
+                            </table>
+                        </c:if>
+                    </div>
                 </section>
 
                 <div>
