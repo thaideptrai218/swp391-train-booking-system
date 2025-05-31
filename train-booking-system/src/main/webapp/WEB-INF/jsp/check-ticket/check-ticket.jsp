@@ -70,9 +70,9 @@
                         <div class="booking-info">
                             <h3>Thông tin đặt chỗ</h3>
                             <p>Mã đặt chỗ: ${booking.bookingCode}</p>
-                            <!-- <p>Họ tên: ${user.fullName}</p>
+                            <p>Họ tên: ${user.fullName}</p>
                             <p>Điện thoại: ${user.phoneNumber}</p>
-                            <p>Email: ${user.email}</p> -->
+                            <p>Email: ${user.email}</p>
                             <p>Trạng thái: ${booking.bookingStatus}</p>
                         </div>
                     </c:if>
