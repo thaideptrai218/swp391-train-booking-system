@@ -221,10 +221,9 @@
 .train-composition-display {
     display: flex;
     flex-direction: row; /* Coaches are sorted descending in backend, so train head is last item in DOM */
-    align-items: center; /* Align bottoms of SVGs */
+    align-items: flex-end; /* Align bottoms of SVGs, changed from center to flex-end */
     padding: 10px 0;
     margin-bottom: 15px;
-    overflow-x: auto; /* Enable horizontal scrolling if train is too long */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
 }
 
@@ -239,6 +238,7 @@
     border-radius: 4px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
     flex-shrink: 0; /* Prevent items from shrinking */
+    position: relative; /* For tooltip positioning */
 }
 
 .train-composition-display .carriage-item:hover,
@@ -270,15 +270,55 @@
     white-space: nowrap;
 }
 
-.carriage-details-description {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid #e0e0e0;
-    background-color: #f9f9f9;
+/* Tooltip for carriage item */
+.train-composition-display .carriage-item::after {
+    content: attr(data-coach-typename);
+    position: absolute;
+    bottom: 100%; /* Position above the item */
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px); /* Center and add a small gap */
+    background-color: #333;
+    color: white;
+    padding: 5px 8px;
     border-radius: 4px;
-    min-height: 30px; /* Adjust as needed */
-    font-size: 0.9em;
-    color: #444;
+    font-size: 0.75em;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 10;
+    pointer-events: none; /* So it doesn't interfere with clicks on the item itself */
+}
+
+.train-composition-display .carriage-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* Slide in effect */
+}
+
+.carriage-details-description {
+    margin-top: 15px; /* Increased margin */
+    padding: 15px 20px; /* Increased padding */
+    border: none; /* Removed border for a cleaner look */
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Softer radius */
+    min-height: 40px;
+    font-size: 0.95em; /* Slightly larger font */
+    color: #333; /* Darker text for better contrast */
+    text-align: center; /* Center align text */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer, more modern shadow */
+    line-height: 1.6; /* Improved line height for readability */
+}
+
+.carriage-details-description p {
+    margin: 0; /* Remove default p margin if any */
+}
+
+.carriage-details-description strong {
+    display: block; /* Make strong elements block for better centering if needed */
+    margin-bottom: 5px; /* Space after the main title */
+    font-size: 1.05em;
+    color: #10375c; /* Theme color */
 }
 
 .seat-details-block {

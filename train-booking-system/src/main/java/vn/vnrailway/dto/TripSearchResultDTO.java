@@ -24,6 +24,7 @@ public class TripSearchResultDTO {
     private LocalDateTime scheduledArrival;     // Scheduled arrival time at the destination station for this leg - from SP: ArrivalTime
     
     private int durationMinutes;                // Calculated duration of this leg in minutes - from SP: DurationMinutes
+    private double distanceTraveledKm;          // Calculated distance for this leg in kilometers - from SP
 
     private LocalDateTime tripOverallDepartureTime; // Overall departure time of the trip from its very first station - from SP: TripOverallDeparture
     private LocalDateTime tripOverallArrivalTime;   // Overall arrival time of the trip at its very last station - from SP: TripOverallArrival

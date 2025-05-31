@@ -207,10 +207,11 @@ public class TripRepositoryImpl implements TripRepository {
 
                         dto.setLegType(rs.getString("LegType"));
                         dto.setTripId(rs.getInt("TripID"));
+                        dto.setTrainId(rs.getInt("TrainID")); // Mapping TrainID
                         dto.setTrainName(rs.getString("TrainName"));
                         dto.setRouteName(rs.getString("RouteName"));
                         dto.setOriginStationName(rs.getString("OriginStation"));
-                        dto.setTrainId(rs.getInt("trainId"));
+                        // dto.setTrainId(rs.getInt("trainId")); // Already mapped above as TrainID, ensure SP output name consistency
 
                         Timestamp depTimestamp = rs.getTimestamp("DepartureTime");
                         if (depTimestamp != null) {
@@ -224,6 +225,7 @@ public class TripRepositoryImpl implements TripRepository {
                         }
 
                         dto.setDurationMinutes(rs.getInt("DurationMinutes"));
+                        dto.setDistanceTraveledKm(rs.getDouble("DistanceTraveledKm")); // Mapping DistanceTraveledKm
 
                         Timestamp overallDepTimestamp = rs.getTimestamp("TripOverallDeparture");
                         if (overallDepTimestamp != null) {
@@ -240,10 +242,10 @@ public class TripRepositoryImpl implements TripRepository {
                         dto.setOriginStationId(originStationId); // From method parameter
                         dto.setDestinationStationId(destinationStationId); // From method parameter
 
-                        // trainId and routeId are not directly returned by the SP's final SELECT.
-                        // They will remain as default (0 for int) unless the SP is modified or
-                        // they are populated in a service layer.
-                        // For now, we are not setting them from the ResultSet here.
+                        // routeId is not directly returned by the SP's final SELECT.
+                        // It will remain as default (0 for int) unless the SP is modified or
+                        // populated in a service layer.
+                        // For now, we are not setting it from the ResultSet here.
 
                         results.add(dto);
                     }
