@@ -44,7 +44,11 @@
                     <c:when test="${not empty outboundTrips}">
                         <div class="train-list">
                             <c:forEach var="trip" items="${outboundTrips}">
-                                <div class="train-item" data-trip-id="${trip.tripId}" tabindex="0">
+                                <div class="train-item" 
+                                     data-trip-id="${trip.tripId}" 
+                                     data-leg-origin-station-id="${trip.originStationId}"
+                                     data-leg-dest-station-id="${trip.destinationStationId}"
+                                     tabindex="0">
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
@@ -72,12 +76,15 @@
                                                          data-coach-typename="${coachInfo.coachTypeName}" 
                                                          data-coach-position="${coachInfo.positionInTrain}"
                                                          data-coach-description="${coachInfo.coachTypeDescription}"
+                                                         data-coach-capacity="${coachInfo.capacity}"
+                                                         data-coach-is-compartmented="${coachInfo.isCompartmented()}"
+                                                         data-coach-default-compartment-capacity="${not empty coachInfo.defaultCompartmentCapacity ? coachInfo.defaultCompartmentCapacity : ''}"
                                                          data-trip-id="${trip.tripId}"
                                                          data-trip-leg="outbound"
                                                          tabindex="0">
                                                         <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" 
                                                              alt="Toa ${coachInfo.positionInTrain}" class="carriage-svg-icon"/>
-                                                        <span class="carriage-number-label">${coachInfo.positionInTrain}</span>
+                                                        <span class="carriage-number-label">Toa ${coachInfo.positionInTrain}</span>
                                                     </div>
                                                 </c:forEach>
                                             </c:if>
@@ -110,9 +117,13 @@
                     <h2>Chiều về: <c:out value="${returnDateDisplay}"/> từ <c:out value="${destinationStationDisplay}"/> đến <c:out value="${originStationDisplay}"/></h2>
                     <c:choose>
                         <c:when test="${not empty returnTrips}">
-                            <div class="train-list">
-                                <c:forEach var="trip" items="${returnTrips}">
-                                    <div class="train-item" data-trip-id="${trip.tripId}" tabindex="0">
+                        <div class="train-list">
+                            <c:forEach var="trip" items="${returnTrips}">
+                                <div class="train-item" 
+                                     data-trip-id="${trip.tripId}"
+                                     data-leg-origin-station-id="${trip.originStationId}" 
+                                     data-leg-dest-station-id="${trip.destinationStationId}"
+                                     tabindex="0">
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
@@ -140,6 +151,9 @@
                                                          data-coach-typename="${coachInfo.coachTypeName}" 
                                                          data-coach-position="${coachInfo.positionInTrain}"
                                                          data-coach-description="${coachInfo.coachTypeDescription}"
+                                                         data-coach-capacity="${coachInfo.capacity}"
+                                                         data-coach-is-compartmented="${coachInfo.isCompartmented}"
+                                                         data-coach-default-compartment-capacity="${not empty coachInfo.defaultCompartmentCapacity ? coachInfo.defaultCompartmentCapacity : ''}"
                                                          data-trip-id="${trip.tripId}"
                                                          data-trip-leg="return"
                                                          tabindex="0">

@@ -60,6 +60,8 @@ public class TripServiceImpl implements TripService {
                             coachInfo.setCoachTypeName(coachType.getTypeName());
                             coachInfo.setCoachTypeDescription(coachType.getDescription());
                             coachInfo.setCapacity(coach.getCapacity());
+                            coachInfo.setCompartmented(coachType.isCompartmented()); // Populate from CoachType model
+                            coachInfo.setDefaultCompartmentCapacity(coachType.getDefaultCompartmentCapacity()); // Populate from CoachType model
                             // coachInfo.setCoachSpecificName(coach.getCoachName()); // If needed
                             coachInfoList.add(coachInfo);
                         } else {

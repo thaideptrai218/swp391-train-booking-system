@@ -220,11 +220,11 @@
 /* New Train Composition Styles */
 .train-composition-display {
     display: flex;
-    flex-direction: row; /* Coaches are sorted descending in backend, so train head is last item in DOM */
-    align-items: flex-end; /* Align bottoms of SVGs, changed from center to flex-end */
+    flex-direction: row;
+    align-items: flex-end;
     padding: 10px 0;
     margin-bottom: 15px;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+    -webkit-overflow-scrolling: touch;
 }
 
 .train-composition-display .carriage-item,
@@ -234,11 +234,11 @@
     align-items: center;
     text-align: center;
     cursor: pointer;
-    border: 1px solid transparent; /* For active state */
+    border: 1px solid transparent;
     border-radius: 4px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    flex-shrink: 0; /* Prevent items from shrinking */
-    position: relative; /* For tooltip positioning */
+    flex-shrink: 0;
+    position: relative;
 }
 
 .train-composition-display .carriage-item:hover,
@@ -252,13 +252,13 @@
 }
 
 .train-composition-display .carriage-svg-icon {
-    height: 30px; /* Adjust as needed */
-    width: auto; /* Maintain aspect ratio */
+    height: 35px; /* Adjusted size */
+    width: auto;
     margin-bottom: 3px;
 }
 
 .train-composition-display .train-head-svg-icon {
-    height: 30px; /* Adjust as needed, slightly taller than carriage */
+    height: 35px; /* Adjusted size */
     width: auto;
     margin-bottom: 3px;
 }
@@ -325,10 +325,11 @@
     margin-top: 10px;
     padding: 15px;
     border: 1px dashed #ccc;
-    min-height: 150px; /* Placeholder height */
+    min-height: 200px; /* Placeholder height */
     background-color: #fdfdfd;
     text-align: center;
     color: #777;
+    overflow: auto;
 }
 
 .no-results {
@@ -339,4 +340,141 @@
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
+}
+
+/* Seat Layout Styles */
+.seat-details-block {
+    background-color: #f0f4f8; /* Light background for the whole block */
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat-grid {
+    display: flex;
+    flex-direction: column; /* Rows stacked vertically */
+    align-items: start; /* Center rows/compartments in the block */
+    gap: 8px; /* Gap between rows or compartments */
+    margin: 0 auto; /* Center the grid if it's narrower than the block */
+    max-width: 100%;
+    overflow: auto;
+}
+
+.seat-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px; /* Gap between seats/aisle in a row */
+}
+
+.aisle-spacer {
+    width: 25px; /* Width of the aisle */
+    height: 35px; /* Match seat height */
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #b0bec5; /* Cadet blue-grey */
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em; /* Smaller font for seat numbers/names */
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        transform 0.1s ease, box-shadow 0.15s ease;
+    user-select: none;
+    color: #37474f; /* Dark slate grey */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.seat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.seat.available:hover {
+    background-color: #e6fffa; /* Mint cream */
+    border-color: #38b2ac; /* Teal */
+}
+
+.seat.selected {
+    background-color: #3182ce; /* Blue */
+    color: white;
+    border-color: #2c5282; /* Darker blue */
+    transform: scale(1.05) translateY(-1px);
+    box-shadow: 0 3px 6px rgba(49, 130, 206, 0.4);
+}
+
+.seat.occupied,
+.seat.disabled {
+    background-color: #e2e8f0; /* Slate 200 */
+    color: #718096; /* Slate 500 */
+    border-color: #cbd5e0; /* Slate 300 */
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.seat.occupied:hover,
+.seat.disabled:hover {
+    transform: none; /* No hover effect for non-available seats */
+}
+/* BERTH LEvels */
+.berth-levels .berth-level {
+    height: 35px; /* Height of each berth level */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Compartment Specific Styles */
+.compartment-grid {
+    display: flex;
+    gap: 15px; /* Gap between compartments */
+    flex-direction: row;
+    justify-content: start;
+    align-items: self-end;
+}
+
+.compartment {
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.compartment-label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #4b5563; /* Gray 600 */
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.berths-container {
+    display: flex;
+    flex-direction: row; /* Stack berths vertically by default */
+    gap: 5px;
+    align-items: center;
+}
+
+/* Example for 2-column berth layout if needed, can be applied via JS or specific class */
+.berths-container.two-column {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.seat.berth-upper {
+    /* Specific style for upper berths, e.g., a small icon or border */
+    /* border-top: 2px dashed #90cdf4; */
+}
+
+.seat.berth-lower {
+    /* Specific style for lower berths */
+    /* border-bottom: 2px dashed #90cdf4; */
 }

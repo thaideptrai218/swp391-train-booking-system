@@ -20,12 +20,19 @@ public class CoachTypeRepositoryImpl implements CoachTypeRepository {
         coachType.setTypeName(rs.getString("TypeName"));
         coachType.setPriceMultiplier(rs.getBigDecimal("PriceMultiplier"));
         coachType.setDescription(rs.getString("Description"));
+        coachType.setCompartmented(rs.getBoolean("IsCompartmented"));
+        int defaultCapacity = rs.getInt("DefaultCompartmentCapacity");
+        if (rs.wasNull()) { // Check if the INT was SQL NULL
+            coachType.setDefaultCompartmentCapacity(null);
+        } else {
+            coachType.setDefaultCompartmentCapacity(defaultCapacity);
+        }
         return coachType;
     }
 
     @Override
     public Optional<CoachType> findById(int coachTypeId) throws SQLException {
-        String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description FROM CoachTypes WHERE CoachTypeID = ?";
+        String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description, IsCompartmented, DefaultCompartmentCapacity FROM CoachTypes WHERE CoachTypeID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coachTypeId);
@@ -41,7 +48,7 @@ public class CoachTypeRepositoryImpl implements CoachTypeRepository {
     @Override
     public List<CoachType> findAll() throws SQLException {
         List<CoachType> coachTypes = new ArrayList<>();
-        String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description FROM CoachTypes";
+        String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description, IsCompartmented, DefaultCompartmentCapacity FROM CoachTypes";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
