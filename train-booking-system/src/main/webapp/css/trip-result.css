@@ -362,6 +362,7 @@
     margin: 0 auto; /* Center the grid if it's narrower than the block */
     max-width: 100%;
     overflow: auto;
+    padding: 10px;
 }
 
 .seat-row {
@@ -411,6 +412,11 @@
     border-color: #2c5282; /* Darker blue */
     transform: scale(1.05) translateY(-1px);
     box-shadow: 0 3px 6px rgba(49, 130, 206, 0.4);
+}
+
+.seat.selected:hover {
+    background-color: #2b6cb0; /* Darker blue on hover */
+    border-color: #2c5282; /* Keep the same border color */
 }
 
 .seat.occupied,
@@ -464,17 +470,9 @@
     align-items: center;
 }
 
-/* Example for 2-column berth layout if needed, can be applied via JS or specific class */
-.berths-container.two-column {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-.seat.berth-upper {
-    /* Specific style for upper berths, e.g., a small icon or border */
-    /* border-top: 2px dashed #90cdf4; */
-}
-
-.seat.berth-lower {
-    /* Specific style for lower berths */
-    /* border-bottom: 2px dashed #90cdf4; */
+.berth-item {
+    display: flex;
+    flex-direction: column; /* Stack berth items vertically */
+    align-items: center; /* Center berth items */
+    gap: 5px; /* Space between berth items */
 }
