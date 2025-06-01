@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing-page.css" />
   </head>
   <body data-context-path="${pageContext.request.contextPath}">
-    <section class="hero">
+    <section class="hero" style="background-image: url('${pageContext.request.contextPath}/assets/images/landing/top_BG.png'); background-size: cover; background-position: center;">
       <header class="navbar">
         <div class="container">
           <div class="logo-block">
