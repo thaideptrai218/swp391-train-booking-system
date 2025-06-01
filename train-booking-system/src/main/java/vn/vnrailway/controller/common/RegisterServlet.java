@@ -92,7 +92,8 @@ public class RegisterServlet extends HttpServlet {
                 } else {
                     // Assuming 'fullName' is used as 'userName' for login
                     // In a real application, you might want a separate username field or generate one.
-                    User newUser = new User(fullName, password, fullName, email, phoneNumber, idCardNumber, "Customer"); // Default role "Customer"
+                    // Added an empty string for 'address' as it's a new field in User model
+                    User newUser = new User(fullName, password, fullName, email, phoneNumber, idCardNumber, "", "Customer"); // Default role "Customer"
 
                     userRepository.save(newUser);
                     response.sendRedirect(request.getContextPath() + "/login.jsp?registrationSuccess=true");

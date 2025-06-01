@@ -74,7 +74,7 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
                     case "customer":
-                        response.sendRedirect(request.getContextPath() + "/customer/dashboard.jsp");
+                        response.sendRedirect(request.getContextPath() + "/customer-profile");
                         break;
                     default:
                         // Handle unknown role or default to a common dashboard

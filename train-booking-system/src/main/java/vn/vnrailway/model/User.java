@@ -12,6 +12,7 @@ public class User {
     private String email;
     private String phoneNumber;
     private String idCardNumber;
+    private String address; // Added for customer profile display
     private String role;
     private boolean isActive;
     private LocalDateTime createdAt;
@@ -23,13 +24,14 @@ public class User {
 
     // Constructor for creating new users (without userID, createdAt, lastLogin)
     public User(String userName, String passwordHash, String fullName, String email,
-                String phoneNumber, String idCardNumber, String role) {
+                String phoneNumber, String idCardNumber, String address, String role) {
         this.userName = userName;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.idCardNumber = idCardNumber;
+        this.address = address;
         this.role = role;
         this.isActive = true; // Default to active for new users
         this.createdAt = LocalDateTime.now(); // Default creation time
@@ -37,7 +39,7 @@ public class User {
 
     // All-argument constructor (useful for mapping from DB)
     public User(int userID, String userName, String passwordHash, String fullName, String email,
-                String phoneNumber, String idCardNumber, String role, boolean isActive,
+                String phoneNumber, String idCardNumber, String address, String role, boolean isActive,
                 LocalDateTime createdAt, LocalDateTime lastLogin) {
         this.userID = userID;
         this.userName = userName;
@@ -46,6 +48,7 @@ public class User {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.idCardNumber = idCardNumber;
+        this.address = address;
         this.role = role;
         this.isActive = isActive;
         this.createdAt = createdAt;
@@ -109,6 +112,14 @@ public class User {
         this.idCardNumber = idCardNumber;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getRole() {
         return role;
     }
@@ -150,6 +161,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", idCardNumber='" + idCardNumber + '\'' +
+                ", address='" + address + '\'' +
                 ", role='" + role + '\'' +
                 ", isActive=" + isActive +
                 ", createdAt=" + createdAt +

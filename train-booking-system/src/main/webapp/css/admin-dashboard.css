@@ -1,5 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 16px; /* Base font size */
     margin: 0;
     background-color: #f4f7f6;
@@ -17,16 +23,32 @@ body {
     background-color: #2c3e50; /* Dark blue-gray */
     color: #ecf0f1; /* Light gray */
     padding: 20px;
+    padding-top: 60px; /* Adjusted for home icon */
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
+    position: relative; /* Establish positioning context for absolute children */
     animation: slideInLeft 0.5s ease-out;
+}
+
+.home-link {
+    position: absolute;
+    top: 30px;
+    left: 15px;
+    color: #93caff;
+    font-size: 1.5rem; /* Keep this font-size as per user's request */
+}
+
+.home-link:hover {
+    color: #b0d8ff;
 }
 
 .sidebar h2 {
     text-align: center;
     margin-bottom: 30px;
     color: #ecf0f1;
+    font-size: 2.2rem; /* Consistent with login.css h2 */
+    font-weight: 700; /* Consistent with login.css h2 */
 }
 
 .sidebar ul {
@@ -45,6 +67,7 @@ body {
     display: block;
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1.1rem; /* Consistent with login.css buttons/labels */
 }
 
 .sidebar ul li a:hover {
@@ -71,6 +94,8 @@ body {
 .header h1 {
     margin: 0;
     color: #2c3e50;
+    font-size: 2.2rem; /* Consistent with login.css h2 */
+    font-weight: 700; /* Consistent with login.css h2 */
 }
 
 .cards-container {
@@ -160,5 +185,67 @@ body {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding-top: 20px; /* Reset padding for smaller screens */
+        position: relative; /* Keep relative for home-link positioning */
+        flex-direction: row; /* Arrange sidebar items horizontally */
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .sidebar h2 {
+        margin-bottom: 0;
+    }
+
+    .sidebar nav {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 0;
+    }
+
+    .sidebar ul li a {
+        padding: 8px 12px;
+        font-size: 1.1rem; /* Consistent with other links/buttons */
+    }
+
+    .home-link {
+        position: static; /* Remove absolute positioning */
+        margin-right: 15px; /* Add some space */
+        font-size: 2.5rem; /* Keep original font-size as per user's request */
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cards-container {
+        grid-template-columns: 1fr; /* Stack cards on small screens */
     }
 }
