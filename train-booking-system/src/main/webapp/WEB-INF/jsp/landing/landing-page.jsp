@@ -165,7 +165,15 @@
                 <div class="route-card-overlay">
                   <div class="route-card-content">
                     <h3 class="route-card-title"><c:out value="${route.displayName}"/></h3>
-                    <%-- route-card-info div and its contents (trips, distance, popular trains) are removed --%>
+                    <div class="route-card-info">
+                        <p>Tàu/Ngày: <c:out value="${route.tripsPerDay}"/></p>
+                        <p>Khoảng Cách: <c:out value="${String.format('%.1f', route.distance)}"/> km</p>
+                        <p>Tàu Nổi Bật:
+                            <c:forEach var="trainName" items="${route.popularTrainNames}" varStatus="loop">
+                                <c:out value="${trainName}"/><c:if test="${not loop.last}">, </c:if>
+                            </c:forEach>
+                        </p>
+                    </div>
                   </div>
                   <a href="${pageContext.request.contextPath}/storeRoute?originID=${route.originStationID}&destinationID=${route.destinationStationID}"
                      class="route-card-button"

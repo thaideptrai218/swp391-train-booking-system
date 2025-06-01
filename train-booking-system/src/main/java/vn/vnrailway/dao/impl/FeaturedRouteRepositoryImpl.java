@@ -6,6 +6,7 @@ import vn.vnrailway.model.FeaturedRoute;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 // import java.util.Optional; // Not strictly needed for findAll
 
@@ -18,16 +19,36 @@ public class FeaturedRouteRepositoryImpl implements FeaturedRouteRepository {
         route.setOriginStationID(rs.getInt("OriginStationID"));
         route.setDestinationStationID(rs.getInt("DestinationStationID"));
         route.setDisplayName(rs.getString("DisplayName"));
-        // The fields backgroundImageUrl, tripsPerDay, distance, popularTrainNames are
-        // not in the DB.
+        route.setDistance(rs.getDouble("Distance"));
+        route.setTripsPerDay(rs.getInt("TripsPerDay"));
+        // Placeholder for popular train names
+        route.setPopularTrainNames(Arrays.asList("SE1", "TN5")); // Example popular trains
         return route;
     }
 
     @Override
     public List<FeaturedRoute> findAll() throws SQLException {
         List<FeaturedRoute> routes = new ArrayList<>();
-        // SQL selects only the 5 columns present in the FeaturedRoutes table.
-        String sql = "SELECT FeaturedRouteID, RouteID, OriginStationID, DestinationStationID, DisplayName FROM FeaturedRoutes";
+        String sql = "SELECT " +
+                "    fr.FeaturedRouteID, " +
+                "    fr.RouteID, " +
+                "    fr.OriginStationID, " +
+                "    fr.DestinationStationID, " +
+                "    fr.DisplayName, " +
+                "    ABS(rs_dest.DistanceFromStart - rs_orig.DistanceFromStart) AS Distance, " +
+                "    (SELECT COUNT(*) FROM Trips t WHERE t.RouteID = fr.RouteID) AS TripsPerDay " +
+                "FROM " +
+                "    FeaturedRoutes fr " +
+                "JOIN " +
+                "    Routes r ON fr.RouteID = r.RouteID " +
+                "JOIN " +
+                "    RouteStations rs_orig ON r.RouteID = rs_orig.RouteID AND fr.OriginStationID = rs_orig.StationID " +
+                "JOIN " +
+                "    RouteStations rs_dest ON r.RouteID = rs_dest.RouteID AND fr.DestinationStationID = rs_dest.StationID "
+                +
+                "GROUP BY " +
+                "    fr.FeaturedRouteID, fr.RouteID, fr.OriginStationID, fr.DestinationStationID, fr.DisplayName, " +
+                "    rs_orig.DistanceFromStart, rs_dest.DistanceFromStart";
 
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
