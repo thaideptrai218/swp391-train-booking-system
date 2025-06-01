@@ -968,19 +968,24 @@ hr {
   background-color: #5a6268; /* Darker shade on hover */
 }
 
-/* Popular Routes Section Styles */
-.popular-routes-section {
+/* Popular Routes Section Styles (Reused for Featured Routes) */
+.popular-routes-section, /* Keep existing for backward compatibility or other uses */
+.featured-routes-section {
+  /* Add new class */
   padding: 40px 0;
   background-color: var(
     --color-bg-body
   ); /* Or a slightly different shade if needed */
 }
 
-.popular-routes-section .section-main-title {
+.popular-routes-section .section-main-title, /* Keep existing */
+.featured-routes-section .section-main-title {
+  /* Add new class */
   text-align: center; /* Center the title for this section */
   margin-bottom: 30px; /* More space below title */
   font-size: 32px; /* Consistent with other section titles */
   color: var(--color-secondary-blue);
+  font-weight: 600; /* Added for emphasis */
 }
 
 .route-cards-grid {
@@ -1102,4 +1107,8 @@ hr {
 
 .route-card-button:hover {
   background-color: #e65a40; /* Darker orange on hover */
+}
+
+.route-card-button .arrow-icon {
+  line-height: 1; /* Helps with vertical alignment of the arrow character */
 }

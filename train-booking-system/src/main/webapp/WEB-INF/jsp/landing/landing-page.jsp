@@ -149,44 +149,36 @@
           </div>
         </div>
 
-        <!-- Popular Routes Section -->
-        <div class="popular-routes-section">
-          <h1 class="section-main-title">Các tuyến đường phổ biến đến Hà Nội</h1>
-          <c:if test="${not empty popularRouteErrorMessage}">
-            <p style="color: red; text-align: center;"><c:out value="${popularRouteErrorMessage}" /></p>
+        <!-- Featured Routes Section -->
+        <div class="featured-routes-section">
+          <h1 class="section-main-title">Tuyến đường nổi bật</h1> <%-- Title based on image --%>
+          <c:if test="${not empty featuredRouteErrorMessage}">
+            <p style="color: red; text-align: center;"><c:out value="${featuredRouteErrorMessage}" /></p>
           </c:if>
-          <c:if test="${empty popularRouteList and empty popularRouteErrorMessage}">
-            <p style="text-align: center;">Không có tuyến đường phổ biến nào để hiển thị.</p>
+          <c:if test="${empty featuredRouteList and empty featuredRouteErrorMessage}">
+            <p style="text-align: center;">Không có tuyến đường nổi bật nào để hiển thị.</p>
           </c:if>
           <div class="route-cards-grid">
-            <c:forEach var="route" items="${popularRouteList}">
+            <c:forEach var="route" items="${featuredRouteList}">
               <div class="route-card">
-                <img src="<c:url value='${route.backgroundImageUrl}'/>" alt="Tuyến từ ${route.originName} đến ${route.destinationName}" class="route-card-bg" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x220?text=Image+Not+Found';"/>
+                <img src="${pageContext.request.contextPath}/assets/images/landing/stations/station${route.originStationID}.jpg" alt="<c:out value='${route.displayName}'/>" class="route-card-bg" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x220?text=Image+Not+Found';"/>
                 <div class="route-card-overlay">
                   <div class="route-card-content">
-                    <h3 class="route-card-title">Tàu từ <c:out value="${route.originName}"/> đến <c:out value="${route.destinationName}"/></h3>
-                    <div class="route-card-info">
-                      <div>
-                        <span>Số chuyến/ngày</span>
-                        <strong><c:out value="${route.tripsPerDay}"/></strong>
-                      </div>
-                      <div>
-                        <span>Khoảng cách</span>
-                        <strong><c:out value="${route.distance}"/></strong>
-                      </div>
-                      <div>
-                        <span>Tàu phổ biến</span>
-                        <strong><c:out value="${route.popularTrainNames}"/></strong>
-                      </div>
-                    </div>
+                    <h3 class="route-card-title"><c:out value="${route.displayName}"/></h3>
+                    <%-- route-card-info div and its contents (trips, distance, popular trains) are removed --%>
                   </div>
-                  <a href="#" class="route-card-button">&rarr;</a>
+                  <a href="${pageContext.request.contextPath}/storeRoute?originID=${route.originStationID}&destinationID=${route.destinationStationID}"
+                     class="route-card-button"
+                     data-originid="${route.originStationID}"
+                     data-destinationid="${route.destinationStationID}">
+                    <span class="arrow-icon">&#x2197;</span>
+                  </a>
                 </div>
               </div>
             </c:forEach>
           </div>
         </div>
-        <!-- End of Popular Routes Section -->
+        <!-- End of Featured Routes Section -->
 
       </div> <!-- This is the closing div of the container that now holds introduce and hot-locations -->
     </div> <!-- This is the closing div of class="body" -->
