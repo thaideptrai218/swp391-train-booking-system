@@ -73,7 +73,7 @@
                   <div class="location-info">
                     <h4 id="station-name-${station.stationID}">
                       <a href="#" onclick="showStationPopup('${station.stationName}', '${station.address}', '${station.phoneNumber}', '${station.stationID}'); return false;" class="station-name-link">
-                        <c:out value="${station.stationName}" />
+                        <c:out value="Ga ${station.stationName}" />
                       </a>
                     </h4>
                     <p>Địa chỉ: <c:out value="${station.address}" /></p>
@@ -119,7 +119,7 @@
             <div class="carousel-navigation">
               <button class="nav-arrow prev-location"><</button>
               <button class="nav-arrow next-location">></button>
-              <a href="#" class="view-all-link">Xem thêm <span class="arrow">&rarr;</span></a>
+              <a href="${pageContext.request.contextPath}/all-locations" class="view-all-link">Xem thêm <span class="arrow">&rarr;</span></a>
             </div>
           </div>
           <div class="carousel-container" id="hotLocationsCarousel">
