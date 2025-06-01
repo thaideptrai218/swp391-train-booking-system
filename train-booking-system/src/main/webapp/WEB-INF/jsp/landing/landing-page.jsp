@@ -35,7 +35,7 @@
           <p class="hero-subtitle">Trải nghiệm dịch vụ chất lượng</p>
 
           <div class="actions">
-            <button class="btn btn-primary">Tìm hiểu thêm</button>
+            <a href="${pageContext.request.contextPath}/train-info" class="btn btn-primary">Tìm hiểu thêm</a>
             <button class="btn btn-secondary">
               <img
                 src="${pageContext.request.contextPath}/assets/images/landing/phone.png"
