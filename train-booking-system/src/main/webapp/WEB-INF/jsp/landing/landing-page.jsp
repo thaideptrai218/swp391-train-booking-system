@@ -140,13 +140,54 @@
                   />
                   <div class="card-content">
                     <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
-                    <button class="btn btn-card"><a href="${location.link}" target="_blank">Xem Chi Tiết</a></button>
+                    <p>Thành phố: <c:out value="${location.city}" /></p>
+                    <p>Vùng: <c:out value="${location.region}" /></p>
                   </div>
                 </div>
               </c:forEach>
             </div>
           </div>
         </div>
+
+        <!-- Popular Routes Section -->
+        <div class="popular-routes-section">
+          <h1 class="section-main-title">Các tuyến đường phổ biến đến Hà Nội</h1>
+          <c:if test="${not empty popularRouteErrorMessage}">
+            <p style="color: red; text-align: center;"><c:out value="${popularRouteErrorMessage}" /></p>
+          </c:if>
+          <c:if test="${empty popularRouteList and empty popularRouteErrorMessage}">
+            <p style="text-align: center;">Không có tuyến đường phổ biến nào để hiển thị.</p>
+          </c:if>
+          <div class="route-cards-grid">
+            <c:forEach var="route" items="${popularRouteList}">
+              <div class="route-card">
+                <img src="<c:url value='${route.backgroundImageUrl}'/>" alt="Tuyến từ ${route.originName} đến ${route.destinationName}" class="route-card-bg" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x220?text=Image+Not+Found';"/>
+                <div class="route-card-overlay">
+                  <div class="route-card-content">
+                    <h3 class="route-card-title">Tàu từ <c:out value="${route.originName}"/> đến <c:out value="${route.destinationName}"/></h3>
+                    <div class="route-card-info">
+                      <div>
+                        <span>Số chuyến/ngày</span>
+                        <strong><c:out value="${route.tripsPerDay}"/></strong>
+                      </div>
+                      <div>
+                        <span>Khoảng cách</span>
+                        <strong><c:out value="${route.distance}"/></strong>
+                      </div>
+                      <div>
+                        <span>Tàu phổ biến</span>
+                        <strong><c:out value="${route.popularTrainNames}"/></strong>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="#" class="route-card-button">&rarr;</a>
+                </div>
+              </div>
+            </c:forEach>
+          </div>
+        </div>
+        <!-- End of Popular Routes Section -->
+
       </div> <!-- This is the closing div of the container that now holds introduce and hot-locations -->
     </div> <!-- This is the closing div of class="body" -->
 

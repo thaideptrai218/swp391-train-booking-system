@@ -16,7 +16,8 @@ public class LocationRepositoryImpl implements LocationRepository {
     @Override
     public List<Location> getAllLocations() throws Exception {
         List<Location> locations = new ArrayList<>();
-        String sql = "SELECT LocationID, LocationName, Link FROM Locations ORDER BY LocationID"; // Assuming a
+        String sql = "SELECT LocationID, LocationName, City, Region, Link FROM Locations ORDER BY LocationID"; // Assuming
+                                                                                                               // a
         // table named
         // 'Locations'
         try (Connection conn = DBContext.getConnection();
@@ -27,6 +28,8 @@ public class LocationRepositoryImpl implements LocationRepository {
                 Location location = new Location();
                 location.setLocationID(rs.getInt("LocationID"));
                 location.setLocationName(rs.getString("LocationName"));
+                location.setCity(rs.getString("City"));
+                location.setRegion(rs.getString("Region"));
                 location.setLink(rs.getString("Link"));
                 locations.add(location);
             }

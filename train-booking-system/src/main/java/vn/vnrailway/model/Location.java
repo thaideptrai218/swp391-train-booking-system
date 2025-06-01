@@ -3,14 +3,18 @@ package vn.vnrailway.model;
 public class Location {
     private int locationID;
     private String locationName;
+    private String city;
+    private String region;
     private String link;
 
     public Location() {
     }
 
-    public Location(int locationID, String locationName, String link) {
+    public Location(int locationID, String locationName, String city, String region, String link) {
         this.locationID = locationID;
         this.locationName = locationName;
+        this.city = city;
+        this.region = region;
         this.link = link;
     }
 
@@ -30,6 +34,22 @@ public class Location {
         this.locationName = locationName;
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public String getLink() {
         return link;
     }
@@ -43,6 +63,8 @@ public class Location {
         return "Location{" +
                 "locationID=" + locationID +
                 ", locationName='" + locationName + '\'' +
+                ", city='" + city + '\'' +
+                ", region='" + region + '\'' +
                 ", link='" + link + '\'' +
                 '}';
     }
