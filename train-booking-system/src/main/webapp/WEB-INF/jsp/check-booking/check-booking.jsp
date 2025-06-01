@@ -29,16 +29,16 @@
             </header>
 
             <main class="main-content">
-                <div>
+                <!-- <div>
                     <img src="${pageContext.request.contextPath}/assets/images/image-26-72.png" class="news" alt="news">
-                </div>
+                </div> -->
 
 
                 <section class="check-info">
                     <div class="form-checking">
                         <label class="et-main-label">TRA CỨU THÔNG TIN ĐẶT CHỖ</label>
                         <p>Để tra cứu thông tin, quý khách vui lòng thông tin bên dưới.</p>
-                        <form id="returnForm">
+                        <form id="returnForm" method="get" action="checkBooking">
                             <table cellspacing="10">
                                 <tbody>
                                     <tr>
@@ -48,12 +48,12 @@
                                     </tr>
                                     <tr>
                                         <td>Điện thoại</td>
-                                        <td><input type="text" placeholder="Nhập số điện thoại"
+                                        <td><input type="text" name="phoneNumber" placeholder="Nhập số điện thoại"
                                                 value="${checkBookingDTO.userPhoneNumber}"></td>
                                     </tr>
                                     <tr>
                                         <td>Email</td>
-                                        <td><input type="email" placeholder="Email"
+                                        <td><input type="email" placeholder="Email" name="email"
                                                 value="${checkBookingDTO.userEmail}"><br></td>
                                     </tr>
                                     <tr>
@@ -71,7 +71,7 @@
                         </c:if>
 
                         <c:if test="${not empty checkBookingDTO}">
-                            <h3>Danh sách vé:</h3>
+                            <h3 style="color: red;">Danh sách vé:</h3>
                             <table border="1" cellpadding="5" cellspacing="0">
                                 <thead>
                                     <tr style="background-color: #5e5e5e50;">
@@ -87,20 +87,15 @@
                                     </tr>
                                 </thead>
 
-                                <c:if test="${not empty checkBookingDTO.infoPassengers}">
+                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
                                     <tbody>
                                         <tr>
                                             <td colspan="9" style="font-weight:bold;">
-                                                ${checkBookingDTO.infoPassengers[0].startStationName} -
-                                                ${checkBookingDTO.infoPassengers[0].endStationName}
-                                                ${checkBookingDTO.infoPassengers[0].scheduledDepartureTime}
+                                                ${p.startStationName} -
+                                                ${p.endStationName}
+                                                ${p.scheduledDepartureTime}
                                             </td>
                                         </tr>
-                                    </tbody>
-                                </c:if>
-
-                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
-                                    <tbody>
                                         <tr>
                                             <td>${p.passengerFullName}</td>
                                             <td>${p.passengerIDCard}</td>
@@ -116,7 +111,7 @@
                                 </c:forEach>
                             </table>
 
-                            <h3>Thông tin người đặt vé</h3>
+                            <h3 style="color: red;">Thông tin người đặt vé</h3>
                             <div class="booking-info-grid">
                                 <div class="form-row">
                                     <label>Họ và tên</label>
@@ -135,9 +130,9 @@
                     </div>
                 </section>
 
-                <div>
+                <!-- <div>
                     <img src="${pageContext.request.contextPath}/assets/images/image-27-73.png" class="news" alt="news">
-                </div>
+                </div> -->
 
             </main>
 

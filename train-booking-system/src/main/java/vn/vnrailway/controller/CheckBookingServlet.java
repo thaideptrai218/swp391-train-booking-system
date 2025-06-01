@@ -41,21 +41,36 @@ public class CheckBookingServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         String bookingCode = request.getParameter("bookingCode");
+        String phoneNumber = request.getParameter("phoneNumber");
+        String email = request.getParameter("email");
 
-        if (bookingCode != null && !bookingCode.trim().isEmpty()) {
-            bookingCode = bookingCode.trim(); // loại bỏ khoảng trắng ở đầu/cuối
-            request.setAttribute("bookingCode", bookingCode);
+        bookingCode = (bookingCode != null) ? bookingCode.trim() : "";
+        phoneNumber = (phoneNumber != null) ? phoneNumber.trim() : "";
+        email = (email != null) ? email.trim() : "";
 
-            try {
-                CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode);
-                if (checkBookingDTO != null) {
-                    request.setAttribute("checkBookingDTO", checkBookingDTO);
-                } else {
-                    request.setAttribute("errorMessage", "Không tìm thấy thông tin đặt chỗ với mã đã nhập.");
+        request.setAttribute("bookingCode", bookingCode);
+        request.setAttribute("phoneNumber", phoneNumber);
+        request.setAttribute("email", email);
+
+        if (!bookingCode.isEmpty() || !phoneNumber.isEmpty() && !email.isEmpty()) {
+            if (bookingCode.isEmpty()) {
+                request.setAttribute("errorMessage", "Vui lòng nhập mã đặt chỗ.");
+            } else if (phoneNumber.isEmpty() && email.isEmpty()) {
+                request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại hoặc email.");
+            } else {
+                try {
+                    CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode,
+                            phoneNumber,
+                            email);
+                    if (checkBookingDTO != null) {
+                        request.setAttribute("checkBookingDTO", checkBookingDTO);
+                    } else {
+                        request.setAttribute("errorMessage", "Không tìm thấy thông tin đặt chỗ với mã đã nhập.");
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    request.setAttribute("errorMessage", "Có lỗi xảy ra khi tra cứu. Vui lòng thử lại sau.");
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                request.setAttribute("errorMessage", "Có lỗi xảy ra khi tra cứu. Vui lòng thử lại sau.");
             }
         }
 
