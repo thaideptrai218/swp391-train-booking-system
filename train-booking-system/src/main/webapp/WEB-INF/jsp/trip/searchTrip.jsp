@@ -247,7 +247,8 @@
             </div>
         </section>
 
-        <script src="${pageContext.request.contextPath}/js/search-trip.js"></script>
-        <script src="${pageContext.request.contextPath}/js/station-autocomplete.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/search-trip.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/passenger-selector.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/station-autocomplete.js"></script>
     </body>
 </html>

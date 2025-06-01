@@ -1,0 +1,478 @@
+.page-wrapper {
+    display: flex;
+    flex-direction: row-reverse; /* This will place the sidebar on the right */
+    gap: 20px; /* Space between sidebar and main content */
+    padding: 20px; /* Padding for the overall page wrapper if not using .container from common.css directly on it */
+}
+
+.sidebar {
+    max-width: 250px; /* Minimum width for the sidebar */
+    min-width: 200px;
+    max-width: 200px;
+    background-color: #f9f9f9; /* Light background for sidebar */
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.shopping-cart-placeholder,
+.mini-search-placeholder {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    min-height: 100px; /* Placeholder height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #777;
+}
+
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trip-header .title {
+    padding: 10px;
+    color: #fff;
+    border-radius: 5px;
+    background: #0082c4;
+    text-align: center;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.change-station-btn {
+    padding: 8px 15px;
+    background: #10375c;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+    box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.02);
+    color: #fff;
+    text-align: center;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 27px;
+}
+
+.change-station-btn:hover {
+    background-color: #0d2b49;
+}
+
+.main-results-content {
+    width: 75%; /* Adjust as needed */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between outbound and return sections */
+}
+
+.train-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between train items */
+}
+
+.train-item {
+    background: #edf8ff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.train-item:hover,
+.train-item.expanded {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.train-item-collapsed-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.train-item-collapsed-summary span {
+    flex-shrink: 0; /* Prevent items from shrinking too much */
+}
+.train-item-collapsed-summary .train-name {
+    font-weight: bold;
+    color: #333;
+}
+.train-item-collapsed-summary .departure-info,
+.train-item-collapsed-summary .arrival-info {
+    font-size: 0.9em;
+    color: #555;
+    min-width: 150px; /* Example min-width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Align items to the start of the flex container */
+}
+
+.train-item-collapsed-summary .departure-info .trip-station,
+.train-item-collapsed-summary .arrival-info .trip-station {
+    font-weight: bold; /* Optionally make station name bold */
+    margin-top: 2px; /* Add a small space between time and station */
+}
+
+/* Remove or comment out old duration-arrow style if it exists */
+/*
+.train-item-collapsed-summary .duration-arrow {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    color: #777;
+}
+*/
+
+.train-item-collapsed-summary .duration-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center icon and text */
+    gap: 2px; /* Space between icon and text */
+    min-width: 100px; /* Adjust as needed */
+}
+
+.train-item-collapsed-summary .duration-info .train-duration-icon {
+    width: 24px; /* Adjust icon size as needed */
+    height: 24px; /* Adjust icon size as needed */
+}
+
+.train-item-collapsed-summary .duration-info .duration-text {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.train-item-collapsed-summary .seats-info {
+    font-size: 0.85em;
+    color: #666;
+    text-align: right;
+    min-width: 120px; /* Example min-width */
+}
+
+.expanded-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Old carriage list styles - commented out */
+/*
+.carriage-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto; 
+    padding-bottom: 10px; 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.carriage-item {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    white-space: nowrap; 
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.carriage-item:hover {
+    background-color: #e0e0e0;
+}
+
+.carriage-item.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+.carriage-item.active .fa-train {
+    color: white; 
+}
+*/
+
+/* New Train Composition Styles */
+.train-composition-display {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.train-composition-display .carriage-item,
+.train-composition-display .train-head-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.train-composition-display .carriage-item:hover,
+.train-composition-display .train-head-item:hover {
+    background-color: #e9ecef;
+}
+
+.train-composition-display .carriage-item.active {
+    border-color: #007bff;
+    background-color: #cfe2ff;
+}
+
+.train-composition-display .carriage-svg-icon {
+    height: 35px; /* Adjusted size */
+    width: auto;
+    margin-bottom: 3px;
+}
+
+.train-composition-display .train-head-svg-icon {
+    height: 35px; /* Adjusted size */
+    width: auto;
+    margin-bottom: 3px;
+}
+
+.train-composition-display .carriage-number-label,
+.train-composition-display .train-name-label {
+    font-size: 0.8em;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Tooltip for carriage item */
+.train-composition-display .carriage-item::after {
+    content: attr(data-coach-typename);
+    position: absolute;
+    bottom: 100%; /* Position above the item */
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px); /* Center and add a small gap */
+    background-color: #333;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 10;
+    pointer-events: none; /* So it doesn't interfere with clicks on the item itself */
+}
+
+.train-composition-display .carriage-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* Slide in effect */
+}
+
+.carriage-details-description {
+    margin-top: 15px; /* Increased margin */
+    padding: 15px 20px; /* Increased padding */
+    border: none; /* Removed border for a cleaner look */
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Softer radius */
+    min-height: 40px;
+    font-size: 0.95em; /* Slightly larger font */
+    color: #333; /* Darker text for better contrast */
+    text-align: center; /* Center align text */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer, more modern shadow */
+    line-height: 1.6; /* Improved line height for readability */
+}
+
+.carriage-details-description p {
+    margin: 0; /* Remove default p margin if any */
+}
+
+.carriage-details-description strong {
+    display: block; /* Make strong elements block for better centering if needed */
+    margin-bottom: 5px; /* Space after the main title */
+    font-size: 1.05em;
+    color: #10375c; /* Theme color */
+}
+
+.seat-details-block {
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px dashed #ccc;
+    min-height: 200px; /* Placeholder height */
+    background-color: #fdfdfd;
+    text-align: center;
+    color: #777;
+    overflow: auto;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    font-size: 1.1em;
+    color: #777;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Seat Layout Styles */
+.seat-details-block {
+    background-color: #f0f4f8; /* Light background for the whole block */
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat-grid {
+    display: flex;
+    flex-direction: column; /* Rows stacked vertically */
+    align-items: start; /* Center rows/compartments in the block */
+    gap: 8px; /* Gap between rows or compartments */
+    margin: 0 auto; /* Center the grid if it's narrower than the block */
+    max-width: 100%;
+    overflow: auto;
+    padding: 10px;
+}
+
+.seat-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px; /* Gap between seats/aisle in a row */
+}
+
+.aisle-spacer {
+    width: 25px; /* Width of the aisle */
+    height: 35px; /* Match seat height */
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #b0bec5; /* Cadet blue-grey */
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em; /* Smaller font for seat numbers/names */
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        transform 0.1s ease, box-shadow 0.15s ease;
+    user-select: none;
+    color: #37474f; /* Dark slate grey */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.seat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.seat.available:hover {
+    background-color: #e6fffa; /* Mint cream */
+    border-color: #38b2ac; /* Teal */
+}
+
+.seat.selected {
+    background-color: #3182ce; /* Blue */
+    color: white;
+    border-color: #2c5282; /* Darker blue */
+    transform: scale(1.05) translateY(-1px);
+    box-shadow: 0 3px 6px rgba(49, 130, 206, 0.4);
+}
+
+.seat.selected:hover {
+    background-color: #2b6cb0; /* Darker blue on hover */
+    border-color: #2c5282; /* Keep the same border color */
+}
+
+.seat.occupied,
+.seat.disabled {
+    background-color: #e2e8f0; /* Slate 200 */
+    color: #718096; /* Slate 500 */
+    border-color: #cbd5e0; /* Slate 300 */
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.seat.occupied:hover,
+.seat.disabled:hover {
+    transform: none; /* No hover effect for non-available seats */
+}
+/* BERTH LEvels */
+.berth-levels .berth-level {
+    height: 35px; /* Height of each berth level */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Compartment Specific Styles */
+.compartment-grid {
+    display: flex;
+    gap: 15px; /* Gap between compartments */
+    flex-direction: row;
+    justify-content: start;
+    align-items: self-end;
+}
+
+.compartment {
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.compartment-label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #4b5563; /* Gray 600 */
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.berths-container {
+    display: flex;
+    flex-direction: row; /* Stack berths vertically by default */
+    gap: 5px;
+    align-items: center;
+}
+
+.berth-item {
+    display: flex;
+    flex-direction: column; /* Stack berth items vertically */
+    align-items: center; /* Center berth items */
+    gap: 5px; /* Space between berth items */
+}

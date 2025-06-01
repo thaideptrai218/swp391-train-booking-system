@@ -130,7 +130,7 @@ body {
     height: 0; /* Default state: no height */
     background-color: transparent;
     border-radius: 2px;
-    z-index: 2; 
+    z-index: 2;
     transition: background-color 0.2s, height 0.2s;
 }
 
@@ -151,7 +151,6 @@ body {
 .input-icon-group:has(#return-date:focus) {
     border-bottom: 0.5px solid rgba(72, 72, 72, 0.2);
 }
-
 
 /* Styles for date input groups */
 .input-icon-group.date-group {
@@ -321,9 +320,9 @@ body {
     cursor: pointer;
     padding: 0 5px;
     position: absolute;
-    top: 50%;
+    top: 0;
     transform: translateY(-50%);
-    right: 8px;
+    right: 0px;
     z-index: 3; /* Above label and input */
 }
 

@@ -13,7 +13,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public Optional<Station> findById(int stationId) throws SQLException {
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region FROM Stations WHERE StationID = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber FROM Stations WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stationId);
@@ -26,6 +26,7 @@ public class StationRepositoryImpl implements StationRepository {
                     station.setAddress(rs.getString("Address"));
                     station.setCity(rs.getString("City"));
                     station.setRegion(rs.getString("Region"));
+                    station.setPhoneNumber(rs.getString("PhoneNumber"));
                     return Optional.of(station);
                 }
             }
@@ -35,7 +36,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public Optional<Station> findByStationCode(String stationCode) throws SQLException {
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region FROM Stations WHERE StationCode = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber FROM Stations WHERE StationCode = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, stationCode);
@@ -48,6 +49,7 @@ public class StationRepositoryImpl implements StationRepository {
                     station.setAddress(rs.getString("Address"));
                     station.setCity(rs.getString("City"));
                     station.setRegion(rs.getString("Region"));
+                    station.setPhoneNumber(rs.getString("PhoneNumber"));
                     return Optional.of(station);
                 }
             }
@@ -58,7 +60,7 @@ public class StationRepositoryImpl implements StationRepository {
     @Override
     public List<Station> findAll() throws SQLException {
         List<Station> stations = new ArrayList<>();
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region FROM Stations";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber FROM Stations";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -70,6 +72,7 @@ public class StationRepositoryImpl implements StationRepository {
                 station.setAddress(rs.getString("Address"));
                 station.setCity(rs.getString("City"));
                 station.setRegion(rs.getString("Region"));
+                station.setPhoneNumber(rs.getString("PhoneNumber"));
                 stations.add(station);
             }
         }
@@ -78,7 +81,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public Station save(Station station) throws SQLException {
-        String sql = "INSERT INTO Stations (StationCode, StationName, Address, City, Region) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Stations (StationCode, StationName, Address, City, Region, PhoneNumber) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
@@ -87,6 +90,7 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setString(3, station.getAddress());
             ps.setString(4, station.getCity());
             ps.setString(5, station.getRegion());
+            ps.setString(6, station.getPhoneNumber());
             
             int affectedRows = ps.executeUpdate();
             
@@ -107,7 +111,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public boolean update(Station station) throws SQLException {
-        String sql = "UPDATE Stations SET StationCode = ?, StationName = ?, Address = ?, City = ?, Region = ? WHERE StationID = ?";
+        String sql = "UPDATE Stations SET StationCode = ?, StationName = ?, Address = ?, City = ?, Region = ?, PhoneNumber = ? WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
@@ -116,7 +120,8 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setString(3, station.getAddress());
             ps.setString(4, station.getCity());
             ps.setString(5, station.getRegion());
-            ps.setInt(6, station.getStationID());
+            ps.setString(6, station.getPhoneNumber());
+            ps.setInt(7, station.getStationID());
             
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -161,7 +166,7 @@ public class StationRepositoryImpl implements StationRepository {
             // Example of saving a new station (uncomment and modify to test)
             /*
             System.out.println("\nTesting save new station:");
-            Station newStation = new Station(0, "TESTCODE", "Test Station Name", "123 Test Address", "Test City", "Test Region");
+            Station newStation = new Station(0, "TESTCODE", "Test Station Name", "123 Test Address", "Test City", "Test Region", "0123456789");
             Station savedStation = stationRepository.save(newStation);
             System.out.println("Saved station: " + savedStation);
             
@@ -169,6 +174,7 @@ public class StationRepositoryImpl implements StationRepository {
             if (savedStation.getStationID() > 0) {
                  System.out.println("\nTesting update station ID: " + savedStation.getStationID());
                  savedStation.setStationName("Test Station Updated Name");
+                 savedStation.setPhoneNumber("9876543210");
                  boolean updated = stationRepository.update(savedStation);
                  System.out.println("Update successful: " + updated);
             

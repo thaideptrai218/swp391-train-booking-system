@@ -12,24 +12,20 @@ public class DBContext {
     private static Properties dbProperties = new Properties();
 
     static {
-        // Load db.properties from the classpath (src/main/resources)
-        String propertiesFileName = "db.properties";
-        try (InputStream input = DBContext.class.getClassLoader().getResourceAsStream(propertiesFileName)) {
+        try (InputStream input = DBContext.class.getClassLoader().getResourceAsStream("db.properties")) {
             if (input == null) {
-                System.err.println("CRITICAL ERROR: " + propertiesFileName + " file not found in classpath. "
-                        + "Application cannot connect to the database. "
-                        + "Please ensure the file exists in 'src/main/resources'.");
-                // Consider throwing a RuntimeException to halt initialization if properties are essential
-                // throw new RuntimeException("Failed to load " + propertiesFileName + ", file not found in classpath: " + propertiesFileName);
+                System.err.println("CRITICAL ERROR: db.properties file not found in classpath. Application cannot connect to the database. Please ensure 'db.properties' is in 'src/main/resources'.");
+                // Optionally throw an exception to halt application startup if DB is critical
+                // throw new RuntimeException("db.properties not found in classpath");
             } else {
                 dbProperties.load(input);
-                // System.out.println("Successfully loaded " + propertiesFileName + " from classpath."); // Optional: for debugging
+                // System.out.println("Successfully loaded db.properties from classpath."); // Optional: for debugging
             }
         } catch (IOException ex) {
-            System.err.println("CRITICAL ERROR: IOException while loading " + propertiesFileName + " from classpath. Details: "
-                    + ex.getMessage());
-            // Consider throwing a RuntimeException
-            // throw new RuntimeException("Failed to load " + propertiesFileName + " due to IOException from classpath", ex);
+            System.err.println("CRITICAL ERROR: IOException while loading db.properties from classpath. Details: " + ex.getMessage());
+            // Optionally throw an exception
+            // throw new RuntimeException("Failed to load db.properties from classpath due to IOException", ex);
+
         }
 
         // Load the JDBC driver
