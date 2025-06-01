@@ -42,21 +42,21 @@ public class CheckBookingServlet extends HttpServlet {
 
         String bookingCode = request.getParameter("bookingCode");
 
-        if (bookingCode != null) {
+        if (bookingCode != null && !bookingCode.trim().isEmpty()) {
             bookingCode = bookingCode.trim(); // loại bỏ khoảng trắng ở đầu/cuối
-        }
+            request.setAttribute("bookingCode", bookingCode);
 
-        try {
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode);
-            if (checkBookingDTO != null) {
-                request.setAttribute("bookingCode", bookingCode);
-                request.setAttribute("checkBookingDTO", checkBookingDTO);
-            } else {
-                request.setAttribute("errorMessage", "No booking found with the provided code.");
+            try {
+                CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode);
+                if (checkBookingDTO != null) {
+                    request.setAttribute("checkBookingDTO", checkBookingDTO);
+                } else {
+                    request.setAttribute("errorMessage", "Không tìm thấy thông tin đặt chỗ với mã đã nhập.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                request.setAttribute("errorMessage", "Có lỗi xảy ra khi tra cứu. Vui lòng thử lại sau.");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Error retrieving booking details. Please try again later.");
         }
 
         request.getRequestDispatcher("/WEB-INF/jsp/check-booking/check-booking.jsp").forward(request, response);

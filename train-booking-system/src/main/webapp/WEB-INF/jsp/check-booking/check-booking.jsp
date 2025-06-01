@@ -58,6 +58,7 @@
                                     </tr>
                                     <tr>
                                         <td><button type="submit">Xác Nhận</button></td>
+
                                     </tr>
                                 </tbody>
                             </table>
@@ -86,13 +87,20 @@
                                     </tr>
                                 </thead>
 
-                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
+                                <c:if test="${not empty checkBookingDTO.infoPassengers}">
                                     <tbody>
                                         <tr>
-                                            <td colspan="9"><strong>${p.startStationName} - ${p.endStationName}
-                                                    ${p.scheduledDepartureTime}</strong></td>
+                                            <td colspan="9" style="font-weight:bold;">
+                                                ${checkBookingDTO.infoPassengers[0].startStationName} -
+                                                ${checkBookingDTO.infoPassengers[0].endStationName}
+                                                ${checkBookingDTO.infoPassengers[0].scheduledDepartureTime}
+                                            </td>
                                         </tr>
+                                    </tbody>
+                                </c:if>
 
+                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
+                                    <tbody>
                                         <tr>
                                             <td>${p.passengerFullName}</td>
                                             <td>${p.passengerIDCard}</td>
@@ -108,11 +116,21 @@
                                 </c:forEach>
                             </table>
 
-                            <h3>Thông tin người đặt:</h3>
-                            <p>Họ tên: ${checkBookingDTO.userFullName}</p>
-                            <p>Email: ${checkBookingDTO.userEmail}</p>
-                            <p>CMND: ${checkBookingDTO.userIDCardNumber}</p>
-                            <p>SĐT: ${checkBookingDTO.userPhoneNumber}</p>
+                            <h3>Thông tin người đặt vé</h3>
+                            <div class="booking-info-grid">
+                                <div class="form-row">
+                                    <label>Họ và tên</label>
+                                    <input type="text" value="${checkBookingDTO.userFullName}" readonly />
+                                    <label>Email</label>
+                                    <input type="text" value="${checkBookingDTO.userEmail}" readonly />
+                                </div>
+                                <div class="form-row">
+                                    <label>Số CMND</label>
+                                    <input type="text" value="${checkBookingDTO.userIDCardNumber}" readonly />
+                                    <label>Số điện thoại</label>
+                                    <input type="text" value="${checkBookingDTO.userPhoneNumber}" readonly />
+                                </div>
+                            </div>
                         </c:if>
                     </div>
                 </section>
