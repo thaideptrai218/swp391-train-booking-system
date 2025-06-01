@@ -6,8 +6,8 @@
 package vn.vnrailway.controller.common;
 
 import java.io.IOException;
-import java.sql.SQLException; // Added import
-import java.util.Optional; // Added import
+import java.sql.SQLException;
+import java.util.Optional;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,31 +26,6 @@ import vn.vnrailway.model.User;
 public class LoginServlet extends HttpServlet {
    
     /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    // Remove processRequest as it's not needed for MVC flow
-    // protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    // throws ServletException, IOException {
-    //     response.setContentType("text/html;charset=UTF-8");
-    //     try (PrintWriter out = response.getWriter()) {
-    //         out.println("<!DOCTYPE html>");
-    //         out.println("<html>");
-    //         out.println("<head>");
-    //         out.println("<title>Servlet LoginServlet</title>");  
-    //         out.println("</head>");
-    //         out.println("<body>");
-    //         out.println("<h1>Servlet LoginServlet at " + request.getContextPath () + "</h1>");
-    //         out.println("</body>");
-    //         out.println("</html>");
-    //     }
-    // } 
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
      * Handles the HTTP <code>GET</code> method.
      * @param request servlet request
      * @param response servlet response
@@ -61,9 +36,9 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         request.getRequestDispatcher("/login.jsp").forward(request, response);
-    } 
+    }
 
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
      * @param request servlet request
      * @param response servlet response
@@ -73,34 +48,50 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        String username = request.getParameter("username");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         UserRepository userRepository = new UserRepositoryImpl();
         Optional<User> userOptional = null;
         try {
-            userOptional = userRepository.findByUsername(username);
+            userOptional = userRepository.findByEmail(email);
         } catch (SQLException e) {
             throw new ServletException("Database error during login", e);
         }
         
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (user.getPasswordHash().equals(password)) { // Use getPasswordHash()
+            if (user.getPasswordHash().equals(password)) {
                 HttpSession session = request.getSession();
                 session.setAttribute("loggedInUser", user);
-                response.sendRedirect(request.getContextPath() + "/index.jsp"); // Redirect to a success page
+                String role = user.getRole();
+
+                switch (role) {
+                    case "admin":
+                        response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                        break;
+                    case "staff":
+                        response.sendRedirect(request.getContextPath() + "/staff/dashboard");
+                        break;
+                    case "customer":
+                        response.sendRedirect(request.getContextPath() + "/customer/dashboard.jsp");
+                        break;
+                    default:
+                        // Handle unknown role or default to a common dashboard
+                        response.sendRedirect(request.getContextPath() + "/index.jsp");
+                        break;
+                }
             } else {
                 // Password mismatch
-                request.setAttribute("errorMessage", "Invalid username or password.");
+                request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             }
         } else {
             // User not found
-            request.setAttribute("errorMessage", "Invalid username or password.");
+            request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
-    } // Closing brace for doPost method
+    }
 
     /** 
      * Returns a short description of the servlet.

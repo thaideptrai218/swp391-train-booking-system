@@ -7,11 +7,16 @@ package vn.vnrailway.controller.common;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException; // Added import
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession; // Added import
+import vn.vnrailway.dao.UserRepository; // Added import
+import vn.vnrailway.dao.impl.UserRepositoryImpl; // Added import
+import vn.vnrailway.model.User; // Added import
 
 
 /**
@@ -68,7 +73,48 @@ public class ChangePasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession();
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            // User is not logged in, redirect to login page
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        String currentPassword = request.getParameter("currentPassword");
+        String newPassword = request.getParameter("newPassword");
+        String confirmNewPassword = request.getParameter("confirmNewPassword");
+
+        String errorMessage = null;
+        String successMessage = null;
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            errorMessage = "Mật khẩu mới và xác nhận mật khẩu mới không khớp.";
+        } else {
+            UserRepository userRepository = new UserRepositoryImpl();
+            try {
+                // Verify current password (plain-text comparison)
+                if (currentPassword.equals(loggedInUser.getPasswordHash())) {
+                    // Update user's password in the database (plain-text)
+                    loggedInUser.setPasswordHash(newPassword);
+                    userRepository.update(loggedInUser); // Assuming an update method exists in UserRepository
+
+                    successMessage = "Mật khẩu đã được thay đổi thành công.";
+                    // Update the session user object as well
+                    session.setAttribute("loggedInUser", loggedInUser);
+                } else {
+                    errorMessage = "Mật khẩu hiện tại không đúng.";
+                }
+            } catch (SQLException e) {
+                errorMessage = "Đã xảy ra lỗi khi thay đổi mật khẩu. Vui lòng thử lại.";
+                e.printStackTrace(); // Log the exception for debugging
+            }
+        }
+
+        request.setAttribute("errorMessage", errorMessage);
+        request.setAttribute("successMessage", successMessage);
+        request.getRequestDispatcher("/changepassword.jsp").forward(request, response);
     }
 
     /** 

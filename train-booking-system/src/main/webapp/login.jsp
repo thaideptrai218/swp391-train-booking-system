@@ -12,17 +12,17 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <a href="http://localhost:8080/train-booking-system/searchTrip" class="home-link">
+                <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
                     <i class="fa-solid fa-house fa-xl home-icon"></i>
                 </a>
                 <h2>Đăng Nhập</h2>
             </div>
             <form action="login" method="post" class="login-form">
                 <div class="form-group">
-                    <label for="username">Tên đăng nhập</label>
+                    <label for="email">Email</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-user icon"></i> <!-- Changed icon to user for username -->
-                        <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập của bạn" required>
+                        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
                     </div>
                 </div>
                 <div class="form-group">

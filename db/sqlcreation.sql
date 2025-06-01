@@ -18,6 +18,7 @@ GO
 USE TrainTicketSystemDB_V1_FinalDesign;
 GO
 
+
 -- --- Enums are handled by CHECK constraints in each table ---
 
 -- Table: Users
@@ -28,7 +29,7 @@ CREATE TABLE Users (
     FullName NVARCHAR(100) NOT NULL,
     Email NVARCHAR(100) NOT NULL,
     PhoneNumber NVARCHAR(20) NOT NULL,
-    PasswordHash NVARCHAR(255) NOT NULL,
+    Password NVARCHAR(100) NOT NULL,
     IDCardNumber NVARCHAR(20) NULL,
     [Role] NVARCHAR(20) NOT NULL CHECK ([Role] IN ('Customer', 'Staff', 'Admin')),
     IsActive BIT NOT NULL DEFAULT 1,
