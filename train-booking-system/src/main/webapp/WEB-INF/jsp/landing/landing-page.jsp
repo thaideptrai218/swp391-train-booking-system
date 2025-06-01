@@ -216,7 +216,7 @@
                   >Chính sách và quy trình giải quyết tranh chấp, khiếu nại</a
                 >
               </li>
-              <li><a href="#">Câu hỏi thường gặp</a></li>
+              <li><a href="${pageContext.request.contextPath}/terms">Câu hỏi thường gặp</a></li>
               <li><a href="#">Tra cứu đơn hàng</a></li>
             </ul>
           </div>
@@ -300,7 +300,7 @@
                 <div class="footer-top">
                     <a href="#">Tin tức</a>
                     <a href="#">Hỗ trợ</a>
-                    <a href="#">FAQ</a>
+                    <a href="${pageContext.request.contextPath}/terms">FAQ</a>
                     <a href="#">Liên hệ</a>
                 </div>
 
