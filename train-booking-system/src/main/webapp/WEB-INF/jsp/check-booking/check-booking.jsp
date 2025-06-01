@@ -35,7 +35,7 @@
 
 
                 <section class="check-info">
-                    <div>
+                    <div class="form-checking">
                         <label class="et-main-label">TRA CỨU THÔNG TIN ĐẶT CHỖ</label>
                         <p>Để tra cứu thông tin, quý khách vui lòng thông tin bên dưới.</p>
                         <form id="returnForm">
@@ -43,15 +43,18 @@
                                 <tbody>
                                     <tr>
                                         <td>Mã đặt chỗ <span style="color:red">*</span></td>
-                                        <td><input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ" value="${bookingCode}" required></td>
+                                        <td><input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ"
+                                                value="${bookingCode}" required></td>
                                     </tr>
                                     <tr>
                                         <td>Điện thoại</td>
-                                        <td><input type="text" placeholder="Nhập số điện thoại" value="${checkBookingDTO.userPhoneNumber}"></td>
+                                        <td><input type="text" placeholder="Nhập số điện thoại"
+                                                value="${checkBookingDTO.userPhoneNumber}"></td>
                                     </tr>
                                     <tr>
                                         <td>Email</td>
-                                        <td><input type="email" placeholder="Email" value="${checkBookingDTO.userEmail}"><br></td>
+                                        <td><input type="email" placeholder="Email"
+                                                value="${checkBookingDTO.userEmail}"><br></td>
                                     </tr>
                                     <tr>
                                         <td><button type="submit">Xác Nhận</button></td>
@@ -61,49 +64,55 @@
                         </form>
                     </div>
 
-                    <div>
+                    <div class="booking-summary">
                         <c:if test="${not empty errorMessage}">
                             <p style="color: red">${errorMessage}</p>
                         </c:if>
 
                         <c:if test="${not empty checkBookingDTO}">
+                            <h3>Danh sách vé:</h3>
+                            <table border="1" cellpadding="5" cellspacing="0">
+                                <thead>
+                                    <tr style="background-color: #5e5e5e50;">
+                                        <th>Hành khách</th>
+                                        <th>CMND</th>
+                                        <th>Loại</th>
+                                        <th>Ghế</th>
+                                        <th>Loại ghế</th>
+                                        <th>Toa</th>
+                                        <th>Tàu</th>
+                                        <th>Giá</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+
+                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="9"><strong>${p.startStationName} - ${p.endStationName}
+                                                    ${p.scheduledDepartureTime}</strong></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>${p.passengerFullName}</td>
+                                            <td>${p.passengerIDCard}</td>
+                                            <td>${p.passengerType}</td>
+                                            <td>${p.seatNumber}</td>
+                                            <td>${p.seatTypeName}</td>
+                                            <td>${p.coachName}</td>
+                                            <td>${p.trainName}</td>
+                                            <td>${p.price}</td>
+                                            <td>${p.ticketStatus}</td>
+                                        </tr>
+                                    </tbody>
+                                </c:forEach>
+                            </table>
+
                             <h3>Thông tin người đặt:</h3>
                             <p>Họ tên: ${checkBookingDTO.userFullName}</p>
                             <p>Email: ${checkBookingDTO.userEmail}</p>
                             <p>CMND: ${checkBookingDTO.userIDCardNumber}</p>
                             <p>SĐT: ${checkBookingDTO.userPhoneNumber}</p>
-
-                            <h3>Danh sách vé:</h3>
-                            <table border="1" cellpadding="5" cellspacing="0">
-                                <tr>
-                                    <th>Hành khách</th>
-                                    <th>CMND</th>
-                                    <th>Loại</th>
-                                    <th>Ghế</th>
-                                    <th>Loại ghế</th>
-                                    <th>Toa</th>
-                                    <th>Tàu</th>
-                                    <th>Ga đi</th>
-                                    <th>Ga đến</th>
-                                    <th>Giá</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
-                                    <tr>
-                                        <td>${p.passengerFullName}</td>
-                                        <td>${p.passengerIDCard}</td>
-                                        <td>${p.passengerType}</td>
-                                        <td>${p.seatNumber}</td>
-                                        <td>${p.seatTypeName}</td>
-                                        <td>${p.coachName}</td>
-                                        <td>${p.trainName}</td>
-                                        <td>${p.startStationName}</td>
-                                        <td>${p.endStationName}</td>
-                                        <td>${p.price}</td>
-                                        <td>${p.ticketStatus}</td>
-                                    </tr>
-                                </c:forEach>
-                            </table>
                         </c:if>
                     </div>
                 </section>

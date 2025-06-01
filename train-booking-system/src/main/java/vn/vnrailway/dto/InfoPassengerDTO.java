@@ -2,6 +2,9 @@ package vn.vnrailway.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 
 @Data
@@ -15,6 +18,7 @@ public class InfoPassengerDTO {
     private String SeatNumber;
     private String CoachName;
     private String TrainName;
+    private String ScheduledDepartureTime;
     private String TicketStatus;
     private double Price;
     private String StartStationName;

@@ -7,7 +7,9 @@ import vn.vnrailway.dto.InfoPassengerDTO;
 import vn.vnrailway.model.Booking;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -227,7 +229,7 @@ public class BookingRepositoryImpl implements BookingRepository {
 
     @Override
     public CheckBookingDTO findBookingDetailsByCode(String bookingCode) throws SQLException {
-        String sql = "SELECT \r\n" + 
+        String sql = "SELECT \r\n" +
                 "    P.FullName AS PassengerFullName,\r\n" + //
                 "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
                 "    PT.TypeName AS PassengerType,\r\n" + //
@@ -235,6 +237,7 @@ public class BookingRepositoryImpl implements BookingRepository {
                 "    S.SeatNumber AS SeatNumber,\r\n" + //
                 "    C.CoachName AS CoachName,\r\n" + //
                 "    T.TrainName AS TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
                 "    TK.TicketStatus,\r\n" + //
                 "    TK.Price,\r\n" + //
                 "\tStartStation.StationName AS StartStationName,\r\n" + //
@@ -282,6 +285,10 @@ public class BookingRepositoryImpl implements BookingRepository {
                     passenger.setSeatNumber(rs.getString("SeatNumber"));
                     passenger.setCoachName(rs.getString("CoachName"));
                     passenger.setTrainName(rs.getString("TrainName"));
+                    Timestamp ts = rs.getTimestamp("ScheduledDepartureTime");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String formattedDateTime = sdf.format(ts); // Kết quả: "2025-06-10 08:00"
+                    passenger.setScheduledDepartureTime(formattedDateTime);
                     passenger.setTicketStatus(rs.getString("TicketStatus"));
                     passenger.setPrice(rs.getDouble("Price"));
                     passenger.setStartStationName(rs.getString("StartStationName"));
@@ -306,9 +313,9 @@ public class BookingRepositoryImpl implements BookingRepository {
             // System.out.println("Testing findAll bookings:");
             // List<Booking> bookings = bookingRepository.findAll();
             // if (bookings.isEmpty()) {
-            //     System.out.println("No bookings found.");
+            // System.out.println("No bookings found.");
             // } else {
-            //     bookings.forEach(b -> System.out.println(b));
+            // bookings.forEach(b -> System.out.println(b));
             // }
 
             // // Test findById (assuming booking with ID 1 exists)
@@ -316,10 +323,11 @@ public class BookingRepositoryImpl implements BookingRepository {
             // System.out.println("\nTesting findById for booking ID: " + testBookingId);
             // Optional<Booking> bookingOpt = bookingRepository.findById(testBookingId);
             // bookingOpt.ifPresentOrElse(
-            //         b -> System.out.println("Found booking: " + b),
-            //         () -> System.out.println("Booking with ID " + testBookingId + " not found."));
+            // b -> System.out.println("Found booking: " + b),
+            // () -> System.out.println("Booking with ID " + testBookingId + " not
+            // found."));
 
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK20250531001");
+            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK20250531002");
             if (checkBookingDTO != null) {
                 System.out.println("Booking details found:");
                 System.out.println("User Full Name: " + checkBookingDTO.getUserFullName());
