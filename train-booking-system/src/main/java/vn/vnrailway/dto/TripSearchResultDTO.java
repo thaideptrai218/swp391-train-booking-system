@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List; // Added import
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class TripSearchResultDTO {
     private LocalDateTime scheduledArrival;     // Scheduled arrival time at the destination station for this leg - from SP: ArrivalTime
     
     private int durationMinutes;                // Calculated duration of this leg in minutes - from SP: DurationMinutes
+    private double distanceTraveledKm;          // Calculated distance for this leg in kilometers - from SP
 
     private LocalDateTime tripOverallDepartureTime; // Overall departure time of the trip from its very first station - from SP: TripOverallDeparture
     private LocalDateTime tripOverallArrivalTime;   // Overall arrival time of the trip at its very last station - from SP: TripOverallArrival
@@ -38,4 +40,36 @@ public class TripSearchResultDTO {
     
     // Other relevant information
     private String tripStatus;                  // Status of the trip (e.g., "Scheduled"), SP filters on T.TripStatus
+
+    // List of coaches for this trip leg
+    private List<CoachInfoDTO> coaches;
+
+    // Getter for JSTL fmt:formatDate compatibility
+    public java.util.Date getScheduledDepartureAsDate() {
+        if (this.scheduledDeparture == null) {
+            return null;
+        }
+        return java.util.Date.from(this.scheduledDeparture.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getScheduledArrivalAsDate() {
+        if (this.scheduledArrival == null) {
+            return null;
+        }
+        return java.util.Date.from(this.scheduledArrival.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getTripOverallDepartureTimeAsDate() {
+        if (this.tripOverallDepartureTime == null) {
+            return null;
+        }
+        return java.util.Date.from(this.tripOverallDepartureTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
+
+    public java.util.Date getTripOverallArrivalTimeAsDate() {
+        if (this.tripOverallArrivalTime == null) {
+            return null;
+        }
+        return java.util.Date.from(this.tripOverallArrivalTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+    }
 }

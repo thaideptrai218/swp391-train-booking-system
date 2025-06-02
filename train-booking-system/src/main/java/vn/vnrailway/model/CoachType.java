@@ -13,4 +13,6 @@ public class CoachType {
     private String typeName; // Loại toa: giường nằm K4 ĐH, ghế mềm ĐH...
     private BigDecimal priceMultiplier;
     private String description; // Có thể null
+    private boolean isCompartmented;
+    private Integer defaultCompartmentCapacity; // e.g., 4 or 6 for sleepers, null if not compartmented
 }
