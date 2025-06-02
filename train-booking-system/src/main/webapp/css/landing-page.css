@@ -117,12 +117,12 @@ time,
 mark,
 audio,
 video {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
 article,
@@ -136,29 +136,29 @@ hgroup,
 menu,
 nav,
 section {
-    display: block;
+  display: block;
 }
 body {
-    line-height: 1;
+  line-height: 1;
 }
 ol,
 ul {
-    list-style: none;
+  list-style: none;
 }
 blockquote,
 q {
-    quotes: none;
+  quotes: none;
 }
 blockquote:before,
 blockquote:after,
 q:before,
 q:after {
-    content: "";
-    content: none;
+  content: "";
+  content: none;
 }
 table {
-    border-collapse: collapse;
-    border-spacing: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .body {
@@ -541,46 +541,83 @@ table {
 }
 
 .carousel-container {
-  overflow-x: auto;
+  overflow-x: hidden; /* Hide scrollbar, will be controlled by JS */
   padding-bottom: 15px;
+  position: relative; /* For potential absolute positioning of arrows if needed */
+  scroll-behavior: smooth; /* Smooth scrolling for JS-driven scroll */
+  cursor: grab; /* Indicate draggable */
+  user-select: none; /* Prevent text selection during drag */
+}
+
+.carousel-container.grabbing {
+  cursor: grabbing; /* Change cursor when dragging */
 }
 
 .carousel-track {
   display: flex;
   gap: 20px;
   padding: 5px;
+  transition: transform 0.5s ease-in-out; /* For CSS transform-based sliding if used */
 }
 
 .location-card {
   background-color: var(--color-bg-card);
   border-radius: var(--border-radius-card);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
   width: 320px;
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--color-border-separator); /* Light border */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* Smooth transitions */
+}
+
+.location-card:hover {
+  transform: translateY(-5px); /* Lift effect */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+  border-color: var(--color-primary); /* Highlight border on hover */
 }
 
 .card-image {
   width: 100%;
-  height: 180px;
+  height: 200px; /* Slightly taller image */
   object-fit: cover;
+  transition: transform 0.3s ease; /* Smooth zoom for image */
+}
+
+.location-card:hover .card-image {
+  transform: scale(1.05); /* Zoom image on card hover */
 }
 
 .card-content {
-  padding: 20px;
+  padding: 18px; /* Adjusted padding */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-white); /* Ensure content background is white */
 }
 
 .card-title {
   font-family: var(--font-secondary);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-default);
-  margin-bottom: 10px;
+  font-size: 20px; /* Maintained font size */
+  font-weight: 700; /* Bolder title */
+  color: var(--color-secondary-dark-blue); /* Darker blue for title */
+  margin-bottom: 8px; /* Reduced margin */
+  line-height: 1.3;
+}
+
+.card-content p {
+  /* Styling for City and Region */
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--color-text-light);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.card-content p:last-child {
+  margin-bottom: 0;
 }
 
 .card-description {
@@ -610,6 +647,11 @@ table {
 
 .btn-card:hover {
   background-color: var(--color-primary-dark);
+}
+
+.btn-card a {
+  text-decoration: none;
+  color: inherit; /* Ensures link color matches button text color */
 }
 
 /* New Site Info / Footer Section Styles */
@@ -696,8 +738,9 @@ table {
   align-items: center;
 }
 .logos-grid img {
-  max-width: 100%;
-  height: auto;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
 }
 
 .logos-list img {
@@ -716,68 +759,356 @@ table {
   margin-right: 10px;
 }
 
-.main-footer .footer-top {
-  background-color: var(--color-primary);
-  padding: 20px 0;
+.footer {
+  background-color: #003b65;
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
 }
-.main-footer .footer-top .container {
+
+.footer-top {
+  background-color: #0082c4;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.footer-top a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 50px;
+}
+
+.footer-social {
+  background-color: #3c2172;
+  padding: 15px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 30px;
-}
-.main-footer .footer-top a {
-  color: var(--color-white);
-  text-decoration: none;
-  font-family: var(--font-secondary);
-  font-size: 16px;
-  font-weight: 500;
-}
-.main-footer .footer-top a:hover {
-  text-decoration: underline;
+  gap: 20px;
 }
 
-.main-footer .footer-middle {
-  background-color: var(--color-secondary-blue);
-  padding: 30px 0;
-  color: var(--color-white);
+.footer-social p {
+  margin-bottom: 10px;
+  font-size: 18px;
 }
-.main-footer .footer-middle .container {
+
+.social-icons a img {
+  width: 40px;
+  margin: 0 8px;
+  border-radius: 50%;
+}
+
+.footer-bottom {
+  background-color: #003b65;
+  padding: 20px 10px;
+}
+
+.footer-logo {
+  width: 14%;
+  margin-bottom: 10px;
+}
+
+.slogan {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #aaa;
+  width: 80%;
+  margin: 10px auto;
+}
+
+.footer-bottom p {
+  margin: 5px 0;
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* Station Name Link Style */
+.station-name-link {
+  color: inherit; /* Make link color same as parent h4 */
+  text-decoration: none; /* Remove underline */
+  cursor: pointer;
+}
+
+.station-name-link:hover {
+  text-decoration: underline; /* Optional: underline on hover */
+  color: var(--color-primary); /* Optional: change color on hover */
+}
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Slightly darker overlay */
+}
+
+.modal-content {
+  background-color: #fff; /* White background */
+  margin: 10% auto; /* More top margin */
+  padding: 0; /* Remove padding, will be handled by header/body/footer */
+  border: none; /* Remove border, rely on shadow */
+  width: 90%;
+  max-width: 700px; /* Wider modal for two-column layout */
+  border-radius: 8px; /* Softer radius */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-family: var(--font-primary);
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee; /* Separator line */
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.main-footer .footer-middle span {
+
+.modal-header h3 {
+  /* For #modalHeaderStationName */
+  margin: 0;
   font-family: var(--font-secondary);
-  font-size: 16px;
-}
-.social-icons {
-  display: flex;
-  gap: 15px;
-}
-.social-icons img {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--border-radius-round);
+  font-size: 22px; /* Slightly smaller than previous h3 */
+  color: var(--color-text-default); /* Standard text color */
+  font-weight: 600;
 }
 
-.main-footer .footer-bottom {
-  background-color: var(--color-secondary-dark-blue);
-  padding: 30px 0;
-  text-align: center;
-  color: var(--color-text-footer);
+.close-button {
+  /* For the 'X' */
+  color: #555; /* Darker grey */
+  font-size: 24px; /* Slightly smaller */
+  font-weight: bold;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
 }
-.footer-logo {
-  margin-bottom: 15px;
-  max-width: 150px;
+
+.close-button:hover,
+.close-button:focus {
+  color: #000; /* Black on hover */
+  text-decoration: none;
+  cursor: pointer;
 }
-.main-footer .footer-bottom p {
-  font-family: var(--font-primary);
-  font-size: 14px;
-  margin-bottom: 8px;
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  gap: 20px; /* Space between image and text columns */
+}
+
+.modal-body-left {
+  flex: 1; /* Adjust flex basis as needed, e.g., 40% */
+  max-width: 40%; /* Limit image column width */
+}
+
+.modal-station-image {
+  width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  max-height: 300px; /* Adjust as needed */
+  object-fit: cover;
+  border-radius: var(--border-radius-input);
+  display: block;
+}
+
+.modal-body-right {
+  flex: 1.5; /* Adjust flex basis, e.g., 60% */
+}
+
+.modal-body-right h4 {
+  /* For #modalBodyStationName */
+  font-family: var(--font-secondary);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-default);
+  margin-top: 0; /* Remove top margin if image is present */
+  margin-bottom: 10px;
+}
+
+.modal-body-right p {
+  font-size: 14px; /* Smaller text for details */
   line-height: 1.6;
+  margin-bottom: 8px;
+  color: var(--color-text-light);
 }
-.main-footer .footer-bottom .copyright {
+
+.modal-body-right p strong {
+  color: var(--color-text-default); /* Strong text standard color */
+  font-weight: 600;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee; /* Separator line */
+  text-align: right; /* Align button to the right */
+}
+
+.btn-modal-close {
+  background-color: #6c757d; /* Bootstrap secondary-like color */
+  color: white;
+  padding: 8px 20px; /* Smaller padding */
+  font-size: 14px;
+  border-radius: var(--border-radius-input); /* Consistent radius */
+  border: none;
+  cursor: pointer;
+}
+
+.btn-modal-close:hover {
+  background-color: #5a6268; /* Darker shade on hover */
+}
+
+/* Popular Routes Section Styles (Reused for Featured Routes) */
+.popular-routes-section, /* Keep existing for backward compatibility or other uses */
+.featured-routes-section {
+  /* Add new class */
+  padding: 40px 0;
+  background-color: var(
+    --color-bg-body
+  ); /* Or a slightly different shade if needed */
+}
+
+.popular-routes-section .section-main-title, /* Keep existing */
+.featured-routes-section .section-main-title {
+  /* Add new class */
+  text-align: center; /* Center the title for this section */
+  margin-bottom: 30px; /* More space below title */
+  font-size: 32px; /* Consistent with other section titles */
+  color: var(--color-secondary-blue);
+  font-weight: 600; /* Added for emphasis */
+}
+
+.route-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* Responsive grid */
+  gap: 25px; /* Space between cards */
+}
+
+.route-card {
+  position: relative;
+  border-radius: var(--border-radius-card);
+  overflow: hidden; /* Clips the background image and overlay */
+  color: var(--color-white);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 220px; /* Minimum height for the card */
+  display: flex; /* To help with overlay positioning */
+  flex-direction: column; /* Stack content vertically */
+}
+
+.route-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.route-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the card area */
+  z-index: 1;
+  transition: transform 0.4s ease;
+}
+
+.route-card:hover .route-card-bg {
+  transform: scale(1.08); /* Slight zoom on hover */
+}
+
+.route-card-overlay {
+  position: relative; /* Changed from absolute to allow content to push height */
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  ); /* Darker gradient at bottom */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes info to bottom, title to top */
+  flex-grow: 1; /* Takes up available space */
+  min-height: inherit; /* Inherit min-height from .route-card */
+}
+
+.route-card-content {
+  flex-grow: 1; /* Allows this to take up space before the button */
+}
+
+.route-card-title {
+  font-family: var(--font-secondary);
+  font-size: 24px; /* Larger title */
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 15px; /* Space below title */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.route-card-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Three columns for info */
+  gap: 10px;
+  margin-top: auto; /* Pushes this block to the bottom of its container */
+  padding-top: 15px; /* Space above the info blocks */
+}
+
+.route-card-info div {
+  text-align: left;
+}
+
+.route-card-info span {
+  display: block;
   font-size: 12px;
-  color: var(--color-text-copyright);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85); /* Lighter text for labels */
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.route-card-info strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.route-card-button {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: var(--color-accent-orange);
+  color: var(--color-white);
+  width: 44px; /* Square button */
+  height: 44px;
+  border-radius: var(--border-radius-card); /* Consistent rounding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 24px; /* Larger arrow */
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  z-index: 3; /* Ensure button is above overlay content if overlapping */
+}
+
+.route-card-button:hover {
+  background-color: #e65a40; /* Darker orange on hover */
+}
+
+.route-card-button .arrow-icon {
+  line-height: 1; /* Helps with vertical alignment of the arrow character */
 }

@@ -17,7 +17,7 @@ public class UserRepositoryImpl implements UserRepository {
         user.setFullName(rs.getString("FullName"));
         user.setEmail(rs.getString("Email"));
         user.setPhoneNumber(rs.getString("PhoneNumber"));
-        user.setPasswordHash(rs.getString("PasswordHash")); // Be cautious about fetching password hashes unless necessary
+        user.setPasswordHash(rs.getString("PasswordHash")); // Use setPasswordHash for plain-text password
         user.setIdCardNumber(rs.getString("IDCardNumber"));
         user.setRole(rs.getString("Role"));
         user.setActive(rs.getBoolean("IsActive"));
@@ -87,7 +87,7 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhoneNumber());
-            ps.setString(4, user.getPasswordHash());
+            ps.setString(4, user.getPasswordHash()); // Use getPasswordHash for plain-text password
             ps.setString(5, user.getIdCardNumber());
             ps.setString(6, user.getRole());
             ps.setBoolean(7, user.isActive());
@@ -133,7 +133,7 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhoneNumber());
-            ps.setString(4, user.getPasswordHash()); // Be cautious with password updates; ensure hashing is handled correctly at service layer if plain text is ever passed.
+            ps.setString(4, user.getPasswordHash()); // Use getPasswordHash for plain-text password
             ps.setString(5, user.getIdCardNumber());
             ps.setString(6, user.getRole());
             ps.setBoolean(7, user.isActive());
