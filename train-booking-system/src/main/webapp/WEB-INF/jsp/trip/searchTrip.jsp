@@ -20,8 +20,8 @@
         />
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     </head>
-    <body>
-        <div class="search-trip-wrapper">
+    <body data-context-path="${pageContext.request.contextPath}">
+        <section class="search-trip-wrapper">
             <div class="search-panel">
                 <form
                     action="<c:url value='/searchTrip'/>"
@@ -39,13 +39,15 @@
                                     <input
                                         type="text"
                                         id="original-station"
-                                        name="original-station"
+                                        name="original-station-name" 
                                         autocomplete="off"
                                         onfocus="this.classList.add('has-value')"
                                         onblur="if(!this.value) this.classList.remove('has-value')"
                                         required
                                     />
                                     <label for="original-station">Ga đi</label>
+                                    <input type="hidden" id="original-station-id" name="originalStationId" />
+                                    <div id="original-station-suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="input-icon-group">
@@ -56,7 +58,7 @@
                                     <input
                                         type="text"
                                         id="destination-station"
-                                        name="destination-station"
+                                        name="destination-station-name"
                                         autocomplete="off"
                                         onfocus="this.classList.add('has-value')"
                                         onblur="if(!this.value) this.classList.remove('has-value')"
@@ -65,6 +67,8 @@
                                     <label for="destination-station"
                                         >Ga đến</label
                                     >
+                                    <input type="hidden" id="destination-station-id" name="destinationStationId" />
+                                    <div id="destination-station-suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="input-icon-group date-group">
@@ -241,8 +245,10 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <script src="${pageContext.request.contextPath}/js/search-trip.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/search-trip.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/passenger-selector.js"></script>
+        <script src="${pageContext.request.contextPath}/js/trip/station-autocomplete.js"></script>
     </body>
 </html>

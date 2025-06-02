@@ -69,6 +69,22 @@ public class CoachRepositoryImpl implements CoachRepository {
     }
 
     @Override
+    public List<Coach> findByTrainIdOrderByPositionInTrainDesc(int trainId) throws SQLException {
+        List<Coach> coaches = new ArrayList<>();
+        String sql = "SELECT CoachID, TrainID, CoachNumber, CoachName, CoachTypeID, Capacity, PositionInTrain FROM Coaches WHERE TrainID = ? ORDER BY PositionInTrain DESC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, trainId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    coaches.add(mapResultSetToCoach(rs));
+                }
+            }
+        }
+        return coaches;
+    }
+
+    @Override
     public List<Coach> findByCoachTypeId(int coachTypeId) throws SQLException {
         List<Coach> coaches = new ArrayList<>();
         String sql = "SELECT CoachID, TrainID, CoachNumber, CoachName, CoachTypeID, Capacity, PositionInTrain FROM Coaches WHERE CoachTypeID = ?";

@@ -2,9 +2,11 @@ package vn.vnrailway.dao.impl;
 
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.SeatRepository;
+import vn.vnrailway.dto.SeatStatusDTO; // Import DTO
 import vn.vnrailway.model.Seat;
 
 import java.sql.*;
+import java.math.BigDecimal; // Import for price multipliers
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,48 @@ public class SeatRepositoryImpl implements SeatRepository {
         seat.setSeatTypeID(rs.getInt("SeatTypeID"));
         seat.setEnabled(rs.getBoolean("IsEnabled"));
         return seat;
+    }
+
+    private SeatStatusDTO mapResultSetToSeatStatusDTO(ResultSet rs) throws SQLException {
+        SeatStatusDTO dto = new SeatStatusDTO();
+        dto.setSeatID(rs.getInt("SeatID"));
+        dto.setSeatName(rs.getString("SeatName"));
+        dto.setSeatNumberInCoach(rs.getInt("SeatNumberInCoach"));
+        dto.setSeatTypeID(rs.getInt("SeatTypeID"));
+        dto.setSeatTypeName(rs.getString("SeatTypeName"));
+        dto.setBerthLevel(rs.getString("BerthLevel")); // Handle null if SP can return null for this
+        dto.setSeatPriceMultiplier(rs.getBigDecimal("SeatPriceMultiplier"));
+        dto.setCoachPriceMultiplier(rs.getBigDecimal("CoachPriceMultiplier"));
+        dto.setTripBasePriceMultiplier(rs.getBigDecimal("TripBasePriceMultiplier"));
+        dto.setEnabled(rs.getBoolean("IsEnabled"));
+        dto.setAvailabilityStatus(rs.getString("AvailabilityStatus"));
+        return dto;
+    }
+
+    @Override
+    public List<SeatStatusDTO> getCoachSeatsWithAvailability(int tripId, int coachId, int legOriginStationId, int legDestinationStationId) throws SQLException {
+        List<SeatStatusDTO> seatStatusList = new ArrayList<>();
+        String callSP = "{CALL dbo.GetCoachSeatsWithAvailability(?, ?, ?, ?)}";
+
+        try (Connection conn = DBContext.getConnection();
+             CallableStatement cs = conn.prepareCall(callSP)) {
+            
+            cs.setInt(1, tripId);
+            cs.setInt(2, coachId);
+            cs.setInt(3, legOriginStationId);
+            cs.setInt(4, legDestinationStationId);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    seatStatusList.add(mapResultSetToSeatStatusDTO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            // Log or handle more gracefully
+            System.err.println("SQL Error in getCoachSeatsWithAvailability: " + e.getMessage());
+            throw e;
+        }
+        return seatStatusList;
     }
 
     @Override

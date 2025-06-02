@@ -1,0 +1,154 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    background-color: #042c57;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 30px;
+    align-items: center;
+}
+
+.navbar a {
+    color: white;
+    margin: 27px;
+    text-decoration: none;
+    font-weight: bold
+}
+
+.logo {
+    width: 12%;
+}
+
+.auth a {
+    margin-left: 10px;
+    padding: 5px 10px;
+}
+
+.register {
+    background-color: #007bff;
+    color: white;
+    border-radius: 20px;
+}
+
+/* .steps {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  background-color: #fff;
+  padding: 10px;
+  border-bottom: 2px solid #ccc;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  color: gray;
+}
+
+.step.active {
+  color: #007bff;
+  font-weight: bold;
+} */
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    gap: 30px; 
+    padding: 20px;
+    margin: 20px;
+}
+
+.check-info {
+    margin: 40px auto 20px auto;
+}
+
+.et-main-label {
+    background: url(images/label_bg.png) right bottom no-repeat #0082c4;
+    padding: 5px 40px 5px 10px;
+    margin-left: 5px;
+    color: #fff;
+    font-family: Verdana;
+}
+
+.check-info input,
+.check-info button {
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.footer {
+  background-color: #003b65;
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.footer-top {
+  background-color: #0082c4;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.footer-top a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 50px;
+}
+
+.footer-social {
+  background-color: #3c2172;
+  padding: 15px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  gap: 20px; 
+}
+
+.footer-social p {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.social-icons a img {
+  width: 40px;
+  margin: 0 8px;
+  border-radius: 50%;
+}
+
+.footer-bottom {
+  background-color: #003b65;
+  padding: 20px 10px;
+}
+
+.footer-logo {
+  width: 14%;
+  margin-bottom: 10px;
+}
+
+.slogan {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #aaa;
+  width: 80%;
+  margin: 10px auto;
+}
+
+.footer-bottom p {
+  margin: 5px 0;
+  color: #ccc;
+  font-size: 14px;
+}

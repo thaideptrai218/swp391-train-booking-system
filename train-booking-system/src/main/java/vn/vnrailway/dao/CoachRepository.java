@@ -9,6 +9,7 @@ public interface CoachRepository {
     Optional<Coach> findById(int coachId) throws SQLException;
     List<Coach> findAll() throws SQLException;
     List<Coach> findByTrainId(int trainId) throws SQLException;
+    List<Coach> findByTrainIdOrderByPositionInTrainDesc(int trainId) throws SQLException;
     List<Coach> findByCoachTypeId(int coachTypeId) throws SQLException;
     Optional<Coach> findByTrainIdAndCoachNumber(int trainId, int coachNumber) throws SQLException;
 
