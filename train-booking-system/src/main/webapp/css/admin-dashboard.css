@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; /* Base font size */
+    margin: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50; /* Dark blue-gray */
+    color: #ecf0f1; /* Light gray */
+    padding: 20px;
+    padding-top: 60px; /* Adjusted for home icon */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Establish positioning context for absolute children */
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.home-link {
+    position: absolute;
+    top: 30px;
+    left: 15px;
+    color: #93caff;
+    font-size: 1.5rem; /* Keep this font-size as per user's request */
+}
+
+.home-link:hover {
+    color: #b0d8ff;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #ecf0f1;
+    font-size: 2.2rem; /* Consistent with login.css h2 */
+    font-weight: 700; /* Consistent with login.css h2 */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 15px;
+}
+
+.sidebar ul li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1.1rem; /* Consistent with login.css buttons/labels */
+}
+
+.sidebar ul li a:hover {
+    background-color: #34495e; /* Slightly lighter dark blue-gray */
+    transform: translateX(5px);
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #ecf0f1; /* Light gray */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.header h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 2.2rem; /* Consistent with login.css h2 */
+    font-weight: 700; /* Consistent with login.css h2 */
+}
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 25px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0; /* Start hidden for animation */
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+    color: #3498db; /* Blue */
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.charts-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 25px;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0; /* Start hidden for animation */
+    animation-delay: 0.5s;
+}
+
+.charts-container h3 {
+    color: #3498db;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Keyframe Animations */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding-top: 20px; /* Reset padding for smaller screens */
+        position: relative; /* Keep relative for home-link positioning */
+        flex-direction: row; /* Arrange sidebar items horizontally */
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .sidebar h2 {
+        margin-bottom: 0;
+    }
+
+    .sidebar nav {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 0;
+    }
+
+    .sidebar ul li a {
+        padding: 8px 12px;
+        font-size: 1.1rem; /* Consistent with other links/buttons */
+    }
+
+    .home-link {
+        position: static; /* Remove absolute positioning */
+        margin-right: 15px; /* Add some space */
+        font-size: 2.5rem; /* Keep original font-size as per user's request */
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cards-container {
+        grid-template-columns: 1fr; /* Stack cards on small screens */
+    }
+}

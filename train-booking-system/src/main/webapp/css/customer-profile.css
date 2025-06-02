@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    margin: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.profile-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 30px;
+    padding-top: 60px; /* Adjusted for home icon */
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    position: relative; /* Establish positioning context for absolute children */
+}
+
+.home-link {
+    position: absolute;
+    top: 30px;
+    left: 15px;
+    color: #93caff;
+    font-size: 2.5rem; /* Keep this font-size as per user's request */
+}
+
+.home-link:hover {
+    color: #b0d8ff;
+}
+
+.profile-header {
+    margin-bottom: 25px;
+}
+
+.profile-header h1 {
+    color: #2c3e50;
+    font-size: 2.2rem; /* Consistent with login.css h2 */
+    font-weight: 700; /* Consistent with login.css h2 */
+    margin: 0;
+}
+
+.profile-details {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
+    font-weight: 600; /* Consistent with login.css labels */
+    color: #555;
+    flex-basis: 40%;
+}
+
+.detail-item .value {
+    color: #333;
+    flex-basis: 60%;
+    text-align: right;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 700; /* Consistent with login.css buttons */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: #ffffff;
+    border: 1px solid #3498db;
+    font-size: 1.1rem; /* Consistent with login.css buttons */
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    border: 1px solid #ccc;
+    font-size: 1.1rem; /* Consistent with login.css buttons */
+}
+
+.btn-secondary:hover {
+    background-color: #bdc3c7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-container {
+    /* Existing styles */
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    /* Animation properties */
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.detail-item {
+    /* Existing styles */
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    /* Transition for hover effect */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.detail-item:hover {
+    background-color: #f9f9f9;
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .profile-container {
+        padding: 20px;
+        padding-top: 50px; /* Adjust padding for smaller screens */
+    }
+
+    .home-link {
+        position: static; /* Remove absolute positioning */
+        margin-bottom: 15px; /* Add some space below the icon */
+        font-size: 1rem; /* Keep original font-size as per user's request */
+        display: block; /* Make it a block element to take full width */
+        text-align: left; /* Align to left */
+    }
+
+    .profile-header {
+        margin-top: 15px; /* Add space after home link */
+    }
+
+    .profile-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
