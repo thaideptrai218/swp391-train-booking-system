@@ -1,5 +1,6 @@
 package vn.vnrailway.dao;
 
+import vn.vnrailway.dto.CheckBookingDTO;
 import vn.vnrailway.model.Booking;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -18,4 +19,5 @@ public interface BookingRepository {
     Booking save(Booking booking) throws SQLException;
     boolean update(Booking booking) throws SQLException; // Typically for status updates
     boolean deleteById(int bookingId) throws SQLException; // Use with caution, often bookings are cancelled not deleted
+    CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException;
 }
