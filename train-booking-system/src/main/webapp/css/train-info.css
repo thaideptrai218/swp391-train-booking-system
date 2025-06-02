@@ -1,0 +1,240 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f8f9fa; /* Slightly lighter background */
+  color: #495057; /* Softer text color */
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto; /* More margin for the container */
+  background-color: #fff;
+  padding: 30px; /* More padding inside container */
+  border-radius: 12px; /* More rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* More pronounced shadow */
+}
+
+h1 {
+  color: #2c508c; /* Primary accent color */
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.25rem; /* Larger H1 */
+  font-weight: 600;
+}
+
+.content-flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px; /* Increased gap */
+  margin-bottom: 20px; /* Space after initial content block */
+}
+
+.text-content {
+  flex: 1;
+}
+
+.image-content {
+  flex-shrink: 0;
+  width: 40%;
+  max-width: 350px;
+}
+
+.image-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for images */
+}
+
+/* Initial list styling (Nên chọn loại tàu...) */
+.container > .content-flex > .text-content > ul {
+  list-style: none;
+  padding: 0;
+}
+
+.container > .content-flex > .text-content > ul li {
+  background-color: #e9ecef;
+  margin-bottom: 12px; /* Slightly more margin */
+  padding: 12px 15px; /* Adjust padding */
+  border-radius: 6px; /* Slightly more rounded */
+  font-size: 0.95rem;
+}
+
+p {
+  margin-top: 0; /* Remove default top margin if not needed, rely on bottom */
+  margin-bottom: 1rem; /* Consistent paragraph spacing */
+}
+
+.text-content p strong,
+.train-type-details p strong {
+  color: #2c508c; /* Accent color for strong tags */
+  font-weight: 600;
+}
+
+.train-type-details {
+  margin-top: 40px; /* Increased top margin */
+  padding-top: 30px; /* Increased top padding */
+  border-top: 2px solid #dee2e6; /* More visible separator */
+}
+
+.train-type-details:first-of-type {
+  /* No top border for the very first .train-type-details if it's directly after the intro */
+}
+
+.train-type-details h2 {
+  color: #2c508c; /* Primary accent color */
+  margin-bottom: 20px;
+  font-size: 1.75rem; /* Larger H2 */
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0; /* Subtle underline for H2 */
+}
+
+.train-type-details ul {
+  list-style: none; /* Ensure nested lists also have no default bullets */
+  padding-left: 0; /* Remove default padding */
+  margin-bottom: 20px; /* Space after lists */
+}
+
+.train-type-details ul li {
+  background-color: transparent;
+  padding: 8px 0 8px 20px; /* Add left padding for indent + icon */
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f1f3f5; /* Very light separator */
+  position: relative; /* For pseudo-element bullet */
+  font-size: 0.95rem;
+}
+
+.train-type-details ul li::before {
+  content: "*"; /* Custom bullet */
+  position: absolute;
+  left: 0;
+  top: 8px;
+  color: #2c508c; /* Accent color for bullet */
+  font-weight: bold;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.train-type-details ul li:last-child {
+  border-bottom: none;
+}
+
+.train-type-details p {
+  margin-bottom: 15px; /* Consistent paragraph spacing */
+  font-size: 0.95rem;
+}
+
+/* Specific styling for the Tàu SE section if its image needs different alignment or size */
+/* This rule might be redundant now if .train-type-details .content-flex is no longer used for Tàu SE image */
+/* Or if it is, it's fine. If Tàu SE image is now also .centered-image, this specific rule might not be hit. */
+.train-type-details .content-flex .image-content img {
+  max-height: 280px; /* Slightly larger max-height */
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Ensure shadow is applied here too */
+}
+
+.image-content.centered-image {
+  width: 70%; /* Make centered images a bit wider */
+  max-width: 550px;
+  margin: 25px auto;
+  flex-shrink: 1;
+}
+
+.image-content.centered-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); /* Slightly stronger shadow for prominent images */
+}
+
+.introduction-section {
+  background-color: #f8f9fa; /* Light background for this distinct section */
+  padding: 25px;
+  border-radius: 8px;
+  margin-top: 40px;
+}
+
+.introduction-section h2 {
+  text-align: center;
+  margin-top: 0; /* Reset margin as section has padding */
+  margin-bottom: 25px;
+  font-size: 2rem; /* Prominent H2 for this section */
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #2c508c; /* Accent border */
+  padding-bottom: 15px;
+}
+
+.introduction-section p {
+  text-align: justify;
+  margin-bottom: 20px;
+  font-size: 1rem; /* Slightly larger text for intro section */
+  color: #343a40; /* Slightly darker text for this section for contrast */
+}
+
+/* Station Table Styles */
+.station-list-section h2 {
+  text-align: center; /* Center the title of the station list */
+  margin-bottom: 25px; /* Add some space below the title */
+}
+
+.station-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 0.9rem; /* Slightly smaller font for table data */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 8px; /* Rounded corners for the table */
+  overflow: hidden; /* Ensures border-radius is applied to child elements like th/td */
+}
+
+.station-table th,
+.station-table td {
+  border: 1px solid #dee2e6;
+  padding: 12px 15px; /* Increased padding for cells */
+  text-align: left;
+  vertical-align: middle;
+}
+
+.station-table thead th {
+  background-color: #007bff; /* Blue header similar to image */
+  color: #ffffff;
+  font-weight: 600; /* Bolder header text */
+  font-size: 0.95rem;
+  border-top: none; /* Remove top border for the first header row */
+  border-left: none;
+  border-right: none;
+}
+.station-table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+.station-table thead th:last-child {
+  border-top-right-radius: 8px;
+  border-right: none; /* Ensure no right border on last header cell */
+}
+
+.station-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa; /* Light gray for even rows */
+}
+
+.station-table tbody tr:nth-child(odd) {
+  background-color: #e9ecef; /* Lighter blue/gray for odd rows, adjust as needed */
+}
+
+.station-table tbody tr:hover {
+  background-color: #d1e7fd; /* Light blue hover for rows */
+}
+
+.station-table td {
+  color: #343a40; /* Darker text for table data for readability */
+}
+
+.station-table td:first-child {
+  font-weight: 500; /* Slightly bolder station name */
+}
