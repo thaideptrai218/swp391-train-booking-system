@@ -7,8 +7,8 @@ package vn.vnrailway.controller.common;
 
 import java.io.IOException;
 import java.sql.SQLException;
+
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -72,7 +72,7 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        String fullName = request.getParameter("fullname");
+        String fullName = request.getParameter("FullName");
         String phoneNumber = request.getParameter("phone");
         String email = request.getParameter("email");
         String password = request.getParameter("password");

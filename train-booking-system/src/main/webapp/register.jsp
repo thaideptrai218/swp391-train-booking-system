@@ -19,10 +19,10 @@
             </div>
             <form action="register" method="post" class="register-form">
                 <div class="form-group">
-                    <label for="fullName">Họ và tên</label>
+                    <label for="FullName">Họ và tên</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-user icon"></i>
-                        <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên của bạn" required>
+                        <input type="text" id="FullName" name="FullName" placeholder="Nhập họ và tên của bạn" required>
                     </div>
                 </div>
                 <div class="form-group">
