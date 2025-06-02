@@ -330,7 +330,7 @@ public class BookingRepositoryImpl implements BookingRepository {
             // () -> System.out.println("Booking with ID " + testBookingId + " not
             // found."));
 
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK20250531002", "0987654321", "b.tran@company.com");
+            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BKEF918C78D4C64E9681A42871BC62FDFC", "0912345678", "customer.an@example.com");
             if (checkBookingDTO != null) {
                 System.out.println("Booking details found:");
                 System.out.println("User Full Name: " + checkBookingDTO.getUserFullName());

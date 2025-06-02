@@ -1,11 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "cSpell.words": [
-        "CCCD",
-        "CMND",
-        "jdbc",
-        "projectlombok",
-        "tshami"
-    ],
-    "liveServer.settings.port": 8081
+    "cSpell.words": ["CCCD", "CMND", "jdbc", "projectlombok", "tshami"],
+    "liveServer.settings.port": 8081,
+    "java.debug.settings.onBuildFailureProceed": true
 }
