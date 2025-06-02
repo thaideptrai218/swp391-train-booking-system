@@ -261,20 +261,16 @@
             <h3>Chứng nhận</h3>
             <div class="logos-list">
               <img
-                src="https://via.placeholder.com/150x50?text=VNExpress"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/vnexpress.png"
                 alt="VNExpress"
               />
               <img
-                src="https://via.placeholder.com/100x40?text=PayPal"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/paypal.jpg"
                 alt="PayPal"
               />
               <img
-                src="https://via.placeholder.com/100x40?text=VerifiedByVisa"
+                src="${pageContext.request.contextPath}/assets/images/landing/footer/visa.webp"
                 alt="Verified by Visa"
-              />
-              <img
-                src="https://via.placeholder.com/100x40?text=MasterSecure"
-                alt="Mastercard SecureCode"
               />
             </div>
           </div>
@@ -283,12 +279,12 @@
             <div class="app-buttons">
               <a href="#"
                 ><img
-                  src="https://via.placeholder.com/150x50?text=App+Store"
+                  src="${pageContext.request.contextPath}/assets/images/landing/footer/appstore.jpg"
                   alt="Download on the App Store"
               /></a>
               <a href="#"
                 ><img
-                  src="https://via.placeholder.com/150x50?text=Google+Play"
+                  src="${pageContext.request.contextPath}/assets/images/landing/footer/ggplay.webp"
                   alt="Get it on Google Play"
               /></a>
             </div>
