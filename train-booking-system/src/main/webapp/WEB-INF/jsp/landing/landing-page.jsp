@@ -175,7 +175,7 @@
                         </p>
                     </div>
                   </div>
-                  <a href="${pageContext.request.contextPath}/storeRoute?originID=${route.originStationID}&destinationID=${route.destinationStationID}"
+                  <a href="${pageContext.request.contextPath}/searchTrip?originalStation=${route.originStationID}&destinationID=${route.destinationStationID}"
                      class="route-card-button"
                      data-originid="${route.originStationID}"
                      data-destinationid="${route.destinationStationID}">

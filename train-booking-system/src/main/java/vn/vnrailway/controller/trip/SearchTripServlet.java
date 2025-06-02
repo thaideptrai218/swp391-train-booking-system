@@ -1,18 +1,22 @@
-package vn.vnrailway.controller;
+package vn.vnrailway.controller.trip; // Corrected package
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+// import java.text.ParseException; // No longer explicitly used
+// import java.text.SimpleDateFormat; // No longer explicitly used
 import java.time.LocalDate;
-import java.time.ZoneId;
+// import java.time.ZoneId; // No longer explicitly used
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date; // Keep for sdf parsing if needed, but prefer LocalDate
+// import java.util.Date; // No longer explicitly used
 import java.sql.SQLException;
+import java.util.Optional; // Added for Optional
 
 import vn.vnrailway.dto.TripSearchResultDTO;
 import vn.vnrailway.service.TripService;
-import vn.vnrailway.service.impl.TripServiceImpl; // Assuming this exists
+import vn.vnrailway.service.impl.TripServiceImpl;
+import vn.vnrailway.dao.StationRepository; // Added
+import vn.vnrailway.dao.impl.StationRepositoryImpl; // Added
+import vn.vnrailway.model.Station; // Added
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,16 +31,60 @@ public class SearchTripServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private TripService tripService;
+    private StationRepository stationRepository; // Added
 
     @Override
     public void init() throws ServletException {
         super.init();
-        tripService = new TripServiceImpl(); // Initialize TripService
+        tripService = new TripServiceImpl();
+        stationRepository = new StationRepositoryImpl(); // Added initialization
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Forward to the search form if accessed via GET
+        String originStationIdParam = request.getParameter("originalStation"); // Matches landing-page.jsp link
+        String destinationStationIdParam = request.getParameter("destinationID"); // Matches landing-page.jsp link
+
+        if (originStationIdParam != null && !originStationIdParam.isEmpty() &&
+                destinationStationIdParam != null && !destinationStationIdParam.isEmpty()) {
+            try {
+                int originId = Integer.parseInt(originStationIdParam);
+                int destinationId = Integer.parseInt(destinationStationIdParam);
+
+                Optional<Station> originStationOpt = stationRepository.findById(originId);
+                Optional<Station> destinationStationOpt = stationRepository.findById(destinationId);
+
+                if (originStationOpt.isPresent()) {
+                    Station originStation = originStationOpt.get();
+                    request.setAttribute("prefill_originalStationId", originStation.getStationID());
+                    request.setAttribute("prefill_originalStationName", originStation.getStationName());
+                } else {
+                    // Log or handle missing origin station
+                    System.err.println("SearchTripServlet: Origin station not found for ID: " + originId);
+                }
+
+                if (destinationStationOpt.isPresent()) {
+                    Station destinationStation = destinationStationOpt.get();
+                    request.setAttribute("prefill_destinationStationId", destinationStation.getStationID());
+                    request.setAttribute("prefill_destinationStationName", destinationStation.getStationName());
+                } else {
+                    // Log or handle missing destination station
+                    System.err.println("SearchTripServlet: Destination station not found for ID: " + destinationId);
+                }
+
+            } catch (NumberFormatException e) {
+                System.err.println("SearchTripServlet: Invalid station ID format from parameters.");
+                // Optionally set an error message for the user
+                // request.setAttribute("errorMessage", "Lỗi ID ga không hợp lệ từ trang
+                // trước.");
+            } catch (SQLException e) {
+                System.err.println("SearchTripServlet: SQL error fetching station details: " + e.getMessage());
+                // Optionally set an error message for the user
+                // request.setAttribute("errorMessage", "Lỗi truy vấn thông tin ga.");
+                e.printStackTrace();
+            }
+        }
+
         request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
     }
 
@@ -57,7 +105,8 @@ public class SearchTripServlet extends HttpServlet {
         int destinationStationId;
         LocalDate departureLocalDate;
         LocalDate returnLocalDate = null;
-        DateTimeFormatter inputDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // Changed to accept dd/MM/yyyy
+        DateTimeFormatter inputDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // Changed to accept
+                                                                                          // dd/MM/yyyy
         DateTimeFormatter displayDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         try {
@@ -78,7 +127,9 @@ public class SearchTripServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
             return;
         } catch (DateTimeParseException e) {
-            request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy."); // Updated error message
+            request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy."); // Updated
+                                                                                                               // error
+                                                                                                               // message
             request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
             return;
         }
