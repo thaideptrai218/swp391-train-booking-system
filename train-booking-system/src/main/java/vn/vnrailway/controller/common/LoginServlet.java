@@ -23,6 +23,7 @@ import vn.vnrailway.model.User;
  *
  * @author admin
  */
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
    
     /** 
@@ -73,8 +74,8 @@ public class LoginServlet extends HttpServlet {
                     case "staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
-                    case "customer":
-                        response.sendRedirect(request.getContextPath() + "/customer-profile");
+                    case "Customer":
+                        response.sendRedirect(request.getContextPath() + "/landing");
                         break;
                     default:
                         // Handle unknown role or default to a common dashboard

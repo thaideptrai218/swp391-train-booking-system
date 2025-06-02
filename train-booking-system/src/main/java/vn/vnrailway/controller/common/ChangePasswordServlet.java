@@ -23,6 +23,7 @@ import vn.vnrailway.model.User; // Added import
  *
  * @author admin
  */
+@WebServlet("/changepassword")
 public class ChangePasswordServlet extends HttpServlet {
    
     /** 
