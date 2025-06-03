@@ -11,7 +11,7 @@
 <body>
     <div class="change-password-container">
         <div class="change-password-card">
-                <a href="http://localhost:8080/train-booking-system/searchTrip" class="home-link">
+                <a href="${pageContext.request.contextPath}/landing" class="home-link">
                     <i class="fa-solid fa-house fa-xl home-icon"></i>
                 </a>
             <div class="change-password-header">

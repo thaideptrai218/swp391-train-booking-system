@@ -12,7 +12,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
+                <a href="${pageContext.request.contextPath}/landing" class="home-link">
                     <i class="fa-solid fa-house fa-xl home-icon"></i>
                 </a>
                 <h2>Đăng Nhập</h2>

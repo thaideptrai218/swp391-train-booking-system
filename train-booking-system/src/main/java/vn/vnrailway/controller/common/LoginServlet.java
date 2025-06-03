@@ -23,6 +23,9 @@ import vn.vnrailway.model.User;
  *
  * @author admin
  */
+
+@WebServlet("/login")
+
 public class LoginServlet extends HttpServlet {
    
     /** 
@@ -73,23 +76,23 @@ public class LoginServlet extends HttpServlet {
                     case "staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
-                    case "customer":
-                        response.sendRedirect(request.getContextPath() + "/customer-profile");
+ case "customer":
+                        response.sendRedirect(request.getContextPath() + "/customerProfile");
                         break;
                     default:
                         // Handle unknown role or default to a common dashboard
-                        response.sendRedirect(request.getContextPath() + "/index.jsp");
+                        response.sendRedirect(request.getContextPath() + "/landing");
                         break;
                 }
             } else {
                 // Password mismatch
                 request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/login").forward(request, response);
             }
         } else {
             // User not found
             request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/login").forward(request, response);
         }
     }
 

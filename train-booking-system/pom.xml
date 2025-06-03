@@ -129,6 +129,15 @@
                 <failOnMissingWebXml>false</failOnMissingWebXml> <!-- Useful if web.xml is minimal or using annotations -->
             </configuration>
         </plugin>
+        <plugin>
+            <groupId>org.apache.tomcat.maven</groupId>
+            <artifactId>tomcat7-maven-plugin</artifactId>
+            <version>2.2</version>
+            <configuration>
+                <port>8080</port>
+                <path>/train-booking-system</path>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

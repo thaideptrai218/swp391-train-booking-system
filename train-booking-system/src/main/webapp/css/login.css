@@ -57,6 +57,19 @@ a {
     padding-left: 40px; /* Keep original padding for left */
     padding-right: 40px; /* Keep original padding for right */
     padding-bottom: 40px; /* Keep original padding for bottom */
+    animation: fadeInSlideUp 1s ease-out forwards; /* Apply animation */
+}
+
+/* Keyframe animation for fade-in and slide-up effect */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .login-header {

@@ -1,0 +1,113 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "DBContext",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.config.DBContext",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "BookingRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.BookingRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "CoachRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.CoachRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "PassengerRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.PassengerRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "PassengerTypeRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.PassengerTypeRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "PricingRuleRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.PricingRuleRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "RouteRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.RouteRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "SeatRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.SeatRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "StationRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.StationRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "TicketRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.TicketRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "TrainRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.TrainRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "TripRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.TripRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "TripStationRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.TripStationRepositoryImpl",
+            "projectName": "train-booking-system"
+        },
+        {
+            "type": "java",
+            "name": "UserRepositoryImpl",
+            "request": "launch",
+            "mainClass": "vn.vnrailway.dao.impl.UserRepositoryImpl",
+            "projectName": "train-booking-system"
+        }
+    ]
+}
