@@ -16,10 +16,8 @@ public class LocationRepositoryImpl implements LocationRepository {
     @Override
     public List<Location> getAllLocations() throws Exception {
         List<Location> locations = new ArrayList<>();
-        String sql = "SELECT LocationID, LocationName, City, Region, Link FROM Locations ORDER BY LocationID"; // Assuming
-                                                                                                               // a
-        // table named
-        // 'Locations'
+        // Added LocationCode to the SELECT statement
+        String sql = "SELECT LocationID, LocationCode, LocationName, City, Region, Link FROM Locations ORDER BY LocationID";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -27,6 +25,7 @@ public class LocationRepositoryImpl implements LocationRepository {
             while (rs.next()) {
                 Location location = new Location();
                 location.setLocationID(rs.getInt("LocationID"));
+                location.setLocationCode(rs.getString("LocationCode")); // Added
                 location.setLocationName(rs.getString("LocationName"));
                 location.setCity(rs.getString("City"));
                 location.setRegion(rs.getString("Region"));
@@ -49,8 +48,9 @@ public class LocationRepositoryImpl implements LocationRepository {
             String sortField, String sortOrder) throws Exception {
         List<Location> locations = new ArrayList<>();
         List<Object> params = new ArrayList<>();
+        // Added LocationCode to the SELECT statement
         StringBuilder sqlBuilder = new StringBuilder(
-                "SELECT LocationID, LocationName, City, Region, Link FROM Locations");
+                "SELECT LocationID, LocationCode, LocationName, City, Region, Link FROM Locations");
 
         // Filtering
         boolean hasFilter = false;
@@ -94,6 +94,7 @@ public class LocationRepositoryImpl implements LocationRepository {
                 while (rs.next()) {
                     Location location = new Location();
                     location.setLocationID(rs.getInt("LocationID"));
+                    location.setLocationCode(rs.getString("LocationCode")); // Added
                     location.setLocationName(rs.getString("LocationName"));
                     location.setCity(rs.getString("City"));
                     location.setRegion(rs.getString("Region"));

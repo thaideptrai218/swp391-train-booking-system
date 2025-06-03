@@ -65,15 +65,15 @@
               <c:forEach var="station" items="${stationList}">
                 <div class="location-item">
                   <img
-                    src="${pageContext.request.contextPath}/assets/images/landing/stations/station${station.stationID}.jpg"
-                    alt="Ga <c:out value='${station.stationName}'/>"
+                    src="${pageContext.request.contextPath}/assets/images/landing/stations/${station.stationCode}.jpg"
+                    alt="<c:out value='${station.stationName}'/>"
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/150x100?text=Image+Not+Found';" <%-- Fallback image --%>
                     style="width: 150px; height: 100px; object-fit: cover;" <%-- Basic styling for consistency --%>
                   />
                   <div class="location-info">
                     <h4 id="station-name-${station.stationID}">
                       <a href="#" onclick="showStationPopup('${station.stationName}', '${station.address}', '${station.phoneNumber}', '${station.stationID}'); return false;" class="station-name-link">
-                        <c:out value="Ga ${station.stationName}" />
+                        <c:out value="${station.stationName}" />
                       </a>
                     </h4>
                     <p>Địa chỉ: <c:out value="${station.address}" /></p>
@@ -133,7 +133,7 @@
               <c:forEach var="location" items="${locationList}">
                 <div class="location-card">
                   <img
-                    src="${pageContext.request.contextPath}/assets/images/landing/locations/location${location.locationID}.jpg"
+                    src="${pageContext.request.contextPath}/assets/images/landing/locations/${location.locationCode}.jpg"
                     alt="<c:out value='${location.locationName}'/>"
                     class="card-image"
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';" <%-- Fallback image --%>
