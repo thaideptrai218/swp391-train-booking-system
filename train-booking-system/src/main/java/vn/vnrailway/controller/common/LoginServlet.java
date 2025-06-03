@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.dao.UserRepository;
 import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
+import vn.vnrailway.utils.HashPassword;
 
 
 /**
@@ -64,7 +65,8 @@ public class LoginServlet extends HttpServlet {
         
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (user.getPasswordHash().equals(password)) {
+            // Use HashPassword.checkPassword for verification
+            if (HashPassword.checkPassword(password, user.getPasswordHash())) {
                 HttpSession session = request.getSession();
                 session.setAttribute("loggedInUser", user);
                 String role = user.getRole();
@@ -76,7 +78,7 @@ public class LoginServlet extends HttpServlet {
                     case "staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
- case "customer":
+                    case "customer":
                         response.sendRedirect(request.getContextPath() + "/customerProfile");
                         break;
                     default:

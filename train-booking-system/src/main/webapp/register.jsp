@@ -24,6 +24,7 @@
                         <i class="fa-solid fa-user icon"></i>
                         <input type="text" id="FullName" name="FullName" placeholder="Nhập họ và tên của bạn" required>
                     </div>
+                    <span class="error-message" id="fullNameError"></span>
                 </div>
                 <div class="form-group">
                     <label for="phone">Số điện thoại</label>
@@ -31,6 +32,7 @@
                         <i class="fa-solid fa-phone icon"></i>
                         <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại của bạn" required>
                     </div>
+                    <span class="error-message" id="phoneError"></span>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -38,6 +40,7 @@
                         <i class="fa-solid fa-envelope icon"></i>
                         <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
                     </div>
+                    <span class="error-message" id="emailError"></span>
                 </div>
                 <div class="form-group">
                     <label for="password">Mật khẩu</label>
@@ -46,6 +49,7 @@
                         <input type="password" id="password" name="password" placeholder="Nhập mật khẩu của bạn" required>
                         <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
                     </div>
+                    <span class="error-message" id="passwordError"></span>
                 </div>
                 <div class="form-group">
                     <label for="idCardNumber">Số CMND/CCCD</label>
@@ -53,6 +57,7 @@
                         <i class="fa-solid fa-id-card icon"></i> <!-- Assuming a suitable icon for ID card -->
                         <input type="text" id="idCardNumber" name="idCardNumber" placeholder="Nhập số CMND/CCCD của bạn" required>
                     </div>
+                    <span class="error-message" id="idCardNumberError"></span>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Xác nhận mật khẩu</label>
@@ -61,12 +66,8 @@
                         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu của bạn" required>
                         <i class="fa-solid fa-eye-slash toggle-password" id="toggleConfirmPassword"></i>
                     </div>
+                    <span class="error-message" id="confirmPasswordError"></span>
                 </div>
-                <%-- Display error message if present --%>
-                <% String errorMessage = (String) request.getAttribute("errorMessage"); %>
-                <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
-                    <p style="color: #dc3545; text-align: center; margin-top: -10px;"><%= errorMessage %></p>
-                <% } %>
                 <button type="submit" class="register-button">Xác Nhận</button>
             </form>
             <div class="login-section">
