@@ -18,22 +18,53 @@
                 <h2>Thay đổi mật khẩu</h2>
             </div>
 
-            <form id="changePasswordForm" class="password-form" novalidate>
+            <form id="changePasswordForm" class="password-form" action="${pageContext.request.contextPath}/changepassword" method="post" novalidate>
+                <%-- Display error message if present --%>
+                <% String errorMessage = (String) request.getAttribute("errorMessage"); %>
+                <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
+                    <div class="alert-message error-message-box">
+                        <p><%= errorMessage %></p>
+                    </div>
+                <% } %>
+
+                <%-- Display success message if present --%>
+                <% String successMessage = (String) request.getAttribute("successMessage"); %>
+                <% if (successMessage != null && !successMessage.isEmpty()) { %>
+                    <div class="alert-message success-message-box">
+                        <p><%= successMessage %></p>
+                    </div>
+                <% } %>
+
                 <div class="form-group">
-                    <label for="oldPassword">Mật khẩu cũ</label>
+                    <label for="emailOrPhone">Email hoặc Số điện thoại</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user icon"></i>
+                        <input 
+                            type="text" 
+                            id="emailOrPhone" 
+                            name="emailOrPhone" 
+                            placeholder="Nhập email hoặc số điện thoại"
+                            required
+                        >
+                    </div>
+                    <span class="error-message" id="emailOrPhoneError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentPassword">Mật khẩu cũ</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-lock icon"></i>
                         <input 
                             type="password" 
-                            id="oldPassword" 
-                            name="oldPassword" 
+                            id="currentPassword" 
+                            name="currentPassword" 
                             placeholder="Nhập mật khẩu cũ"
                             required
                             autocomplete="current-password"
                         >
-                        <i class="fa-solid fa-eye-slash toggle-password" id="toggleOldPassword"></i>
+                        <i class="fa-solid fa-eye-slash toggle-password" id="toggleCurrentPassword"></i>
                     </div>
-                    <span class="error-message" id="oldPasswordError"></span>
+                    <span class="error-message" id="currentPasswordError"></span>
                 </div>
 
                 <div class="form-group">
@@ -54,20 +85,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+                    <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-lock icon"></i>
                         <input 
                             type="password" 
-                            id="confirmPassword" 
-                            name="confirmPassword" 
+                            id="confirmNewPassword" 
+                            name="confirmNewPassword" 
                             placeholder="Nhập lại mật khẩu mới"
                             required
                             autocomplete="new-password"
                         >
-                        <i class="fa-solid fa-eye-slash toggle-password" id="toggleConfirmPassword"></i>
+                        <i class="fa-solid fa-eye-slash toggle-password" id="toggleConfirmNewPassword"></i>
                     </div>
-                    <span class="error-message" id="confirmPasswordError"></span>
+                    <span class="error-message" id="confirmNewPasswordError"></span>
                 </div>
 
                 <div class="form-actions">
@@ -81,9 +112,10 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <div class="success-message" id="successMessage" style="display: none;">
+    <%-- The success message div is now controlled by the servlet's attribute --%>
+    <%-- <div class="success-message" id="successMessage" style="display: none;">
         <p>Mật khẩu đã được thay đổi thành công!</p>
-    </div>
+    </div> --%>
 
     <script src="js/changepassword.js"></script>
 </body>
