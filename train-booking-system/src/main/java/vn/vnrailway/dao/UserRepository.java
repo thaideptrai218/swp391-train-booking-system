@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface UserRepository {
     Optional<User> findById(int userId) throws SQLException;
     Optional<User> findByEmail(String email) throws SQLException;
+    Optional<User> findByPhone(String phone) throws SQLException;
     List<User> findAll() throws SQLException;
     User save(User user) throws SQLException; // Returns the saved user, possibly with generated ID
     boolean update(User user) throws SQLException;

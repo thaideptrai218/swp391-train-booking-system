@@ -45,6 +45,7 @@ a {
     border-radius: 20px;
     padding: 40px; /* Adjusted below to account for icon */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(10px); /* Frosted glass effect for Safari */
     backdrop-filter: blur(10px); /* Frosted glass effect */
     border: 1px solid rgba(255, 255, 255, 0.2);
     width: 100%;
@@ -164,6 +165,48 @@ a {
     margin-top: 10px;
 }
 
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+}
+
+.remember-me input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.remember-me input[type="checkbox"]:checked {
+    background-color: #93caff;
+    border-color: #93caff;
+}
+
+.remember-me input[type="checkbox"]:checked::after {
+    content: '\2713'; /* Checkmark character */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #10375c; /* Dark blue checkmark */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.remember-me label {
+    cursor: pointer;
+    margin-bottom: 0; /* Override default label margin */
+}
+
 .forgot-password {
     color: #7ef4ec; /* Light teal for links */
     font-size: 0.95rem;
@@ -187,11 +230,19 @@ a {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    
 }
 
 .login-button:hover {
     background-color: #0d2a47;
     transform: translateY(-2px);
+}
+
+.login-button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Ensure it takes full width to center effectively */
+    margin-top: 20px; /* Add some space above the button */
 }
 
 .social-login {
