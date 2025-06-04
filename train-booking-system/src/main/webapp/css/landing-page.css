@@ -560,6 +560,12 @@ table {
   transition: transform 0.5s ease-in-out; /* For CSS transform-based sliding if used */
 }
 
+.location-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block; /* Ensures the link takes up the card's space */
+}
+
 .location-card {
   background-color: var(--color-bg-card);
   border-radius: var(--border-radius-card);

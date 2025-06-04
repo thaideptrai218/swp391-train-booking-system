@@ -12,9 +12,11 @@
     <section class="hero" style="background-image: url('${pageContext.request.contextPath}/assets/images/landing/top_BG.png'); background-size: cover; background-position: center;">
       <header class="navbar">
         <div class="container">
-          <div class="logo-block">
-            <img src="${pageContext.request.contextPath}/assets/images/landing/logo.svg" alt="Logo" class="logo" />
-          </div>
+          <a href="${pageContext.request.contextPath}/landing" class="logo-block-link"> <%-- Added anchor tag --%>
+            <div class="logo-block">
+              <img src="${pageContext.request.contextPath}/assets/images/landing/logo.svg" alt="Logo" class="logo" />
+            </div>
+          </a>
           <nav>
             <ul class="nav-list">
               <li><a href="#">Tìm vé</a></li>
@@ -72,7 +74,7 @@
                   />
                   <div class="location-info">
                     <h4 id="station-name-${station.stationID}">
-                      <a href="#" onclick="showStationPopup('${station.stationName}', '${station.address}', '${station.phoneNumber}', '${station.stationID}'); return false;" class="station-name-link">
+                      <a href="#" onclick="showStationPopup('${station.stationName}', '${station.address}', '${station.phoneNumber}', '${station.stationCode}'); return false;" class="station-name-link">
                         <c:out value="${station.stationName}" />
                       </a>
                     </h4>
@@ -130,20 +132,22 @@
               <c:if test="${empty locationList and empty locationErrorMessage}">
                 <p>Không có địa điểm nổi bật nào để hiển thị.</p>
               </c:if>
-              <c:forEach var="location" items="${locationList}">
-                <div class="location-card">
-                  <img
-                    src="${pageContext.request.contextPath}/assets/images/landing/locations/${location.locationCode}.jpg"
-                    alt="<c:out value='${location.locationName}'/>"
-                    class="card-image"
-                    onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';" <%-- Fallback image --%>
-                  />
-                  <div class="card-content">
-                    <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
-                    <p>Thành phố: <c:out value="${location.city}" /></p>
-                    <p>Vùng: <c:out value="${location.region}" /></p>
+              <c:forEach var="location" items="${locationList}" varStatus="loop" begin="0" end="5"> <%-- Added varStatus, begin, and end --%>
+                <a href="${location.link}" class="location-card-link" target="_blank"> <%-- Added target="_blank" to open in new tab --%>
+                  <div class="location-card">
+                    <img
+                      src="${pageContext.request.contextPath}/assets/images/landing/locations/${location.locationCode}.jpg"
+                      alt="<c:out value='${location.locationName}'/>"
+                      class="card-image"
+                      onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';" <%-- Fallback image --%>
+                    />
+                    <div class="card-content">
+                      <h4 class="card-title"><c:out value="${location.locationName}" /></h4>
+                      <p>Thành phố: <c:out value="${location.city}" /></p>
+                      <p>Vùng: <c:out value="${location.region}" /></p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </c:forEach>
             </div>
           </div>
@@ -198,7 +202,7 @@
           <h2>Đặt vé ngay tại đây</h2>
           <p>Tận hưởng trải nghiệm dịch vụ tốt nhất và đến nơi mà bạn mơ ước</p>
           <p>Liên hệ ngay: 0963868888</p>
-          <button class="btn btn-primary btn-book-now-footer">Đặt vé</button>
+          <a href="${pageContext.request.contextPath}/searchTrip" class="btn btn-primary btn-book-now-footer" style="text-decoration: none;">đặt vé</a>
         </div>
       </div>
 
