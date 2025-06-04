@@ -47,7 +47,7 @@
                     </div>
                     <span class="error-message" id="emailError"></span>
                 </div>                <div class="form-actions" style="justify-content: center;">
-                    <button type="submit" class="login-button">Gửi Liên Kết Đặt Lại</button>
+                    <button type="submit" class="login-button">Gửi Mã OTP Để Đổi Mật Khẩu</button>
                 </div>
             </form>
             

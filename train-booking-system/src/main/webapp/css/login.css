@@ -254,6 +254,23 @@ a {
     text-decoration: underline;
 }
 
+.error-message-server {
+    color: #ff0000;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.success-message {
+    color: #28a745;
+    text-align: center;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .login-card {

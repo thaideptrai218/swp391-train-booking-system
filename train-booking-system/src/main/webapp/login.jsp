@@ -36,7 +36,7 @@
                 <%-- Display error message if present --%>
                 <% String errorMessage = (String) request.getAttribute("errorMessage"); %>
                 <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
-                    <p style="color: #dc3545; text-align: center; margin-top: -10px;"><%= errorMessage %></p>
+                    <div class="error-message-server"><%= errorMessage %></div>
                 <% } %>
                 <div class="form-actions">
                     <a href="${pageContext.request.contextPath}/forgotpassword" class="forgot-password">Quên mật khẩu?</a>
@@ -55,6 +55,22 @@
             </div>
         </div>
     </div>
+    <%-- Server-side message display --%>
+    <%
+        String pageMessage = (String) request.getAttribute("message");
+        String pageMessageType = (String) request.getAttribute("messageType");
+        if (pageMessage != null && !pageMessage.isEmpty()) {
+            String messageClass = "server-message ";
+            if ("success".equals(pageMessageType)) {
+                messageClass += "success-message";
+            } else {
+                messageClass += "error-message-server";
+            }
+    %>
+        <div class="<%= messageClass %>"><%= pageMessage %></div>
+    <%
+        }
+    %>
     <script src="js/login.js"></script>
 </body>
 </html>
