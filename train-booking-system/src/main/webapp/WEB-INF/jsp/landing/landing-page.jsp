@@ -24,8 +24,33 @@
               <li><a href="#">Kiểm tra vé</a></li>
               <li><a href="#">Trả vé</a></li>
               <li><a href="#">Hotline</a></li>
-              <li><a href="#">Đăng nhập</a></li>
-              <li class="btn"><a href="#">Đăng kí</a></li>
+              <c:choose>
+                <c:when test="${not empty sessionScope.loggedInUser and sessionScope.loggedInUser.role == 'Customer'}">
+                  <li class="profile-dropdown-container">
+                    <a href="javascript:void(0);" id="profileIcon" class="nav-profile-icon" title="Trang cá nhân">👤</a>
+                    <div class="profile-dropdown-menu" id="profileDropdown">
+                      <div class="dropdown-header">
+                        <%-- Assuming user object has a 'avatarUrl' and 'fullName' or similar --%>
+                        <%-- <img src="${not empty sessionScope.loggedInUser.avatarUrl ? sessionScope.loggedInUser.avatarUrl : pageContext.request.contextPath += '/assets/images/icons/default-avatar.png'}" alt="Avatar" class="dropdown-avatar"/> --%>
+                        <span class="dropdown-username">${sessionScope.loggedInUser.fullName}</span> <%-- Adjust if property name is different --%>
+                      </div>
+                      <a href="${pageContext.request.contextPath}/customer-profile" class="dropdown-item">👥 Xem tất cả trang cá nhân</a>
+                      <a href="#" class="dropdown-item">⚙️ Cài đặt và quyền riêng tư <span class="arrow-right">➡️</span></a>
+                      <a href="#" class="dropdown-item">❓ Trợ giúp và hỗ trợ <span class="arrow-right">➡️</span></a>
+                      <a href="#" class="dropdown-item">🌙 Màn hình & trợ năng <span class="arrow-right">➡️</span></a>
+                      <a href="#" class="dropdown-item">💬 Đóng góp ý kiến</a>
+                      <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout-item">🚪 Đăng xuất</a>
+                    </div>
+                  </li>
+                  <%-- The original logout link is now inside the dropdown, so we can remove the standalone one if desired,
+                       or keep it if the dropdown is an additional feature. For now, assuming it replaces the direct logout link. --%>
+                  <%-- <li><a href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li> --%>
+                </c:when>
+                <c:otherwise>
+                  <li><a href="${pageContext.request.contextPath}/login">Đăng nhập</a></li>
+                  <li class="btn"><a href="${pageContext.request.contextPath}/register">Đăng kí</a></li>
+                </c:otherwise>
+              </c:choose>
             </ul>
           </nav>
         </div>

@@ -41,6 +41,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Profile Dropdown Toggle
+    const profileIcon = document.getElementById('profileIcon');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    if (profileIcon && profileDropdown) {
+        profileIcon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent click from immediately closing dropdown
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (profileDropdown.style.display === 'block' && !profileIcon.contains(event.target) && !profileDropdown.contains(event.target)) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+    } else {
+        if (!profileIcon) console.warn('Profile icon with ID "profileIcon" not found.');
+        if (!profileDropdown) console.warn('Profile dropdown with ID "profileDropdown" not found.');
+    }
 });
 
 // Hot Locations Carousel Functionality
