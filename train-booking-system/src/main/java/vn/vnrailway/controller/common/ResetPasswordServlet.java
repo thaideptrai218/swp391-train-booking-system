@@ -9,8 +9,14 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import vn.vnrailway.dao.UserDAO;
 
-@WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/resetpassword"})
+@WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/newpassword"})  // Changed from /resetpassword
 public class ResetPasswordServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/newpassword.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -49,9 +55,9 @@ public class ResetPasswordServlet extends HttpServlet {
 
         if (updateSuccess) {
             session.invalidate();
-            request.setAttribute("message", "Mật khẩu đã được đặt lại thành công.");
+            request.setAttribute("message", "Mật khẩu đã được đặt lại thành công!");
             request.setAttribute("messageType", "success");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/newpassword.jsp").forward(request, response);
         } else {
             request.setAttribute("message", "Có lỗi xảy ra khi đặt lại mật khẩu.");
             request.setAttribute("messageType", "error");

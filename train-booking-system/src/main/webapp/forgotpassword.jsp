@@ -23,14 +23,8 @@
                 String pageMessage = (String) request.getAttribute("message");
                 String pageMessageType = (String) request.getAttribute("messageType");
                 if (pageMessage != null && !pageMessage.isEmpty()) {
-                    String messageClass = "server-message ";
-                    if ("success".equals(pageMessageType)) {
-                        messageClass += "success-message";
-                    } else {
-                        messageClass += "error-message-server";
-                    }
             %>
-                <div class="<%= messageClass %>"><%= pageMessage %></div>
+                <div class="error-message-server"><%= pageMessage %></div>
             <%
                 }
             %>

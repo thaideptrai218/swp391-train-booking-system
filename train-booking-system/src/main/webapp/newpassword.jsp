@@ -26,16 +26,32 @@
                     String messageClass = "server-message ";
                     if ("success".equals(pageMessageType)) {
                         messageClass += "success-message";
+            %>
+                        <div class="<%= messageClass %>"><%= pageMessage %></div>
+                        <div class="countdown">Tự động trở về trang đăng nhập sau <span id="timer">5</span> giây</div>
+                        <script>
+                            let timeLeft = 5;
+                            const timerElement = document.getElementById('timer');
+                            const countdownInterval = setInterval(() => {
+                                timeLeft--;
+                                timerElement.textContent = timeLeft;
+                                if (timeLeft <= 0) {
+                                    clearInterval(countdownInterval);
+                                    window.location.href = '${pageContext.request.contextPath}/login';
+                                }
+                            }, 1000);
+                        </script>
+            <%
                     } else {
                         messageClass += "error-message-server";
-                    }
             %>
-                <div class="<%= messageClass %>"><%= pageMessage %></div>
+                        <div class="<%= messageClass %>"><%= pageMessage %></div>
             <%
+                    }
                 }
             %>
 
-            <form id="newPasswordForm" action="${pageContext.request.contextPath}/resetpassword" method="post" class="login-form">
+            <form id="newPasswordForm" action="${pageContext.request.contextPath}/newpassword" method="post" class="login-form">
                 <div class="form-group">
                     <label for="newPassword">Mật khẩu mới</label>
                     <div class="input-wrapper">

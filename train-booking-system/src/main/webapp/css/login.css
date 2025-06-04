@@ -305,8 +305,8 @@ a {
     text-decoration: underline;
 }
 
-.error-message-server {
-    color: #ff0000;
+.success-message {
+    color: #00ff3c;
     font-weight: bold;
     text-align: center;
     margin: 10px 0;
@@ -314,8 +314,16 @@ a {
     border-radius: 5px;
 }
 
-.success-message {
-    color: #28a745;
+.countdown {
+    color: #00ff3c;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.error-message-server {
+    color: #ff0000;
+    font-weight: bold;
     text-align: center;
     margin: 10px 0;
     padding: 10px;

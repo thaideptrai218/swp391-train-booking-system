@@ -43,7 +43,7 @@
                 <h2>Xác Nhận OTP</h2>
             </div>
 
-            <form id="otpForm" action="${pageContext.request.contextPath}/verifyotp" method="post" class="login-form">
+            <form id="otpForm" action="${pageContext.request.contextPath}/enterotp" method="post" class="login-form">
                 <p class="form-description">
                     Vui lòng nhập mã OTP đã được gửi đến email của bạn.<br>
                     Mã sẽ hết hạn sau 5 phút.

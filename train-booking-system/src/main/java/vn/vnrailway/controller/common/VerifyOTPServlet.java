@@ -8,8 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "VerifyOTPServlet", urlPatterns = {"/verifyotp"})
+@WebServlet(name = "VerifyOTPServlet", urlPatterns = {"/enterotp"})
 public class VerifyOTPServlet extends HttpServlet {
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -37,7 +43,7 @@ public class VerifyOTPServlet extends HttpServlet {
         
         if (storedOTP.equals(inputOTP)) {
             session.setAttribute("otpVerified", true);
-            response.sendRedirect(request.getContextPath() + "/newpassword.jsp");
+            response.sendRedirect(request.getContextPath() + "/newpassword");
         } else {
             request.setAttribute("message", "Mã OTP không chính xác.");
             request.setAttribute("messageType", "error");
