@@ -6,6 +6,7 @@
     <title>Bảng điều khiển quản trị</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -38,30 +39,91 @@
             <section class="cards-container">
                 <div class="card">
                     <h3>Tổng số người dùng</h3>
-                    <p>1,234</p>
+                    <p>${totalUsers}</p>
                 </div>
                 <div class="card">
                     <h3>Tổng số tàu</h3>
-                    <p>56</p>
+                    <p>${totalTrains}</p>
                 </div>
                 <div class="card">
                     <h3>Tổng số đặt chỗ</h3>
-                    <p>7,890</p>
+                    <p>${totalBookings}</p>
                 </div>
                 <div class="card">
                     <h3>Doanh thu</h3>
-                    <p>$123,456</p>
+                    <p>${totalRevenue}</p>
                 </div>
             </section>
 
             <section class="charts-container">
-                <h3>Xu hướng đặt chỗ (Chỗ giữ)</h3>
-                <div style="height: 300px; background-color: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666;">
-                    Biểu đồ sẽ ở đây (ví dụ: sử dụng Chart.js)
+                <h3>Xu hướng đặt chỗ (6 tháng gần nhất)</h3>
+                <div style="height: 400px;">
+                    <canvas id="bookingChart"></canvas>
                 </div>
             </section>
         </main>
     </div>
     <script src="${pageContext.request.contextPath}/js/admin-dashboard.js"></script>
+    <script>
+        const ctx = document.getElementById('bookingChart').getContext('2d');
+        // Parse JSON string thành object
+        const trends = JSON.parse('${bookingTrends}');
+        
+        // Lấy 6 tháng gần nhất
+        const sortedMonths = Object.keys(trends).sort().slice(-6);
+        const labels = sortedMonths.map(month => {
+            const [year, monthNum] = month.split('-');
+            return `Tháng ${monthNum}/${year}`;
+        });
+
+        const data = sortedMonths.map(month => trends[month]);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượng đặt chỗ',
+                    data: data,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Biểu đồ xu hướng đặt chỗ 6 tháng gần nhất',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return value.toLocaleString('vi-VN');
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
 </body>
 </html>
