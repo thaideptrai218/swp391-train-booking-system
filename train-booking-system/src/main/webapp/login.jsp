@@ -39,7 +39,7 @@
                     <p style="color: #dc3545; text-align: center; margin-top: -10px;"><%= errorMessage %></p>
                 <% } %>
                 <div class="form-actions">
-                    <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                    <a href="${pageContext.request.contextPath}/forgotpassword" class="forgot-password">Quên mật khẩu?</a>
                     <button type="submit" class="login-button">Đăng nhập</button>
                 </div>
             </form>

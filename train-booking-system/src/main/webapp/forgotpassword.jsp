@@ -35,7 +35,7 @@
                 }
             %>
 
-            <form id="forgotPasswordForm" action="${pageContext.request.contextPath}/forgot-password" method="post" class="login-form">
+            <form id="forgotPasswordForm" action="${pageContext.request.contextPath}/forgotpassword" method="post" class="login-form">
                 <p class="form-description">
                     Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để đặt lại mật khẩu.
                 </p>
