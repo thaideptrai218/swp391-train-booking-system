@@ -19,6 +19,7 @@ public class FeaturedRouteRepositoryImpl implements FeaturedRouteRepository {
         route.setOriginStationID(rs.getInt("OriginStationID"));
         route.setDestinationStationID(rs.getInt("DestinationStationID"));
         route.setDisplayName(rs.getString("DisplayName"));
+        route.setDestinationStationCode(rs.getString("DestinationStationCode"));
         route.setDistance(rs.getDouble("Distance"));
         route.setTripsPerDay(rs.getInt("TripsPerDay"));
         // Placeholder for popular train names
@@ -34,6 +35,7 @@ public class FeaturedRouteRepositoryImpl implements FeaturedRouteRepository {
                 "    fr.RouteID, " +
                 "    fr.OriginStationID, " +
                 "    fr.DestinationStationID, " +
+                "    s_dest.StationCode AS DestinationStationCode, " +
                 "    fr.DisplayName, " +
                 "    ABS(rs_dest.DistanceFromStart - rs_orig.DistanceFromStart) AS Distance, " +
                 "    (SELECT COUNT(*) FROM Trips t WHERE t.RouteID = fr.RouteID) AS TripsPerDay " +
@@ -46,8 +48,12 @@ public class FeaturedRouteRepositoryImpl implements FeaturedRouteRepository {
                 "JOIN " +
                 "    RouteStations rs_dest ON r.RouteID = rs_dest.RouteID AND fr.DestinationStationID = rs_dest.StationID "
                 +
+                "JOIN " +
+                "    Stations s_dest ON fr.DestinationStationID = s_dest.StationID " + // Join to get destination
+                                                                                       // station code
                 "GROUP BY " +
-                "    fr.FeaturedRouteID, fr.RouteID, fr.OriginStationID, fr.DestinationStationID, fr.DisplayName, " +
+                "    fr.FeaturedRouteID, fr.RouteID, fr.OriginStationID, fr.DestinationStationID, s_dest.StationCode, fr.DisplayName, "
+                +
                 "    rs_orig.DistanceFromStart, rs_dest.DistanceFromStart";
 
         try (Connection conn = DBContext.getConnection();
