@@ -14,16 +14,19 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession; // Added import
-import vn.vnrailway.dao.UserRepository; // Added import
-import vn.vnrailway.dao.impl.UserRepositoryImpl; // Added import
-import vn.vnrailway.model.User; // Added import
+import vn.vnrailway.dao.UserRepository;
+import vn.vnrailway.dao.impl.UserRepositoryImpl;
+import vn.vnrailway.model.User;
+import vn.vnrailway.utils.HashPassword; // Import HashPassword
 
 
 /**
  *
  * @author admin
  */
+
 @WebServlet("/changepassword")
+
 public class ChangePasswordServlet extends HttpServlet {
    
     /** 
@@ -86,20 +89,29 @@ public class ChangePasswordServlet extends HttpServlet {
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmNewPassword = request.getParameter("confirmNewPassword");
+        String emailOrPhone = request.getParameter("emailOrPhone");
 
         String errorMessage = null;
         String successMessage = null;
 
-        if (!newPassword.equals(confirmNewPassword)) {
+        // Validate email or phone
+        if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
+            errorMessage = "Vui lòng nhập email hoặc số điện thoại.";
+        } else if (!emailOrPhone.equals(loggedInUser.getEmail()) && !emailOrPhone.equals(loggedInUser.getPhoneNumber())) {
+            errorMessage = "Email hoặc số điện thoại không khớp với tài khoản của bạn.";
+        } else if (newPassword.length() < 8) { // New password length validation
+            errorMessage = "Mật khẩu mới phải có ít nhất 8 ký tự.";
+        } else if (!newPassword.equals(confirmNewPassword)) {
             errorMessage = "Mật khẩu mới và xác nhận mật khẩu mới không khớp.";
         } else {
             UserRepository userRepository = new UserRepositoryImpl();
             try {
-                // Verify current password (plain-text comparison)
-                if (currentPassword.equals(loggedInUser.getPasswordHash())) {
-                    // Update user's password in the database (plain-text)
-                    loggedInUser.setPasswordHash(newPassword);
-                    userRepository.update(loggedInUser); // Assuming an update method exists in UserRepository
+                // Verify current password using BCrypt
+                if (HashPassword.checkPassword(currentPassword, loggedInUser.getPasswordHash())) {
+                    // Hash the new password before updating
+                    String hashedNewPassword = HashPassword.hashPassword(newPassword);
+                    loggedInUser.setPasswordHash(hashedNewPassword);
+                    userRepository.update(loggedInUser);
 
                     successMessage = "Mật khẩu đã được thay đổi thành công.";
                     // Update the session user object as well

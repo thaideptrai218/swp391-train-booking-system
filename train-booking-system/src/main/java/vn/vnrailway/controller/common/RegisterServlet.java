@@ -7,8 +7,11 @@ package vn.vnrailway.controller.common;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,13 +19,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import vn.vnrailway.dao.UserRepository;
 import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
+import vn.vnrailway.utils.HashPassword; // Import HashPassword for hashing the password
 
 
 /**
  *
  * @author admin
  */
+
 @WebServlet("/register")
+
 public class RegisterServlet extends HttpServlet {
    
         
@@ -83,28 +89,62 @@ public class RegisterServlet extends HttpServlet {
 
         String errorMessage = null;
 
-        if (!password.equals(confirmPassword)) {
+        // 1. Password length validation
+        if (password.length() < 8) {
+            errorMessage = "Mật khẩu phải có ít nhất 8 ký tự.";
+        } else if (!password.equals(confirmPassword)) {
             errorMessage = "Mật khẩu xác nhận không khớp.";
-        } else {
-            UserRepository userRepository = new UserRepositoryImpl();
-            try {
-                // Check if email already exists
-                if (userRepository.findByEmail(email).isPresent()) {
-                    errorMessage = "Email đã được đăng ký.";
-                } else {
-                    // Assuming 'fullName' is used as 'userName' for login
-                    // In a real application, you might want a separate username field or generate one.
-                    // Added an empty string for 'address' as it's a new field in User model
-                    User newUser = new User(fullName, password, fullName, email, phoneNumber, idCardNumber, "", "Customer"); // Default role "Customer"
+        }
 
-                    userRepository.save(newUser);
-                    response.sendRedirect(request.getContextPath() + "/login.jsp?registrationSuccess=true");
-                    return; // Important to return after redirect
-                }
-            } catch (SQLException e) {
-                errorMessage = "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.";
-                e.printStackTrace(); // Log the exception for debugging
+        // 2. Email format validation
+        if (errorMessage == null) {
+            String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+            Pattern emailPattern = Pattern.compile(emailRegex);
+            Matcher emailMatcher = emailPattern.matcher(email);
+            if (!emailMatcher.matches()) {
+                errorMessage = "Email không đúng định dạng.";
             }
+        }
+
+        // 3. Phone number validation (starts with 0 and contains only digits)
+        if (errorMessage == null) {
+            if (!phoneNumber.startsWith("0") || !phoneNumber.matches("\\d+")) {
+                errorMessage = "Số điện thoại phải bắt đầu bằng 0 và chỉ chứa các chữ số.";
+            }
+        }
+
+        // 4. CCCD length and digit validation (exactly 12 digits)
+        if (errorMessage == null) {
+            if (idCardNumber.length() != 12 || !idCardNumber.matches("\\d+")) {
+                errorMessage = "CCCD phải có đúng 12 chữ số.";
+            }
+        }
+
+        if (errorMessage != null) {
+            request.setAttribute("errorMessage", errorMessage);
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
+            return; // Stop further processing if there's an error
+        }
+
+        // If all validations pass, proceed with user registration
+        UserRepository userRepository = new UserRepositoryImpl();
+        try {
+            // Check if email already exists
+            if (userRepository.findByEmail(email).isPresent()) {
+                errorMessage = "Email đã được đăng ký.";
+            } else {
+                // Hash the password before saving
+                String hashedPassword = HashPassword.hashPassword(password);
+                
+                User newUser = new User(fullName, hashedPassword, fullName, email, phoneNumber, idCardNumber, "", "Customer"); // Default role "Customer"
+
+                userRepository.save(newUser);
+                response.sendRedirect(request.getContextPath() + "/login.jsp?registrationSuccess=true");
+                return; // Important to return after redirect
+            }
+        } catch (SQLException e) {
+            errorMessage = "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.";
+            e.printStackTrace(); // Log the exception for debugging
         }
 
         request.setAttribute("errorMessage", errorMessage);

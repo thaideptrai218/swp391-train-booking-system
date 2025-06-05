@@ -22,8 +22,8 @@
               <li><a href="#">Kiểm tra vé</a></li>
               <li><a href="#">Trả vé</a></li>
               <li><a href="#">Hotline</a></li>
-              <li><a href="#">Đăng nhập</a></li>
-              <li class="btn"><a href="#">Đăng kí</a></li>
+              <li><a href="${pageContext.request.contextPath}/login">Đăng nhập</a></li>
+              <li class="btn"><a href="${pageContext.request.contextPath}/register">Đăng kí</a></li>
             </ul>
           </nav>
         </div>
