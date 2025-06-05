@@ -1,0 +1,363 @@
+/* Reset and base styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;  /* Changed from #f5f5f5 to white */
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Header styles */
+header {
+  background-color: #10375C;
+  width: 100%;
+  height: 107px;
+  flex-shrink: 0;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Left section - Logo */
+.logo {
+  flex: 0 0 200px;
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+  padding-left: 15px; /* Add some padding to push logo right */
+  padding-top: 3px; /* Push logo down slightly */
+}
+
+.logo img {
+  width: 90%; /* Increased from 80% */
+  height: auto;
+  object-fit: contain;
+}
+
+/* Center section - Main navigation */
+.menu {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+  margin-left: -120px; /* Push menu items towards center */
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+  margin: 0 20px; /* Increase spacing between menu items */
+  font-size: 14px;
+  font-weight: bold;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.menu a:hover {
+  color: #ddd;
+}
+
+/* Right section - Auth buttons */
+.auth-buttons {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Reduced from 20px */
+  margin-left: 20px; /* Reduced from 40px */
+  margin-right: 20px;
+}
+
+.auth-buttons a {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: bold; /* Added font-weight: bold */
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-register {
+  background-color: #3498db;
+  padding: 8px 20px;
+  border-radius: 20px;
+}
+
+.btn-register:hover {
+  background-color: #2980b9;
+  color: white;
+}
+
+.auth-buttons a:hover {
+  color: #7FCEF2;
+}
+
+/* Main content styles */
+main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  /* Removed box-shadow since background is now white */
+}
+
+/* Train selection section */
+.train-selection {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.train-selection h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-align: left;  /* Changed from center */
+}
+
+.train-options {
+  list-style-type: disc;
+  width: 100%;  /* Changed from 60% */
+  margin: 0 0 30px 0;  /* Changed margin to align left */
+  padding-left: 20px;  /* Add some padding for the bullet points */
+  text-align: left;
+}
+
+.train-options li {
+  margin-bottom: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Info container with text and image */
+.info-container {
+  display: flex;
+  margin: 30px auto;
+  max-width: 1000px;
+  gap: 30px;
+  align-items: center;
+}
+
+.info-text {
+  flex: 1;
+}
+
+.info-text p {
+  margin: 0;
+  line-height: 1.8;
+  color: #444;
+}
+
+.info-image {
+  flex: 1;
+}
+
+.info-image img {
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  height: 200px;
+}
+
+/* Train details section */
+.train-details {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 40px;
+  text-align: left;
+}
+
+.train-details h3 {
+  color: #333;
+  font-size: 24px;
+  margin: 40px 0 20px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.train-details h4 {
+  color: #444;
+  font-size: 20px;
+  margin: 30px 0 15px;
+  text-align: left;
+}
+
+.train-details img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 20px 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.train-details ul {
+  width: 100%;
+  margin: 15px 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.train-details li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 16px;
+  text-align: left;
+}
+
+.train-details p {
+  width: 100%;
+  margin: 20px 0;
+  line-height: 1.8;
+  font-size: 16px;
+  color: #444;
+  text-align: left;
+}
+
+.train-details strong {
+  color: #10375C;
+  font-weight: bold;
+}
+
+/* General image styles */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Station table styles */
+.station-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  background-color: #fff;
+}
+
+.station-table th {
+  background-color: #2F80ED;  /* Changed from #7FCEF2 to #2F80ED */
+  color: white;
+  padding: 12px;
+  text-align: center;
+}
+
+.station-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.station-table tr:nth-child(even) {
+  background-color: #E8F4F9;
+}
+
+.station-table tr:nth-child(2), .station-table tr:nth-child(4) {
+  background-color: #E8F4F9;
+}
+
+.station-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Footer styles */
+footer {
+  background-color: #10375C;
+  color: white;
+  padding: 0;  /* Changed from padding: 20px 0 */
+  margin-top: 40px;
+  text-align: center;
+}
+
+.footer-content {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  background-color: #006DAE;
+  padding: 15px 0;
+  margin: 0;  /* Remove bottom margin */
+  width: 100%;
+}
+
+.footer-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;  /* Remove margins */
+  background: #2C215D;
+  padding: 20px;
+  border: 1px solid #000;
+  width: 100%;  /* Make it full width */
+  box-sizing: border-box;  /* Include padding in width calculation */
+}
+
+.social-links p {
+  margin: 0;
+  font-size: 16px;
+  color: white;
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 20px;
+}
+
+.social-icons img {
+  width: 30px;
+  height: 30px;
+}
+
+/* Footer logo styles */
+.footer-logo {
+  margin-top: 30px;  /* Add space between social links and logo */
+  text-align: center;
+  width: 100%;
+}
+
+.footer-logo img {
+  width: 180px;  /* Increased from 120px */
+  display: block;
+  margin: 0 auto;  /* Center the image */
+}
+
+.footer-motto {
+  color: white;
+  font-style: italic;
+  margin: 20px 0;
+  font-size: 16px;
+}
+
+.copyright {
+  color: #ccc;
+  font-size: 14px;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+}
