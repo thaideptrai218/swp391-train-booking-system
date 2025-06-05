@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class StaffDashboardDAO {
     
     public int getPendingBookings() {
-        String sql = "SELECT COUNT(*) as total FROM dbo.Bookings WHERE Status = 'PENDING'";
+        String sql = "SELECT COUNT(*) as total FROM dbo.Bookings WHERE Status = 'Pending'";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

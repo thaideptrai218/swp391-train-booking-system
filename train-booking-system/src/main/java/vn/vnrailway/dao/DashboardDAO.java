@@ -48,7 +48,7 @@ public class DashboardDAO {
     }
     
     public double getTotalRevenue() {
-        String sql = "SELECT SUM(Amount) as total FROM dbo.PaymentTransactions WHERE Status = 'COMPLETED'";
+        String sql = "SELECT SUM(TotalPrice) as total FROM dbo.Bookings WHERE BookingStatus = 'Confirmed' AND PaymentStatus = 'Paid'";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

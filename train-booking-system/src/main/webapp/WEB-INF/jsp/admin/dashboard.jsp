@@ -69,8 +69,8 @@
         // Parse JSON string thành object
         const trends = JSON.parse('${bookingTrends}');
         
-        // Lấy 6 tháng gần nhất
-        const sortedMonths = Object.keys(trends).sort().slice(-6);
+        // Keys should already be sorted and limited to last 6 months from backend
+        const sortedMonths = Object.keys(trends).sort(); // .sort() is a good safety for "yyyy-MM" string keys
         const labels = sortedMonths.map(month => {
             const [year, monthNum] = month.split('-');
             return `Tháng ${monthNum}/${year}`;

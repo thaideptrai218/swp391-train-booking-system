@@ -9,11 +9,11 @@ public class BookingTrendDAO {
     public Map<String, Integer> getBookingTrends() {
         Map<String, Integer> trends = new LinkedHashMap<>();
         
-        String sql = "SELECT FORMAT(CreatedAt, 'yyyy-MM') as Month, " +
+        String sql = "SELECT FORMAT(BookingDateTime, 'yyyy-MM') as Month, " +
                     "COUNT(*) as BookingCount " +
                     "FROM dbo.Bookings " +
-                    "WHERE CreatedAt >= DATEADD(MONTH, -6, GETDATE()) " +
-                    "GROUP BY FORMAT(CreatedAt, 'yyyy-MM') " +
+                    "WHERE BookingDateTime >= DATEADD(MONTH, -6, GETDATE()) " +
+                    "GROUP BY FORMAT(BookingDateTime, 'yyyy-MM') " +
                     "ORDER BY Month";
                     
         try (Connection conn = DBContext.getConnection();
