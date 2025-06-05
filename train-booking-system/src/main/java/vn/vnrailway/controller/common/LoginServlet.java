@@ -25,9 +25,7 @@ import vn.vnrailway.utils.HashPassword;
  *
  * @author admin
  */
-
 @WebServlet("/login")
-
 public class LoginServlet extends HttpServlet {
    
     /** 
@@ -119,7 +117,7 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
                     case "Customer":
-                        response.sendRedirect(request.getContextPath() + "/customerProfile");
+                        response.sendRedirect(request.getContextPath() + "/landing");
                         break;
                     default:
                         response.sendRedirect(request.getContextPath() + "/landing");

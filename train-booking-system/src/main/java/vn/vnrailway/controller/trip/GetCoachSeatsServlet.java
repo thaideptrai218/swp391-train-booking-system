@@ -1,4 +1,4 @@
-package vn.vnrailway.controller;
+package vn.vnrailway.controller.trip;
 
 import vn.vnrailway.dao.SeatRepository;
 import vn.vnrailway.dao.impl.SeatRepositoryImpl;

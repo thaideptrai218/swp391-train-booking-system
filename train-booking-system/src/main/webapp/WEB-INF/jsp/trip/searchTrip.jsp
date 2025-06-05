@@ -39,14 +39,16 @@
                                     <input
                                         type="text"
                                         id="original-station"
-                                        name="original-station-name" 
+                                        name="original-station-name"
+                                        value="${prefill_originalStationName}"
+                                        class="${not empty prefill_originalStationName ? 'has-value' : ''}"
                                         autocomplete="off"
                                         onfocus="this.classList.add('has-value')"
                                         onblur="if(!this.value) this.classList.remove('has-value')"
                                         required
                                     />
                                     <label for="original-station">Ga đi</label>
-                                    <input type="hidden" id="original-station-id" name="originalStationId" />
+                                    <input type="hidden" id="original-station-id" name="originalStationId" value="${prefill_originalStationId}" />
                                     <div id="original-station-suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
@@ -59,6 +61,8 @@
                                         type="text"
                                         id="destination-station"
                                         name="destination-station-name"
+                                        value="${prefill_destinationStationName}"
+                                        class="${not empty prefill_destinationStationName ? 'has-value' : ''}"
                                         autocomplete="off"
                                         onfocus="this.classList.add('has-value')"
                                         onblur="if(!this.value) this.classList.remove('has-value')"
@@ -67,7 +71,7 @@
                                     <label for="destination-station"
                                         >Ga đến</label
                                     >
-                                    <input type="hidden" id="destination-station-id" name="destinationStationId" />
+                                    <input type="hidden" id="destination-station-id" name="destinationStationId" value="${prefill_destinationStationId}" />
                                     <div id="destination-station-suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>

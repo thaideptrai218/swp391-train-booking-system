@@ -1,87 +1,140 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f8f9fa;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f8f9fa;
 }
 
 .navbar {
-    background-color: #042c57;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 30px;
-    align-items: center;
+  background-color: #042c57;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 30px;
+  align-items: center;
 }
 
 .navbar a {
-    color: white;
-    margin: 27px;
-    text-decoration: none;
-    font-weight: bold
+  color: white;
+  margin: 27px;
+  text-decoration: none;
+  font-weight: bold
 }
 
 .logo {
-    width: 12%;
+  width: 12%;
 }
 
 .auth a {
-    margin-left: 10px;
-    padding: 5px 10px;
+  margin-left: 10px;
+  padding: 5px 10px;
 }
 
 .register {
-    background-color: #007bff;
-    color: white;
-    border-radius: 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 20px;
 }
-
-/* .steps {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-  background-color: #fff;
-  padding: 10px;
-  border-bottom: 2px solid #ccc;
-}
-
-.step {
-  flex: 1;
-  text-align: center;
-  color: gray;
-}
-
-.step.active {
-  color: #007bff;
-  font-weight: bold;
-} */
 
 .main-content {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; 
-    gap: 30px; 
-    padding: 20px;
-    margin: 20px;
+  display: flex;
+  justify-content: center;
+  /* align-items: flex-start; */
+  gap: 30px;
+  padding: 20px;
+  margin: 20px;
 }
 
 .check-info {
-    margin: 40px auto 20px auto;
+  margin: 40px auto 20px auto;
+  /* text-align: center; */
 }
 
-.et-main-label {
-    background: url(images/label_bg.png) right bottom no-repeat #0082c4;
-    padding: 5px 40px 5px 10px;
-    margin-left: 5px;
-    color: #fff;
-    font-family: Verdana;
+.form-checking {
+  text-align: start;
 }
+
+.check-info table {
+  margin: 0 auto;
+  /* Canh giữa bảng */
+}
+
+
+
+.et-main-label {
+  background: url('../assets/images/label_bg.png') right bottom no-repeat #0082c4;
+  padding: 5px 40px 5px 10px;
+  margin-left: 5px;
+  color: #fff;
+  font-family: Verdana;
+}
+
 
 .check-info input,
 .check-info button {
-    padding: 10px;
-    border-radius: 10px;
-    width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
 }
+
+.route-info {
+  background-color: #d9edf7;
+  text-align: left;
+  font-weight: bold;
+}
+
+.booking-summary h3 {
+  margin-top: 30px;
+  color: #333;
+}
+
+.booking-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white;
+}
+
+.booking-summary th,
+.booking-summary td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.booking-summary th {
+  background-color: #007bff;
+  color: white;
+}
+
+
+.booking-info-grid {
+  max-width: 1000px;
+  margin-top: 10px;
+  padding: 15px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.form-row label {
+  width: 140px;
+  font-weight: normal;
+  margin-right: 10px;
+  color: #333;
+}
+
+.form-row input {
+  width: 200px;
+  padding: 6px 10px;
+  margin-right: 30px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 
 .footer {
   background-color: #003b65;
@@ -110,8 +163,8 @@ body {
   padding: 15px 10px;
   display: flex;
   justify-content: center;
-  align-items: center; 
-  gap: 20px; 
+  align-items: center;
+  gap: 20px;
 }
 
 .footer-social p {
@@ -152,3 +205,12 @@ hr {
   color: #ccc;
   font-size: 14px;
 }
+
+
+
+
+
+
+
+
+
