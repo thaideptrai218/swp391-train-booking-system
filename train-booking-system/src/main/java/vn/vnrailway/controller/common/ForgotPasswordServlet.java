@@ -31,7 +31,116 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+        String action = request.getParameter("action");
+
+        if ("resend".equals(action)) {
+            // Handle Resend OTP
+            HttpSession session = request.getSession();
+            String email = (String) session.getAttribute("email");
+            String message = "";
+            String messageType = "";
+
+            // Rate limiting for resend OTP
+            Long lastOTPSendTime = (Long) session.getAttribute("lastOTPSendTime");
+            long currentTime = System.currentTimeMillis();
+            long cooldownPeriod = 60 * 1000; // 60 seconds in milliseconds
+
+            if (lastOTPSendTime != null && (currentTime - lastOTPSendTime < cooldownPeriod)) {
+                long timeLeftInSeconds = (cooldownPeriod - (currentTime - lastOTPSendTime)) / 1000;
+                message = "Vui lòng đợi " + timeLeftInSeconds + " giây nữa trước khi gửi lại OTP.";
+                messageType = "error";
+                request.setAttribute("message", message);
+                request.setAttribute("messageType", messageType);
+                request.setAttribute("timeLeft", timeLeftInSeconds); // Pass timeLeft to JSP
+                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+                return;
+            }
+
+            if (email == null || email.trim().isEmpty()) {
+                message = "Không tìm thấy thông tin email để gửi lại OTP. Vui lòng thử lại từ bước quên mật khẩu.";
+                messageType = "error";
+                request.setAttribute("message", message);
+                request.setAttribute("messageType", messageType);
+                // Redirect to forgot password page as session might be lost or invalid
+                response.sendRedirect(request.getContextPath() + "/forgotpassword");
+                return;
+            }
+
+            try {
+                Properties props = new Properties();
+                props.put("mail.smtp.host", "smtp.gmail.com");
+                props.put("mail.smtp.port", "587");
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+
+                Random rand = new Random();
+                String otp = String.format("%06d", rand.nextInt(999999));
+                
+                System.out.println("Resending OTP: " + otp + " to email: " + email);
+
+                Session mailSession = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
+                    }
+                });
+                mailSession.setDebug(true);
+
+                Message mimeMessage = new MimeMessage(mailSession);
+                mimeMessage.setFrom(new InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
+                mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+                
+                mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+                mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+                mimeMessage.setSubject(MimeUtility.encodeText("Mã OTP Mới - Vetaure", "UTF-8", "B"));
+                
+                String messageContent = String.format(
+                    "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>" +
+                    "</head>" +
+                    "<body style='font-family: Arial, sans-serif;'>" +
+                    "<h2 style='color: #333;'>Xin chào,</h2>" +
+                    "<p>Đây là mã OTP mới của bạn theo yêu cầu gửi lại từ VeTauRe.</p>" +
+                    "<p>Mã OTP mới của bạn là: <span style='color: red; font-size: 24px; font-weight: bold;'>%s</span></p>" +
+                    "<br/>" +
+                    "<p>Nếu bạn không yêu cầu gửi lại mã OTP, vui lòng bỏ qua email này.</p>" +
+                    "<p>Mã OTP này sẽ hết hạn sau 5 phút.</p>" +
+                    "<br/>" +          
+                    "<h2 style='color: #333;'>Cảm ơn bạn đã sử dụng VeTauRe!</h2>" +
+                    "<h2 style='color: #333;'>Đội ngũ VeTauRe.</h2>" +
+                    "</body>" +
+                    "</html>", 
+                    otp);
+
+                mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
+                Transport.send(mimeMessage);
+
+                session.setAttribute("otp", otp);
+                session.setAttribute("otpTimestamp", System.currentTimeMillis());
+                session.setAttribute("lastOTPSendTime", System.currentTimeMillis()); // Update last send time
+
+                message = "Mã OTP mới đã được gửi đến email của bạn.";
+                messageType = "success";
+                request.setAttribute("message", message);
+                request.setAttribute("messageType", messageType);
+                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                e.printStackTrace();
+                System.out.println("Email resend error: " + e.getMessage());
+                
+                message = "Lỗi khi gửi lại email OTP. Vui lòng thử lại sau.";
+                messageType = "error";
+                request.setAttribute("message", message);
+                request.setAttribute("messageType", messageType);
+                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+            }
+        } else {
+            // Default GET request: show forgot password page
+            request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+        }
     }
 
     @Override

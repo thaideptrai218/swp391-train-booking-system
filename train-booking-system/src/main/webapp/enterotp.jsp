@@ -62,7 +62,7 @@
             </form>
             
             <div class="register-section">
-                <p>Chưa nhận được mã? <a href="${pageContext.request.contextPath}/resendotp" class="register-link">Gửi lại mã</a></p>
+                <p>Chưa nhận được mã? <a href="${pageContext.request.contextPath}/forgotpassword?action=resend" class="register-link">Gửi lại mã</a></p>
             </div>
         </div>
     </div>

@@ -7,9 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException; // Added for UserRepository
+import java.util.Optional; // Added for UserRepository
 import vn.vnrailway.dao.UserDAO;
+import vn.vnrailway.dao.UserRepository; // Added
+import vn.vnrailway.dao.impl.UserRepositoryImpl; // Added
+import vn.vnrailway.model.User; // Added
+import vn.vnrailway.utils.HashPassword; // Added
 
-@WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/newpassword"})  // Changed from /resetpassword
+@WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/newpassword"})
 public class ResetPasswordServlet extends HttpServlet {
 
     @Override
@@ -49,8 +55,38 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
+        // Check if new password is the same as the old password
+        UserRepository userRepository = new UserRepositoryImpl();
+        try {
+            Optional<User> userOptional = userRepository.findByEmail(email);
+            if (userOptional.isPresent()) {
+                User currentUser = userOptional.get();
+                if (HashPassword.checkPassword(newPassword, currentUser.getPasswordHash())) {
+                    request.setAttribute("message", "Mật khẩu mới không được trùng với mật khẩu cũ.");
+                    request.setAttribute("messageType", "error");
+                    request.getRequestDispatcher("/newpassword.jsp").forward(request, response);
+                    return;
+                }
+            } else {
+                // Should not happen if email in session is valid and OTP was verified
+                request.setAttribute("message", "Không tìm thấy thông tin người dùng.");
+                request.setAttribute("messageType", "error");
+                request.getRequestDispatcher("/newpassword.jsp").forward(request, response);
+                return;
+            }
+        } catch (SQLException e) {
+            // Log the error and inform the user
+            e.printStackTrace(); // Consider a proper logging mechanism
+            request.setAttribute("message", "Lỗi truy vấn cơ sở dữ liệu khi kiểm tra mật khẩu cũ.");
+            request.setAttribute("messageType", "error");
+            request.getRequestDispatcher("/newpassword.jsp").forward(request, response);
+            return;
+        }
+
         UserDAO userDAO = new UserDAO();
-        boolean updateSuccess = userDAO.updatePassword(email, newPassword);
+        // Hash the new password before updating
+        String hashedNewPassword = HashPassword.hashPassword(newPassword);
+        boolean updateSuccess = userDAO.updatePassword(email, hashedNewPassword);
         System.out.println("Password update result: " + updateSuccess);
 
         if (updateSuccess) {
