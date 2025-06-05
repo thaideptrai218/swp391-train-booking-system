@@ -259,7 +259,7 @@ public class BookingRepositoryImpl implements BookingRepository {
                 "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
                 "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID\r\n" + //
                 "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID\r\n" + //
-                "WHERE B.BookingCode = ? AND u.PhoneNumber = ? OR B.BookingCode = ? AND u.Email = ?;";
+                "WHERE (B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?);";
 
         CheckBookingDTO checkBookingDTO = null;
         List<InfoPassengerDTO> passengers = new ArrayList<>();
@@ -330,7 +330,7 @@ public class BookingRepositoryImpl implements BookingRepository {
             // () -> System.out.println("Booking with ID " + testBookingId + " not
             // found."));
 
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BKEF918C78D4C64E9681A42871BC62FDFC", "0912345678", "customer.an@example.com");
+            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK588C13461874490F905DD43C808A3ECA", "0912345678", "customer.an@example.com");
             if (checkBookingDTO != null) {
                 System.out.println("Booking details found:");
                 System.out.println("User Full Name: " + checkBookingDTO.getUserFullName());
