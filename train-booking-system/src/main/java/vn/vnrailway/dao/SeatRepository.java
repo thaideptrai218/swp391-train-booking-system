@@ -11,6 +11,16 @@ public interface SeatRepository {
     // Method to get seat status for a specific coach on a trip leg
     List<SeatStatusDTO> getCoachSeatsWithAvailability(int tripId, int coachId, int legOriginStationId, int legDestinationStationId) throws SQLException;
 
+    // New method to get seat status with price
+    List<SeatStatusDTO> getCoachSeatsWithAvailabilityAndPrice(
+            int tripId,
+            int coachId,
+            int legOriginStationId,
+            int legDestinationStationId,
+            java.sql.Timestamp bookingDateTime,
+            boolean isRoundTrip
+    ) throws SQLException;
+
     // Standard CRUD methods from existing Impl
     Optional<Seat> findById(int seatId) throws SQLException;
     List<Seat> findAll() throws SQLException;

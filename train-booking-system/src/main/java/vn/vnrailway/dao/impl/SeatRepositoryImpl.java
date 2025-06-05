@@ -37,6 +37,8 @@ public class SeatRepositoryImpl implements SeatRepository {
         dto.setTripBasePriceMultiplier(rs.getBigDecimal("TripBasePriceMultiplier"));
         dto.setEnabled(rs.getBoolean("IsEnabled"));
         dto.setAvailabilityStatus(rs.getString("AvailabilityStatus"));
+        // Map the new CalculatedPrice field from the SP
+        dto.setCalculatedPrice(rs.getBigDecimal("CalculatedPrice"));
         return dto;
     }
 
@@ -61,6 +63,40 @@ public class SeatRepositoryImpl implements SeatRepository {
         } catch (SQLException e) {
             // Log or handle more gracefully
             System.err.println("SQL Error in getCoachSeatsWithAvailability: " + e.getMessage());
+            throw e;
+        }
+        return seatStatusList;
+    }
+
+    @Override
+    public List<SeatStatusDTO> getCoachSeatsWithAvailabilityAndPrice(
+            int tripId,
+            int coachId,
+            int legOriginStationId,
+            int legDestinationStationId,
+            java.sql.Timestamp bookingDateTime,
+            boolean isRoundTrip) throws SQLException {
+        List<SeatStatusDTO> seatStatusList = new ArrayList<>();
+        // Updated to call the new stored procedure
+        String callSP = "{CALL dbo.GetCoachSeatsWithAvailabilityAndPrice(?, ?, ?, ?, ?, ?)}";
+
+        try (Connection conn = DBContext.getConnection();
+             CallableStatement cs = conn.prepareCall(callSP)) {
+
+            cs.setInt(1, tripId);
+            cs.setInt(2, coachId);
+            cs.setInt(3, legOriginStationId);
+            cs.setInt(4, legDestinationStationId);
+            cs.setTimestamp(5, bookingDateTime);
+            cs.setBoolean(6, isRoundTrip);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    seatStatusList.add(mapResultSetToSeatStatusDTO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Error in getCoachSeatsWithAvailabilityAndPrice: " + e.getMessage());
             throw e;
         }
         return seatStatusList;
