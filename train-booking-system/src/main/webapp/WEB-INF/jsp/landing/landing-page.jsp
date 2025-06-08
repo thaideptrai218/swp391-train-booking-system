@@ -36,8 +36,16 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
           </a>
           <nav>
             <ul class="nav-list">
-              <li><a href="#">Tìm vé</a></li>
-              <li><a href="#">Thông tin đặt chỗ</a></li>
+              <li>
+                <a href="${pageContext.request.contextPath}/searchTrip"
+                  >Tìm vé</a
+                >
+              </li>
+              <li>
+                <a href="${pageContext.request.contextPath}/checkBooking"
+                  >Thông tin đặt chỗ</a
+                >
+              </li>
               <li><a href="#">Kiểm tra vé</a></li>
               <li><a href="#">Trả vé</a></li>
               <li><a href="#">Hotline</a></li>

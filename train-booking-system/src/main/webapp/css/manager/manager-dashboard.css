@@ -1,0 +1,188 @@
+/* General Dashboard Styles */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Arial", sans-serif;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #f4f7fc;
+  overflow-y: auto; /* Allows scrolling for main content if it overflows */
+}
+
+.dashboard-header {
+  background-color: #007bff; /* Changed background to a primary color */
+  color: #ffffff; /* Text color white for better contrast */
+  padding: 30px 20px; /* Increased padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
+  margin-bottom: 30px; /* Increased margin */
+  text-align: center; /* Center align the content of the header */
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.2em; /* Increased font size */
+  font-weight: 600; /* Slightly bolder */
+  letter-spacing: 1px; /* Added some letter spacing */
+}
+
+.welcome-section {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.welcome-section p {
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Statistics Section */
+.statistics-section {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statistics-section h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.stats-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+}
+
+.stat-card {
+  background-color: #e9ecef;
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1; /* Allows cards to grow and shrink */
+  min-width: 200px; /* Minimum width before wrapping */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin-top: 0;
+  color: #007bff;
+  font-size: 1.1em;
+}
+
+.stat-card p {
+  font-size: 1.8em;
+  color: #333;
+  margin: 10px 0 0;
+  font-weight: bold;
+}
+
+/* Table Styles for Statistics */
+.best-sellers,
+.popular-stations-origin,
+.popular-stations-destination,
+.popular-trips {
+  margin-bottom: 30px;
+}
+
+.best-sellers h3,
+.popular-stations-origin h3,
+.popular-stations-destination h3,
+.popular-trips h3 {
+  color: #333;
+  font-size: 1.3em;
+  margin-bottom: 15px;
+}
+
+.best-sellers table,
+.popular-stations-origin table,
+.popular-stations-destination table,
+.popular-trips table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.best-sellers th,
+.best-sellers td,
+.popular-stations-origin th,
+.popular-stations-origin td,
+.popular-stations-destination th,
+.popular-stations-destination td,
+.popular-trips th,
+.popular-trips td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.best-sellers th,
+.popular-stations-origin th,
+.popular-stations-destination th,
+.popular-trips th {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.best-sellers tr:nth-child(even),
+.popular-stations-origin tr:nth-child(even),
+.popular-stations-destination tr:nth-child(even),
+.popular-trips tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.best-sellers tr:hover,
+.popular-stations-origin tr:hover,
+.popular-stations-destination tr:hover,
+.popular-trips tr:hover {
+  background-color: #e9ecef;
+}
+
+/* Chart Container Styles */
+.chart-container {
+  margin: 20px auto; /* Center chart and add some margin */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  max-width: 90%; /* Control max width for larger screens */
+}
+
+/* Responsive Table Container */
+.table-responsive-container {
+  overflow-x: auto;
+  margin-bottom: 1em; /* Add some space below the scrollable table */
+  border: 1px solid #ddd; /* Optional: adds a border around the scrollable area */
+  border-radius: 4px; /* Optional: rounds the corners of the border */
+}
+
+.table-responsive-container table {
+  min-width: 600px; /* Ensure table has a minimum width to demonstrate scrolling if needed */
+}
+
+/* Error Message Style */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.error-message p {
+  margin: 0;
+}

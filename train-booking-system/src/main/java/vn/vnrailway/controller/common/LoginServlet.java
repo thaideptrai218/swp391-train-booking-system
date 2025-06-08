@@ -64,7 +64,7 @@ public class LoginServlet extends HttpServlet {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (user.getPasswordHash().equals(password)) {
-                HttpSession session = request.getSession();
+                HttpSession session = request.getSession(true); // Ensure session is created if not existing
                 session.setAttribute("loggedInUser", user);
                 String role = user.getRole();
 
@@ -74,6 +74,9 @@ public class LoginServlet extends HttpServlet {
                         break;
                     case "Staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
+                        break;
+                    case "Manager":
+                        response.sendRedirect(request.getContextPath() + "/managerDashboard");
                         break;
                     case "Customer":
                         response.sendRedirect(request.getContextPath() + "/landing");

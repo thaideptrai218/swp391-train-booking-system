@@ -1,0 +1,112 @@
+/* Variables for easier theme management */
+:root {
+  --sidebar-bg: #2c3e50; /* Dark blue-gray */
+  --sidebar-text-color: #ecf0f1; /* Light gray */
+  --sidebar-accent-color: #3498db; /* Bright blue */
+  --sidebar-hover-bg: #34495e; /* Slightly darker blue-gray */
+  --sidebar-border-color: #4a627a;
+  --sidebar-width: 260px;
+  --toggle-btn-bg: var(--sidebar-accent-color);
+  --toggle-btn-text: white;
+}
+
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background-color: var(--toggle-btn-bg);
+  color: var(--toggle-btn-text);
+  border: none;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 1.3em;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #2980b9; /* Darker shade of accent blue */
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  padding: 20px;
+  padding-top: 80px; /* Increased padding for toggle button */
+  border-right: 1px solid var(--sidebar-border-color);
+  height: 100vh;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text-color);
+  position: fixed;
+  top: 0;
+  left: calc(-1 * var(--sidebar-width)); /* Initially hidden */
+  transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: hidden; /* Hide vertical scrollbar */
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar h2,
+.sidebar h3 {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  color: var(--sidebar-text-color);
+  font-weight: 600;
+  border-bottom: 1px solid var(--sidebar-border-color);
+  padding-bottom: 10px;
+}
+
+.sidebar h2 {
+  font-size: 1.3em;
+}
+
+.sidebar h3 {
+  font-size: 1.1em;
+  margin-top: 25px; /* More space before function list */
+}
+
+.sidebar p {
+  margin-bottom: 10px;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.sidebar p strong {
+  color: #bdc3c7; /* Slightly lighter for emphasis */
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: var(--sidebar-text-color);
+  display: block;
+  padding: 12px 15px; /* Increased padding */
+  border-radius: 5px;
+  margin-bottom: 5px; /* Space between links */
+  transition: background-color 0.2s ease, color 0.2s ease,
+    padding-left 0.2s ease;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  /* Style for active link */
+  background-color: var(--sidebar-hover-bg);
+  color: var(--sidebar-accent-color);
+  padding-left: 20px; /* Indent on hover/active */
+}
+
+/* Optional: Style for the main content area to push it when sidebar is open */
+.main-content.shifted {
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}

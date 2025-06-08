@@ -1,10 +1,12 @@
 package vn.vnrailway.model;
 
 import java.time.LocalDateTime;
+import java.io.Serializable;
 
 // Removed Lombok annotations as they seem to be causing issues in the environment.
 // Getters, setters, and constructors will be explicitly defined.
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L; // Added for Serializable
     private int userID;
     private String userName;
     private String passwordHash; // Renamed 'password' to 'passwordHash' for consistency
@@ -24,7 +26,7 @@ public class User {
 
     // Constructor for creating new users (without userID, createdAt, lastLogin)
     public User(String userName, String passwordHash, String fullName, String email,
-                String phoneNumber, String idCardNumber, String address, String role) {
+            String phoneNumber, String idCardNumber, String address, String role) {
         this.userName = userName;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
@@ -39,8 +41,8 @@ public class User {
 
     // All-argument constructor (useful for mapping from DB)
     public User(int userID, String userName, String passwordHash, String fullName, String email,
-                String phoneNumber, String idCardNumber, String address, String role, boolean isActive,
-                LocalDateTime createdAt, LocalDateTime lastLogin) {
+            String phoneNumber, String idCardNumber, String address, String role, boolean isActive,
+            LocalDateTime createdAt, LocalDateTime lastLogin) {
         this.userID = userID;
         this.userName = userName;
         this.passwordHash = passwordHash;

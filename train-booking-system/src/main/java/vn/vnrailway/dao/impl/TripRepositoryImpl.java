@@ -2,6 +2,8 @@ package vn.vnrailway.dao.impl;
 
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.TripRepository;
+import vn.vnrailway.dto.BestSellerLocationDTO;
+import vn.vnrailway.dto.TripPopularityDTO;
 import vn.vnrailway.dto.TripSearchResultDTO;
 import vn.vnrailway.model.Trip;
 
@@ -211,7 +213,8 @@ public class TripRepositoryImpl implements TripRepository {
                         dto.setTrainName(rs.getString("TrainName"));
                         dto.setRouteName(rs.getString("RouteName"));
                         dto.setOriginStationName(rs.getString("OriginStation"));
-                        // dto.setTrainId(rs.getInt("trainId")); // Already mapped above as TrainID, ensure SP output name consistency
+                        // dto.setTrainId(rs.getInt("trainId")); // Already mapped above as TrainID,
+                        // ensure SP output name consistency
 
                         Timestamp depTimestamp = rs.getTimestamp("DepartureTime");
                         if (depTimestamp != null) {
@@ -343,5 +346,69 @@ public class TripRepositoryImpl implements TripRepository {
             System.err.println("Error testing TripRepository: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<BestSellerLocationDTO> getBestSellerLocations(int limit) throws SQLException {
+        List<BestSellerLocationDTO> bestSellers = new ArrayList<>();
+        // Assuming SQL Server for TOP ?, adjust for other DBs (e.g., LIMIT ? for
+        // MySQL/PostgreSQL)
+        String sql = "SELECT TOP (?) r.RouteName, COUNT(t.TicketID) as TicketsSold " +
+                "FROM Tickets t " +
+                "JOIN Trips tr ON t.TripID = tr.TripID " +
+                "JOIN Routes r ON tr.RouteID = r.RouteID " +
+                "WHERE t.TicketStatus NOT IN ('Cancelled', 'Void') " +
+                "GROUP BY r.RouteName " +
+                "ORDER BY TicketsSold DESC";
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, limit);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String routeName = rs.getString("RouteName");
+                    long ticketsSold = rs.getLong("TicketsSold");
+                    bestSellers.add(new BestSellerLocationDTO(routeName, ticketsSold));
+                }
+            }
+        }
+        return bestSellers;
+    }
+
+    @Override
+    public List<TripPopularityDTO> getMostPopularTrips(int limit) throws SQLException {
+        List<TripPopularityDTO> popularTrips = new ArrayList<>();
+        String sql = "SELECT TOP (?) " +
+                "tck.TripID, r.RouteName, trn.TrainName, tr.DepartureDateTime, COUNT(tck.TicketID) as BookingCount " +
+                "FROM Tickets tck " +
+                "JOIN Trips tr ON tck.TripID = tr.TripID " +
+                "JOIN Routes r ON tr.RouteID = r.RouteID " +
+                "JOIN Trains trn ON tr.TrainID = trn.TrainID " + // Assuming Trains table is named 'Trains' and has
+                                                                 // 'TrainName'
+                "WHERE tck.TicketStatus NOT IN ('Cancelled', 'Void') " +
+                "GROUP BY tck.TripID, r.RouteName, trn.TrainName, tr.DepartureDateTime " +
+                "ORDER BY BookingCount DESC";
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int tripId = rs.getInt("TripID");
+                    String routeName = rs.getString("RouteName");
+                    String trainName = rs.getString("TrainName");
+                    Timestamp departureTimestamp = rs.getTimestamp("DepartureDateTime");
+                    LocalDateTime departureDateTime = (departureTimestamp != null)
+                            ? departureTimestamp.toLocalDateTime()
+                            : null;
+                    long bookingCount = rs.getLong("BookingCount");
+                    popularTrips
+                            .add(new TripPopularityDTO(tripId, routeName, trainName, departureDateTime, bookingCount));
+                }
+            }
+        }
+        return popularTrips;
     }
 }

@@ -29,7 +29,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         ticket.setPassengerName(rs.getString("PassengerName"));
         ticket.setPassengerIDCardNumber(rs.getString("PassengerIDCardNumber"));
         ticket.setFareComponentDetails(rs.getString("FareComponentDetails"));
-        
+
         // Handle nullable ParentTicketID
         int parentTicketIdVal = rs.getInt("ParentTicketID");
         if (rs.wasNull()) {
@@ -44,7 +44,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     public Optional<Ticket> findById(int ticketId) throws SQLException {
         String sql = "SELECT * FROM Tickets WHERE TicketID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ticketId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -59,7 +59,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     public Optional<Ticket> findByTicketCode(String ticketCode) throws SQLException {
         String sql = "SELECT * FROM Tickets WHERE TicketCode = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ticketCode);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -69,14 +69,14 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
         return Optional.empty();
     }
-    
+
     @Override
     public List<Ticket> findAll() throws SQLException {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Tickets";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 tickets.add(mapResultSetToTicket(rs));
             }
@@ -89,7 +89,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Tickets WHERE BookingID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, bookingId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -104,8 +104,8 @@ public class TicketRepositoryImpl implements TicketRepository {
     public List<Ticket> findByTripId(int tripId) throws SQLException {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Tickets WHERE TripID = ?";
-         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tripId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -121,7 +121,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Tickets WHERE PassengerID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, passengerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -131,13 +131,13 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
         return tickets;
     }
-    
+
     @Override
     public List<Ticket> findByTripIdAndSeatId(int tripId, int seatId) throws SQLException {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Tickets WHERE TripID = ? AND SeatID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tripId);
             ps.setInt(2, seatId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -153,8 +153,8 @@ public class TicketRepositoryImpl implements TicketRepository {
     public Ticket save(Ticket ticket) throws SQLException {
         String sql = "INSERT INTO Tickets (TicketCode, BookingID, TripID, SeatID, PassengerID, StartStationID, EndStationID, Price, TicketStatus, CoachNameSnapshot, SeatNameSnapshot, PassengerName, PassengerIDCardNumber, FareComponentDetails, ParentTicketID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setString(1, ticket.getTicketCode());
             ps.setInt(2, ticket.getBookingID());
             ps.setInt(3, ticket.getTripID());
@@ -174,7 +174,7 @@ public class TicketRepositoryImpl implements TicketRepository {
             } else {
                 ps.setNull(15, Types.INTEGER);
             }
-            
+
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Creating ticket failed, no rows affected.");
@@ -194,7 +194,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     public boolean update(Ticket ticket) throws SQLException {
         String sql = "UPDATE Tickets SET TicketCode = ?, BookingID = ?, TripID = ?, SeatID = ?, PassengerID = ?, StartStationID = ?, EndStationID = ?, Price = ?, TicketStatus = ?, CoachNameSnapshot = ?, SeatNameSnapshot = ?, PassengerName = ?, PassengerIDCardNumber = ?, FareComponentDetails = ?, ParentTicketID = ? WHERE TicketID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ticket.getTicketCode());
             ps.setInt(2, ticket.getBookingID());
             ps.setInt(3, ticket.getTripID());
@@ -215,7 +215,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setNull(15, Types.INTEGER);
             }
             ps.setInt(16, ticket.getTicketID());
-            
+
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
@@ -223,17 +223,18 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     @Override
     public boolean deleteById(int ticketId) throws SQLException {
-        // Tickets are usually not hard-deleted. Consider changing status to "Cancelled" or "Void".
+        // Tickets are usually not hard-deleted. Consider changing status to "Cancelled"
+        // or "Void".
         // For this example, a hard delete is implemented.
         String sql = "DELETE FROM Tickets WHERE TicketID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ticketId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
     }
-    
+
     // Main method for testing (optional)
     public static void main(String[] args) {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
@@ -242,10 +243,39 @@ public class TicketRepositoryImpl implements TicketRepository {
             // Example: Find all tickets for BookingID 1
             List<Ticket> ticketsForBooking1 = ticketRepository.findByBookingId(1);
             ticketsForBooking1.forEach(System.out::println);
-            
+
             // Add more specific tests as needed
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public long getTotalTicketsSold() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Tickets WHERE TicketStatus NOT IN ('Cancelled', 'Void')";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public double getTotalRevenue() throws SQLException {
+        String sql = "SELECT SUM(Price) FROM Tickets WHERE TicketStatus NOT IN ('Cancelled', 'Void')";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                // Handle potential NULL if no tickets match (though SUM usually returns NULL
+                // not 0 for no rows)
+                BigDecimal totalRevenue = rs.getBigDecimal(1);
+                return totalRevenue == null ? 0.0 : totalRevenue.doubleValue();
+            }
+        }
+        return 0.0;
     }
 }
