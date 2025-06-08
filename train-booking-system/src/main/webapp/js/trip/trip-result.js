@@ -4,10 +4,92 @@ let currentCoachInfo = null; // To store coach metadata for use in createSeatEle
 let shoppingCart = []; // To store selected seat DTOs, with tripId for context
 let seatHoldTimers = {}; // To store timers for individual seat holds { seatId: timerId }
 const HOLD_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const SESSION_STORAGE_CART_KEY = "VNR_userShoppingCart";
 
 let currentCarriage; // To store the currently selected carriage element for seat selection
 
+// Function to load cart from session storage
+function loadCartFromSession() {
+    const storedCart = sessionStorage.getItem(SESSION_STORAGE_CART_KEY);
+    if (storedCart) {
+        try {
+            const parsedCart = JSON.parse(storedCart);
+            const now = new Date();
+            const validItems = [];
+
+            parsedCart.forEach((item) => {
+                if (item.holdExpiresAt) {
+                    // Item must have a hold expiration
+                    const expiresAtDate = new Date(item.holdExpiresAt);
+                    if (expiresAtDate > now) {
+                        // And the hold must be in the future
+                        validItems.push(item);
+                    } else {
+                        console.log(
+                            `Seat ${item.seatName} (Trip: ${item.tripId}) hold expired, removing from session-loaded cart.`
+                        );
+                        // Server cleanup job is the backup for releasing the hold on the server.
+                    }
+                } else {
+                    // Items without holdExpiresAt are considered invalid for persisting an active hold.
+                    console.log(
+                        `Seat ${item.seatName} (Trip: ${item.tripId}) has no holdExpiresAt, removing from session-loaded cart.`
+                    );
+                }
+            });
+            shoppingCart = validItems; // Assign the filtered list
+
+            // Re-initialize timers for items that are still validly held
+            // and update their visual representation on the seat map if the seat is currently displayed
+            shoppingCart.forEach((item) => {
+                startSeatHoldTimer(item); // This function also updates timer display in the cart
+
+                // Attempt to find the seat on the map and mark it as selected if it's part of the current view
+                const trainItemElem = document.querySelector(
+                    `.train-item[data-trip-id="${item.tripId}"]`
+                );
+                if (trainItemElem) {
+                    const seatElementOnMap = trainItemElem.querySelector(
+                        `.seat[data-seat-id="${item.seatID}"]`
+                    );
+                    if (
+                        seatElementOnMap &&
+                        seatElementOnMap.classList.contains("available")
+                    ) {
+                        seatElementOnMap.classList.remove("available");
+                        seatElementOnMap.classList.add("selected");
+                    } else if (
+                        seatElementOnMap &&
+                        !seatElementOnMap.classList.contains("selected")
+                    ) {
+                        // If it exists but isn't 'selected', ensure it is.
+                        // This handles cases where the seat map might have been re-rendered without full cart awareness.
+                        seatElementOnMap.classList.add("selected");
+                    }
+                }
+            });
+        } catch (e) {
+            console.error(
+                "Error parsing shopping cart from session storage:",
+                e
+            );
+            sessionStorage.removeItem(SESSION_STORAGE_CART_KEY); // Clear corrupted data
+        }
+    }
+}
+
+// Function to save cart to session storage
+function saveCartToSession() {
+    sessionStorage.setItem(
+        SESSION_STORAGE_CART_KEY,
+        JSON.stringify(shoppingCart)
+    );
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    loadCartFromSession(); // Load cart from session storage first
+    updateCartDisplay(); // Then update the display based on loaded cart
+
     const trainItems = document.querySelectorAll(".train-item");
     trainItems.forEach((item) => {
         const collapsedSummary = item.querySelector(
@@ -124,6 +206,7 @@ function selectCarriage(selectedCarriageElement, trainItemElement) {
                 };
                 const carriageContext = {
                     // Collect context here
+                    coachId: coachId, // Add coachId to the context
                     coachPosition: coachPosition,
                     tripLeg: tripLeg, // from selectedCarriageElement.dataset.tripLeg
                     // trainName, origin/dest station names, departure time will be sourced from trainItemElement in addSeatClickListeners
@@ -317,131 +400,460 @@ function createSeatElement(seatDto) {
     return seatDiv;
 }
 
-function addSeatClickListeners(seatGridContainer, carriageContext) {
-    let tripId = null;
-    const trainItemElement = seatGridContainer.closest(".train-item"); // This is the correct trainItemElement for general trip info
-    if (trainItemElement && trainItemElement.dataset.tripId) {
-        tripId = trainItemElement.dataset.tripId;
-    } else {
-        // Fallback: try to parse from seatDetailsBlock ID if possible
-        const seatDetailsBlock = seatGridContainer.closest(
-            '[id^="seatDetailsBlock-"]'
-        );
-        if (seatDetailsBlock && seatDetailsBlock.id) {
-            const idParts = seatDetailsBlock.id.split("-");
-            if (idParts.length >= 3 && idParts[0] === "seatDetailsBlock") {
-                tripId = idParts[idParts.length - 1]; // Assumes format seatDetailsBlock-tripLeg-tripId
-            }
+// --- NEW FUNCTIONS FOR SEAT HOLDING, TIMERS, AND BOOKING PROCESS ---
+
+/**
+ * Handles the attempt to select and hold a seat via API.
+ * @param {object} seatDataForCart - The fully augmented seat data object.
+ * @param {HTMLElement} seatElement - The clicked seat div element on the map.
+ */
+async function handleSeatSelectionAttempt(seatDataForCart, seatElement) {
+    console.log("Attempting to hold seat:", seatDataForCart.seatName);
+    seatElement.classList.add("pending-hold"); // Visual feedback for pending operation
+
+    try {
+        const response = await fetch(`${contextPath}/api/seats/hold`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                tripId: seatDataForCart.tripId,
+                seatId: seatDataForCart.seatID,
+                coachId: seatDataForCart.coachId,
+                legOriginStationId: seatDataForCart.legOriginStationId,
+                legDestinationStationId:
+                    seatDataForCart.legDestinationStationId,
+            }),
+        });
+
+        seatElement.classList.remove("pending-hold");
+        const responseData = await response.json();
+        console.log("Server response from /api/seats/hold:", JSON.stringify(responseData)); // Log the raw server response
+
+        if (response.ok && responseData.status === "success") {
+            console.log("Seat hold successful. Server data:", responseData);
+            seatElement.classList.add("selected"); // Confirm selection on UI
+            
+            // Correctly access the nested holdExpiresAt property
+            const expiresAtFromServer = responseData.data && responseData.data.holdExpiresAt ? responseData.data.holdExpiresAt : null;
+            console.log("Value of expiresAtFromServer (from responseData.data.holdExpiresAt):", expiresAtFromServer); 
+
+            const finalCartItem = {
+                ...seatDataForCart,
+                holdExpiresAt: expiresAtFromServer, 
+            };
+            console.log("Final cart item constructed before adding to cart:", JSON.stringify(finalCartItem)); 
+            
+            addToCart(finalCartItem, finalCartItem.tripId); // This will trigger updateCartDisplay and timer start
+        } else {
+            console.error("Seat hold failed:", responseData.message);
+            alert(
+                `Không thể giữ ghế ${seatDataForCart.seatName}: ${
+                    responseData.message || "Lỗi không xác định."
+                }`
+            );
+            seatElement.classList.remove("selected"); // Ensure it's not marked selected if API fails
         }
+    } catch (error) {
+        seatElement.classList.remove("pending-hold");
+        seatElement.classList.remove("selected");
+        console.error("Error during seat hold API call:", error);
+        alert("Lỗi kết nối khi cố gắng giữ ghế. Vui lòng thử lại.");
+    }
+}
+
+/**
+ * Handles the deselection of a seat (releasing the hold).
+ * @param {object} cartItem - The cart item object to be deselected.
+ * @param {HTMLElement} seatElement - The seat div element on the map (optional, may not be available if called from cart).
+ */
+async function handleSeatDeselectionAttempt(cartItem, seatElementOnMap) {
+    console.log("Attempting to release seat:", cartItem.seatName);
+
+    try {
+        const response = await fetch(`${contextPath}/api/seats/release`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                tripId: cartItem.tripId,
+                seatId: cartItem.seatID,
+                legOriginStationId: cartItem.legOriginStationId,
+                legDestinationStationId: cartItem.legDestinationStationId,
+            }),
+        });
+        const responseData = await response.json();
+        if (response.ok && responseData.status === "success") {
+            console.log(
+                `Seat release for ${cartItem.seatName} successful on server.`
+            );
+        } else {
+            console.warn(
+                `Failed to release seat ${cartItem.seatName} on server: ${responseData.message}`
+            );
+            // Continue with client-side removal anyway for UX consistency. Server cleanup job is the backup.
+        }
+    } catch (error) {
+        console.error("Error during seat release API call:", error);
+        // Continue with client-side removal
+    } finally {
+        clearTimerAndRemoveFromClientCart(cartItem.seatID, cartItem.tripId);
+        // If seatElementOnMap is provided (i.e., deselection from map), update its class
+        if (seatElementOnMap) {
+            seatElementOnMap.classList.remove("selected");
+        }
+        // If deselection was from cart trash icon, clearTimerAndRemoveFromClientCart will call updateCartDisplay
+        // which removes the item from cart UI. The seat on map might need separate update if not handled by clearTimer...
+    }
+}
+
+/**
+ * Starts and manages the countdown timer for a specific cart item.
+ * The timer display is updated on the trash icon of the cart item.
+ * @param {object} cartItem - The cart item, must include holdExpiresAt, tripId, seatID.
+ */
+function startSeatHoldTimer(cartItem) {
+    const timerKey = `${cartItem.tripId}_${cartItem.seatID}`;
+
+    if (seatHoldTimers[timerKey]) {
+        // Clear existing timer for this seat if any (e.g., on refresh hold)
+        clearInterval(seatHoldTimers[timerKey]);
     }
 
-    if (!tripId) {
+    const expiresAtDate = new Date(cartItem.holdExpiresAt);
+
+    const intervalId = setInterval(() => {
+        const now = new Date();
+        const timeLeftSeconds = Math.round(
+            (expiresAtDate.getTime() - now.getTime()) / 1000
+        );
+
+        const listItemElement = document.querySelector(
+            `.cart-item-entry[data-trip-id="${cartItem.tripId}"][data-seat-id="${cartItem.seatID}"]`
+        );
+        const timerDisplayElement = listItemElement
+            ? listItemElement.querySelector(".cart-item-remove-icon")
+            : null;
+
+        if (timeLeftSeconds > 0) {
+            if (timerDisplayElement) {
+                const minutes = Math.floor(timeLeftSeconds / 60);
+                const seconds = timeLeftSeconds % 60;
+                timerDisplayElement.innerHTML = `<span class="timer-countdown" title="Thời gian giữ vé: ${minutes}m ${seconds}s">${minutes}:${seconds
+                    .toString()
+                    .padStart(2, "0")}</span>`;
+                if (!timerDisplayElement.classList.contains("timer-active")) {
+                    timerDisplayElement.classList.add("timer-active");
+                }
+            }
+        } else {
+            console.log(
+                "Timer expired for seat:",
+                cartItem.seatName,
+                cartItem.seatID
+            );
+            clearInterval(intervalId);
+            delete seatHoldTimers[timerKey];
+
+            if (timerDisplayElement) {
+                timerDisplayElement.innerHTML = '<i class="fas fa-trash"></i>';
+                timerDisplayElement.classList.remove("timer-active");
+            }
+            handleHoldExpired(cartItem);
+        }
+    }, 1000);
+    seatHoldTimers[timerKey] = intervalId;
+}
+
+/**
+ * Called when a seat's hold timer expires.
+ * @param {object} expiredCartItem - The cart item whose hold has expired.
+ */
+async function handleHoldExpired(expiredCartItem) {
+    alert(
+        `Thời gian giữ vé cho ghế ${expiredCartItem.seatName} (Tàu ${
+            expiredCartItem.trainName || "N/A"
+        }) đã hết. Vé đã được tự động hủy.`
+    );
+
+    // Attempt to release on server
+    try {
+        const response = await fetch(`${contextPath}/api/seats/release`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                tripId: expiredCartItem.tripId,
+                seatId: expiredCartItem.seatID,
+                legOriginStationId: expiredCartItem.legOriginStationId,
+                legDestinationStationId:
+                    expiredCartItem.legDestinationStationId,
+            }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({})); // Try to parse error, default to empty obj
+            console.warn(
+                `Server failed to release expired hold for seat ${
+                    expiredCartItem.seatID
+                }: ${response.status} - ${
+                    errorData.message || "Unknown server error"
+                }`
+            );
+        } else {
+            const result = await response.json();
+            if (result.status === "success") {
+                console.log(
+                    `Successfully released expired hold for seat ${expiredCartItem.seatID} on server.`
+                );
+            } else {
+                console.warn(
+                    `Server reported failure to release expired hold for seat ${expiredCartItem.seatID}: ${result.message}`
+                );
+            }
+        }
+    } catch (error) {
+        console.error("Error releasing expired seat hold on server:", error);
+    }
+
+    clearTimerAndRemoveFromClientCart(
+        expiredCartItem.seatID,
+        expiredCartItem.tripId
+    );
+}
+
+/**
+ * Clears a seat's timer, removes it from the client-side shoppingCart, and updates UI.
+ * @param {number|string} seatId - The ID of the seat to remove.
+ * @param {string} tripId - The ID of the trip for the seat.
+ */
+function clearTimerAndRemoveFromClientCart(seatId, tripId) {
+    const timerKey = `${tripId}_${seatId}`;
+    if (seatHoldTimers[timerKey]) {
+        clearInterval(seatHoldTimers[timerKey]);
+        delete seatHoldTimers[timerKey];
+    }
+
+    const itemIndex = shoppingCart.findIndex(
+        (item) =>
+            item.seatID.toString() === seatId.toString() &&
+            item.tripId === tripId
+    );
+    if (itemIndex > -1) {
+        shoppingCart.splice(itemIndex, 1);
+        console.log(
+            `Removed seat ${seatId} (Trip: ${tripId}) from client cart.`
+        );
+    }
+
+    const trainItemElem = document.querySelector(
+        `.train-item[data-trip-id="${tripId}"]`
+    );
+    if (trainItemElem) {
+        const seatElementOnMap = trainItemElem.querySelector(
+            `.seat[data-seat-id="${seatId}"]`
+        );
+        if (seatElementOnMap) {
+            seatElementOnMap.classList.remove("selected");
+            // TODO: Refresh coach or mark as available based on actual server status if needed
+        }
+    }
+    updateCartDisplay();
+    saveCartToSession(); // Save cart to session after removing or when hold expires
+}
+
+/**
+ * Handles the "Proceed to Booking" button action.
+ */
+async function initiateBookingProcess() {
+    if (shoppingCart.length === 0) {
+        alert("Vui lòng chọn ít nhất một vé để tiếp tục.");
+        return;
+    }
+
+    const seatsToBook = shoppingCart.map((item) => ({
+        tripId: item.tripId,
+        seatId: item.seatID,
+        coachId: item.coachId,
+        legOriginStationId: item.legOriginStationId,
+        legDestinationStationId: item.legDestinationStationId,
+        // calculatedPrice: item.calculatedPrice // Optional: send price for server verification
+    }));
+
+    console.log("Initiating booking with seats:", seatsToBook);
+
+    try {
+        const response = await fetch(`${contextPath}/api/booking/initiate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(seatsToBook),
+        });
+        const responseData = await response.json();
+
+        if (response.ok && responseData.status === "success") {
+            console.log(
+                "Booking initiated successfully, redirecting...",
+                responseData
+            );
+            Object.values(seatHoldTimers).forEach(clearInterval); // Clear all client-side timers
+            seatHoldTimers = {};
+            shoppingCart = []; // Clear client cart as server now manages the state for payment page
+            updateCartDisplay(); // Update UI to show empty cart
+            saveCartToSession(); // Save the now-empty cart to session before redirect
+
+            // Redirect to the URL provided by the server, or a default payment page
+            window.location.href =
+                responseData.redirectUrl || `${contextPath}/ticketPayment.jsp`;
+        } else {
+            alert(
+                `Lỗi khi khởi tạo đặt vé: ${
+                    responseData.message ||
+                    "Không thể tiếp tục, vui lòng thử lại."
+                }`
+            );
+            // Potentially refresh seat statuses if server indicates some seats became unavailable
+            // This might involve re-fetching the current coach's seat layout.
+        }
+    } catch (error) {
+        console.error("Error initiating booking:", error);
+        alert(
+            "Lỗi kết nối khi khởi tạo đặt vé. Vui lòng kiểm tra kết nối và thử lại."
+        );
+    }
+}
+
+// --- END OF NEW FUNCTIONS ---
+
+function addSeatClickListeners(seatGridContainer, carriageContext) {
+    let tripIdFromScope = null; // Renamed to avoid conflict with seatDataForAction.tripId
+    let legOriginStationIdFromScope = null;
+    let legDestinationStationIdFromScope = null;
+
+    const trainItemElement = seatGridContainer.closest(".train-item");
+    if (trainItemElement && trainItemElement.dataset.tripId) {
+        tripIdFromScope = trainItemElement.dataset.tripId;
+        // Ensure these are consistently named with how they are set in HTML (data-leg-origin-station-id)
+        legOriginStationIdFromScope =
+            trainItemElement.dataset.legOriginStationId;
+        legDestinationStationIdFromScope =
+            trainItemElement.dataset.legDestStationId; // dataset.legDestStationId from JSP
+    }
+
+    if (!tripIdFromScope) {
         console.warn(
             "Could not reliably determine tripId for seat grid:",
             seatGridContainer.id
         );
-        // If tripId is absolutely essential for cart operations and cannot be found,
-        // you might consider not adding click listeners or showing an error.
+    }
+    if (!legOriginStationIdFromScope || !legDestinationStationIdFromScope) {
+        console.warn(
+            "Could not reliably determine leg origin/destination station IDs for seat grid:",
+            seatGridContainer.id,
+            trainItemElement.dataset
+        );
     }
 
-    seatGridContainer.querySelectorAll(".seat.available").forEach((seat) => {
-        seat.addEventListener("click", function () {
-            this.classList.toggle("selected");
-            const isSelected = this.classList.contains("selected");
-            const seatInfoString = this.dataset.seatInfo;
+    seatGridContainer
+        .querySelectorAll(".seat.available") // Only attach to initially available seats
+        .forEach((seatElement) => {
+            seatElement.addEventListener("click", function () {
+                // 'this' refers to seatElement
+                const seatInfoString = this.dataset.seatInfo;
+                if (!seatInfoString) {
+                    console.warn("No seatInfo found for clicked seat:", this);
+                    return;
+                }
 
-            if (seatInfoString) {
                 const seatDataObject = JSON.parse(seatInfoString);
 
-                // Use the tripId determined for the grid.
-                const effectiveTripId = tripId || seatDataObject.tripId; // Fallback to seatDataObject.tripId if grid tripId is null
+                // effectiveTripId should be the one associated with this specific seat's context
+                const effectiveTripId =
+                    tripIdFromScope || seatDataObject.tripId;
 
                 if (!effectiveTripId) {
                     console.error(
-                        "CRITICAL: tripId is missing for cart operation. Seat:",
+                        "CRITICAL: tripId is missing for seat operation. Seat:",
                         seatDataObject.seatName,
-                        "Clicked element:",
                         this
                     );
                     return;
                 }
 
-                // Retrieve legOriginStationId and legDestStationId from the parent .train-item
-                let legOriginStationId = null;
-                let legDestStationId = null;
-                // trainItemElement is already defined in the outer scope of addSeatClickListeners
-                // but it refers to the container of the whole seat grid.
-                // We need to ensure we're using the correct trainItemElement associated with THIS seat's grid.
-                // The 'trainItemElement' passed to selectCarriage is the one we need,
-                // and 'seatGridContainer' is 'seatDetailsBlock' which is a child of that 'trainItemElement'.
-                // So, 'trainItemElement' from the outer scope should be correct.
-                if (trainItemElement && trainItemElement.dataset) {
-                    legOriginStationId =
-                        trainItemElement.dataset.legOriginStationId;
-                    legDestStationId =
-                        trainItemElement.dataset.legDestStationId;
-                }
+                const isCurrentlySelected = this.classList.contains("selected");
 
-                if (!legOriginStationId || !legDestStationId) {
-                    console.warn(
-                        `Could not determine leg origin/destination for cart item. Seat: ${seatDataObject.seatName} on Trip: ${effectiveTripId}. Check trainItemElement dataset.`,
-                        trainItemElement
+                // Prepare the full data object for the action (hold or release)
+                const seatDataForAction = {
+                    ...seatDataObject, // Includes seatID, seatName, calculatedPrice, etc.
+                    tripId: effectiveTripId,
+                    coachId: carriageContext?.coachId, // Get coachId from passed carriageContext
+                    legOriginStationId: legOriginStationIdFromScope,
+                    legDestinationStationId: legDestinationStationIdFromScope, // Use value from trainItemElement.dataset
+
+                    // Display properties from context
+                    tripLeg: carriageContext?.tripLeg,
+                    coachPosition: carriageContext?.coachPosition,
+                    trainName: trainItemElement
+                        ?.querySelector(
+                            ".train-item-collapsed-summary .train-name"
+                        )
+                        ?.textContent.trim(),
+                    originStationName: trainItemElement
+                        ?.querySelector(
+                            ".train-item-collapsed-summary .departure-info .trip-station"
+                        )
+                        ?.textContent.trim(),
+                    destinationStationName: trainItemElement
+                        ?.querySelector(
+                            ".train-item-collapsed-summary .arrival-info .trip-station"
+                        )
+                        ?.textContent.trim(),
+                    scheduledDepartureDisplay: trainItemElement
+                        ?.querySelector(
+                            ".train-item-collapsed-summary .departure-info .trip-time"
+                        )
+                        ?.textContent.trim(),
+                };
+
+                // Validate essential data for API calls
+                if (
+                    !seatDataForAction.coachId ||
+                    !seatDataForAction.legOriginStationId ||
+                    !seatDataForAction.legDestinationStationId
+                ) {
+                    console.error(
+                        "CRITICAL: Missing coachId, legOriginStationId, or legDestinationStationId for API call.",
+                        seatDataForAction
                     );
-                    // Decide if this is critical enough to prevent adding to cart or if nulls are acceptable
+                    alert(
+                        "Lỗi: Không đủ thông tin để xử lý yêu cầu cho ghế này. Vui lòng thử làm mới trang."
+                    );
+                    return;
                 }
 
-                console.log(
-                    `Seat ${seatDataObject.seatName} (ID: ${seatDataObject.seatID}, Trip: ${effectiveTripId}, Leg: ${legOriginStationId}-${legDestStationId}) clicked. Selected: ${isSelected}`
-                );
-
-                if (isSelected) {
-                    // Augment seatDataObject with comprehensive information for cart display
-                    const seatDataForCart = {
-                        ...seatDataObject,
-                        // Core IDs for logic
-                        tripId: effectiveTripId, // Already established
-                        legOriginStationId:
-                            trainItemElement?.dataset.legOriginStationId,
-                        legDestStationId:
-                            trainItemElement?.dataset.legDestStationId,
-
-                        // Contextual display information
-                        tripLeg: carriageContext?.tripLeg, // e.g., 'outbound', 'return'
-                        coachPosition: carriageContext?.coachPosition,
-
-                        // Information from the train item summary display
-                        trainName: trainItemElement
-                            ?.querySelector(
-                                ".train-item-collapsed-summary .train-name"
-                            )
-                            ?.textContent.trim(),
-                        originStationName: trainItemElement
-                            ?.querySelector(
-                                ".train-item-collapsed-summary .departure-info .trip-station"
-                            )
-                            ?.textContent.trim(),
-                        destinationStationName: trainItemElement
-                            ?.querySelector(
-                                ".train-item-collapsed-summary .arrival-info .trip-station"
-                            )
-                            ?.textContent.trim(),
-                        scheduledDepartureDisplay: trainItemElement
-                            ?.querySelector(
-                                ".train-item-collapsed-summary .departure-info .trip-time"
-                            )
-                            ?.textContent.trim(),
-                        // Note: seatName and seatNumberInCoach are already in seatDataObject
-                    };
-                    addToCart(seatDataForCart, effectiveTripId); // effectiveTripId is fine, seatDataForCart now also contains it.
+                if (!isCurrentlySelected) {
+                    // Was not selected, now trying to select
+                    console.log(
+                        `Attempting to select seat: ${seatDataForAction.seatName}`
+                    );
+                    handleSeatSelectionAttempt(seatDataForAction, this);
                 } else {
-                    // removeFromCart only needs seatID and tripId
-                    removeFromCart(seatDataObject.seatID, effectiveTripId);
+                    // Was selected, now trying to deselect
+                    console.log(
+                        `Attempting to deselect seat: ${seatDataForAction.seatName}`
+                    );
+                    const cartItemToDeselect = shoppingCart.find(
+                        (item) =>
+                            item.seatID === seatDataForAction.seatID &&
+                            item.tripId === seatDataForAction.tripId
+                    );
+                    if (cartItemToDeselect) {
+                        handleSeatDeselectionAttempt(cartItemToDeselect, this);
+                    } else {
+                        this.classList.remove("selected"); // Was selected on UI but not in cart
+                        console.warn(
+                            "Seat was marked selected on UI but not found in cart for deselection:",
+                            seatDataForAction
+                        );
+                    }
                 }
-            } else {
-                console.warn("No seatInfo found for clicked seat:", this);
-            }
+            });
         });
-    });
 }
 
 // Function to add a seat to the shopping cart
@@ -462,6 +874,7 @@ function addToCart(seatData, tripId) {
         );
     }
     updateCartDisplay();
+    saveCartToSession(); // Save cart to session after adding
 }
 
 // Function to remove a seat from the shopping cart
@@ -538,26 +951,20 @@ function updateCartDisplay() {
                 if (removeIcon) {
                     const listItem = removeIcon.closest(".cart-item-entry");
                     const seatIdToRemove = listItem?.dataset.seatId;
-                    const tripIdToRemove = listItem?.dataset.tripId; // tripId is stored on cartItem, not directly on dataset here.
-                    // We need to ensure tripId is available for removeFromCart.
-                    // The cartItem itself has the tripId. We can find it from shoppingCart.
+                    const tripIdToRemove = listItem?.dataset.tripId;
 
                     if (seatIdToRemove && tripIdToRemove) {
-                        // tripIdToRemove will be derived from cartItem
-                        // Find the actual tripId from the shoppingCart based on seatId, as dataset might not be fully reliable here for tripId
                         const itemInCart = shoppingCart.find(
                             (item) =>
-                                item.seatID.toString() === seatIdToRemove &&
+                                item.seatID.toString() === seatIdToRemove && // Ensure types match for comparison
                                 item.tripId === tripIdToRemove
                         );
                         if (itemInCart) {
-                            removeFromCart(
-                                itemInCart.seatID,
-                                itemInCart.tripId
-                            );
+                            // Call handleSeatDeselectionAttempt instead of removeFromCart directly
+                            handleSeatDeselectionAttempt(itemInCart, null); // Pass null for seatElement as it's a cart action
                         } else {
                             console.error(
-                                "Could not find item in cart to remove for seatId:",
+                                "Could not find item in cart to remove (trash icon click) for seatId:",
                                 seatIdToRemove,
                                 "and tripId:",
                                 tripIdToRemove
@@ -614,9 +1021,21 @@ function updateCartDisplay() {
             shoppingCart.forEach((cartItem) => {
                 const listItem = document.createElement("li");
                 listItem.className = "cart-item-entry";
-                // Store seatID and tripId on the list item for easier removal
                 listItem.dataset.seatId = cartItem.seatID;
-                listItem.dataset.tripId = cartItem.tripId; // Storing tripId here for the click handler
+                listItem.dataset.tripId = cartItem.tripId;
+
+                // Start timer if item has holdExpiresAt and no active timer
+                if (cartItem.holdExpiresAt) {
+                    const timerKey = `${cartItem.tripId}_${cartItem.seatID}`;
+                    if (!seatHoldTimers[timerKey]) {
+                        startSeatHoldTimer(cartItem);
+                    }
+                    // If timer is already running, startSeatHoldTimer's logic will update its display
+                    // or it will be updated by its own interval.
+                    // To ensure display is current on cart re-render, we might need to manually update timer text here too,
+                    // or rely on startSeatHoldTimer to handle it if called.
+                    // For now, startSeatHoldTimer handles DOM update.
+                }
 
                 const legTypeDisplay =
                     cartItem.tripLeg === "outbound"
@@ -665,7 +1084,10 @@ function updateCartDisplay() {
     if (proceedButton) {
         proceedButton.style.display =
             shoppingCart.length > 0 ? "block" : "none";
-        // TODO: Add event listener for proceedButton if not already handled elsewhere
-        // proceedButton.onclick = function() { /* handle proceeding to booking */ };
+        if (!proceedButton.dataset.listenerAttached) {
+            // Attach listener only once
+            proceedButton.addEventListener("click", initiateBookingProcess);
+            proceedButton.dataset.listenerAttached = "true";
+        }
     }
 }
