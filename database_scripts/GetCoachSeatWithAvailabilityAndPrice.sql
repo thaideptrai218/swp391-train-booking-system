@@ -105,14 +105,15 @@ CREATE PROCEDURE dbo.GetCoachSeatsWithAvailabilityAndPrice
     @LegOriginStationID_Input INT,
     @LegDestinationStationID_Input INT,
     @BookingDateTime_Input DATETIME2,
-    @IsRoundTrip_Input BIT
+    @IsRoundTrip_Input BIT,
+    @CurrentUserSessionID_Input NVARCHAR(100) = NULL -- Added parameter
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- Input validations
     IF @TripID_Input IS NULL OR @CoachID_Input IS NULL OR @LegOriginStationID_Input IS NULL OR @LegDestinationStationID_Input IS NULL OR @BookingDateTime_Input IS NULL OR @IsRoundTrip_Input IS NULL
-    BEGIN RAISERROR('All input parameters must be provided.', 16, 1); RETURN; END
+    BEGIN RAISERROR('All input parameters (except optional CurrentUserSessionID) must be provided.', 16, 1); RETURN; END
 
     DECLARE @LegOriginSeq INT, @LegDestSeq INT;
     SELECT @LegOriginSeq = TS.SequenceNumber FROM dbo.TripStations TS WHERE TS.TripID = @TripID_Input AND TS.StationID = @LegOriginStationID_Input;
@@ -136,18 +137,15 @@ BEGIN
     DECLARE @DistanceTraveled DECIMAL(10,2);
     DECLARE @BasePricePerKm_Context DECIMAL(10,2);
 
-    -- Get RouteID and TrainID from Trip
     SELECT @RouteID = T.RouteID, @TrainID = T.TrainID
     FROM dbo.Trips T WHERE T.TripID = @TripID_Input;
 
     IF @RouteID IS NULL BEGIN RAISERROR('Trip (ID: %d) details not found.', 16, 1, @TripID_Input); RETURN; END
 
-    -- Get TrainTypeID from Train
     SELECT @TrainTypeID = Tr.TrainTypeID FROM dbo.Trains Tr WHERE Tr.TrainID = @TrainID;
 
     IF @TrainTypeID IS NULL BEGIN RAISERROR('Train (ID: %d) details not found, cannot get TrainTypeID.', 16, 1, @TrainID); RETURN; END
 
-    -- Calculate Distance Traveled for the Leg using the new function
     SET @DistanceTraveled = dbo.GetDistanceBetweenStationsOnRoute(@RouteID, @LegOriginStationID_Input, @LegDestinationStationID_Input);
 
     IF @DistanceTraveled IS NULL
@@ -156,7 +154,6 @@ BEGIN
     IF @DistanceTraveled = 0 AND @LegOriginStationID_Input <> @LegDestinationStationID_Input
     BEGIN RAISERROR('Segment distance calculated as zero for different stations. Check RouteStations data.', 16, 1); RETURN; END
 
-    -- Fetch BasePricePerKm using the new function
     SET @BasePricePerKm_Context = dbo.GetApplicableBasePriceKm(
         @TrainTypeID,
         @RouteID,
@@ -176,23 +173,38 @@ BEGIN
         CT.PriceMultiplier AS CoachPriceMultiplier,
         TRP.BasePriceMultiplier AS TripBasePriceMultiplier,
         S.IsEnabled,
-        CASE -- Availability Status
+        CASE -- Availability Status (Order of checks is important)
             WHEN S.IsEnabled = 0 THEN 'Disabled'
+            -- 1. Check if held by the CURRENT user for the EXACT leg
+            WHEN @CurrentUserSessionID_Input IS NOT NULL AND EXISTS (
+                SELECT 1 FROM dbo.TemporarySeatHolds TSH_User
+                WHERE TSH_User.SeatID = S.SeatID
+                  AND TSH_User.TripID = @TripID_Input
+                  AND TSH_User.LegStartStationID = @LegOriginStationID_Input -- Exact leg match
+                  AND TSH_User.LegEndStationID = @LegDestinationStationID_Input   -- Exact leg match
+                  AND TSH_User.SessionID = @CurrentUserSessionID_Input
+                  AND TSH_User.ExpiresAt > GETDATE()
+            ) THEN 'HeldByYou'
+            -- 2. Check for committed tickets (Occupied by anyone for an overlapping leg)
             WHEN EXISTS (
                 SELECT 1 FROM dbo.Tickets TKT
                 INNER JOIN dbo.TripStations TKT_Start_TS ON TKT.TripID = TKT_Start_TS.TripID AND TKT.StartStationID = TKT_Start_TS.StationID
                 INNER JOIN dbo.TripStations TKT_End_TS ON TKT.TripID = TKT_End_TS.TripID AND TKT.EndStationID = TKT_End_TS.StationID
                 WHERE TKT.SeatID = S.SeatID AND TKT.TripID = @TripID_Input
-                  AND TKT.TicketStatus IN ('Valid', 'Confirmed')
-                  AND (TKT_Start_TS.SequenceNumber < @LegDestSeq AND TKT_End_TS.SequenceNumber > @LegOriginSeq)
-            ) OR EXISTS (
-                SELECT 1 FROM dbo.TemporarySeatHolds TSH
-                INNER JOIN dbo.TripStations TSH_Start_TS ON TSH.TripID = TSH_Start_TS.TripID AND TSH.legOriginStationId = TSH_Start_TS.StationID
-                INNER JOIN dbo.TripStations TSH_End_TS ON TSH.TripID = TSH_End_TS.TripID AND TSH.legDestinationStationId = TSH_End_TS.StationID
-                WHERE TSH.SeatID = S.SeatID AND TSH.TripID = @TripID_Input
-                  AND TSH.ExpiresAt > GETDATE()
-                  AND (TSH_Start_TS.SequenceNumber < @LegDestSeq AND TSH_End_TS.SequenceNumber > @LegOriginSeq)
+                  AND TKT.TicketStatus IN ('Valid', 'Confirmed', 'Paid') -- Consider all finalized statuses
+                  AND (TKT_Start_TS.SequenceNumber < @LegDestSeq AND TKT_End_TS.SequenceNumber > @LegOriginSeq) -- Overlap
             ) THEN 'Occupied'
+            -- 3. Check if held by OTHER users (overlapping leg)
+            WHEN EXISTS (
+                SELECT 1 FROM dbo.TemporarySeatHolds TSH_Other
+                INNER JOIN dbo.TripStations TSH_Other_Start_TS ON TSH_Other.TripID = TSH_Other_Start_TS.TripID AND TSH_Other.LegStartStationID = TSH_Other_Start_TS.StationID
+                INNER JOIN dbo.TripStations TSH_Other_End_TS ON TSH_Other.TripID = TSH_Other_End_TS.TripID AND TSH_Other.LegEndStationID = TSH_Other_End_TS.StationID
+                WHERE TSH_Other.SeatID = S.SeatID
+                  AND TSH_Other.TripID = @TripID_Input
+                  AND (@CurrentUserSessionID_Input IS NULL OR TSH_Other.SessionID <> @CurrentUserSessionID_Input) -- Not the current user
+                  AND TSH_Other.ExpiresAt > GETDATE()
+                  AND (TSH_Other_Start_TS.SequenceNumber < @LegDestSeq AND TSH_Other_End_TS.SequenceNumber > @LegOriginSeq) -- Overlap
+            ) THEN 'HeldByOther'
             ELSE 'Available'
         END AS AvailabilityStatus,
         CASE
@@ -201,18 +213,18 @@ BEGIN
             WHEN @DistanceTraveled = 0 AND @LegOriginStationID_Input = @LegDestinationStationID_Input THEN 0.00
             ELSE CAST(
                     @DistanceTraveled *
-                    @BasePricePerKm_Context *         -- From PricingRule via UDF
-                    TRP.BasePriceMultiplier *          -- From Trip
-                    CT.PriceMultiplier *               -- From CoachType
-                    ST.PriceMultiplier                 -- From SeatType
-                AS DECIMAL(10,0))
+                    @BasePricePerKm_Context *
+                    TRP.BasePriceMultiplier *
+                    CT.PriceMultiplier *
+                    ST.PriceMultiplier
+                AS DECIMAL(10,0)) -- Consider if DECIMAL(10,2) or other precision is needed for final price
         END AS CalculatedPrice
     FROM
         dbo.Seats S
     INNER JOIN dbo.Coaches CO ON S.CoachID = CO.CoachID
     INNER JOIN dbo.SeatTypes ST ON S.SeatTypeID = ST.SeatTypeID
     INNER JOIN dbo.CoachTypes CT ON CO.CoachTypeID = CT.CoachTypeID
-    INNER JOIN dbo.Trips TRP ON TRP.TripID = @TripID_Input
+    INNER JOIN dbo.Trips TRP ON TRP.TripID = @TripID_Input -- Ensures we use the Trip's BasePriceMultiplier
     WHERE
         S.CoachID = @CoachID_Input
     ORDER BY
@@ -220,7 +232,7 @@ BEGIN
 END
 GO
 
-PRINT 'Stored Procedure dbo.GetCoachSeatsWithAvailabilityAndPrice (using functions) created.';
+PRINT 'Stored Procedure dbo.GetCoachSeatsWithAvailabilityAndPrice (with CurrentUserSessionID_Input) updated.';
 GO
 
 
@@ -336,7 +348,8 @@ EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @LegOriginStationID_Input = 1,
     @LegDestinationStationID_Input = 3,
     @BookingDateTime_Input = @OffSeasonBookingDate,
-    @IsRoundTrip_Input = 0;
+    @IsRoundTrip_Input = 0,
+    @CurrentUserSessionID_Input = NULL; -- Test without session ID
 
 -- Test 3.2: Trip 2 (SE1 - Express Train, Route 1), Coach 4 (Sleeper), Hanoi to Sai Gon, One-Way, Summer
 -- TrainTypeID = 2, RouteID = 1, IsRoundTrip = 0, Date = Summer ('2024-07-15')
@@ -354,7 +367,8 @@ EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @LegOriginStationID_Input = 1, -- Hanoi on Trip 2 Route
     @LegDestinationStationID_Input = 5, -- Sai Gon on Trip 2 Route
     @BookingDateTime_Input = @BookingDate,
-    @IsRoundTrip_Input = 0;
+    @IsRoundTrip_Input = 0,
+    @CurrentUserSessionID_Input = 'TestSessionID123'; -- Test with a session ID
 
 -- Test 3.3: Trip 3 (SE3 - Express Train, Route 2), Coach 5 (Soft Seat), Hanoi to Da Nang, Round-Trip, Off-Season
 -- TrainTypeID = 2, RouteID = 2, IsRoundTrip = 1, Date = Off-Season
@@ -376,9 +390,10 @@ EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @LegOriginStationID_Input = 1,
     @LegDestinationStationID_Input = 4,
     @BookingDateTime_Input = @OffSeasonBookingDate,
-    @IsRoundTrip_Input = 1;
+    @IsRoundTrip_Input = 1,
+    @CurrentUserSessionID_Input = NULL;
 
--- Test 3.4: Invalid Leg (Origin after Destination) - using the version of SP without explicit RAISERROR
+-- Test 3.4: Invalid Leg (Origin after Destination)
 PRINT 'Test 3.4: Invalid Leg - DaNang(4) to Hanoi(1) with sequences reversed';
 EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @TripID_Input = 1,
@@ -386,18 +401,17 @@ EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @LegOriginStationID_Input = 4, -- Seq higher
     @LegDestinationStationID_Input = 1, -- Seq lower
     @BookingDateTime_Input = @BookingDate,
-    @IsRoundTrip_Input = 0;
--- Expected: Empty result set (if using the SP version that returns empty set on bad leg)
+    @IsRoundTrip_Input = 0,
+    @CurrentUserSessionID_Input = NULL;
 
 -- Test 3.5: Price cannot be determined (e.g., if no pricing rule matches at all - hard to force with defaults)
--- Let's try a date far in the future for which no rule is effective.
 PRINT 'Test 3.5: Future date where no rule definition is effective';
 EXEC dbo.GetCoachSeatsWithAvailabilityAndPrice
     @TripID_Input = 10,
     @CoachID_Input = 1,
     @LegOriginStationID_Input = 13,
     @LegDestinationStationID_Input = 11,
-    @BookingDateTime_Input = '2025-06-06', -- Assuming no rules have EffectiveToDate this far out
-    @IsRoundTrip_Input = 0;
--- Expected: CalculatedPrice = NULL for seats if @BasePricePerKm_Context becomes NULL
+    @BookingDateTime_Input = '2025-06-06', 
+    @IsRoundTrip_Input = 0,
+    @CurrentUserSessionID_Input = NULL;
 GO

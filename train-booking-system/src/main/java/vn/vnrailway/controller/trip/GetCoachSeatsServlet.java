@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession; // Import HttpSession
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -76,9 +77,12 @@ public class GetCoachSeatsServlet extends HttpServlet {
                  // Optionally, you could re-throw or set a specific error for the client
             }
 
+            // Get current user's session ID
+            HttpSession session = request.getSession(false); // Get existing session, don't create if not present
+            String currentUserSessionId = (session != null) ? session.getId() : null;
 
             List<SeatStatusDTO> seatStatusList = seatRepository.getCoachSeatsWithAvailabilityAndPrice(
-                    tripId, coachId, legOriginStationId, legDestinationStationId, bookingTimestamp, isRoundTrip);
+                    tripId, coachId, legOriginStationId, legDestinationStationId, bookingTimestamp, isRoundTrip, currentUserSessionId);
 
             objectMapper.writeValue(out, seatStatusList);
 

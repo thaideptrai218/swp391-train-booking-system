@@ -18,7 +18,8 @@ public interface SeatRepository {
             int legOriginStationId,
             int legDestinationStationId,
             java.sql.Timestamp bookingDateTime,
-            boolean isRoundTrip
+            boolean isRoundTrip,
+            String currentUserSessionId
     ) throws SQLException;
 
     // Standard CRUD methods from existing Impl
