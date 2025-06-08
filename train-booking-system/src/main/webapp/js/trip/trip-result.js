@@ -5,6 +5,8 @@ let shoppingCart = []; // To store selected seat DTOs, with tripId for context
 let seatHoldTimers = {}; // To store timers for individual seat holds { seatId: timerId }
 const HOLD_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
+let currentCarriage; // To store the currently selected carriage element for seat selection
+
 document.addEventListener("DOMContentLoaded", function () {
     const trainItems = document.querySelectorAll(".train-item");
     trainItems.forEach((item) => {
@@ -15,32 +17,17 @@ document.addEventListener("DOMContentLoaded", function () {
             collapsedSummary.addEventListener("click", () =>
                 toggleTrainItemDetails(item)
             );
-            collapsedSummary.addEventListener("keydown", (event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    toggleTrainItemDetails(item);
-                }
-            });
         }
 
-        // Use event delegation for carriage items for potentially dynamic content
         const expandedDetails = item.querySelector(".expanded-details");
         if (expandedDetails) {
             expandedDetails.addEventListener("click", function (event) {
                 const carriageItem = event.target.closest(".carriage-item");
-                if (carriageItem) {
+                if (carriageItem && carriageItem !== currentCarriage) {
+                    // If a different carriage is clicked, select it
                     selectCarriage(carriageItem, item);
                 }
-            });
-            expandedDetails.addEventListener("keydown", function (event) {
-                const carriageItem = event.target.closest(".carriage-item");
-                if (
-                    carriageItem &&
-                    (event.key === "Enter" || event.key === " ")
-                ) {
-                    event.preventDefault();
-                    selectCarriage(carriageItem, item);
-                }
+                currentCarriage = carriageItem; // Store the current carriage for later use
             });
         }
     });
@@ -135,7 +122,8 @@ function selectCarriage(selectedCarriageElement, trainItemElement) {
                     defaultCompartmentCapacity: defaultCompartmentCapacity,
                     coachTypeName: coachTypeName,
                 };
-                const carriageContext = { // Collect context here
+                const carriageContext = {
+                    // Collect context here
                     coachPosition: coachPosition,
                     tripLeg: tripLeg, // from selectedCarriageElement.dataset.tripLeg
                     // trainName, origin/dest station names, departure time will be sourced from trainItemElement in addSeatClickListeners
@@ -154,7 +142,13 @@ function selectCarriage(selectedCarriageElement, trainItemElement) {
     }
 }
 
-function generateSeatLayout(seatDetailsBlock, seatDataList, coachLayoutInfo, carriageContext) { // Added carriageContext
+function generateSeatLayout(
+    seatDetailsBlock,
+    seatDataList,
+    coachLayoutInfo,
+    carriageContext
+) {
+    // Added carriageContext
     seatDetailsBlock.innerHTML = ""; // Clear loading message or previous seats
 
     if (!seatDataList || seatDataList.length === 0) {
@@ -323,8 +317,7 @@ function createSeatElement(seatDto) {
     return seatDiv;
 }
 
-function addSeatClickListeners(seatGridContainer, carriageContext) { // Added carriageContext
-    // Attempt to get the tripId from the context of the seatGridContainer.
+function addSeatClickListeners(seatGridContainer, carriageContext) {
     let tripId = null;
     const trainItemElement = seatGridContainer.closest(".train-item"); // This is the correct trainItemElement for general trip info
     if (trainItemElement && trainItemElement.dataset.tripId) {
@@ -383,8 +376,10 @@ function addSeatClickListeners(seatGridContainer, carriageContext) { // Added ca
                 // and 'seatGridContainer' is 'seatDetailsBlock' which is a child of that 'trainItemElement'.
                 // So, 'trainItemElement' from the outer scope should be correct.
                 if (trainItemElement && trainItemElement.dataset) {
-                    legOriginStationId = trainItemElement.dataset.legOriginStationId;
-                    legDestStationId = trainItemElement.dataset.legDestStationId;
+                    legOriginStationId =
+                        trainItemElement.dataset.legOriginStationId;
+                    legDestStationId =
+                        trainItemElement.dataset.legDestStationId;
                 }
 
                 if (!legOriginStationId || !legDestStationId) {
@@ -394,7 +389,7 @@ function addSeatClickListeners(seatGridContainer, carriageContext) { // Added ca
                     );
                     // Decide if this is critical enough to prevent adding to cart or if nulls are acceptable
                 }
-                
+
                 console.log(
                     `Seat ${seatDataObject.seatName} (ID: ${seatDataObject.seatID}, Trip: ${effectiveTripId}, Leg: ${legOriginStationId}-${legDestStationId}) clicked. Selected: ${isSelected}`
                 );
@@ -405,18 +400,36 @@ function addSeatClickListeners(seatGridContainer, carriageContext) { // Added ca
                         ...seatDataObject,
                         // Core IDs for logic
                         tripId: effectiveTripId, // Already established
-                        legOriginStationId: trainItemElement?.dataset.legOriginStationId,
-                        legDestStationId: trainItemElement?.dataset.legDestStationId,
-                        
+                        legOriginStationId:
+                            trainItemElement?.dataset.legOriginStationId,
+                        legDestStationId:
+                            trainItemElement?.dataset.legDestStationId,
+
                         // Contextual display information
                         tripLeg: carriageContext?.tripLeg, // e.g., 'outbound', 'return'
                         coachPosition: carriageContext?.coachPosition,
-                        
+
                         // Information from the train item summary display
-                        trainName: trainItemElement?.querySelector(".train-item-collapsed-summary .train-name")?.textContent.trim(),
-                        originStationName: trainItemElement?.querySelector(".train-item-collapsed-summary .departure-info .trip-station")?.textContent.trim(),
-                        destinationStationName: trainItemElement?.querySelector(".train-item-collapsed-summary .arrival-info .trip-station")?.textContent.trim(),
-                        scheduledDepartureDisplay: trainItemElement?.querySelector(".train-item-collapsed-summary .departure-info .trip-time")?.textContent.trim(),
+                        trainName: trainItemElement
+                            ?.querySelector(
+                                ".train-item-collapsed-summary .train-name"
+                            )
+                            ?.textContent.trim(),
+                        originStationName: trainItemElement
+                            ?.querySelector(
+                                ".train-item-collapsed-summary .departure-info .trip-station"
+                            )
+                            ?.textContent.trim(),
+                        destinationStationName: trainItemElement
+                            ?.querySelector(
+                                ".train-item-collapsed-summary .arrival-info .trip-station"
+                            )
+                            ?.textContent.trim(),
+                        scheduledDepartureDisplay: trainItemElement
+                            ?.querySelector(
+                                ".train-item-collapsed-summary .departure-info .trip-time"
+                            )
+                            ?.textContent.trim(),
                         // Note: seatName and seatNumberInCoach are already in seatDataObject
                     };
                     addToCart(seatDataForCart, effectiveTripId); // effectiveTripId is fine, seatDataForCart now also contains it.
@@ -430,8 +443,6 @@ function addSeatClickListeners(seatGridContainer, carriageContext) { // Added ca
         });
     });
 }
-
-
 
 // Function to add a seat to the shopping cart
 function addToCart(seatData, tripId) {
@@ -482,19 +493,26 @@ function updateCartDisplay() {
     });
     console.log(`Total Price: ${totalPrice.toFixed(2)}`); // Keep console log for debugging
 
-    const cartPlaceholder = document.querySelector(".shopping-cart-placeholder");
+    const cartPlaceholder = document.querySelector(
+        ".shopping-cart-placeholder"
+    );
     if (!cartPlaceholder) {
         console.error("Shopping cart placeholder not found in DOM.");
         return;
     }
 
-    let cartSummaryDetails = cartPlaceholder.querySelector("#cart-summary-details");
+    let cartSummaryDetails = cartPlaceholder.querySelector(
+        "#cart-summary-details"
+    );
 
     // Initialize cart summary HTML structure if it doesn't exist
     if (!cartSummaryDetails) {
         // Remove the initial <p>(Chưa có vé nào)</p> if it exists
         const initialMessage = cartPlaceholder.querySelector("p");
-        if (initialMessage && initialMessage.textContent.includes("Chưa có vé nào")) {
+        if (
+            initialMessage &&
+            initialMessage.textContent.includes("Chưa có vé nào")
+        ) {
             initialMessage.remove();
         }
 
@@ -510,27 +528,46 @@ function updateCartDisplay() {
         cartPlaceholder.appendChild(cartSummaryDetails);
 
         // Add event listener for remove buttons ONCE when the list is created
-        const cartItemsList = cartSummaryDetails.querySelector("#cart-items-list");
+        const cartItemsList =
+            cartSummaryDetails.querySelector("#cart-items-list");
         if (cartItemsList) {
-            cartItemsList.addEventListener('click', function(event) {
-                const removeIcon = event.target.closest('.cart-item-remove-icon');
+            cartItemsList.addEventListener("click", function (event) {
+                const removeIcon = event.target.closest(
+                    ".cart-item-remove-icon"
+                );
                 if (removeIcon) {
-                    const listItem = removeIcon.closest('.cart-item-entry');
+                    const listItem = removeIcon.closest(".cart-item-entry");
                     const seatIdToRemove = listItem?.dataset.seatId;
                     const tripIdToRemove = listItem?.dataset.tripId; // tripId is stored on cartItem, not directly on dataset here.
-                                                                    // We need to ensure tripId is available for removeFromCart.
-                                                                    // The cartItem itself has the tripId. We can find it from shoppingCart.
-                    
-                    if (seatIdToRemove && tripIdToRemove) { // tripIdToRemove will be derived from cartItem
-                         // Find the actual tripId from the shoppingCart based on seatId, as dataset might not be fully reliable here for tripId
-                        const itemInCart = shoppingCart.find(item => item.seatID.toString() === seatIdToRemove && item.tripId === tripIdToRemove);
+                    // We need to ensure tripId is available for removeFromCart.
+                    // The cartItem itself has the tripId. We can find it from shoppingCart.
+
+                    if (seatIdToRemove && tripIdToRemove) {
+                        // tripIdToRemove will be derived from cartItem
+                        // Find the actual tripId from the shoppingCart based on seatId, as dataset might not be fully reliable here for tripId
+                        const itemInCart = shoppingCart.find(
+                            (item) =>
+                                item.seatID.toString() === seatIdToRemove &&
+                                item.tripId === tripIdToRemove
+                        );
                         if (itemInCart) {
-                            removeFromCart(itemInCart.seatID, itemInCart.tripId);
+                            removeFromCart(
+                                itemInCart.seatID,
+                                itemInCart.tripId
+                            );
                         } else {
-                            console.error("Could not find item in cart to remove for seatId:", seatIdToRemove, "and tripId:", tripIdToRemove);
+                            console.error(
+                                "Could not find item in cart to remove for seatId:",
+                                seatIdToRemove,
+                                "and tripId:",
+                                tripIdToRemove
+                            );
                         }
                     } else {
-                         console.error("Missing seatId or tripId for removal from cart item:", listItem);
+                        console.error(
+                            "Missing seatId or tripId for removal from cart item:",
+                            listItem
+                        );
                     }
                 }
             });
@@ -540,10 +577,14 @@ function updateCartDisplay() {
     // Get references to the dynamic elements
     // const cartCountElement = cartSummaryDetails.querySelector("#cart-item-count"); // Removed
     // const cartTotalPriceElement = cartSummaryDetails.querySelector("#cart-total-price"); // Removed
-    const cartItemsListElement = cartSummaryDetails.querySelector("#cart-items-list");
-    const proceedButton = cartSummaryDetails.querySelector("#proceed-to-booking-btn");
-    const emptyMessageElement = cartItemsListElement.querySelector(".cart-empty-message");
-
+    const cartItemsListElement =
+        cartSummaryDetails.querySelector("#cart-items-list");
+    const proceedButton = cartSummaryDetails.querySelector(
+        "#proceed-to-booking-btn"
+    );
+    const emptyMessageElement = cartItemsListElement.querySelector(
+        ".cart-empty-message"
+    );
 
     // Update cart count and total price - DOM elements removed, console log remains
     // if (cartCountElement) { // Removed
@@ -556,27 +597,51 @@ function updateCartDisplay() {
     // Update list of cart items
     if (cartItemsListElement) {
         // Clear previous items, but keep the empty message template if needed
-        while (cartItemsListElement.firstChild && !cartItemsListElement.firstChild.classList?.contains('cart-empty-message')) {
+        while (
+            cartItemsListElement.firstChild &&
+            !cartItemsListElement.firstChild.classList?.contains(
+                "cart-empty-message"
+            )
+        ) {
             cartItemsListElement.removeChild(cartItemsListElement.firstChild);
         }
-        
+
         if (shoppingCart.length === 0) {
-            if (emptyMessageElement) emptyMessageElement.style.display = 'list-item';
+            if (emptyMessageElement)
+                emptyMessageElement.style.display = "list-item";
         } else {
-            if (emptyMessageElement) emptyMessageElement.style.display = 'none';
-            shoppingCart.forEach(cartItem => {
-                const listItem = document.createElement('li');
-                listItem.className = 'cart-item-entry';
+            if (emptyMessageElement) emptyMessageElement.style.display = "none";
+            shoppingCart.forEach((cartItem) => {
+                const listItem = document.createElement("li");
+                listItem.className = "cart-item-entry";
                 // Store seatID and tripId on the list item for easier removal
                 listItem.dataset.seatId = cartItem.seatID;
                 listItem.dataset.tripId = cartItem.tripId; // Storing tripId here for the click handler
 
-                const legTypeDisplay = cartItem.tripLeg === 'outbound' ? 'Chiều đi' : (cartItem.tripLeg === 'return' ? 'Chiều về' : 'Chuyến');
-                const trainRouteDisplay = `${cartItem.trainName || 'N/A'}: ${cartItem.originStationName || 'N/A'} - ${cartItem.destinationStationName || 'N/A'}`;
-                const departureDisplay = cartItem.scheduledDepartureDisplay || 'N/A';
-                const seatDetailsDisplay = `${cartItem.seatName || 'N/A'} (Toa ${cartItem.coachPosition || 'N/A'}, Chỗ ${cartItem.seatNumberInCoach || 'N/A'})`;
-                const priceInfo = cartItem.calculatedPrice !== undefined ? 
-                                cartItem.calculatedPrice.toLocaleString('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' VND' : 'N/A';
+                const legTypeDisplay =
+                    cartItem.tripLeg === "outbound"
+                        ? "Chiều đi"
+                        : cartItem.tripLeg === "return"
+                        ? "Chiều về"
+                        : "Chuyến";
+                const trainRouteDisplay = `${cartItem.trainName || "N/A"}: ${
+                    cartItem.originStationName || "N/A"
+                } - ${cartItem.destinationStationName || "N/A"}`;
+                const departureDisplay =
+                    cartItem.scheduledDepartureDisplay || "N/A";
+                const seatDetailsDisplay = `${
+                    cartItem.seatName || "N/A"
+                } (Toa ${cartItem.coachPosition || "N/A"}, Chỗ ${
+                    cartItem.seatNumberInCoach || "N/A"
+                })`;
+                const priceInfo =
+                    cartItem.calculatedPrice !== undefined
+                        ? cartItem.calculatedPrice.toLocaleString("vi-VN", {
+                              style: "decimal",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                          }) + " VND"
+                        : "N/A";
 
                 listItem.innerHTML = `
                     <div class="cart-item-info-block">
@@ -588,14 +653,18 @@ function updateCartDisplay() {
                     </div>
                     <span class="cart-item-remove-icon" title="Xóa vé này"><i class="fas fa-trash"></i></span>
                 `;
-                cartItemsListElement.insertBefore(listItem, emptyMessageElement); 
+                cartItemsListElement.insertBefore(
+                    listItem,
+                    emptyMessageElement
+                );
             });
         }
     }
-    
+
     // Show/hide proceed button
     if (proceedButton) {
-        proceedButton.style.display = shoppingCart.length > 0 ? "block" : "none";
+        proceedButton.style.display =
+            shoppingCart.length > 0 ? "block" : "none";
         // TODO: Add event listener for proceedButton if not already handled elsewhere
         // proceedButton.onclick = function() { /* handle proceeding to booking */ };
     }
