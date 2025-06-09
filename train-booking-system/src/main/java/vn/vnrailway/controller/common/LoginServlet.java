@@ -52,7 +52,6 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-            throws ServletException, IOException {
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
@@ -74,7 +73,6 @@ public class LoginServlet extends HttpServlet {
             throw new ServletException("Database error during login", e);
         }
 
-
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (user.getPasswordHash().equals(password)) {
@@ -88,10 +86,11 @@ public class LoginServlet extends HttpServlet {
                     identifierCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
                     response.addCookie(identifierCookie);
 
-                    Cookie passwordCookie = new Cookie("rememberedPassword", password); // Store plain password for client-side pre-fill
+                    Cookie passwordCookie = new Cookie("rememberedPassword", password); // Store plain password for
+                                                                                        // client-side pre-fill
                     passwordCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
                     response.addCookie(passwordCookie);
-                    
+
                     Cookie rememberMeCookie = new Cookie("rememberMeChecked", "true");
                     rememberMeCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
                     response.addCookie(rememberMeCookie);
@@ -105,7 +104,7 @@ public class LoginServlet extends HttpServlet {
                     Cookie passwordCookie = new Cookie("rememberedPassword", "");
                     passwordCookie.setMaxAge(0); // Delete cookie
                     response.addCookie(passwordCookie);
-                    
+
                     Cookie rememberMeCookie = new Cookie("rememberMeChecked", "");
                     rememberMeCookie.setMaxAge(0); // Delete cookie
                     response.addCookie(rememberMeCookie);
@@ -116,7 +115,6 @@ public class LoginServlet extends HttpServlet {
                     case "Admin":
                         response.sendRedirect(request.getContextPath() + "/admin-dashboard");
                         break;
-                    case "Staff":
                     case "Staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
