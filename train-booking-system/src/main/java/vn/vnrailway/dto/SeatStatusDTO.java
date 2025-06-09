@@ -20,4 +20,5 @@ public class SeatStatusDTO {
     private BigDecimal tripBasePriceMultiplier;
     private boolean isEnabled; // From S.IsEnabled in DB (Seats table)
     private String availabilityStatus; // "Available", "Occupied", "Disabled" - determined by SP
+    private BigDecimal calculatedPrice; // Added for displaying the final price
 }

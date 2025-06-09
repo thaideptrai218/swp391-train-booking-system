@@ -65,6 +65,21 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByPhone(String phone) throws SQLException {
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin FROM Users WHERE PhoneNumber = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public List<User> findAll() throws SQLException {
         List<User> users = new ArrayList<>();
         String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin FROM Users";
@@ -192,6 +207,15 @@ public class UserRepositoryImpl implements UserRepository {
             userByEmailOpt.ifPresentOrElse(
                 u -> System.out.println("Found user by email: " + u),
                 () -> System.out.println("User with email " + testEmail + " not found.")
+            );
+            
+            // Test findByPhone
+            String testPhone = "0123456789"; // Ensure this phone number exists or use a real one from your DB
+            System.out.println("\nTesting findByPhone for phone: " + testPhone);
+            Optional<User> userByPhoneOpt = userRepository.findByPhone(testPhone);
+            userByPhoneOpt.ifPresentOrElse(
+                u -> System.out.println("Found user by phone: " + u),
+                () -> System.out.println("User with phone " + testPhone + " not found.")
             );
 
             // Example of saving a new user (uncomment and modify to test)

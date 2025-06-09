@@ -184,6 +184,30 @@ a {
     text-decoration: underline;
 }
 
+/* Validation Error Styles */
+.form-group .error-message {
+    color: #ff6b6b; /* A distinct red for error messages */
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: left;
+    display: block; /* Ensure it takes its own line */
+}
+
+.input-wrapper input.input-error {
+    border-color: #ff6b6b; /* Red border for error */
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+    animation: shake 0.3s; /* Apply shake animation */
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .register-card {

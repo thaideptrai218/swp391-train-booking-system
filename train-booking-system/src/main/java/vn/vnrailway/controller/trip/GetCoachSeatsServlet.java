@@ -12,13 +12,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 // import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Not strictly needed for SeatStatusDTO as it is
 
-@WebServlet(name = "GetCoachSeatsServlet", urlPatterns = { "/getCoachSeats" })
+@WebServlet(name = "GetCoachSeatsServlet", urlPatterns = { "/getCoachSeatsWithPrice" }) // Updated URL Pattern
 public class GetCoachSeatsServlet extends HttpServlet {
 
     private SeatRepository seatRepository;
@@ -46,20 +49,36 @@ public class GetCoachSeatsServlet extends HttpServlet {
             String coachIdParam = request.getParameter("coachId");
             String legOriginStationIdParam = request.getParameter("legOriginStationId");
             String legDestinationStationIdParam = request.getParameter("legDestinationStationId");
+            String bookingDateTimeParam = request.getParameter("bookingDateTime");
+            String isRoundTripParam = request.getParameter("isRoundTrip");
 
             if (tripIdParam == null || coachIdParam == null || legOriginStationIdParam == null
-                    || legDestinationStationIdParam == null) {
+                    || legDestinationStationIdParam == null || bookingDateTimeParam == null || isRoundTripParam == null) {
                 throw new IllegalArgumentException(
-                        "Missing required parameters: tripId, coachId, legOriginStationId, legDestinationStationId");
+                        "Missing required parameters: tripId, coachId, legOriginStationId, legDestinationStationId, bookingDateTime, isRoundTrip");
             }
 
             int tripId = Integer.parseInt(tripIdParam);
             int coachId = Integer.parseInt(coachIdParam);
             int legOriginStationId = Integer.parseInt(legOriginStationIdParam);
             int legDestinationStationId = Integer.parseInt(legDestinationStationIdParam);
+            boolean isRoundTrip = Boolean.parseBoolean(isRoundTripParam);
+            
+            Timestamp bookingTimestamp;
+            try {
+                // Assuming JS sends ISO_LOCAL_DATE_TIME format e.g. "2023-10-26T10:15:30"
+                // The SP expects DATETIME2, which Timestamp can map to.
+                // If JS sends ISO_OFFSET_DATE_TIME (with Z or +07:00), parsing needs to change.
+                bookingTimestamp = Timestamp.valueOf(LocalDateTime.parse(bookingDateTimeParam));
+            } catch (DateTimeParseException e) {
+                System.err.println("Invalid bookingDateTime format: " + bookingDateTimeParam + ". Falling back to current time. Error: " + e.getMessage());
+                bookingTimestamp = new Timestamp(System.currentTimeMillis());
+                 // Optionally, you could re-throw or set a specific error for the client
+            }
 
-            List<SeatStatusDTO> seatStatusList = seatRepository.getCoachSeatsWithAvailability(tripId, coachId,
-                    legOriginStationId, legDestinationStationId);
+
+            List<SeatStatusDTO> seatStatusList = seatRepository.getCoachSeatsWithAvailabilityAndPrice(
+                    tripId, coachId, legOriginStationId, legDestinationStationId, bookingTimestamp, isRoundTrip);
 
             objectMapper.writeValue(out, seatStatusList);
 

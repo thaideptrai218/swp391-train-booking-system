@@ -1,12 +1,8 @@
-// trip-result.js
-
-// Assume contextPath is set globally in the JSP, e.g., <script>var contextPath = '${pageContext.request.contextPath}';</script>
-// If not, this needs to be adjusted or passed appropriately.
 var contextPath = "/train-booking-system"; // Fallback if not set, though it should be.
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const trainItems = document.querySelectorAll(".train-item");
-
     trainItems.forEach((item) => {
         const collapsedSummary = item.querySelector(
             ".train-item-collapsed-summary"
@@ -107,9 +103,19 @@ function selectCarriage(selectedCarriageElement, trainItemElement) {
     if (seatDetailsBlock) {
         seatDetailsBlock.innerHTML = "<p>Đang tải sơ đồ ghế...</p>"; // Loading indicator
 
-        fetch(
-            `${contextPath}/getCoachSeats?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestStationId}`
-        )
+        const bookingDateTimeISO = new Date().toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+        const mainResultsContent = trainItemElement.closest(
+            ".main-results-content"
+        );
+        const isRoundTripForFetch = mainResultsContent
+            ? mainResultsContent.dataset.isRoundTrip === "true"
+            : false;
+
+        const fetchUrl = `${contextPath}/getCoachSeatsWithPrice?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestStationId}&bookingDateTime=${encodeURIComponent(
+            bookingDateTimeISO
+        )}&isRoundTrip=${isRoundTripForFetch}`;
+
+        fetch(fetchUrl)
             .then((response) => {
                 if (!response.ok) {
                     return response.json().then((err) => {
@@ -273,7 +279,18 @@ function createSeatElement(seatDto) {
     seatDiv.className = "seat";
     seatDiv.dataset.seatId = seatDto.seatID;
     seatDiv.dataset.seatName = seatDto.seatName;
-    seatDiv.textContent = seatDto.seatNumberInCoach; // Display SeatName, fallback to number
+    seatDiv.textContent = seatDto.seatNumberInCoach;
+
+    let titleText = seatDto.availabilityStatus || "Trạng thái không xác định";
+    if (
+        seatDto.availabilityStatus &&
+        seatDto.availabilityStatus.toLowerCase() === "available" &&
+        seatDto.calculatedPrice !== null && // Price should be raw number
+        seatDto.enabled
+    ) {
+        titleText += `: ${seatDto.calculatedPrice}`; // Append raw price
+    }
+    seatDiv.title = titleText;
 
     if (!seatDto.enabled) {
         seatDiv.classList.add("disabled");
@@ -299,7 +316,6 @@ function addSeatClickListeners(seatGridContainer) {
     seatGridContainer.querySelectorAll(".seat.available").forEach((seat) => {
         seat.addEventListener("click", function () {
             this.classList.toggle("selected");
-            // TODO: Add logic to manage selected seats (e.g., add to a list, update price)
             console.log(
                 `Seat ${
                     this.dataset.seatName || this.textContent

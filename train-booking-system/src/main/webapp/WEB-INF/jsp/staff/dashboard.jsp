@@ -36,19 +36,19 @@
             <section class="cards-container">
                 <div class="card">
                     <h3>Đặt chỗ đang chờ xử lý</h3>
-                    <p>45</p>
+                    <p>${pendingBookings}</p>
                 </div>
                 <div class="card">
                     <h3>Các chuyến khởi hành hôm nay</h3>
-                    <p>12</p>
+                    <p>${todayDepartures}</p>
                 </div>
                 <div class="card">
                     <h3>Vé đang hoạt động</h3>
-                    <p>567</p>
+                    <p>${activeTickets}</p>
                 </div>
                 <div class="card">
                     <h3>Yêu cầu gần đây</h3>
-                    <p>8</p>
+                    <p>${recentRequests}</p>
                 </div>
             </section>
 

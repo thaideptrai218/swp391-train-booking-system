@@ -30,7 +30,7 @@
             </div>
         </aside>
 
-        <main class="main-results-content">
+        <main class="main-results-content" data-is-round-trip="${not empty returnDateDisplay}">
             <%-- Outbound Trips Section --%>
             <section class="trip-section outbound-section">
                 <div class="trip-header">

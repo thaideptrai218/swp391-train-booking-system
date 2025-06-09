@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.dao.UserRepository;
 import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
+import vn.vnrailway.utils.HashPassword;
 
 /**
  *
@@ -50,28 +52,71 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+            throws ServletException, IOException {
         String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
         String password = request.getParameter("password");
+        String rememberMe = request.getParameter("rememberMe"); // "on" if checked, null otherwise
 
         UserRepository userRepository = new UserRepositoryImpl();
-        Optional<User> userOptional = null;
+        Optional<User> userOptional = Optional.empty();
+        String loginIdentifier = ""; // To store the identifier used for login (email or phone)
+
         try {
-            userOptional = userRepository.findByEmail(email);
+            if (email != null && !email.trim().isEmpty()) {
+                userOptional = userRepository.findByEmail(email);
+                loginIdentifier = email;
+            } else if (phone != null && !phone.trim().isEmpty()) {
+                userOptional = userRepository.findByPhone(phone);
+                loginIdentifier = phone;
+            }
         } catch (SQLException e) {
             throw new ServletException("Database error during login", e);
         }
+
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (user.getPasswordHash().equals(password)) {
                 HttpSession session = request.getSession(true); // Ensure session is created if not existing
                 session.setAttribute("loggedInUser", user);
-                String role = user.getRole();
 
+                // Handle "Remember Me" functionality
+                if ("on".equals(rememberMe)) {
+                    // Set cookies for email/phone and password
+                    Cookie identifierCookie = new Cookie("rememberedIdentifier", loginIdentifier);
+                    identifierCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+                    response.addCookie(identifierCookie);
+
+                    Cookie passwordCookie = new Cookie("rememberedPassword", password); // Store plain password for client-side pre-fill
+                    passwordCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+                    response.addCookie(passwordCookie);
+                    
+                    Cookie rememberMeCookie = new Cookie("rememberMeChecked", "true");
+                    rememberMeCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+                    response.addCookie(rememberMeCookie);
+
+                } else {
+                    // Remove "Remember Me" cookies if unchecked
+                    Cookie identifierCookie = new Cookie("rememberedIdentifier", "");
+                    identifierCookie.setMaxAge(0); // Delete cookie
+                    response.addCookie(identifierCookie);
+
+                    Cookie passwordCookie = new Cookie("rememberedPassword", "");
+                    passwordCookie.setMaxAge(0); // Delete cookie
+                    response.addCookie(passwordCookie);
+                    
+                    Cookie rememberMeCookie = new Cookie("rememberMeChecked", "");
+                    rememberMeCookie.setMaxAge(0); // Delete cookie
+                    response.addCookie(rememberMeCookie);
+                }
+
+                String role = user.getRole();
                 switch (role) {
                     case "Admin":
                         response.sendRedirect(request.getContextPath() + "/admin-dashboard");
                         break;
+                    case "Staff":
                     case "Staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");
                         break;
@@ -86,13 +131,11 @@ public class LoginServlet extends HttpServlet {
                         break;
                 }
             } else {
-                // Password mismatch
-                request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
+                request.setAttribute("errorMessage", "Tài khoản hoặc mật khẩu không đúng, vui lòng nhập lại!");
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             }
         } else {
-            // User not found
-            request.setAttribute("errorMessage", "Sai email hoặc mật khẩu.");
+            request.setAttribute("errorMessage", "Tài khoản hoặc mật khẩu không đúng, vui lòng nhập lại!");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }

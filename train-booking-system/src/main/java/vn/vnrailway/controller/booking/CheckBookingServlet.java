@@ -59,9 +59,7 @@ public class CheckBookingServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại hoặc email.");
             } else {
                 try {
-                    CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode,
-                            phoneNumber,
-                            email);
+                    CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode, phoneNumber, email);
                     if (checkBookingDTO != null) {
                         request.setAttribute("checkBookingDTO", checkBookingDTO);
                     } else {
