@@ -1,7 +1,9 @@
 package vn.vnrailway.dao;
 
 import vn.vnrailway.model.Ticket;
+// import vn.vnrailway.dto.BookingTrendDTO; // Removed import
 import java.sql.SQLException;
+// import java.util.Date; // Removed import
 import java.util.List;
 import java.util.Optional;
 

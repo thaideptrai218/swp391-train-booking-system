@@ -2,18 +2,24 @@ package vn.vnrailway.controller.manager;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList; // Keep for general list usage
 import java.util.List;
+// Removed: SimpleDateFormat, Calendar, Date, Map, Collectors
 
 import jakarta.servlet.ServletException;
 import vn.vnrailway.dao.StationRepository;
 import vn.vnrailway.dao.TicketRepository;
+import vn.vnrailway.dao.TrainRepository;
 import vn.vnrailway.dao.TripRepository;
 import vn.vnrailway.dao.impl.StationRepositoryImpl;
 import vn.vnrailway.dao.impl.TicketRepositoryImpl;
+import vn.vnrailway.dao.impl.TrainRepositoryImpl;
 import vn.vnrailway.dao.impl.TripRepositoryImpl;
 import vn.vnrailway.dto.BestSellerLocationDTO;
+// import vn.vnrailway.dto.BookingTrendDTO; // Already marked as removed
 import vn.vnrailway.dto.StationPopularityDTO;
 import vn.vnrailway.dto.TripPopularityDTO;
+// import vn.vnrailway.model.Ticket; // Already marked as removed
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +39,8 @@ public class ManagerDashboardServlet extends HttpServlet {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
         TripRepository tripRepository = new TripRepositoryImpl();
         StationRepository stationRepository = new StationRepositoryImpl();
-        int statsLimit = 5; // Configurable limit for top N statistics
+        TrainRepository trainRepository = new TrainRepositoryImpl();
+        int statsLimit = 5;
 
         try {
             // Existing stats
@@ -43,9 +50,11 @@ public class ManagerDashboardServlet extends HttpServlet {
 
             request.setAttribute("totalTicketsSold", totalTicketsSold);
             request.setAttribute("totalRevenue", totalRevenue);
-            request.setAttribute("bestSellerLocations", bestSellerLocations); // Keep for JSTL tables
+            request.setAttribute("bestSellerLocations", bestSellerLocations);
 
-            // New stats
+            long totalTrains = trainRepository.findAll().size();
+            request.setAttribute("totalTrains", totalTrains);
+
             List<StationPopularityDTO> mostCommonOriginStations = stationRepository
                     .getMostCommonOriginStations(statsLimit);
             List<StationPopularityDTO> mostCommonDestinationStations = stationRepository
@@ -56,9 +65,12 @@ public class ManagerDashboardServlet extends HttpServlet {
             request.setAttribute("mostCommonDestinationStations", mostCommonDestinationStations);
             request.setAttribute("mostPopularTrips", mostPopularTrips);
 
+            // Removed: Fetch all tickets for the new table
+            // List<Ticket> allTickets = ticketRepository.findAll();
+            // request.setAttribute("allTickets", allTickets);
+
         } catch (SQLException e) {
-            // Log the error and/or set an error message for the JSP
-            e.printStackTrace(); // Consider a proper logging framework
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Error fetching dashboard data: " + e.getMessage());
         }
 
@@ -70,4 +82,5 @@ public class ManagerDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
         doGet(request, response);
     }
+    // Removed aggregateDailyDataToWeekly helper method
 }

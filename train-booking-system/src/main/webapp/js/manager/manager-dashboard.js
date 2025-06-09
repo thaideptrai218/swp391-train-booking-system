@@ -18,7 +18,7 @@ function createPieChart(canvasId, chartLabel, labels, data, titleText) {
           "rgba(75, 192, 192, 0.7)",
           "rgba(153, 102, 255, 0.7)",
           "rgba(255, 159, 64, 0.7)",
-          "rgba(201, 203, 207, 0.7)", // Added more colors
+          "rgba(201, 203, 207, 0.7)", 
           "rgba(255, 87, 34, 0.7)",
           "rgba(0, 150, 136, 0.7)",
           "rgba(121, 85, 72, 0.7)",
@@ -57,6 +57,8 @@ function createPieChart(canvasId, chartLabel, labels, data, titleText) {
     },
   });
 }
+
+// createBarChart function removed as it's no longer used.
 
 document.addEventListener('DOMContentLoaded', function () {
   // Best Sellers Chart
@@ -106,4 +108,5 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Error processing data for popularDestinationStationsChart:", e, "Labels:", popularDestinationStationsCanvas.dataset.labels, "Values:", popularDestinationStationsCanvas.dataset.values);
     }
   }
+  // Removed initializations for weeklyBookingChart, monthlyBookingChart, yearlyBookingChart
 });

@@ -28,7 +28,7 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
         </header>
 
         <section class="statistics-section">
-          <h2>Thống Kê Doanh Thu</h2>
+          <h2>Thống Kê Chung</h2>
 
           <c:if test="${not empty errorMessage}">
             <div class="error-message">
@@ -38,8 +38,12 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
           <div class="stats-cards">
             <div class="stat-card">
-              <h3>Tổng Vé Đã Bán</h3>
-              <p><c:out value="${totalTicketsSold}" default="0" /> vé</p>
+              <h3>Tổng Lượt Đặt Vé</h3>
+              <p><c:out value="${totalTicketsSold}" default="0" /> lượt</p>
+            </div>
+            <div class="stat-card">
+              <h3>Tổng Số Đoàn Tàu</h3>
+              <p><c:out value="${totalTrains}" default="0" /> tàu</p>
             </div>
             <div class="stat-card">
               <h3>Tổng Doanh Thu</h3>
@@ -75,46 +79,48 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
             </c:choose>
           </div>
 
-          <div class="popular-stations-origin">
-            <h3>Ga Khởi Hành Phổ Biến Nhất</h3>
-            <c:choose>
-              <c:when test="${not empty mostCommonOriginStations}">
-                <div
-                  class="chart-container"
-                  style="position: relative; height: 40vh; width: 80vw"
-                >
-                  <canvas
-                    id="popularOriginStationsChart"
-                    data-labels='[<c:forEach var="station" items="${mostCommonOriginStations}" varStatus="loop">"${fn:escapeXml(station.stationName)}"<c:if test="${not loop.last}">, </c:if></c:forEach>]'
-                    data-values='[<c:forEach var="station" items="${mostCommonOriginStations}" varStatus="loop">${station.count}<c:if test="${not loop.last}">, </c:if></c:forEach>]'
-                  ></canvas>
-                </div>
-              </c:when>
-              <c:otherwise>
-                <p>Không có dữ liệu về ga khởi hành phổ biến.</p>
-              </c:otherwise>
-            </c:choose>
-          </div>
+          <div class="popular-stations-row">
+            <div class="popular-stations-origin">
+              <h3>Ga Khởi Hành Phổ Biến Nhất</h3>
+              <c:choose>
+                <c:when test="${not empty mostCommonOriginStations}">
+                  <div
+                    class="chart-container"
+                    style="position: relative; height: 40vh; width: 100%"
+                  >
+                    <canvas
+                      id="popularOriginStationsChart"
+                      data-labels='[<c:forEach var="station" items="${mostCommonOriginStations}" varStatus="loop">"${fn:escapeXml(station.stationName)}"<c:if test="${not loop.last}">, </c:if></c:forEach>]'
+                      data-values='[<c:forEach var="station" items="${mostCommonOriginStations}" varStatus="loop">${station.count}<c:if test="${not loop.last}">, </c:if></c:forEach>]'
+                    ></canvas>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <p>Không có dữ liệu về ga khởi hành phổ biến.</p>
+                </c:otherwise>
+              </c:choose>
+            </div>
 
-          <div class="popular-stations-destination">
-            <h3>Ga Đến Phổ Biến Nhất</h3>
-            <c:choose>
-              <c:when test="${not empty mostCommonDestinationStations}">
-                <div
-                  class="chart-container"
-                  style="position: relative; height: 40vh; width: 80vw"
-                >
-                  <canvas
-                    id="popularDestinationStationsChart"
-                    data-labels='[<c:forEach var="station" items="${mostCommonDestinationStations}" varStatus="loop">"${fn:escapeXml(station.stationName)}"<c:if test="${not loop.last}">, </c:if></c:forEach>]'
-                    data-values='[<c:forEach var="station" items="${mostCommonDestinationStations}" varStatus="loop">${station.count}<c:if test="${not loop.last}">, </c:if></c:forEach>]'
-                  ></canvas>
-                </div>
-              </c:when>
-              <c:otherwise>
-                <p>Không có dữ liệu về ga đến phổ biến.</p>
-              </c:otherwise>
-            </c:choose>
+            <div class="popular-stations-destination">
+              <h3>Ga Đến Phổ Biến Nhất</h3>
+              <c:choose>
+                <c:when test="${not empty mostCommonDestinationStations}">
+                  <div
+                    class="chart-container"
+                    style="position: relative; height: 40vh; width: 100%"
+                  >
+                    <canvas
+                      id="popularDestinationStationsChart"
+                      data-labels='[<c:forEach var="station" items="${mostCommonDestinationStations}" varStatus="loop">"${fn:escapeXml(station.stationName)}"<c:if test="${not loop.last}">, </c:if></c:forEach>]'
+                      data-values='[<c:forEach var="station" items="${mostCommonDestinationStations}" varStatus="loop">${station.count}<c:if test="${not loop.last}">, </c:if></c:forEach>]'
+                    ></canvas>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <p>Không có dữ liệu về ga đến phổ biến.</p>
+                </c:otherwise>
+              </c:choose>
+            </div>
           </div>
 
           <div class="popular-trips">
@@ -156,6 +162,8 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
               </c:otherwise>
             </c:choose>
           </div>
+          <%-- All Tickets Table Section and Booking Trend Chart Section are
+          removed --%>
         </section>
       </div>
     </div>
