@@ -19,7 +19,7 @@
           <nav>
             <a href="${pageContext.request.contextPath}/searchTrip">Tìm vé</a>
             <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
-            <a href="#">Kiểm tra vé</a>
+            <a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a>
             <a href="#">Trả vé</a>
           </nav>
 
@@ -53,27 +53,27 @@
               <table cellspacing="10">
                 <tbody>
                   <tr>
-                    <td>Mã đặt chỗ <span style="color: red">*</span></td>
+                    <td><strong>Mã đặt chỗ</strong> <span style="color: red">*</span></td>
                     <td>
                       <input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ" value="${bookingCode}"
                         required />
                     </td>
                   </tr>
                   <tr>
-                    <td>Điện thoại</td>
+                    <td><strong>Điện thoại</strong></td>
                     <td>
                       <input type="text" name="phoneNumber" placeholder="Nhập số điện thoại"
                         value="${checkBookingDTO.userPhoneNumber}" />
                     </td>
                   </tr>
                   <tr>
-                    <td>Email</td>
+                    <td><strong>Email</strong></td>
                     <td>
                       <input type="email" placeholder="Email" name="email" value="${checkBookingDTO.userEmail}" /><br />
                     </td>
                   </tr>
                   <tr>
-                    <td><button type="submit">Xác Nhận</button></td>
+                    <td><button type="submit"><strong>Xác Nhận</strong></button></td>
                   </tr>
                 </tbody>
               </table>

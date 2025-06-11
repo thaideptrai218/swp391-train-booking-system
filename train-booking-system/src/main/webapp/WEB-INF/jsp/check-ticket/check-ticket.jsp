@@ -32,122 +32,63 @@
             </c:when>
             <c:otherwise>
               <div class="auth">
-                  <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
-                  <a class="register" href="${pageContext.request.contextPath}/register">Đăng ký</a>
-                </div>
+                <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
+                <a class="register" href="${pageContext.request.contextPath}/register">Đăng ký</a>
+              </div>
             </c:otherwise>
           </c:choose>
         </div>
       </header>
 
       <main class="main-content">
-        <!-- <div>
-                    <img src="${pageContext.request.contextPath}/assets/images/image-26-72.png" class="news" alt="news">
-                </div> -->
-
         <section class="check-info">
           <div class="form-checking">
-            <label class="et-main-label">TRA CỨU THÔNG TIN ĐẶT CHỖ</label>
-            <p>Để tra cứu thông tin, quý khách vui lòng thông tin bên dưới.</p>
-            <form id="returnForm" method="get" action="checkBooking">
+            <label class="et-main-label">KIỂM TRA VÉ</label>
+            <p>Để tra cứu thông tin, quý khách vui lòng nhập đầy đủ thông tin bên dưới.</p>
+            <form id="ticketLookupForm" method="get" action="checkTicket">
               <table cellspacing="10">
                 <tbody>
                   <tr>
-                    <td>Mã đặt chỗ <span style="color: red">*</span></td>
-                    <td>
-                      <input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ" value="${bookingCode}"
-                        required />
-                    </td>
+                    <td style="padding-right: 20px;"><strong>Mã vé</strong></td>
+                    <td style="padding-right: 40px;"><input type="text" name="ticketCode" placeholder="Nhập mã vé" required /></td>
+                    <td style="padding-right: 20px;"><strong>Mác tàu</strong></strong></td>
+                    <td><input type="text" name="trainCode" placeholder="Nhập mác tàu" required /></td>
                   </tr>
                   <tr>
-                    <td>Điện thoại</td>
-                    <td>
-                      <input type="text" name="phoneNumber" placeholder="Nhập số điện thoại"
-                        value="${checkBookingDTO.userPhoneNumber}" />
-                    </td>
+                    <td style="padding-right: 20px;"><strong>Ga đi</strong></strong></td>
+                    <td style="padding-right: 40px;"><input type="text" name="departureStation" placeholder="Nhập ga đi" required /></td>
+                    <td style="padding-right: 20px;"><strong>Ga đến</strong></strong></td>
+                    <td><input type="text" name="arrivalStation" placeholder="Nhập ga đến" required /></td>
                   </tr>
                   <tr>
-                    <td>Email</td>
-                    <td>
-                      <input type="email" placeholder="Email" name="email" value="${checkBookingDTO.userEmail}" /><br />
-                    </td>
+                    <td style="padding-right: 20px;"><strong>Ngày đi</strong></td>
+                    <td style="padding-right: 40px;"><input type="date" name="departureDate" required /></td>
+                    <td style="padding-right: 20px;"><strong>Số giấy tờ</strong></strong></td>
+                    <td><input type="text" name="idNumber" placeholder="Nhập số giấy tờ" required /></td>
                   </tr>
                   <tr>
-                    <td><button type="submit">Xác Nhận</button></td>
+                    <td>
+                      <button type="submit"><strong>Kiểm tra vé</strong></button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </form>
           </div>
-
-          <div class="booking-summary">
-            <c:if test="${not empty errorMessage}">
-              <p style="color: red">${errorMessage}</p>
-            </c:if>
-
-            <c:if test="${not empty checkBookingDTO}">
-              <h3 style="color: red">Danh sách vé:</h3>
-              <table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                  <tr style="background-color: #5e5e5e50">
-                    <th>Hành khách</th>
-                    <th>CMND</th>
-                    <th>Loại</th>
-                    <th>Ghế</th>
-                    <th>Loại ghế</th>
-                    <th>Toa</th>
-                    <th>Tàu</th>
-                    <th>Giá</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-
-                <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
-                  <tbody>
-                    <tr>
-                      <td colspan="9" style="font-weight: bold">
-                        ${p.startStationName} - ${p.endStationName}
-                        ${p.scheduledDepartureTime}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>${p.passengerFullName}</td>
-                      <td>${p.passengerIDCard}</td>
-                      <td>${p.passengerType}</td>
-                      <td>${p.seatNumber}</td>
-                      <td>${p.seatTypeName}</td>
-                      <td>${p.coachName}</td>
-                      <td>${p.trainName}</td>
-                      <td>${p.price}</td>
-                      <td>${p.ticketStatus}</td>
-                    </tr>
-                  </tbody>
-                </c:forEach>
-              </table>
-
-              <h3 style="color: red">Thông tin người đặt vé</h3>
-              <div class="booking-info-grid">
-                <div class="form-row">
-                  <label>Họ và tên</label>
-                  <input type="text" value="${checkBookingDTO.userFullName}" readonly />
-                  <label>Email</label>
-                  <input type="text" value="${checkBookingDTO.userEmail}" readonly />
-                </div>
-                <div class="form-row">
-                  <label>Số CMND</label>
-                  <input type="text" value="${checkBookingDTO.userIDCardNumber}" readonly />
-                  <label>Số điện thoại</label>
-                  <input type="text" value="${checkBookingDTO.userPhoneNumber}" readonly />
-                </div>
-              </div>
-            </c:if>
-          </div>
         </section>
-
-        <!-- <div>
-                    <img src="${pageContext.request.contextPath}/assets/images/image-27-73.png" class="news" alt="news">
-                </div> -->
       </main>
+
+
+
+
+
+
+
+
+
+
+
+
 
       <footer class="footer">
         <div class="footer-top">
