@@ -19,12 +19,13 @@ body {
   text-decoration: none;
   font-weight: bold;
 }
-.logooo a {
+
+/* .logooo {
   color: white;
   margin: 27px;
   text-decoration: none;
-  font-weight: bold;
-}
+  font-weight: bold; 
+} */
 .logo {
   width: 12%;
 }
