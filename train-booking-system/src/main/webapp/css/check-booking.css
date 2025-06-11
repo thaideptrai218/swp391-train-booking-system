@@ -11,6 +11,7 @@ body {
   justify-content: space-between;
   padding: 10px 30px;
   align-items: center;
+  height: 80px;
 }
 
 .navbar a {
@@ -20,14 +21,10 @@ body {
   font-weight: bold;
 }
 
-/* .logooo {
-  color: white;
-  margin: 27px;
-  text-decoration: none;
-  font-weight: bold; 
-} */
 .logo {
-  width: 12%;
+  height: 100px; /* Ưu tiên dùng height để giữ tỉ lệ ảnh */
+  width: auto;  /* Giữ tỉ lệ ảnh đúng, không bị méo */
+  object-fit: contain;
 }
 
 .auth a {
