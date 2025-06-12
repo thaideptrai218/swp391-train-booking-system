@@ -15,7 +15,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
     <section
       class="hero"
       style="
-        background-image: url('${pageContext.request.contextPath}/assets/images/landing/top_BG.png');
+        background-image: url('${pageContext.request.contextPath}/assets/images/landing/common/top_BG.png');
         background-size: cover;
         background-position: center;
       "
@@ -28,7 +28,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
           >
             <div class="logo-block">
               <img
-                src="${pageContext.request.contextPath}/assets/images/landing/logo.svg"
+                src="${pageContext.request.contextPath}/assets/images/landing/common/logo.svg"
                 alt="Logo"
                 class="logo"
               />
@@ -123,7 +123,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
             >
             <button class="btn btn-secondary">
               <img
-                src="${pageContext.request.contextPath}/assets/images/landing/phone.png"
+                src="${pageContext.request.contextPath}/assets/images/landing/common/phone.png"
                 alt="Phone"
                 class="phone-icon"
               />0983868888
@@ -184,7 +184,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
             <h3 class="sub-heading">Bản đồ hành trình</h3>
             <div class="map-placeholder">
               <img
-                src="${pageContext.request.contextPath}/assets/images/landing/map.jpg"
+                src="${pageContext.request.contextPath}/assets/images/landing/common/map.jpg"
                 alt="Bản đồ hành trình"
               />
             </div>
@@ -202,7 +202,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
           </p>
           <img
             class="img1"
-            src="${pageContext.request.contextPath}/assets/images/landing/img1.jpeg"
+            src="${pageContext.request.contextPath}/assets/images/landing/common/img1.jpeg"
           />
         </div>
 

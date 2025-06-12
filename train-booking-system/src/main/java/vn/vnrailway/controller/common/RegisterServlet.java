@@ -21,7 +21,6 @@ import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
 import vn.vnrailway.utils.HashPassword; // Import HashPassword for hashing the password
 
-
 /**
  *
  * @author admin
@@ -30,56 +29,62 @@ import vn.vnrailway.utils.HashPassword; // Import HashPassword for hashing the p
 @WebServlet("/register")
 
 public class RegisterServlet extends HttpServlet {
-   
-        
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     // Remove processRequest as it's not needed for MVC flow
-    // protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    // protected void processRequest(HttpServletRequest request, HttpServletResponse
+    // response)
     // throws ServletException, IOException {
-    //     response.setContentType("text/html;charset=UTF-8");
-    //     try (PrintWriter out = response.getWriter()) {
-    //         out.println("<!DOCTYPE html>");
-    //         out.println("<html>");
-    //         out.println("<head>");
-    //         out.println("<title>Servlet RegisterServlet</title>");  
-    //         out.println("</head>");
-    //         out.println("<body>");
-    //         out.println("<h1>Servlet RegisterServlet at " + request.getContextPath () + "</h1>");
-    //         out.println("</body>");
-    //         out.println("</html>");
-    //     }
-    // } 
+    // response.setContentType("text/html;charset=UTF-8");
+    // try (PrintWriter out = response.getWriter()) {
+    // out.println("<!DOCTYPE html>");
+    // out.println("<html>");
+    // out.println("<head>");
+    // out.println("<title>Servlet RegisterServlet</title>");
+    // out.println("</head>");
+    // out.println("<body>");
+    // out.println("<h1>Servlet RegisterServlet at " + request.getContextPath () +
+    // "</h1>");
+    // out.println("</body>");
+    // out.println("</html>");
+    // }
+    // }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
+    /**
      * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        request.getRequestDispatcher("/register.jsp").forward(request, response);
-    }  
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/jsp/authentication/register.jsp").forward(request, response);
+    }
 
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         String fullName = request.getParameter("FullName");
         String phoneNumber = request.getParameter("phone");
         String email = request.getParameter("email");
@@ -122,7 +127,7 @@ public class RegisterServlet extends HttpServlet {
 
         if (errorMessage != null) {
             request.setAttribute("errorMessage", errorMessage);
-            request.getRequestDispatcher("/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/register.jsp").forward(request, response);
             return; // Stop further processing if there's an error
         }
 
@@ -135,11 +140,13 @@ public class RegisterServlet extends HttpServlet {
             } else {
                 // Hash the password before saving
                 String hashedPassword = HashPassword.hashPassword(password);
-                
-                User newUser = new User(fullName, hashedPassword, fullName, email, phoneNumber, idCardNumber, "", "Customer"); // Default role "Customer"
+
+                User newUser = new User(fullName, hashedPassword, fullName, email, phoneNumber, idCardNumber, "",
+                        "Customer"); // Default role "Customer"
 
                 userRepository.save(newUser);
-                response.sendRedirect(request.getContextPath() + "/login.jsp?registrationSuccess=true");
+                response.sendRedirect(request.getContextPath() + "/login?registrationSuccess=true"); // Redirect to
+                                                                                                     // /login servlet
                 return; // Important to return after redirect
             }
         } catch (SQLException e) {
@@ -148,11 +155,12 @@ public class RegisterServlet extends HttpServlet {
         }
 
         request.setAttribute("errorMessage", errorMessage);
-        request.getRequestDispatcher("/register.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/authentication/register.jsp").forward(request, response);
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     * 
      * @return a String containing servlet description
      */
     @Override

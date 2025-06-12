@@ -64,7 +64,7 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
               <c:when test="${not empty bestSellerLocations}">
                 <div
                   class="chart-container"
-                  style="position: relative; height: 40vh; width: 80vw"
+                  style="position: relative; height: 40vh; width: 100%"
                 >
                   <canvas
                     id="bestSellersChart"

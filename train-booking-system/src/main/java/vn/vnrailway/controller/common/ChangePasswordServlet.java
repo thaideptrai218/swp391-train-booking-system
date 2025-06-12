@@ -19,7 +19,6 @@ import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
 import vn.vnrailway.utils.HashPassword; // Import HashPassword
 
-
 /**
  *
  * @author admin
@@ -28,61 +27,66 @@ import vn.vnrailway.utils.HashPassword; // Import HashPassword
 @WebServlet("/changepassword")
 
 public class ChangePasswordServlet extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ChangePasswordServlet</title>");  
+            out.println("<title>Servlet ChangePasswordServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ChangePasswordServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ChangePasswordServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    } 
+    }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
+    /**
      * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        request.getRequestDispatcher("/changepassword.jsp").forward(request, response);
-    }  
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/jsp/authentication/changepassword.jsp").forward(request, response);
+    }
 
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
+     * 
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         HttpSession session = request.getSession();
         User loggedInUser = (User) session.getAttribute("loggedInUser");
 
         if (loggedInUser == null) {
             // User is not logged in, redirect to login page
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login"); // Redirect to servlet
             return;
         }
 
@@ -97,7 +101,8 @@ public class ChangePasswordServlet extends HttpServlet {
         // Validate email or phone
         if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
             errorMessage = "Vui lòng nhập email hoặc số điện thoại.";
-        } else if (!emailOrPhone.equals(loggedInUser.getEmail()) && !emailOrPhone.equals(loggedInUser.getPhoneNumber())) {
+        } else if (!emailOrPhone.equals(loggedInUser.getEmail())
+                && !emailOrPhone.equals(loggedInUser.getPhoneNumber())) {
             errorMessage = "Email hoặc số điện thoại không khớp với tài khoản của bạn.";
         } else if (newPassword.length() < 8) { // New password length validation
             errorMessage = "Mật khẩu mới phải có ít nhất 8 ký tự.";
@@ -127,11 +132,12 @@ public class ChangePasswordServlet extends HttpServlet {
 
         request.setAttribute("errorMessage", errorMessage);
         request.setAttribute("successMessage", successMessage);
-        request.getRequestDispatcher("/changepassword.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/authentication/changepassword.jsp").forward(request, response);
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     * 
      * @return a String containing servlet description
      */
     @Override

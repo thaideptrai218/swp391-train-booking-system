@@ -251,7 +251,7 @@
             </c:if>
             <c:forEach var="location" items="${allLocations}">
                 <div class="location-card">
-                    <img src="${contextPath}/assets/images/landing/locations/location${location.locationID}.jpg" alt="${location.locationName}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';">
+                    <img src="${contextPath}/assets/images/landing/locations/${location.locationCode}.jpg" alt="${location.locationName}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';">
                     <div class="location-card-content">
                         <h3>${location.locationName}</h3>
                         <p>Thành phố: ${location.city}</p>

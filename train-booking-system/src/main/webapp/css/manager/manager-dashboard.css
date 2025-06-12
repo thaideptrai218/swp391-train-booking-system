@@ -109,6 +109,7 @@
 .popular-stations-row .popular-stations-destination {
   flex: 1;
   margin-bottom: 0;
+  min-width: 0; /* Allow flex items to shrink properly */
 }
 
 .best-sellers h3,

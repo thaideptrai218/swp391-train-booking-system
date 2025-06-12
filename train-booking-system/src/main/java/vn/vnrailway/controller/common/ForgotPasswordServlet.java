@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.dao.UserDAO;
 
-@WebServlet(name = "ForgotPasswordServlet", urlPatterns = {"/forgotpassword"})
+@WebServlet(name = "ForgotPasswordServlet", urlPatterns = { "/forgotpassword" })
 public class ForgotPasswordServlet extends HttpServlet {
     private static final String EMAIL_FROM = "assasinhp619@gmail.com";
     // Replace with your 16-character App Password
@@ -52,7 +52,7 @@ public class ForgotPasswordServlet extends HttpServlet {
                 request.setAttribute("message", message);
                 request.setAttribute("messageType", messageType);
                 request.setAttribute("timeLeft", timeLeftInSeconds); // Pass timeLeft to JSP
-                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/enterotp.jsp").forward(request, response);
                 return;
             }
 
@@ -75,7 +75,7 @@ public class ForgotPasswordServlet extends HttpServlet {
 
                 Random rand = new Random();
                 String otp = String.format("%06d", rand.nextInt(999999));
-                
+
                 System.out.println("Resending OTP: " + otp + " to email: " + email);
 
                 Session mailSession = Session.getInstance(props, new Authenticator() {
@@ -89,30 +89,31 @@ public class ForgotPasswordServlet extends HttpServlet {
                 Message mimeMessage = new MimeMessage(mailSession);
                 mimeMessage.setFrom(new InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
                 mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-                
+
                 mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
                 mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
                 mimeMessage.setSubject(MimeUtility.encodeText("Mã OTP Mới - Vetaure", "UTF-8", "B"));
-                
+
                 String messageContent = String.format(
-                    "<!DOCTYPE html>" +
-                    "<html>" +
-                    "<head>" +
-                    "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>" +
-                    "</head>" +
-                    "<body style='font-family: Arial, sans-serif;'>" +
-                    "<h2 style='color: #333;'>Xin chào,</h2>" +
-                    "<p>Đây là mã OTP mới của bạn theo yêu cầu gửi lại từ VeTauRe.</p>" +
-                    "<p>Mã OTP mới của bạn là: <span style='color: red; font-size: 24px; font-weight: bold;'>%s</span></p>" +
-                    "<br/>" +
-                    "<p>Nếu bạn không yêu cầu gửi lại mã OTP, vui lòng bỏ qua email này.</p>" +
-                    "<p>Mã OTP này sẽ hết hạn sau 5 phút.</p>" +
-                    "<br/>" +          
-                    "<h2 style='color: #333;'>Cảm ơn bạn đã sử dụng VeTauRe!</h2>" +
-                    "<h2 style='color: #333;'>Đội ngũ VeTauRe.</h2>" +
-                    "</body>" +
-                    "</html>", 
-                    otp);
+                        "<!DOCTYPE html>" +
+                                "<html>" +
+                                "<head>" +
+                                "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>" +
+                                "</head>" +
+                                "<body style='font-family: Arial, sans-serif;'>" +
+                                "<h2 style='color: #333;'>Xin chào,</h2>" +
+                                "<p>Đây là mã OTP mới của bạn theo yêu cầu gửi lại từ VeTauRe.</p>" +
+                                "<p>Mã OTP mới của bạn là: <span style='color: red; font-size: 24px; font-weight: bold;'>%s</span></p>"
+                                +
+                                "<br/>" +
+                                "<p>Nếu bạn không yêu cầu gửi lại mã OTP, vui lòng bỏ qua email này.</p>" +
+                                "<p>Mã OTP này sẽ hết hạn sau 5 phút.</p>" +
+                                "<br/>" +
+                                "<h2 style='color: #333;'>Cảm ơn bạn đã sử dụng VeTauRe!</h2>" +
+                                "<h2 style='color: #333;'>Đội ngũ VeTauRe.</h2>" +
+                                "</body>" +
+                                "</html>",
+                        otp);
 
                 mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
                 Transport.send(mimeMessage);
@@ -125,21 +126,21 @@ public class ForgotPasswordServlet extends HttpServlet {
                 messageType = "success";
                 request.setAttribute("message", message);
                 request.setAttribute("messageType", messageType);
-                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/enterotp.jsp").forward(request, response);
 
             } catch (MessagingException | java.io.UnsupportedEncodingException e) {
                 e.printStackTrace();
                 System.out.println("Email resend error: " + e.getMessage());
-                
+
                 message = "Lỗi khi gửi lại email OTP. Vui lòng thử lại sau.";
                 messageType = "error";
                 request.setAttribute("message", message);
                 request.setAttribute("messageType", messageType);
-                request.getRequestDispatcher("/enterotp.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/enterotp.jsp").forward(request, response);
             }
         } else {
             // Default GET request: show forgot password page
-            request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
         }
     }
 
@@ -158,7 +159,7 @@ public class ForgotPasswordServlet extends HttpServlet {
             messageType = "error";
             request.setAttribute("message", message);
             request.setAttribute("messageType", messageType);
-            request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
             return;
         }
 
@@ -169,7 +170,7 @@ public class ForgotPasswordServlet extends HttpServlet {
             messageType = "error";
             request.setAttribute("message", message);
             request.setAttribute("messageType", messageType);
-            request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
             return;
         }
 
@@ -179,14 +180,14 @@ public class ForgotPasswordServlet extends HttpServlet {
             props.put("mail.smtp.port", "587");
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
-            
+
             // Generate OTP - Move this before using it
             Random rand = new Random();
             String otp = String.format("%06d", rand.nextInt(999999));
-            
+
             // Add debug log for OTP
             System.out.println("Generated OTP: " + otp);
-            
+
             Session mailSession = Session.getInstance(props, new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -203,34 +204,36 @@ public class ForgotPasswordServlet extends HttpServlet {
             Message mimeMessage = new MimeMessage(mailSession);
             mimeMessage.setFrom(new InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
             mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-            
+
             // Set UTF-8 encoding for both subject and content
             mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
             mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
-            
+
             // Set subject with UTF-8 encoding
             mimeMessage.setSubject(MimeUtility.encodeText("Mã OTP Đặt Lại Mật Khẩu - Vetaure", "UTF-8", "B"));
-            
+
             // Create HTML message content with proper encoding and styling
             String messageContent = String.format(
-                "<!DOCTYPE html>" +
-                "<html>" +
-                "<head>" +
-                "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>" +
-                "</head>" +
-                "<body style='font-family: Arial, sans-serif;'>" +
-                "<h2 style='color: #333;'>Xin chào,</h2>" +
-                "<p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn trên VeTauRe.</p>" +
-                "<p>Để đặt lại mật khẩu, vui lòng sử dụng mã OTP sau đâyđây:<span style='color: red; font-size: 24px; font-weight: bold;'>%s</span></p>" +
-                "<br/>" +
-                "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>" +
-                "<p>Đây là mã OTP duy nhất và chỉ sử dụng một lần và sẽ hết hạn sau 5 phút..</p>" +
-                "<br/>" +          
-                "<h2 style='color: #333;'>Cảm ơn bạn đã sử dụng VeTauRe!</h2>" +
-                "<h2 style='color: #333;'>Đội ngũ VeTauRe.</h2>" +
-                "</body>" +
-                "</html>", 
-                otp);
+                    "<!DOCTYPE html>" +
+                            "<html>" +
+                            "<head>" +
+                            "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>" +
+                            "</head>" +
+                            "<body style='font-family: Arial, sans-serif;'>" +
+                            "<h2 style='color: #333;'>Xin chào,</h2>" +
+                            "<p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn trên VeTauRe.</p>"
+                            +
+                            "<p>Để đặt lại mật khẩu, vui lòng sử dụng mã OTP sau đâyđây:<span style='color: red; font-size: 24px; font-weight: bold;'>%s</span></p>"
+                            +
+                            "<br/>" +
+                            "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>" +
+                            "<p>Đây là mã OTP duy nhất và chỉ sử dụng một lần và sẽ hết hạn sau 5 phút..</p>" +
+                            "<br/>" +
+                            "<h2 style='color: #333;'>Cảm ơn bạn đã sử dụng VeTauRe!</h2>" +
+                            "<h2 style='color: #333;'>Đội ngũ VeTauRe.</h2>" +
+                            "</body>" +
+                            "</html>",
+                    otp);
 
             // Set content with explicit charset
             mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
@@ -253,12 +256,12 @@ public class ForgotPasswordServlet extends HttpServlet {
             // In chi tiết lỗi để debug
             e.printStackTrace();
             System.out.println("Email error: " + e.getMessage());
-            
+
             message = "Lỗi khi gửi email. Vui lòng thử lại sau.";
             messageType = "error";
             request.setAttribute("message", message);
             request.setAttribute("messageType", messageType);
-            request.getRequestDispatcher("/forgotpassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
         }
     }
 
