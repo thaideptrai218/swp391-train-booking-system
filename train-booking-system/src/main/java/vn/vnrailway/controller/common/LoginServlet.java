@@ -75,7 +75,7 @@ public class LoginServlet extends HttpServlet {
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (user.getPasswordHash().equals(password)) {
+            if (HashPassword.checkPassword(password, user.getPasswordHash())) {
                 HttpSession session = request.getSession(true); // Ensure session is created if not existing
                 session.setAttribute("loggedInUser", user);
 
