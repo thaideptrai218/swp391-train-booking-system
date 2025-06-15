@@ -180,8 +180,8 @@ BEGIN
                 SELECT 1 FROM dbo.TemporarySeatHolds TSH_User
                 WHERE TSH_User.SeatID = S.SeatID
                   AND TSH_User.TripID = @TripID_Input
-                  AND TSH_User.LegStartStationID = @LegOriginStationID_Input -- Exact leg match
-                  AND TSH_User.LegEndStationID = @LegDestinationStationID_Input   -- Exact leg match
+                  AND TSH_User.legOriginStationId = @LegOriginStationID_Input -- Exact leg match
+                  AND TSH_User.legDestinationStationId = @LegDestinationStationID_Input   -- Exact leg match
                   AND TSH_User.SessionID = @CurrentUserSessionID_Input
                   AND TSH_User.ExpiresAt > GETDATE()
             ) THEN 'HeldByYou'
@@ -197,8 +197,8 @@ BEGIN
             -- 3. Check if held by OTHER users (overlapping leg)
             WHEN EXISTS (
                 SELECT 1 FROM dbo.TemporarySeatHolds TSH_Other
-                INNER JOIN dbo.TripStations TSH_Other_Start_TS ON TSH_Other.TripID = TSH_Other_Start_TS.TripID AND TSH_Other.LegStartStationID = TSH_Other_Start_TS.StationID
-                INNER JOIN dbo.TripStations TSH_Other_End_TS ON TSH_Other.TripID = TSH_Other_End_TS.TripID AND TSH_Other.LegEndStationID = TSH_Other_End_TS.StationID
+                INNER JOIN dbo.TripStations TSH_Other_Start_TS ON TSH_Other.TripID = TSH_Other_Start_TS.TripID AND TSH_Other.legOriginStationId = TSH_Other_Start_TS.StationID
+                INNER JOIN dbo.TripStations TSH_Other_End_TS ON TSH_Other.TripID = TSH_Other_End_TS.TripID AND TSH_Other.legDestinationStationId = TSH_Other_End_TS.StationID
                 WHERE TSH_Other.SeatID = S.SeatID
                   AND TSH_Other.TripID = @TripID_Input
                   AND (@CurrentUserSessionID_Input IS NULL OR TSH_Other.SessionID <> @CurrentUserSessionID_Input) -- Not the current user
