@@ -411,4 +411,90 @@ public class TripRepositoryImpl implements TripRepository {
         }
         return popularTrips;
     }
+
+    @Override
+    public List<vn.vnrailway.dto.ManageTripViewDTO> findAllForManagerView(String searchTerm, String sortField,
+            String sortOrder) throws SQLException {
+        List<vn.vnrailway.dto.ManageTripViewDTO> managerTrips = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder sqlBuilder = new StringBuilder("SELECT ");
+        sqlBuilder.append("t.TripID, tr.TrainName, r.RouteName, ");
+        sqlBuilder.append("t.DepartureDateTime, t.ArrivalDateTime, t.IsHolidayTrip, t.TripStatus, ");
+        sqlBuilder.append("t.TrainID, t.RouteID ");
+        sqlBuilder.append("FROM Trips t ");
+        sqlBuilder.append("JOIN Trains tr ON t.TrainID = tr.TrainID ");
+        sqlBuilder.append("JOIN Routes r ON t.RouteID = r.RouteID ");
+
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            sqlBuilder.append(
+                    "WHERE (LOWER(tr.TrainName) LIKE LOWER(?) OR LOWER(r.RouteName) LIKE LOWER(?) OR LOWER(t.TripStatus) LIKE LOWER(?)) ");
+            String wildCardSearchTerm = "%" + searchTerm.trim() + "%";
+            params.add(wildCardSearchTerm);
+            params.add(wildCardSearchTerm);
+            params.add(wildCardSearchTerm);
+        }
+
+        // Validate sortField to prevent SQL injection and map to actual DB columns
+        String validSortField = "t.DepartureDateTime"; // Default sort
+        if ("tripID".equalsIgnoreCase(sortField))
+            validSortField = "t.TripID";
+        else if ("trainName".equalsIgnoreCase(sortField))
+            validSortField = "tr.TrainName";
+        else if ("routeName".equalsIgnoreCase(sortField))
+            validSortField = "r.RouteName";
+        else if ("arrivalDateTime".equalsIgnoreCase(sortField))
+            validSortField = "t.ArrivalDateTime";
+        else if ("isHolidayTrip".equalsIgnoreCase(sortField))
+            validSortField = "t.IsHolidayTrip";
+        else if ("tripStatus".equalsIgnoreCase(sortField))
+            validSortField = "t.TripStatus";
+
+        // Ensure sortOrder is either ASC or DESC
+        String SOrder = "DESC"; // Default sort order
+        if ("ASC".equalsIgnoreCase(sortOrder)) {
+            SOrder = "ASC";
+        }
+        sqlBuilder.append("ORDER BY ").append(validSortField).append(" ").append(SOrder);
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sqlBuilder.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    vn.vnrailway.dto.ManageTripViewDTO dto = new vn.vnrailway.dto.ManageTripViewDTO();
+                    dto.setTripID(rs.getInt("TripID"));
+                    dto.setTrainName(rs.getString("TrainName"));
+                    dto.setRouteName(rs.getString("RouteName"));
+
+                    Timestamp departureTimestamp = rs.getTimestamp("DepartureDateTime");
+                    if (departureTimestamp != null) {
+                        dto.setDepartureDateTime(departureTimestamp.toLocalDateTime());
+                    }
+
+                    Timestamp arrivalTimestamp = rs.getTimestamp("ArrivalDateTime");
+                    if (arrivalTimestamp != null) {
+                        dto.setArrivalDateTime(arrivalTimestamp.toLocalDateTime());
+                    }
+
+                    dto.setHolidayTrip(rs.getBoolean("IsHolidayTrip"));
+                    dto.setTripStatus(rs.getString("TripStatus"));
+                    // dto.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier")); //
+                    // Removed
+                    dto.setTrainID(rs.getInt("TrainID"));
+                    dto.setRouteID(rs.getInt("RouteID"));
+
+                    managerTrips.add(dto);
+                }
+            } // Closing brace for try (ResultSet rs = ps.executeQuery())
+        } catch (SQLException e) {
+            System.err.println("Error fetching trips for manager view: " + e.getMessage());
+            throw e; // Re-throw to allow higher layers to handle it
+        }
+        return managerTrips;
+    }
 }

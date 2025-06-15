@@ -42,4 +42,7 @@ public interface TripRepository {
     List<BestSellerLocationDTO> getBestSellerLocations(int limit) throws SQLException;
 
     List<TripPopularityDTO> getMostPopularTrips(int limit) throws SQLException;
+
+    List<vn.vnrailway.dto.ManageTripViewDTO> findAllForManagerView(String searchTerm, String sortField,
+            String sortOrder) throws SQLException;
 }

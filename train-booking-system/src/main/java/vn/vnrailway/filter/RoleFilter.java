@@ -92,8 +92,12 @@ public class RoleFilter implements Filter {
             }
         } else if ("manager".equals(role)) {
             // Manager specific access
-            // Allow access if path is exactly /managerDashboard OR starts with /manager/
-            if (path.equals("/managerDashboard") || path.startsWith("/manager/")) {
+            if (path.equals("/managerDashboard") || path.startsWith("/manager/") ||
+                    path.equals("/manageTrips") ||
+                    path.equals("/manageRoutes") ||
+                    path.equals("/manage-trains-seats") ||
+                    path.equals("/managePrice") ||
+                    path.equals("/managerStaff")) {
                 chain.doFilter(request, response);
             } else if (isCommonPage(path)) {
                 chain.doFilter(request, response);

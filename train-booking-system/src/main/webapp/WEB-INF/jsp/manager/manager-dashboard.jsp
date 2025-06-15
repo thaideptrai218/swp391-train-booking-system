@@ -58,6 +58,26 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
             </div>
           </div>
 
+          <div class="sales-by-month-year">
+            <h3>Doanh Thu Theo Tháng/Năm</h3>
+            <c:choose>
+              <c:when test="${not empty salesByMonthYearData}">
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 40vh; width: 100%"
+                >
+                  <canvas
+                    id="salesByMonthYearChart"
+                    data-sales='<c:out value="${salesByMonthYearJson}" />'
+                  ></canvas>
+                </div>
+              </c:when>
+              <c:otherwise>
+                <p>Không có dữ liệu doanh thu theo tháng/năm.</p>
+              </c:otherwise>
+            </c:choose>
+          </div>
+
           <div class="best-sellers">
             <h3>Tuyến Đường Bán Chạy Nhất</h3>
             <c:choose>
