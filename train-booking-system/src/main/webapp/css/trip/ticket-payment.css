@@ -1,0 +1,255 @@
+/* General Page Structure */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.payment-container {
+    max-width: 950px; /* Slightly wider for better table layout */
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.payment-container h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.payment-container h2 {
+    color: #34495e;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+}
+
+.payment-container h3 {
+    color: #2980b9;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+/* Timer and Links */
+.payment-timer {
+    text-align: center;
+    font-size: 1.3em;
+    color: #e74c3c; /* Red for urgency */
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+.go-back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.95em;
+}
+.go-back-link:hover {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+/* Passenger Info Table */
+.passenger-info-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px; /* Added margin */
+}
+
+.passenger-info-section th,
+.passenger-info-section td {
+    border: 1px solid #e0e0e0;
+    padding: 10px 12px; /* Increased padding */
+    text-align: left;
+    vertical-align: top; /* Align content to top */
+    font-size: 0.9em;
+}
+
+.passenger-info-section th {
+    background-color: #f8f9fa; /* Lighter header */
+    color: #495057;
+    font-weight: 600; /* Bolder header text */
+}
+
+/* Specific cell styling */
+.passenger-name-type-cell { width: 30%; }
+.seat-info-cell { width: 35%; }
+.original-price-cell, .discount-amount-cell, .final-price-cell { 
+    width: 10%; 
+    text-align: right;
+}
+
+.seat-info-cell div {
+    margin-bottom: 4px;
+    font-size: 0.95em;
+}
+.seat-info-cell .seat-train-route { font-weight: bold; }
+.seat-info-cell .seat-hold-timer { font-size:0.85em; color: #7f8c8d; }
+
+
+/* Customer Info Section */
+.customer-info-section div {
+    margin-bottom: 15px; /* Increased spacing */
+    display: flex;
+    align-items: center; /* Align label and input */
+}
+
+.customer-info-section label {
+    display: inline-block;
+    width: 160px; /* Wider labels */
+    font-weight: 500; /* Slightly bolder labels */
+    color: #555;
+    margin-right: 10px;
+    font-size: 0.95em;
+}
+
+/* Input fields styling (shared) */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select {
+    padding: 10px; /* Increased padding */
+    border: 1px solid #ced4da; /* Softer border */
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+    width: calc(100% - 170px); /* Adjust width considering label */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.passenger-info-section input[type="text"],
+.passenger-info-section input[type="date"],
+.passenger-info-section select {
+    width: 100%; /* Full width within table cell */
+    margin-bottom: 5px;
+}
+
+
+input:focus, select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Buttons */
+.button.primary-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px; /* Larger button */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.05em; /* Slightly larger font */
+    transition: background-color 0.2s ease;
+    display: block; /* Make it block to center */
+    width: auto; /* Auto width based on content */
+    min-width: 150px;
+    margin: 20px auto 0 auto; /* Center button */
+}
+.button.primary-button:hover {
+    background-color: #0056b3;
+}
+.button.primary-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+
+/* Payment Summary & Methods */
+.payment-summary {
+    text-align: right;
+    font-size: 1.2em;
+    margin-top: 25px;
+}
+.payment-summary h3 {
+    color: #2c3e50;
+}
+#total-payment-amount {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.payment-methods select {
+    width: 100%;
+    max-width: 300px; /* Limit width of select */
+}
+
+/* Terms Agreement */
+.terms-agreement {
+    margin-top: 25px;
+    font-size: 0.9em;
+}
+.terms-agreement label {
+    margin-left: 8px;
+}
+.terms-agreement a {
+    color: #3498db;
+    text-decoration: none;
+}
+.terms-agreement a:hover {
+    text-decoration: underline;
+}
+
+/* Error Messages */
+.error-message {
+    color: #e74c3c;
+    font-size: 0.85em;
+    display: block; /* Ensure it takes its own line */
+    margin-top: 4px;
+}
+#general-error-message {
+    text-align:center; 
+    margin-bottom:15px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 4px;
+}
+#general-error-message:not(:empty) { /* Only show border if there's content */
+    border: 1px solid;
+}
+#general-error-message[style*="color: red"] {
+    border-color: #e74c3c;
+    background-color: #fdd;
+}
+#general-error-message[style*="color: green"] {
+    border-color: #28a745;
+    background-color: #d4edda;
+    color: #155724 !important; /* Override inline style if needed */
+}
+
+
+/* Responsive adjustments (basic) */
+@media (max-width: 768px) {
+    .customer-info-section div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .customer-info-section label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select {
+        width: 100%;
+    }
+    .passenger-info-section th,
+    .passenger-info-section td {
+        padding: 8px;
+        font-size: 0.85em; /* Smaller font on small screens */
+    }
+}

@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 // Getters, setters, and constructors will be explicitly defined.
 public class User {
     private int userID;
-    private String userName;
-    private String passwordHash; // Renamed 'password' to 'passwordHash' for consistency
+    // private String userName; // Removed as per new schema
+    private String passwordHash;
     private String fullName;
     private String email;
     private String phoneNumber;
@@ -17,15 +17,16 @@ public class User {
     private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
+    private boolean isGuestAccount; // Added new field
 
     // No-argument constructor
     public User() {
     }
 
-    // Constructor for creating new users (without userID, createdAt, lastLogin)
-    public User(String userName, String passwordHash, String fullName, String email,
-                String phoneNumber, String idCardNumber, String address, String role) {
-        this.userName = userName;
+    // Constructor for creating new users (without userID, createdAt, lastLogin, userName)
+    public User(String passwordHash, String fullName, String email,
+                String phoneNumber, String idCardNumber, String address, String role, boolean isGuestAccount) {
+        // this.userName = userName; // Removed
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.email = email;
@@ -33,16 +34,17 @@ public class User {
         this.idCardNumber = idCardNumber;
         this.address = address;
         this.role = role;
-        this.isActive = true; // Default to active for new users
-        this.createdAt = LocalDateTime.now(); // Default creation time
+        this.isActive = true; // Default to active for new users (DB default is also 1)
+        this.createdAt = LocalDateTime.now(); // Default creation time (DB default is getdate())
+        this.isGuestAccount = isGuestAccount; // Set guest status
     }
 
-    // All-argument constructor (useful for mapping from DB)
-    public User(int userID, String userName, String passwordHash, String fullName, String email,
+    // All-argument constructor (useful for mapping from DB, removed userName, added isGuestAccount)
+    public User(int userID, String passwordHash, String fullName, String email,
                 String phoneNumber, String idCardNumber, String address, String role, boolean isActive,
-                LocalDateTime createdAt, LocalDateTime lastLogin) {
+                LocalDateTime createdAt, LocalDateTime lastLogin, boolean isGuestAccount) {
         this.userID = userID;
-        this.userName = userName;
+        // this.userName = userName; // Removed
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.email = email;
@@ -53,6 +55,7 @@ public class User {
         this.isActive = isActive;
         this.createdAt = createdAt;
         this.lastLogin = lastLogin;
+        this.isGuestAccount = isGuestAccount;
     }
 
     // Getters and Setters
@@ -64,13 +67,13 @@ public class User {
         this.userID = userID;
     }
 
-    public String getUserName() {
-        return userName;
-    }
+    // public String getUserName() { // Removed
+    //     return userName;
+    // }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+    // public void setUserName(String userName) { // Removed
+    //     this.userName = userName;
+    // }
 
     public String getPasswordHash() {
         return passwordHash;
@@ -152,11 +155,19 @@ public class User {
         this.lastLogin = lastLogin;
     }
 
+    public boolean isGuestAccount() {
+        return isGuestAccount;
+    }
+
+    public void setGuestAccount(boolean guestAccount) {
+        isGuestAccount = guestAccount;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "userID=" + userID +
-                ", userName='" + userName + '\'' +
+                // ", userName='" + userName + '\'' + // Removed
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
@@ -164,6 +175,7 @@ public class User {
                 ", address='" + address + '\'' +
                 ", role='" + role + '\'' +
                 ", isActive=" + isActive +
+                ", isGuestAccount=" + isGuestAccount + // Added
                 ", createdAt=" + createdAt +
                 ", lastLogin=" + lastLogin +
                 '}';

@@ -731,6 +731,12 @@ async function initiateBookingProcess() {
         return;
     }
 
+    if (shoppingCart.length > 10) {
+        // MAX_PASSENGERS, assuming 10
+        alert("Bạn chỉ có thể đặt tối đa 10 vé cùng một lúc.");
+        return;
+    }
+
     const seatsToBook = shoppingCart.map((item) => ({
         tripId: item.tripId,
         seatId: item.seatID,
@@ -754,14 +760,7 @@ async function initiateBookingProcess() {
                 "Booking initiated successfully, redirecting...",
                 responseData
             );
-            Object.values(seatHoldTimers).forEach(clearInterval);
-            seatHoldTimers = {};
-            shoppingCart = [];
-            updateCartDisplay();
-            saveCartToSession();
-
-            window.location.href =
-                responseData.redirectUrl || `${contextPath}/ticketPayment.jsp`;
+            window.location.href = `${contextPath}/ticketPayment`; // Rely on server-provided redirect URL
         } else {
             alert(
                 `Lỗi khi khởi tạo đặt vé: ${

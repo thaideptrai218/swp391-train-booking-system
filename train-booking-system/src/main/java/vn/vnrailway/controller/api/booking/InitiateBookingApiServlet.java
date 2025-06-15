@@ -4,17 +4,21 @@ import vn.vnrailway.dao.TemporarySeatHoldDAO;
 import vn.vnrailway.dao.TicketRepository; // Changed from TicketDAO
 import vn.vnrailway.dao.BookingRepository; // Assuming you have a BookingRepository
 import vn.vnrailway.dao.impl.TemporarySeatHoldDAOImpl;
-import vn.vnrailway.dao.impl.TicketRepositoryImpl; // Assuming implementation name
+// import vn.vnrailway.dao.impl.TicketRepositoryImpl; // Not used at this stage
 import vn.vnrailway.dao.impl.BookingRepositoryImpl; // Assuming implementation
+import vn.vnrailway.dao.UserRepository; // Added UserRepository
+import vn.vnrailway.dao.impl.UserRepositoryImpl; // Added UserRepositoryImpl
 import vn.vnrailway.dto.ApiResponse;
 // BookingInitiationRequestDTO might not be needed if client sends List<SeatToBookDTO> directly
 // import vn.vnrailway.dto.BookingInitiationRequestDTO; 
 import vn.vnrailway.dto.SeatToBookDTO;
 import vn.vnrailway.model.TemporarySeatHold;
-import vn.vnrailway.model.Ticket;
+// import vn.vnrailway.model.Ticket; // Not used at this stage
 import vn.vnrailway.model.Booking; // Assuming you have a Booking model
+import vn.vnrailway.model.User; // Added User model
 import vn.vnrailway.utils.DBContext;
 import vn.vnrailway.utils.JsonUtils;
+import vn.vnrailway.utils.CodeGenerator; // Added CodeGenerator import
 
 import com.fasterxml.jackson.core.type.TypeReference; // Changed for Jackson
 
@@ -43,12 +47,14 @@ public class InitiateBookingApiServlet extends HttpServlet {
 
     private TemporarySeatHoldDAO temporarySeatHoldDAO;
     private BookingRepository bookingRepository;
+    private UserRepository userRepository;
     // private TicketRepository ticketRepository; // Tickets are not created at this
     // stage
 
     public InitiateBookingApiServlet() {
         this.temporarySeatHoldDAO = new TemporarySeatHoldDAOImpl();
         this.bookingRepository = new BookingRepositoryImpl();
+        this.userRepository = new UserRepositoryImpl(); // Initialize UserRepository
         // this.ticketRepository = new TicketRepositoryImpl();
     }
 
@@ -62,7 +68,8 @@ public class InitiateBookingApiServlet extends HttpServlet {
         Connection conn = null;
         try {
             // Use Jackson's TypeReference for parsing a list of objects
-            TypeReference<ArrayList<SeatToBookDTO>> listTypeRef = new TypeReference<ArrayList<SeatToBookDTO>>() {};
+            TypeReference<ArrayList<SeatToBookDTO>> listTypeRef = new TypeReference<ArrayList<SeatToBookDTO>>() {
+            };
             List<SeatToBookDTO> seatsToBook = JsonUtils.parse(request.getReader(), listTypeRef);
 
             if (seatsToBook == null || seatsToBook.isEmpty()) {
@@ -80,18 +87,66 @@ public class InitiateBookingApiServlet extends HttpServlet {
             }
             String sessionId = httpSession.getId();
             Integer userId = (Integer) httpSession.getAttribute("userId");
+            String bookingCodeForGuestHandling = CodeGenerator.generateBookingCode(); // Generate once for potential
+                                                                                      // guest
+
+            if (userId == null) {
+                // Handle guest user: Create a temporary guest account
+                User guestUser = new User();
+                // Ensure unique username and email for guest, possibly using booking code or
+                // timestamp
+                String guestIdentifier = "guest_" + bookingCodeForGuestHandling;
+                // guestUser.setUserName(guestIdentifier); // UserName field removed from User
+                // model
+                guestUser.setFullName("Khách vãng lai"); // "Guest User" in Vietnamese
+                guestUser.setEmail(guestIdentifier + "@vnrailway.guest"); // Placeholder email
+                guestUser.setPhoneNumber("0000000000"); // Placeholder phone
+                guestUser.setRole("Guest"); // Ensure role matches DB constraint
+                guestUser.setActive(true);
+                guestUser.setGuestAccount(true); // Set IsGuestAccount flag
+                guestUser.setCreatedAt(LocalDateTime.now());
+                // PasswordHash can be null or a non-loginable placeholder if DB requires it
+                // guestUser.setPasswordHash(null); // Or some default non-functional hash
+
+                // Save guest user - Assuming userRepository.save(user) returns the saved user
+                // with ID
+                // This needs to be done outside the main booking transaction or handled
+                // carefully if within.
+                // For simplicity, let's assume it can be done before the main transaction
+                // starts,
+                // or the save method handles its own transaction or is safe to call before
+                // conn.setAutoCommit(false).
+                // If userRepository.save needs a Connection, it must be handled.
+                // Let's assume for now userRepository.save can operate independently or get its
+                // own connection.
+                User savedGuestUser = userRepository.save(guestUser); // This save method needs to exist and return User
+                                                                      // with ID
+                if (savedGuestUser == null || savedGuestUser.getUserID() == 0) {
+                    JsonUtils.toJson(ApiResponse.error("Failed to create a guest user account."), response.getWriter());
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    return;
+                }
+                userId = savedGuestUser.getUserID();
+                // Optionally, put guest user ID in session if needed later for this guest's
+                // flow
+                // httpSession.setAttribute("userId", userId); // This would make them "logged
+                // in" as guest
+            }
 
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
             // Step 1: Create a new Booking record
             Booking newBooking = new Booking();
-            if (userId != null) {
-                newBooking.setUserID(userId); // Assumes Booking model has setUserID(Integer)
-            }
+            // Use the bookingCode generated earlier (consistent for guest email/username if
+            // guest was created)
+            newBooking.setBookingCode(bookingCodeForGuestHandling);
+
+            // userId will now be set for both logged-in users and newly created guest users
+            newBooking.setUserID(userId);
+
             newBooking.setBookingDateTime(LocalDateTime.now());
-            newBooking.setBookingStatus("PendingPassengerInfo"); // Or "PendingPayment" if passenger info is part of
-                                                                 // this step
+            newBooking.setBookingStatus("Pending"); // Set to PendingPayment as user proceeds to payment page
             newBooking.setPaymentStatus("Unpaid");
             LocalDateTime bookingExpiryTime = LocalDateTime.now().plusMinutes(15); // e.g., 15 minutes for next steps
             newBooking.setExpiredAt(bookingExpiryTime);
@@ -157,7 +212,8 @@ public class InitiateBookingApiServlet extends HttpServlet {
                 httpSession.setAttribute("pendingBookingCode", savedBooking.getBookingCode());
             }
 
-            String redirectUrl = request.getContextPath() + "/passengerDetails.jsp"; // Or your passenger/payment page
+            String redirectUrl = request.getContextPath() + "/ticketPayment"; // Corrected to point to
+                                                                              // TicketPaymentServlet
             ApiResponse<Object> apiResponse = ApiResponse.success(
                     Map.of("redirectUrl", redirectUrl, "bookingId", generatedBookingID),
                     "Booking process initiated. Please provide passenger details.");

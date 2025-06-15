@@ -136,7 +136,9 @@ public class RegisterServlet extends HttpServlet {
                 // Hash the password before saving
                 String hashedPassword = HashPassword.hashPassword(password);
                 
-                User newUser = new User(fullName, hashedPassword, fullName, email, phoneNumber, idCardNumber, "", "Customer"); // Default role "Customer"
+                // Updated constructor call: (passwordHash, fullName, email, phoneNumber, idCardNumber, address, role, isGuestAccount)
+                // Assuming address is empty string if not provided, and isGuestAccount is false for normal registration.
+                User newUser = new User(hashedPassword, fullName, email, phoneNumber, idCardNumber, "", "Customer", false); 
 
                 userRepository.save(newUser);
                 response.sendRedirect(request.getContextPath() + "/login.jsp?registrationSuccess=true");
