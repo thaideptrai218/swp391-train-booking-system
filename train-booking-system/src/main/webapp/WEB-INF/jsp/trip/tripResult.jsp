@@ -127,7 +127,7 @@
                                     <div class="train-item-collapsed-summary">
                                         <span class="train-name">${trip.trainName}</span>
                                         <span class="departure-info">
-                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="HH:mm" /></span>
+                                             <span class="trip-time"><fmt:formatDate value="${trip.scheduledDepartureAsDate}" pattern="dd/MM HH:mm" /></span>
                                             <span class="trip-station">${trip.originStationName}</span>
                                         </span>
                                         <span class="duration-info">
@@ -135,7 +135,7 @@
                                             <span class="duration-text">${FormatUtils.formatDuration(trip.durationMinutes)}</span>
                                         </span>
                                         <span class="arrival-info">
-                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="HH:mm" /></span>
+                                            <span class="trip-time"><fmt:formatDate value="${trip.scheduledArrivalAsDate}" pattern="dd/MM HH:mm" /></span>
                                             <span class="trip-station">${trip.destinationStationName}</span>
                                         </span>
                                         <span class="seats-info">
@@ -152,7 +152,7 @@
                                                          data-coach-position="${coachInfo.positionInTrain}"
                                                          data-coach-description="${coachInfo.coachTypeDescription}"
                                                          data-coach-capacity="${coachInfo.capacity}"
-                                                         data-coach-is-compartmented="${coachInfo.isCompartmented}"
+                                                         data-coach-is-compartmented="${coachInfo.isCompartmented()}"
                                                          data-coach-default-compartment-capacity="${not empty coachInfo.defaultCompartmentCapacity ? coachInfo.defaultCompartmentCapacity : ''}"
                                                          data-trip-id="${trip.tripId}"
                                                          data-trip-leg="return"

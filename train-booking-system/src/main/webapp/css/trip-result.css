@@ -421,8 +421,8 @@
 
 .seat.occupied,
 .seat.disabled {
-    background-color: #e2e8f0; /* Slate 200 */
-    color: #718096; /* Slate 500 */
+    background-color: #f50000; /* Slate 200 */
+    color: #ffffff; /* Slate 500 */
     border-color: #cbd5e0; /* Slate 300 */
     cursor: not-allowed;
     box-shadow: none;
