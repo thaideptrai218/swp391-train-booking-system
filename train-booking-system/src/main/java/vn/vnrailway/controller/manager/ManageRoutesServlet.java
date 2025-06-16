@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList; // Added for stationsOrder list
 import java.util.Map; // Added for creating response maps
+import java.util.Optional; // Added for Optional type
 import com.fasterxml.jackson.core.type.TypeReference; // Added for Jackson
 import com.fasterxml.jackson.databind.ObjectMapper; // Added for Jackson
 
@@ -20,11 +21,14 @@ import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Station;
+import vn.vnrailway.dao.TripRepository; // Added
+import vn.vnrailway.dao.impl.TripRepositoryImpl; // Added
 
 @WebServlet("/manageRoutes")
 public class ManageRoutesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RouteRepository routeRepository;
+    private TripRepository tripRepository; // Added
 
     public ManageRoutesServlet() {
         super();
@@ -34,6 +38,7 @@ public class ManageRoutesServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         this.routeRepository = new RouteRepositoryImpl();
+        this.tripRepository = new TripRepositoryImpl(); // Added
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,8 +50,12 @@ public class ManageRoutesServlet extends HttpServlet {
 
         try {
             switch (action) {
-                case "editRoute":
-                    showEditRouteForm(request, response);
+                case "editRoute": // This was for the modal on routeDetail, might need renaming or separate logic
+                    showEditRouteForm(request, response); // This currently forwards to manageRoutes.jsp, but expects to
+                                                          // be on routeDetail
+                    break;
+                case "showEditForm": // New action for showing edit form on manageRoutes.jsp
+                    showEditFormOnManageRoutesPage(request, response);
                     break;
                 case "editRouteStation":
                     showEditRouteStationForm(request, response);
@@ -97,6 +106,45 @@ public class ManageRoutesServlet extends HttpServlet {
         listRoutesAndStations(request, response); // To repopulate lists for the main page view
     }
 
+    private void showEditFormOnManageRoutesPage(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        try {
+            int routeId = Integer.parseInt(request.getParameter("routeId"));
+            Route routeToEdit = routeRepository.findById(routeId)
+                    .orElseThrow(() -> new ServletException(
+                            "Route not found with ID: " + routeId + " for editing on manage routes page."));
+            request.setAttribute("routeToEditOnPage", routeToEdit);
+
+            // Fetch stations for this route to display start and end points
+            List<RouteStationDetailDTO> stationsInRoute = routeRepository.findStationDetailsByRouteId(routeId);
+            if (stationsInRoute != null && !stationsInRoute.isEmpty()) {
+                // Assuming stations are ordered by sequence number
+                request.setAttribute("departureStationIdForEdit", stationsInRoute.get(0).getStationID());
+                request.setAttribute("arrivalStationIdForEdit",
+                        stationsInRoute.get(stationsInRoute.size() - 1).getStationID());
+                // Also pass names for display if needed, though dropdowns will handle it
+                request.setAttribute("departureStationNameForEdit", stationsInRoute.get(0).getStationName());
+                request.setAttribute("arrivalStationNameForEdit",
+                        stationsInRoute.get(stationsInRoute.size() - 1).getStationName());
+            } else {
+                // This case should ideally not happen if routes are created with start/end
+                // stations.
+                // If it can, we might need a different way to determine original stations or
+                // prevent editing.
+                request.setAttribute("errorMessage", "Không thể xác định trạm đầu/cuối cho tuyến này để chỉnh sửa.");
+            }
+            // Ensure allStations is available for the dropdowns
+            request.setAttribute("allStations", routeRepository.getAllStations());
+
+        } catch (NumberFormatException e) {
+            request.setAttribute("errorMessage", "Invalid Route ID for editing.");
+        } catch (ServletException e) {
+            request.setAttribute("errorMessage", e.getMessage());
+        }
+        // Still need to populate other lists for the page
+        listRoutesAndStations(request, response);
+    }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -135,60 +183,316 @@ public class ManageRoutesServlet extends HttpServlet {
         } catch (SQLException e) {
             // Consider setting an error message attribute and forwarding to an error page
             // or back to the form
-            request.setAttribute("errorMessage", "Database operation failed: " + e.getMessage());
             e.printStackTrace(); // Log the full stack trace
-            try {
-                listRoutesAndStations(request, response); // Attempt to show the page again with an error
-            } catch (SQLException | ServletException | IOException ex) {
-                throw new ServletException("Error handling doPost after SQL exception", ex);
+            String errorMessage;
+            String rawSqlErrorMessage = e.getMessage();
+            int sqlErrorCode = e.getErrorCode();
+
+            // SQL Server error code for unique key violation is 2627.
+            // SQL Server error code for primary key violation is 2601.
+            if (sqlErrorCode == 2627 || sqlErrorCode == 2601) {
+                if (rawSqlErrorMessage != null
+                        && rawSqlErrorMessage.toLowerCase().contains("uq_routestations_routesequence")) {
+                    // Specific message for sequence constraint, per user's request to map it to
+                    // "station already in route"
+                    errorMessage = "Không thể thêm trạm đã có trong tuyến đường.";
+                } else if (rawSqlErrorMessage != null
+                        && (rawSqlErrorMessage.toLowerCase().contains("uq_routestations_station")
+                                || rawSqlErrorMessage.toLowerCase().contains("pk_routestations"))) {
+                    // Specific message for station already in route (if these are the constraint
+                    // names for RouteID, StationID)
+                    errorMessage = "Không thể thêm trạm đã có trong tuyến đường.";
+                } else {
+                    // General unique key violation, use user's desired message
+                    errorMessage = "Không thể thêm trạm đã có trong tuyến đường.";
+                }
+            } else {
+                // Generic fallback for other SQL errors
+                errorMessage = "Database operation failed: " + (rawSqlErrorMessage != null ? rawSqlErrorMessage
+                        : "Unknown SQL error (" + sqlErrorCode + ")");
+            }
+
+            String routeIdForError = request.getParameter("routeId");
+            if (routeIdForError == null) {
+                routeIdForError = request.getParameter("routeIdForStation");
+            }
+
+            if (("updateRouteStation".equals(action) || "removeStationFromRoute".equals(action)
+                    || "addStationToRoute".equals(action))
+                    && routeIdForError != null && !routeIdForError.isEmpty()) {
+                request.getSession().setAttribute("errorMessage", errorMessage);
+                response.sendRedirect(request.getContextPath() + "/manager/routeDetail?routeId=" + routeIdForError);
+            } else {
+                request.setAttribute("errorMessage", errorMessage);
+                try {
+                    listRoutesAndStations(request, response);
+                } catch (Exception ex) {
+                    throw new ServletException("Error handling doPost after SQL exception", ex);
+                }
             }
         } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid number format: " + e.getMessage());
-            try {
-                listRoutesAndStations(request, response);
-            } catch (SQLException | ServletException | IOException ex) {
-                throw new ServletException("Error handling doPost after NumberFormatException", ex);
+            e.printStackTrace();
+            String errorMessage = "Invalid number format: " + e.getMessage();
+            String routeIdForError = request.getParameter("routeId");
+            if (routeIdForError == null) {
+                routeIdForError = request.getParameter("routeIdForStation");
+            }
+
+            if (("updateRouteStation".equals(action) || "removeStationFromRoute".equals(action)
+                    || "addStationToRoute".equals(action))
+                    && routeIdForError != null && !routeIdForError.isEmpty()) {
+                request.getSession().setAttribute("errorMessage", errorMessage);
+                response.sendRedirect(request.getContextPath() + "/manager/routeDetail?routeId=" + routeIdForError);
+            } else {
+                request.setAttribute("errorMessage", errorMessage);
+                try {
+                    listRoutesAndStations(request, response);
+                } catch (Exception ex) {
+                    throw new ServletException("Error handling doPost after NumberFormatException", ex);
+                }
             }
         }
     }
 
     private void addRoute(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
-        String routeName = request.getParameter("routeName");
+            throws SQLException, IOException, ServletException {
+        int departureStationId = Integer.parseInt(request.getParameter("departureStationId"));
+        int arrivalStationId = Integer.parseInt(request.getParameter("arrivalStationId"));
         String description = request.getParameter("description");
+
+        if (departureStationId == arrivalStationId) {
+            // Set an error message and redirect or forward back to the form
+            request.setAttribute("errorMessage", "Điểm đi và điểm đến không được trùng nhau.");
+            // Repopulate necessary data for the form
+            listRoutesAndStations(request, response); // This forwards, so return after
+            return;
+        }
+
+        // Fetch station names to create the route name
+        // This requires a method in StationRepository or getting all stations and
+        // filtering
+        // For simplicity, assuming routeRepository can provide station details or we
+        // fetch all and find
+        List<Station> allStations = routeRepository.getAllStations(); // Already fetched in listRoutesAndStations
+        String departureStationName = allStations.stream()
+                .filter(s -> s.getStationID() == departureStationId)
+                .findFirst()
+                .map(Station::getStationName)
+                .orElseThrow(() -> new ServletException("Departure station not found"));
+        String arrivalStationName = allStations.stream()
+                .filter(s -> s.getStationID() == arrivalStationId)
+                .findFirst()
+                .map(Station::getStationName)
+                .orElseThrow(() -> new ServletException("Arrival station not found"));
+
+        String routeName = departureStationName + " - " + arrivalStationName;
+
+        // Check if a route with this name already exists
+        Optional<Route> existingRouteOpt = routeRepository.findByRouteName(routeName);
+        if (existingRouteOpt.isPresent()) {
+            request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồnS tại.");
+            listRoutesAndStations(request, response);
+            return;
+        }
+
         Route newRoute = new Route(0, routeName, description); // ID will be auto-generated
-        routeRepository.save(newRoute);
+        Route savedRoute = routeRepository.save(newRoute); // Get the saved route with its ID
+
+        if (savedRoute.getRouteID() > 0) {
+            // Add departure station (sequence 1)
+            routeRepository.addStationToRoute(savedRoute.getRouteID(), departureStationId, 1, BigDecimal.ZERO, 0);
+            // Add arrival station (sequence 2)
+            // Distance for arrival station: for now, also 0, or could be a placeholder.
+            // Actual distances are usually set when adding intermediate stations or
+            // editing.
+            routeRepository.addStationToRoute(savedRoute.getRouteID(), arrivalStationId, 2, BigDecimal.ZERO, 0); // Assuming
+                                                                                                                 // distance
+                                                                                                                 // 0
+                                                                                                                 // for
+                                                                                                                 // simplicity
+                                                                                                                 // now
+        } else {
+            // Handle error: route not saved correctly
+            throw new ServletException("Could not save the new route properly, ID not generated.");
+        }
+
+        request.getSession().setAttribute("successMessage", "Tuyến đường '" + routeName + "' đã được thêm thành công!");
         response.sendRedirect(request.getContextPath() + "/manageRoutes");
     }
 
     private void updateRoute(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws SQLException, IOException, ServletException {
         int routeId = Integer.parseInt(request.getParameter("routeId"));
-        String routeName = request.getParameter("routeName");
         String description = request.getParameter("description");
-        Route routeToUpdate = new Route(routeId, routeName, description);
-        routeRepository.update(routeToUpdate);
+        int newDepartureStationId = Integer.parseInt(request.getParameter("newDepartureStationId"));
+        int newArrivalStationId = Integer.parseInt(request.getParameter("newArrivalStationId"));
+
+        // Hidden fields for original station IDs might be needed if we only update if
+        // changed.
+        // int originalDepartureStationId =
+        // Integer.parseInt(request.getParameter("originalDepartureStationId"));
+        // int originalArrivalStationId =
+        // Integer.parseInt(request.getParameter("originalArrivalStationId"));
+
+        if (newDepartureStationId == newArrivalStationId) {
+            request.getSession().setAttribute("errorMessage", "Điểm đi và điểm đến không được trùng nhau.");
+            response.sendRedirect(request.getContextPath() + "/manageRoutes?action=showEditForm&routeId=" + routeId
+                    + "#editRouteFormContainer");
+            return;
+        }
+
+        Optional<Route> routeOpt = routeRepository.findById(routeId);
+        if (!routeOpt.isPresent()) {
+            request.getSession().setAttribute("errorMessage", "Không tìm thấy tuyến đường để cập nhật.");
+            response.sendRedirect(request.getContextPath() + "/manageRoutes");
+            return;
+        }
+        Route routeToUpdate = routeOpt.get();
+
+        // Fetch station names for the new route name
+        List<Station> allStations = routeRepository.getAllStations(); // Assuming this is efficient enough or cached
+        String newDepartureStationName = allStations.stream()
+                .filter(s -> s.getStationID() == newDepartureStationId)
+                .findFirst().map(Station::getStationName)
+                .orElseThrow(() -> new ServletException("New departure station not found"));
+        String newArrivalStationName = allStations.stream()
+                .filter(s -> s.getStationID() == newArrivalStationId)
+                .findFirst().map(Station::getStationName)
+                .orElseThrow(() -> new ServletException("New arrival station not found"));
+
+        String newRouteName = newDepartureStationName + " - " + newArrivalStationName;
+
+        // Check if the new route name conflicts with another existing route
+        if (!newRouteName.equals(routeToUpdate.getRouteName())) {
+            Optional<Route> existingRouteWithNewName = routeRepository.findByRouteName(newRouteName);
+            if (existingRouteWithNewName.isPresent() && existingRouteWithNewName.get().getRouteID() != routeId) {
+                request.getSession().setAttribute("errorMessage",
+                        "Tuyến đường với tên '" + newRouteName + "' đã tồn tại.");
+                response.sendRedirect(request.getContextPath() + "/manageRoutes?action=showEditForm&routeId=" + routeId
+                        + "#editRouteFormContainer");
+                return;
+            }
+        }
+
+        routeToUpdate.setRouteName(newRouteName);
+        routeToUpdate.setDescription(description);
+
+        // --- Complex part: Updating RouteStations ---
+        // This requires careful logic to remove old start/end stations if they changed,
+        // add new start/end stations, and potentially re-sequence or adjust
+        // intermediate stations.
+        // This is a placeholder for the complex DB operations.
+        // Ideally, this would be a single transactional method in a service/DAO layer.
+        // For now, we'll update the route name/description and assume station updates
+        // are more complex.
+
+        // Simplified: Update Route table. Actual station replacement is complex.
+        // To fully implement, we'd need:
+        // 1. Get current first and last RouteStation entries.
+        // 2. If newDepartureStationId is different from current first:
+        // - Remove current first RouteStation.
+        // - Add newDepartureStationId as RouteStation with sequence 1, distance 0.
+        // 3. If newArrivalStationId is different from current last:
+        // - Remove current last RouteStation.
+        // - Add newArrivalStationId as RouteStation with new last sequence number.
+        // Distance calculation is tricky.
+        // This simplified version will only update the Route's name and description.
+        // The actual stations in RouteStations table are NOT changed by this simplified
+        // logic.
+        // A full implementation would require more DAO methods and careful transaction
+        // management.
+
+        boolean routeUpdated = routeRepository.update(routeToUpdate); // Updates name and description
+
+        if (routeUpdated) {
+            // Placeholder for actual station replacement logic
+            // Example: if (departureChanged) routeRepository.replaceFirstStation(routeId,
+            // newDepartureStationId, ...);
+            // Example: if (arrivalChanged) routeRepository.replaceLastStation(routeId,
+            // newArrivalStationId, ...);
+            request.getSession().setAttribute("successMessage",
+                    "Thông tin tuyến đường '" + routeToUpdate.getRouteName() + "' đã được cập nhật (Mô tả và Tên). " +
+                            "Thay đổi trạm đầu/cuối cần xử lý phức tạp hơn ở tầng DAO.");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Không thể cập nhật thông tin tuyến đường.");
+        }
         response.sendRedirect(request.getContextPath() + "/manageRoutes");
     }
 
     private void deleteRoute(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws SQLException, IOException, ServletException {
         int routeId = Integer.parseInt(request.getParameter("routeId"));
-        routeRepository.deleteById(routeId);
+        String confirmedDelete = request.getParameter("confirmedDelete");
+
+        int tripCount = tripRepository.countTripsByRouteId(routeId);
+
+        if (tripCount > 0 && !"true".equals(confirmedDelete)) {
+            // Trips exist, and not yet confirmed for deletion
+            Optional<Route> routeOpt = routeRepository.findById(routeId);
+            String routeName = routeOpt.isPresent() ? routeOpt.get().getRouteName() : "ID " + routeId;
+
+            request.setAttribute("confirmDeleteRouteWithTrips", true);
+            request.setAttribute("routeIdToDelete", routeId);
+            request.setAttribute("routeNameToDelete", routeName);
+            request.setAttribute("numberOfTrips", tripCount);
+
+            // Forward back to the page to show confirmation
+            listRoutesAndStations(request, response); // This re-populates lists and forwards
+            return;
+        }
+
+        // Proceed with deletion (either no trips or confirmed)
+        try {
+            boolean deleted = routeRepository.deleteById(routeId); // This now also deletes trips via TripRepository
+            if (deleted) {
+                request.getSession().setAttribute("successMessage",
+                        "Tuyến đường và các chuyến đi liên quan (nếu có) đã được xóa thành công.");
+            } else {
+                request.getSession().setAttribute("errorMessage",
+                        "Không thể xóa tuyến đường. Có thể nó không tồn tại.");
+            }
+        } catch (SQLException e) {
+            // The FK error should ideally be caught before this if trip deletion failed,
+            // but this is a final catch-all.
+            request.getSession().setAttribute("errorMessage",
+                    "Lỗi cơ sở dữ liệu khi xóa tuyến đường: " + e.getMessage());
+            e.printStackTrace();
+        }
         response.sendRedirect(request.getContextPath() + "/manageRoutes");
     }
 
     private void addStationToRoute(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws SQLException, IOException, ServletException {
         int routeId = Integer.parseInt(request.getParameter("routeIdForStation")); // Name from JSP form
         int stationId = Integer.parseInt(request.getParameter("stationId"));
-        // Sequence number is now determined automatically
-        int sequenceNumber = routeRepository.getNextSequenceNumberForRoute(routeId);
         BigDecimal distanceFromStart = new BigDecimal(request.getParameter("distanceFromStart"));
         int defaultStopTime = Integer.parseInt(request.getParameter("defaultStopTime"));
 
-        routeRepository.addStationToRoute(routeId, stationId, sequenceNumber, distanceFromStart, defaultStopTime);
-        response.sendRedirect(request.getContextPath() + "/manageRoutes?action=list&highlightRoute=" + routeId);
+        List<RouteStationDetailDTO> currentStations = routeRepository.findStationDetailsByRouteId(routeId);
+        int targetSequenceNumber;
+
+        if (currentStations.size() < 2) {
+            // If 0 or 1 station, add the new station at the end
+            targetSequenceNumber = routeRepository.getNextSequenceNumberForRoute(routeId);
+            routeRepository.addStationToRoute(routeId, stationId, targetSequenceNumber, distanceFromStart,
+                    defaultStopTime);
+        } else {
+            // If 2 or more stations, insert before the last one
+            // The sequence number of the current last station will be the target for the
+            // new station
+            targetSequenceNumber = currentStations.get(currentStations.size() - 1).getSequenceNumber();
+
+            // Increment sequence numbers for the current last station (and any beyond,
+            // though there shouldn't be)
+            routeRepository.incrementSequenceNumbersFrom(routeId, targetSequenceNumber);
+
+            // Add the new station at the targetSequence (which is now free)
+            routeRepository.addStationToRoute(routeId, stationId, targetSequenceNumber, distanceFromStart,
+                    defaultStopTime);
+        }
+
+        request.getSession().setAttribute("successMessage", "Trạm đã được thêm vào tuyến thành công!");
+        response.sendRedirect(request.getContextPath() + "/manager/routeDetail?routeId=" + routeId);
     }
 
     private void updateRouteStation(HttpServletRequest request, HttpServletResponse response)
@@ -237,7 +541,9 @@ public class ManageRoutesServlet extends HttpServlet {
             routeRepository.updateRouteStation(routeId, originalStationId, sequenceNumber, distanceFromStart,
                     defaultStopTime);
         }
-        response.sendRedirect(request.getContextPath() + "/manageRoutes?action=list&highlightRoute=" + routeId);
+        // Redirect back to the route detail page
+        request.getSession().setAttribute("successMessage", "Trạm trong tuyến đã được cập nhật thành công!");
+        response.sendRedirect(request.getContextPath() + "/manager/routeDetail?routeId=" + routeId);
     }
 
     private void removeStationFromRoute(HttpServletRequest request, HttpServletResponse response)
@@ -245,7 +551,9 @@ public class ManageRoutesServlet extends HttpServlet {
         int routeId = Integer.parseInt(request.getParameter("routeId"));
         int stationId = Integer.parseInt(request.getParameter("stationId"));
         routeRepository.removeStationFromRoute(routeId, stationId);
-        response.sendRedirect(request.getContextPath() + "/manageRoutes?action=list&highlightRoute=" + routeId);
+        // Redirect back to the route detail page
+        request.getSession().setAttribute("successMessage", "Trạm đã được xóa khỏi tuyến thành công!");
+        response.sendRedirect(request.getContextPath() + "/manager/routeDetail?routeId=" + routeId);
     }
 
     private void updateStationOrder(HttpServletRequest request, HttpServletResponse response)

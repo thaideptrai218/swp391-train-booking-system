@@ -43,4 +43,9 @@ public interface RouteRepository {
 
         // Method to get the next available sequence number for a route
         int getNextSequenceNumberForRoute(int routeId) throws SQLException;
+
+        List<RouteStationDetailDTO> findStationDetailsByRouteId(int routeId) throws SQLException;
+
+        // Method to increment sequence numbers for stations from a certain point
+        void incrementSequenceNumbersFrom(int routeId, int fromSequenceNumber) throws SQLException;
 }
