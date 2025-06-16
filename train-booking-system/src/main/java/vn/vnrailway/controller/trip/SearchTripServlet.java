@@ -1,13 +1,9 @@
 package vn.vnrailway.controller.trip; // Corrected package
 
 import java.io.IOException;
-// import java.text.ParseException; // No longer explicitly used
-// import java.text.SimpleDateFormat; // No longer explicitly used
 import java.time.LocalDate;
-// import java.time.ZoneId; // No longer explicitly used
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-// import java.util.Date; // No longer explicitly used
 import java.sql.SQLException;
 import java.util.Optional; // Added for Optional
 
@@ -23,7 +19,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/searchTrip")
@@ -140,14 +135,11 @@ public class SearchTripServlet extends HttpServlet {
             request.setAttribute("outboundTrips", outboundTrips);
             request.setAttribute("outboundTripsFromServlet", true); // Flag to prevent mock data in JSP
 
-            // Set display parameters for the JSP
             request.setAttribute("departureDateDisplay", departureLocalDate.format(displayDateFormatter));
             request.setAttribute("originStationDisplay", originStationName);
             request.setAttribute("destinationStationDisplay", destinationStationName);
 
             if (returnLocalDate != null) {
-                // Search for return trips (destination becomes origin, origin becomes
-                // destination)
                 List<TripSearchResultDTO> returnTrips = tripService.searchAvailableTrips(destinationStationId,
                         originStationId, returnLocalDate);
                 request.setAttribute("returnTrips", returnTrips);

@@ -1,3 +1,8 @@
+/*
+    Stylesheet for the Ticket Payment Page (ticketPayment.jsp)
+    Last updated: [Current Date] - Merged inline styles from JSP and general formatting.
+*/
+
 /* General Page Structure */
 body {
     font-family: 'Arial', sans-serif;
@@ -85,11 +90,15 @@ body {
 }
 
 /* Specific cell styling */
-.passenger-name-type-cell { width: 30%; }
-.seat-info-cell { width: 35%; }
+.passenger-name-type-cell { width: 28%; } /* Adjusted width */
+.seat-info-cell { width: 32%; } /* Adjusted width */
 .original-price-cell, .discount-amount-cell, .final-price-cell { 
-    width: 10%; 
+    width: 9%;  /* Adjusted width */
     text-align: right;
+}
+.action-cell {
+    width: 5%; /* Width for delete button column */
+    text-align: center;
 }
 
 .seat-info-cell div {
@@ -127,9 +136,26 @@ select {
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 0.95em;
-    width: calc(100% - 170px); /* Adjust width considering label */
+    /* width: calc(100% - 170px); /* Width handled by input-wrapper */
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+.customer-info-section .input-wrapper {
+    flex-grow: 1; /* Allow wrapper to take remaining space */
+    display: flex;
+    flex-direction: column; /* Stack input and error message */
+}
+.customer-info-section .input-wrapper input,
+.customer-info-section .input-wrapper select {
+    width: 100%; /* Input takes full width of wrapper */
+}
+.customer-info-section .error-message {
+    width: 100%; /* Error message takes full width */
+    /* display: block; already set globally */
+    /* margin-top: 4px; already set globally */
+}
+
+
 .passenger-info-section input[type="text"],
 .passenger-info-section input[type="date"],
 .passenger-info-section select {
@@ -165,6 +191,21 @@ input:focus, select:focus {
 .button.primary-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+.button-icon {
+    background: none;
+    border: none;
+    color: #e74c3c; /* Red color for delete */
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1.1em;
+}
+.button-icon:hover {
+    color: #c0392b; /* Darker red on hover */
+}
+.button-icon i {
+    pointer-events: none; /* Ensure icon doesn't interfere with button click */
 }
 
 
@@ -233,13 +274,17 @@ input:focus, select:focus {
 
 /* Responsive adjustments (basic) */
 @media (max-width: 768px) {
-    .customer-info-section div {
+    .customer-info-section .form-group {
         flex-direction: column;
         align-items: flex-start;
     }
     .customer-info-section label {
         width: 100%;
         margin-bottom: 5px;
+        margin-right: 0; /* Remove right margin on small screens */
+    }
+    .customer-info-section .input-wrapper {
+        width: 100%; /* Wrapper takes full width */
     }
     input[type="text"],
     input[type="email"],
@@ -252,4 +297,17 @@ input:focus, select:focus {
         padding: 8px;
         font-size: 0.85em; /* Smaller font on small screens */
     }
+}
+
+/* Accessibility helper class */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }

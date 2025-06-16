@@ -62,12 +62,9 @@ public class TripServiceImpl implements TripService {
                             coachInfo.setCapacity(coach.getCapacity());
                             coachInfo.setCompartmented(coachType.isCompartmented()); // Populate from CoachType model
                             coachInfo.setDefaultCompartmentCapacity(coachType.getDefaultCompartmentCapacity()); // Populate from CoachType model
-                            // coachInfo.setCoachSpecificName(coach.getCoachName()); // If needed
                             coachInfoList.add(coachInfo);
                         } else {
-                            // Log warning: CoachType not found for coachTypeID
                             System.err.println("Warning: CoachType not found for ID: " + coach.getCoachTypeID() + " for CoachID: " + coach.getCoachID());
-                            // Optionally, create CoachInfoDTO with partial data or skip
                         }
                     }
                     tripDto.setCoaches(coachInfoList);
