@@ -50,21 +50,29 @@
                 <tbody>
                   <tr>
                     <td style="padding-right: 20px;"><strong>Mã vé</strong></td>
-                    <td style="padding-right: 40px;"><input type="text" name="ticketCode" placeholder="Nhập mã vé" required /></td>
+                    <td style="padding-right: 40px;"><input type="text" name="ticketCode" placeholder="Nhập mã vé"
+                        value="${ticketCode}" /></td>
                     <td style="padding-right: 20px;"><strong>Mác tàu</strong></strong></td>
-                    <td><input type="text" name="trainCode" placeholder="Nhập mác tàu" required /></td>
+                    <td><input type="text" name="trainCode" placeholder="Nhập mác tàu" value="${trainCode}" /></td>
                   </tr>
                   <tr>
                     <td style="padding-right: 20px;"><strong>Ga đi</strong></strong></td>
-                    <td style="padding-right: 40px;"><input type="text" name="departureStation" placeholder="Nhập ga đi" required /></td>
+                    <td style="padding-right: 40px;"><input type="text" name="departureStation" id="departureStation"
+                        placeholder="Nhập ga đi" list="departureSuggestions" value="${departureStation}" />
+                      <datalist id="departureSuggestions"></datalist>
+                    </td>
                     <td style="padding-right: 20px;"><strong>Ga đến</strong></strong></td>
-                    <td><input type="text" name="arrivalStation" placeholder="Nhập ga đến" required /></td>
+                    <td><input type="text" name="arrivalStation" id="arrivalStation" placeholder="Nhập ga đến"
+                        list="arrivalSuggestions" autocomplete="off" value="${arrivalStation}" />
+                      <datalist id="arrivalSuggestions"></datalist>
+                    </td>
                   </tr>
                   <tr>
                     <td style="padding-right: 20px;"><strong>Ngày đi</strong></td>
-                    <td style="padding-right: 40px;"><input type="date" name="departureDate" required /></td>
+                    <td style="padding-right: 40px;"><input type="date" name="departureDate" value="${departureDate}" />
+                    </td>
                     <td style="padding-right: 20px;"><strong>Số giấy tờ</strong></strong></td>
-                    <td><input type="text" name="idNumber" placeholder="Nhập số giấy tờ" required /></td>
+                    <td><input type="text" name="idNumber" placeholder="Nhập số giấy tờ" value="${idNumber}" /></td>
                   </tr>
                   <tr>
                     <td>
@@ -75,19 +83,55 @@
               </table>
             </form>
           </div>
+
+          <div class="booking-summary">
+            <c:if test="${not empty errorMessage}">
+              <p style="color: red">${errorMessage}</p>
+            </c:if>
+
+            <c:if test="${not empty infoPassenger}">
+              <h3 style="color: red">Thông tin vé:</h3>
+              <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                  <tr style="background-color: #5e5e5e50">
+                    <th>Hành khách</th>
+                    <th>CMND</th>
+                    <th>Loại</th>
+                    <th>Ghế</th>
+                    <th>Loại ghế</th>
+                    <th>Toa</th>
+                    <th>Tàu</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td colspan="9" style="font-weight: bold">
+                      ${infoPassenger.startStationName} - ${infoPassenger.endStationName}
+                      ${infoPassenger.scheduledDepartureTime}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>${infoPassenger.passengerFullName}</td>
+                    <td>${infoPassenger.passengerIDCard}</td>
+                    <td>${infoPassenger.passengerType}</td>
+                    <td>${infoPassenger.seatNumber}</td>
+                    <td>${infoPassenger.seatTypeName}</td>
+                    <td>${infoPassenger.coachName}</td>
+                    <td>${infoPassenger.trainName}</td>
+                    <td>${infoPassenger.price}</td>
+                    <td>${infoPassenger.ticketStatus}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </c:if>
+          </div>
         </section>
       </main>
 
-
-
-
-
-
-
-
-
-
-
+      <script src="${pageContext.request.contextPath}/js/check-ticket/check-ticket.js"></script>
 
 
       <footer class="footer">

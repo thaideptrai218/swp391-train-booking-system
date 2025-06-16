@@ -84,7 +84,29 @@ body {
   font-weight: bold;
 }
 
+.booking-summary h3 {
+  margin-top: 30px;
+  color: #333;
+}
 
+.booking-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white;
+}
+
+.booking-summary th,
+.booking-summary td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.booking-summary th {
+  background-color: #007bff;
+  color: white;
+}
 
 
 

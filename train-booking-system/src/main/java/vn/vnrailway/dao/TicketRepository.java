@@ -1,5 +1,6 @@
 package vn.vnrailway.dao;
 
+import vn.vnrailway.dto.InfoPassengerDTO;
 import vn.vnrailway.model.Ticket;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,6 +24,8 @@ public interface TicketRepository {
 
     Ticket save(Ticket ticket) throws SQLException;
 
+    InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException; // For checking ticket status
+
     boolean update(Ticket ticket) throws SQLException; // Mainly for status changes
 
     boolean deleteById(int ticketId) throws SQLException; // Usually not deleted, but status changed (e.g., "Cancelled")
@@ -30,4 +33,4 @@ public interface TicketRepository {
     long getTotalTicketsSold() throws SQLException;
 
     double getTotalRevenue() throws SQLException;
-}
+} 
