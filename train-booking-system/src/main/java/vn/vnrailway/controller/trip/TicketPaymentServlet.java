@@ -32,7 +32,7 @@ public class TicketPaymentServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<PassengerType> passengerTypes = passengerTypeRepository.findAll(); 
+            List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
             String passengerTypesJson = JsonUtils.toJsonString(passengerTypes);
             request.setAttribute("passengerTypesJson", passengerTypesJson);
 
@@ -51,7 +51,7 @@ public class TicketPaymentServlet extends HttpServlet {
                         session.getAttribute("lastQuery_destinationStationName"));
             }
 
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/ticketPayment.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/ticketPayment.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace(); // For debugging

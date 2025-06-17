@@ -35,15 +35,8 @@ public class RoleFilter implements Filter {
                 path.startsWith("/public/") || path.startsWith("/authentication/") || // Allows servlets mapped under
                                                                                       // /authentication/
 
-                // Other public JSPs (if any, ensure they are not in WEB-INF if directly
-                // accessed)
                 path.equals("/index.jsp") || // Assuming index.jsp is at the root and public
-                // JSPs for landing, trip, train-info, check-booking, etc., are now in
-                // WEB-INF/jsp/public/
-                // and accessed via their respective servlets.
-                // Direct checks for these JSP root paths are removed.
 
-                // Servlet/public endpoints
                 path.equals("/login") || path.equals("/register") || path.equals("/logout") ||
                 path.equals("/forgot-password") || path.equals("/verify-otp") || path.equals("/reset-password") ||
                 path.equals("/forgotpassword") || path.equals("/newpassword") || path.equals("/enterotp") ||
@@ -54,9 +47,8 @@ public class RoleFilter implements Filter {
                 path.equals("/api/stations/all") ||
 
                 // Trip & train info related public paths
-                path.startsWith("/trip/") || path.startsWith("/train-info/") || path.startsWith("/check-booking/") ||
-
-                // Error or common
+                path.startsWith("/trip/") || path.startsWith("/train-info/") || path.startsWith("/check-booking/")
+                || path.startsWith("/api") || path.startsWith("/ticketPayment") ||
                 path.equals("/WEB-INF/jsp/common/unauthorized.jsp")) {
             chain.doFilter(request, response);
             return;
@@ -153,8 +145,6 @@ public class RoleFilter implements Filter {
                 path.equals(contextPath + "/enterotp") ||
                 path.equals(contextPath + "/newpassword") ||
                 path.equals(contextPath + "/changepassword") ||
-                // Add other public servlet paths here, and paths for static resources if not
-                // covered by startsWith
                 path.startsWith(contextPath + "/css/") ||
                 path.startsWith(contextPath + "/js/") ||
                 path.startsWith(contextPath + "/assets/") ||
