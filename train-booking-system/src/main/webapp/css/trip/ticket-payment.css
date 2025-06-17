@@ -1,3 +1,8 @@
+/*
+    Stylesheet for the Ticket Payment Page (ticketPayment.jsp)
+    Last updated: [Current Date] - Merged inline styles from JSP and general formatting.
+*/
+
 /* General Page Structure */
 body {
     font-family: 'Arial', sans-serif;
@@ -62,6 +67,32 @@ body {
     color: #2980b9;
 }
 
+.go-back-form {
+    margin-bottom: 20px;
+}
+
+.go-back-button-as-link {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.95em;
+    text-decoration: none;
+    display: inline-flex; /* To align icon and text */
+    align-items: center;
+}
+
+.go-back-button-as-link:hover {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+.go-back-button-as-link i {
+    margin-right: 5px; /* Space between icon and text */
+}
+
+
 /* Passenger Info Table */
 .passenger-info-section table {
     width: 100%;
@@ -85,11 +116,15 @@ body {
 }
 
 /* Specific cell styling */
-.passenger-name-type-cell { width: 30%; }
-.seat-info-cell { width: 35%; }
+.passenger-name-type-cell { width: 28%; } /* Adjusted width */
+.seat-info-cell { width: 32%; } /* Adjusted width */
 .original-price-cell, .discount-amount-cell, .final-price-cell { 
-    width: 10%; 
+    width: 9%;  /* Adjusted width */
     text-align: right;
+}
+.action-cell {
+    width: 5%; /* Width for delete button column */
+    text-align: center;
 }
 
 .seat-info-cell div {
@@ -127,9 +162,26 @@ select {
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 0.95em;
-    width: calc(100% - 170px); /* Adjust width considering label */
+    /* width: calc(100% - 170px); /* Width handled by input-wrapper */
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+.customer-info-section .input-wrapper {
+    flex-grow: 1; /* Allow wrapper to take remaining space */
+    display: flex;
+    flex-direction: column; /* Stack input and error message */
+}
+.customer-info-section .input-wrapper input,
+.customer-info-section .input-wrapper select {
+    width: 100%; /* Input takes full width of wrapper */
+}
+.customer-info-section .error-message {
+    width: 100%; /* Error message takes full width */
+    /* display: block; already set globally */
+    /* margin-top: 4px; already set globally */
+}
+
+
 .passenger-info-section input[type="text"],
 .passenger-info-section input[type="date"],
 .passenger-info-section select {
@@ -165,6 +217,40 @@ input:focus, select:focus {
 .button.primary-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+.button.secondary-button {
+    background-color: #6c757d; /* Bootstrap secondary color */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+.button.secondary-button:hover {
+    background-color: #5a6268;
+}
+.button.secondary-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+
+.button-icon {
+    background: none;
+    border: none;
+    color: #e74c3c; /* Red color for delete */
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1.1em;
+}
+.button-icon:hover {
+    color: #c0392b; /* Darker red on hover */
+}
+.button-icon i {
+    pointer-events: none; /* Ensure icon doesn't interfere with button click */
 }
 
 
@@ -233,13 +319,17 @@ input:focus, select:focus {
 
 /* Responsive adjustments (basic) */
 @media (max-width: 768px) {
-    .customer-info-section div {
+    .customer-info-section .form-group {
         flex-direction: column;
         align-items: flex-start;
     }
     .customer-info-section label {
         width: 100%;
         margin-bottom: 5px;
+        margin-right: 0; /* Remove right margin on small screens */
+    }
+    .customer-info-section .input-wrapper {
+        width: 100%; /* Wrapper takes full width */
     }
     input[type="text"],
     input[type="email"],
@@ -252,4 +342,49 @@ input:focus, select:focus {
         padding: 8px;
         font-size: 0.85em; /* Smaller font on small screens */
     }
+}
+
+/* Accessibility helper class */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Info Notices */
+.info-notice {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.95em;
+    display: flex; /* For icon alignment */
+    align-items: center; /* For icon alignment */
+}
+
+.info-notice i {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.2em; /* Slightly larger icon */
+}
+
+.info-notice.warning-notice {
+    color: #856404; /* Dark yellow text */
+    background-color: #fff3cd; /* Light yellow background */
+    border-color: #ffeeba; /* Yellow border */
+}
+.info-notice.warning-notice .icon-expired-hold {
+    color: #856404; /* Match text color */
+}
+
+.info-notice.passenger-info-instructions {
+    color: #0c5460; /* Dark cyan text */
+    background-color: #d1ecf1; /* Light cyan background */
+    border-color: #bee5eb; /* Cyan border */
+    line-height: 1.5;
 }

@@ -86,7 +86,7 @@ public class AllLocationsServlet extends HttpServlet {
             request.setAttribute("sortField", sortField);
             request.setAttribute("sortOrder", sortOrder);
 
-            request.getRequestDispatcher("/WEB-INF/jsp/landing/all-locations.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/landing/all-locations.jsp").forward(request, response);
         } catch (Exception e) {
             // Log the error and redirect to an error page or show an error message
             e.printStackTrace(); // For debugging, consider a more robust logging mechanism

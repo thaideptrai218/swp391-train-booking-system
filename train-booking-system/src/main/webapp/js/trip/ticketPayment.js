@@ -4,19 +4,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const PAYMENT_TIMEOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
     // DOM Elements
-    const passengerDetailsBody = document.getElementById("passenger-details-body");
-    const passengerRowTemplate = document.getElementById("passenger-row-template");
+    const passengerDetailsBody = document.getElementById(
+        "passenger-details-body"
+    );
+    const passengerRowTemplate = document.getElementById(
+        "passenger-row-template"
+    );
     const noPassengersRow = document.getElementById("no-passengers-row");
     const passengerCountSpan = document.getElementById("passenger-count");
-    const totalPaymentAmountSpan = document.getElementById("total-payment-amount");
+    const totalPaymentAmountSpan = document.getElementById(
+        "total-payment-amount"
+    );
     const paymentCountdownSpan = document.getElementById("payment-countdown");
     const paymentForm = document.getElementById("paymentForm");
-    const generalErrorMessage = document.getElementById("general-error-message");
+    const generalErrorMessage = document.getElementById(
+        "general-error-message"
+    );
+    const clearAllSeatsBtn = document.getElementById("clearAllSeatsButton"); // Added
 
     // Customer Info Fields
     const customerFullNameInput = document.getElementById("customerFullName");
     const customerEmailInput = document.getElementById("customerEmail");
-    const customerEmailConfirmInput = document.getElementById("customerEmailConfirm");
+    const customerEmailConfirmInput = document.getElementById(
+        "customerEmailConfirm"
+    );
     const customerPhoneInput = document.getElementById("customerPhone");
     const customerIDCardInput = document.getElementById("customerIDCard");
     const agreeTermsCheckbox = document.getElementById("agreeTerms");
@@ -28,14 +39,111 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- INITIALIZATION ---
     function initializePage() {
         loadShoppingCart();
-        if (!validateCartOnLoad()) {
-            return; // Stop further processing if initial cart validation fails
-        }
-        populatePassengerTypes(); // Ensure passenger types are available for dynamic rows
+        checkCartAndRedirectIfEmpty(); // Check if cart is empty on load
+        populatePassengerTypes();
         renderPassengerRows();
-        updateTotalPayment();
+        updateTotalPaymentAndPassengerCount();
         startPaymentTimer();
         setupEventListeners();
+        checkCartAndRedirectIfEmpty(); // Check on initial load as well
+    }
+
+    // --- UTILITY FUNCTIONS ---
+    function getAge(dateString) {
+        if (!dateString) return -1;
+        const birthDate = new Date(dateString);
+        if (isNaN(birthDate.getTime())) return -1;
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (
+            monthDifference < 0 ||
+            (monthDifference === 0 && today.getDate() < birthDate.getDate())
+        ) {
+            age--;
+        }
+        return age;
+    }
+
+    function formatCurrency(value) {
+        if (isNaN(parseFloat(value))) return "0";
+        return parseFloat(value).toLocaleString("vi-VN", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+    }
+
+    function parseCurrency(value) {
+        if (typeof value !== "string") return 0;
+        return parseFloat(value.replace(/\./g, "").replace(/,/g, ".")) || 0;
+    }
+
+    function displayError(element, message) {
+        if (element) {
+            element.textContent = message;
+            element.style.display = "block";
+        }
+    }
+
+    function clearError(element) {
+        if (element) {
+            element.textContent = "";
+            element.style.display = "none";
+        }
+    }
+
+    function clearAllErrors() {
+        document
+            .querySelectorAll(".error-message")
+            .forEach((span) => clearError(span));
+    }
+
+    function displayGeneralError(message, isError = true) {
+        if (generalErrorMessage) {
+            generalErrorMessage.textContent = message;
+            generalErrorMessage.style.color = isError ? "red" : "green";
+            generalErrorMessage.style.display = message ? "block" : "none";
+        }
+    }
+
+    // --- API FUNCTIONS ---
+    async function releaseSingleSeatAPI(cartItem) {
+        if (!cartItem || !cartItem.tripId || !cartItem.seatID) {
+            console.warn(
+                "Cannot release seat, missing critical cart item data:",
+                cartItem
+            );
+            return true;
+        }
+        const payload = {
+            tripId: cartItem.tripId,
+            seatId: cartItem.seatID,
+            legOriginStationId: cartItem.legOriginStationId,
+            legDestinationStationId: cartItem.legDestinationStationId,
+        };
+        try {
+            const response = await fetch(`${contextPath}/api/seats/release`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            if (response.ok) {
+                console.log("Seat released on backend:", payload);
+                return true;
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                console.error(
+                    "Failed to release seat on backend. Status:",
+                    response.status,
+                    "Message:",
+                    errorData.message
+                );
+                return false;
+            }
+        } catch (error) {
+            console.error("Error calling releaseSingleSeatAPI:", error);
+            return false;
+        }
     }
 
     function loadShoppingCart() {
@@ -43,12 +151,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (storedCart) {
             try {
                 shoppingCart = JSON.parse(storedCart);
-                // Optional: Filter out expired holds if individual timers were still running
-                // and somehow persisted to this page. For now, assume backend handles final validity.
             } catch (e) {
-                console.error("Error parsing shopping cart from session storage:", e);
+                console.error("Error parsing shopping cart:", e);
                 shoppingCart = [];
-                displayGeneralError("Lỗi khi tải giỏ hàng. Vui lòng thử lại.");
+                displayGeneralError("Lỗi khi tải giỏ hàng.");
             }
         }
     }
@@ -56,112 +162,304 @@ document.addEventListener("DOMContentLoaded", function () {
     function validateCartOnLoad() {
         if (shoppingCart.length === 0) {
             if (noPassengersRow) noPassengersRow.style.display = "table-row";
-            displayGeneralError("Không có vé nào trong giỏ hàng. Vui lòng quay lại để chọn vé.");
+            // displayGeneralError("Không có vé nào trong giỏ hàng. Vui lòng quay lại để chọn vé."); // Message handled by checkCartAndRedirectIfEmpty
             if (submitPaymentButton) submitPaymentButton.disabled = true;
+            if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true; // Disable clear all if cart is empty
             return false;
         }
         if (shoppingCart.length > MAX_PASSENGERS) {
-            displayGeneralError(`Bạn chỉ có thể đặt tối đa ${MAX_PASSENGERS} vé. Hiện tại có ${shoppingCart.length} vé.`);
+            displayGeneralError(
+                `Tối đa ${MAX_PASSENGERS} vé. Hiện có ${shoppingCart.length}.`
+            );
             if (submitPaymentButton) submitPaymentButton.disabled = true;
-            // Consider redirecting or more drastic action
+            if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true;
             return false;
         }
-        if (passengerCountSpan) passengerCountSpan.textContent = shoppingCart.length;
+        if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = false;
         return true;
     }
-    
+
     function populatePassengerTypes() {
-        // This function assumes `passengerTypesData` is globally available from JSP
-        // and populates the <select> in the template if needed, or ensures data is ready.
-        // For now, we assume passengerTypesData is correctly populated in the JSP script tag.
-        if (!window.passengerTypesData || window.passengerTypesData.length === 0) {
-            console.warn("Passenger types data is not available. Discounts and type-specific logic may fail.");
-            // Potentially fetch it via AJAX if not provided by JSP
+        if (
+            !window.passengerTypesData ||
+            window.passengerTypesData.length === 0
+        ) {
+            console.warn("Passenger types data missing.");
         }
     }
 
-    // --- RENDERING PASSENGER ROWS ---
+    // --- UI RENDERING AND UPDATES ---
     function renderPassengerRows() {
         if (!passengerDetailsBody || !passengerRowTemplate) return;
-        passengerDetailsBody.innerHTML = ''; // Clear existing (except template)
+        passengerDetailsBody.innerHTML = "";
 
         if (shoppingCart.length === 0) {
             if (noPassengersRow) noPassengersRow.style.display = "table-row";
+            if (submitPaymentButton) submitPaymentButton.disabled = true;
+            if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true;
             return;
         }
         if (noPassengersRow) noPassengersRow.style.display = "none";
-
+        if (submitPaymentButton) submitPaymentButton.disabled = false;
+        if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = false;
 
         shoppingCart.forEach((cartItem, index) => {
-            const newRow = passengerRowTemplate.content.cloneNode(true).querySelector("tr");
-            newRow.dataset.cartItemIndex = index; // Link row to cart item
+            const newRow = passengerRowTemplate.content
+                .cloneNode(true)
+                .querySelector("tr");
+            newRow.dataset.cartItemIndex = index;
 
-            // Populate passenger type dropdown
-            const passengerTypeSelect = newRow.querySelector(".passenger-type-selector");
+            const inputsAndSelects = newRow.querySelectorAll("input, select");
+            inputsAndSelects.forEach((el) => {
+                const originalId = el.id;
+                if (originalId && originalId.includes("-${index}")) {
+                    el.id = originalId.replace("-${index}", `-${index}`);
+                }
+                const errorSpan = newRow.querySelector(
+                    `.${el.name}Error, .${el.className.split(" ")[0]}Error`
+                );
+                if (errorSpan) {
+                    const originalErrorId = errorSpan.id;
+                    if (
+                        originalErrorId &&
+                        originalErrorId.includes("-${index}")
+                    ) {
+                        errorSpan.id = originalErrorId.replace(
+                            "-${index}",
+                            `-${index}`
+                        );
+                    }
+                    if (el.hasAttribute("aria-describedby")) {
+                        el.setAttribute("aria-describedby", errorSpan.id);
+                    }
+                }
+                const label = newRow.querySelector(
+                    `label[for="${originalId}"]`
+                );
+                if (label) {
+                    label.setAttribute("for", el.id);
+                }
+            });
+
+            const passengerTypeSelect = newRow.querySelector(
+                ".passenger-type-selector"
+            );
             if (window.passengerTypesData && passengerTypeSelect) {
-                window.passengerTypesData.forEach(ptype => {
+                window.passengerTypesData.forEach((ptype) => {
                     const option = document.createElement("option");
                     option.value = ptype.passengerTypeID;
                     option.textContent = ptype.typeName;
-                    option.dataset.discountPercentage = ptype.discountPercentage;
-                    option.dataset.requiresDocument = ptype.requiresDocument;
-                    // A more robust way to check for child: by typeName or a dedicated flag from backend
-                    option.dataset.isChild = (ptype.typeName === 'Trẻ em' || ptype.typeName === 'Em bé'); 
+                    option.dataset.discountPercentage =
+                        ptype.discountPercentage;
+                    option.dataset.requiresDocument = String(
+                        ptype.requiresDocument
+                    );
+                    option.dataset.isChild = String(
+                        ptype.typeName === "Trẻ em" ||
+                            ptype.typeName === "Em bé"
+                    );
                     passengerTypeSelect.appendChild(option);
                 });
             }
-            
-            // Populate seat information
+
             const seatInfoCell = newRow.querySelector(".seat-info-cell");
             if (seatInfoCell) {
-                seatInfoCell.querySelector(".seat-train-route").textContent = `${cartItem.trainName || 'N/A'}: ${cartItem.originStationName || 'N/A'} - ${cartItem.destinationStationName || 'N/A'}`;
-                seatInfoCell.querySelector(".seat-departure-datetime").textContent = `Khởi hành: ${cartItem.scheduledDepartureDisplay || 'N/A'}`;
-                seatInfoCell.querySelector(".seat-coach-seat").textContent = `Toa ${cartItem.coachPosition || 'N/A'}, Ghế ${cartItem.seatName || 'N/A'} (${cartItem.seatNumberInCoach || 'N/A'})`;
-                // seatInfoCell.querySelector(".seat-description").textContent = cartItem.seatDescription || ''; // If available
-                
-                // Individual seat hold timer (if applicable and data exists)
-                const holdTimerSpan = seatInfoCell.querySelector(".seat-hold-timer");
-                if (cartItem.holdExpiresAt && holdTimerSpan) {
-                    startIndividualSeatTimer(cartItem, holdTimerSpan, index);
-                } else if (holdTimerSpan) {
-                    holdTimerSpan.textContent = ''; // No specific hold info for this item on this page
-                }
+                seatInfoCell.querySelector(
+                    ".seat-train-route"
+                ).textContent = `${cartItem.trainName || "N/A"}: ${
+                    cartItem.originStationName || "N/A"
+                } - ${cartItem.destinationStationName || "N/A"}`;
+                seatInfoCell.querySelector(
+                    ".seat-departure-datetime"
+                ).textContent = `Khởi hành: ${
+                    cartItem.scheduledDepartureDisplay || "N/A"
+                }`;
+                seatInfoCell.querySelector(
+                    ".seat-coach-seat"
+                ).textContent = `Toa ${cartItem.coachPosition || "N/A"}, Ghế ${
+                    cartItem.seatName || "N/A"
+                } (${cartItem.seatNumberInCoach || "N/A"})`;
+                const holdTimerSpan =
+                    seatInfoCell.querySelector(".seat-hold-timer");
+                if (cartItem.holdExpiresAt && holdTimerSpan)
+                    startIndividualSeatTimer(cartItem, holdTimerSpan);
+                else if (holdTimerSpan) holdTimerSpan.textContent = "";
             }
 
-            const originalPriceCell = newRow.querySelector(".original-price-cell");
-            if (originalPriceCell) {
-                originalPriceCell.textContent = formatCurrency(cartItem.calculatedPrice);
-                originalPriceCell.dataset.basePrice = cartItem.calculatedPrice;
-            }
-            
-            // Set initial final price same as original, discount is 0
-            const finalPriceCell = newRow.querySelector(".final-price-cell");
-            if (finalPriceCell) finalPriceCell.textContent = formatCurrency(cartItem.calculatedPrice);
+            newRow.querySelector(".original-price-cell").textContent =
+                formatCurrency(cartItem.calculatedPrice);
+            newRow.querySelector(".original-price-cell").dataset.basePrice =
+                cartItem.calculatedPrice;
+            newRow.querySelector(".final-price-cell").textContent =
+                formatCurrency(cartItem.calculatedPrice);
 
+            const dobInput = newRow.querySelector(".passenger-dateOfBirth");
+            if (dobInput) {
+                dobInput.addEventListener("change", (event) =>
+                    handleDobChange(event.target)
+                );
+            }
+
+            const deleteButton = newRow.querySelector(
+                ".delete-passenger-button"
+            );
+            if (deleteButton) {
+                deleteButton.addEventListener("click", () =>
+                    handleDeleteTicketClick(index)
+                );
+            }
 
             passengerDetailsBody.appendChild(newRow);
         });
     }
 
-    // --- EVENT LISTENERS ---
+    function updateTotalPaymentAndPassengerCount() {
+        let total = 0;
+        const validPassengerRows = Array.from(
+            passengerDetailsBody.querySelectorAll("tr:not(#no-passengers-row)")
+        );
+
+        validPassengerRows.forEach((row) => {
+            const finalPriceCell = row.querySelector(".final-price-cell");
+            if (finalPriceCell) {
+                total += parseCurrency(finalPriceCell.textContent);
+            }
+        });
+
+        if (totalPaymentAmountSpan)
+            totalPaymentAmountSpan.textContent = formatCurrency(total);
+        if (passengerCountSpan)
+            passengerCountSpan.textContent = shoppingCart.length;
+
+        if (shoppingCart.length === 0) {
+            if (noPassengersRow) noPassengersRow.style.display = "table-row";
+            if (submitPaymentButton) submitPaymentButton.disabled = true;
+            if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true;
+            // displayGeneralError("Không có vé nào trong giỏ hàng. Vui lòng quay lại để chọn vé."); // Message handled by checkCartAndRedirectIfEmpty
+        } else {
+            if (noPassengersRow) noPassengersRow.style.display = "none";
+            if (submitPaymentButton) submitPaymentButton.disabled = false;
+            if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = false;
+            if (
+                generalErrorMessage &&
+                generalErrorMessage.textContent.includes(
+                    "Không có vé nào trong giỏ hàng"
+                )
+            ) {
+                displayGeneralError("");
+            }
+        }
+    }
+
+    // --- EVENT HANDLERS ---
     function setupEventListeners() {
         if (paymentForm) {
             paymentForm.addEventListener("submit", handleFormSubmission);
         }
-
-        passengerDetailsBody.addEventListener("change", function(event) {
-            if (event.target.classList.contains("passenger-type-selector")) {
-                handlePassengerTypeChange(event.target);
+        passengerDetailsBody.addEventListener("change", function (event) {
+            const target = event.target;
+            if (target.classList.contains("passenger-type-selector")) {
+                handlePassengerTypeChange(target);
             }
         });
-        
-        // Real-time validation for customer inputs (optional, can be on blur)
-        customerEmailConfirmInput?.addEventListener('input', () => validateEmailConfirmation(true));
+        customerEmailConfirmInput?.addEventListener("input", () =>
+            validateEmailConfirmation(true)
+        );
 
+        if (clearAllSeatsBtn) {
+            // Moved event listener setup here
+            clearAllSeatsBtn.addEventListener("click", async function () {
+                if (
+                    !confirm(
+                        "Bạn có chắc chắn muốn hủy tất cả các vé đã chọn không?"
+                    )
+                ) {
+                    return;
+                }
+                try {
+                    const response = await fetch(
+                        `${contextPath}/api/seats/releaseAllBySession`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        }
+                    );
+                    const responseData = await response.json();
+                    if (response.ok && responseData.status === "success") {
+                        alert(
+                            responseData.message ||
+                                `Đã hủy ${
+                                    responseData.data?.releasedCount || 0
+                                } vé đã chọn.`
+                        );
+
+                        shoppingCart.length = 0;
+                        sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
+
+                        renderPassengerRows();
+                        updateTotalPaymentAndPassengerCount();
+                        checkCartAndRedirectIfEmpty();
+                    } else {
+                        alert(
+                            `Lỗi: ${
+                                responseData.message || "Không thể hủy vé."
+                            }`
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error releasing all seats:", error);
+                    alert("Lỗi kết nối khi cố gắng hủy tất cả vé.");
+                }
+            });
+        }
+    }
+
+    function handleDobChange(dobInputElement) {
+        const row = dobInputElement.closest("tr");
+        if (!row) return;
+        const passengerTypeSelect = row.querySelector(
+            ".passenger-type-selector"
+        );
+        const selectedOption =
+            passengerTypeSelect.options[passengerTypeSelect.selectedIndex];
+        const passengerTypeName = selectedOption.textContent;
+        const dobErrorSpan = row.querySelector(".dateOfBirthError");
+
+        clearError(dobErrorSpan);
+
+        if (passengerTypeName === "Trẻ em" && dobInputElement.value) {
+            const age = getAge(dobInputElement.value);
+            if (age < 0) {
+                displayError(dobErrorSpan, "Ngày sinh không hợp lệ.");
+                return;
+            }
+            const dobDate = new Date(dobInputElement.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (dobDate > today) {
+                displayError(dobErrorSpan, "Ngày sinh không thể ở tương lai.");
+                return;
+            }
+
+            if (age < 6) {
+                displayError(
+                    dobErrorSpan,
+                    "Trẻ em dưới 6 tuổi không cần mua vé. Vui lòng không kê khai tại đây."
+                );
+            } else if (age >= 16) {
+                displayError(
+                    dobErrorSpan,
+                    "Trẻ em phải từ 6 đến dưới 16 tuổi."
+                );
+            }
+        }
     }
 
     function handlePassengerTypeChange(selectElement) {
-        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const selectedOption =
+            selectElement.options[selectElement.selectedIndex];
         const row = selectElement.closest("tr");
         if (!row || !selectedOption) return;
 
@@ -170,34 +468,88 @@ document.addEventListener("DOMContentLoaded", function () {
         const discountCell = row.querySelector(".discount-amount-cell");
         const finalPriceCell = row.querySelector(".final-price-cell");
         const originalPriceCell = row.querySelector(".original-price-cell");
-        
-        const basePrice = parseFloat(originalPriceCell.dataset.basePrice || "0");
-        const discountPercentage = parseFloat(selectedOption.dataset.discountPercentage || "0");
-        const requiresDocument = selectedOption.dataset.requiresDocument === "true";
+
+        const basePrice = parseFloat(
+            originalPriceCell.dataset.basePrice || "0"
+        );
+        const discountPercentage = parseFloat(
+            selectedOption.dataset.discountPercentage || "0"
+        );
         const isChild = selectedOption.dataset.isChild === "true";
+        const passengerTypeName = selectedOption.textContent;
+
+        const dobErrorSpan = row.querySelector(".dateOfBirthError");
+        clearError(dobErrorSpan);
 
         if (idCardInput) {
-            idCardInput.style.display = requiresDocument && !isChild ? "block" : "none";
-            idCardInput.required = requiresDocument && !isChild;
+            const showIdCard = !isChild;
+            idCardInput.style.display = showIdCard ? "block" : "none";
+            idCardInput.required = showIdCard;
+            if (!showIdCard) {
+                clearError(row.querySelector(".idCardNumberError"));
+                idCardInput.value = "";
+            }
         }
+
         if (dobInput) {
-            dobInput.style.display = isChild ? "block" : "none";
-            dobInput.required = isChild;
-             if (isChild) { // Set max date for DOB to today for children
-                const today = new Date().toISOString().split('T')[0];
+            const showDob = isChild;
+            dobInput.style.display = showDob ? "block" : "none";
+            dobInput.required = showDob;
+            if (showDob) {
+                const today = new Date().toISOString().split("T")[0];
                 dobInput.max = today;
+                if (dobInput.value) handleDobChange(dobInput);
+            } else {
+                dobInput.value = "";
             }
         }
 
         const discountAmount = basePrice * (discountPercentage / 100);
         const finalPrice = basePrice - discountAmount;
 
-        if (discountCell) discountCell.textContent = formatCurrency(discountAmount);
-        if (finalPriceCell) finalPriceCell.textContent = formatCurrency(finalPrice);
-        
-        updateTotalPayment();
+        if (discountCell)
+            discountCell.textContent = formatCurrency(discountAmount);
+        if (finalPriceCell)
+            finalPriceCell.textContent = formatCurrency(finalPrice);
+
+        updateTotalPaymentAndPassengerCount();
     }
-    
+
+    async function handleDeleteTicketClick(cartItemIndex) {
+        if (cartItemIndex < 0 || cartItemIndex >= shoppingCart.length) {
+            console.error(
+                "Invalid cart item index for deletion:",
+                cartItemIndex
+            );
+            return;
+        }
+
+        const itemToRemove = shoppingCart[cartItemIndex];
+
+        if (
+            !confirm(
+                `Bạn có chắc chắn muốn xóa vé của hành khách này không?\n${itemToRemove.trainName}: ${itemToRemove.originStationName} - ${itemToRemove.destinationStationName}, Ghế ${itemToRemove.seatName}`
+            )
+        ) {
+            return;
+        }
+
+        await releaseSingleSeatAPI(itemToRemove);
+
+        shoppingCart.splice(cartItemIndex, 1);
+        sessionStorage.setItem(
+            SESSION_STORAGE_CART_KEY,
+            JSON.stringify(shoppingCart)
+        );
+
+        renderPassengerRows();
+        updateTotalPaymentAndPassengerCount();
+
+        displayGeneralError("Đã xóa vé khỏi giỏ hàng.", false);
+        setTimeout(() => displayGeneralError(""), 3000);
+        checkCartAndRedirectIfEmpty(); // Call after deleting a ticket
+    }
+
     // --- PAYMENT TIMER ---
     function startPaymentTimer() {
         let timeLeft = PAYMENT_TIMEOUT_DURATION_MS;
@@ -219,78 +571,66 @@ document.addEventListener("DOMContentLoaded", function () {
         if (msLeft < 0) msLeft = 0;
         const minutes = Math.floor(msLeft / 60000);
         const seconds = Math.floor((msLeft % 60000) / 1000);
-        paymentCountdownSpan.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        paymentCountdownSpan.textContent = `${String(minutes).padStart(
+            2,
+            "0"
+        )}:${String(seconds).padStart(2, "0")}`;
     }
 
     async function handlePaymentTimeout() {
-        displayGeneralError("Đã hết thời gian thanh toán. Các vé bạn chọn đã được hủy. Vui lòng thực hiện lại.");
+        displayGeneralError(
+            "Đã hết thời gian thanh toán. Các vé bạn chọn đã được hủy. Vui lòng thực hiện lại."
+        );
         if (submitPaymentButton) submitPaymentButton.disabled = true;
-        // Disable all form inputs
-        paymentForm.querySelectorAll("input, select, button").forEach(el => el.disabled = true);
+        if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true;
+        paymentForm
+            .querySelectorAll(
+                "input, select, button:not(.delete-passenger-button):not(.go-back-button-as-link)"
+            )
+            .forEach((el) => (el.disabled = true));
 
-        // Attempt to release seats on backend
         if (shoppingCart.length > 0) {
-            const seatsToRelease = shoppingCart.map(item => ({
-                tripId: item.tripId,
-                seatId: item.seatID,
-                legOriginStationId: item.legOriginStationId, // Ensure these are in cartItem
-                legDestinationStationId: item.legDestinationStationId // Ensure these are in cartItem
-            }));
+            // Assuming releaseAllBySession API is robust for this.
+            // Or use a specific releaseMultiple if available and different.
             try {
-                // Assuming contextPath is globally available (from JSP)
-                const response = await fetch(`${contextPath}/api/seats/releaseMultiple`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(seatsToRelease)
-                });
-                if (response.ok) {
-                    console.log("Seats released on backend due to payment timeout.");
-                } else {
-                    console.error("Failed to release seats on backend after payment timeout.");
-                }
+                const response = await fetch(
+                    `${contextPath}/api/seats/releaseAllBySession`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                    }
+                );
+                if (response.ok)
+                    console.log("Seats released on backend (timeout).");
+                else
+                    console.error(
+                        "Failed to release seats on backend (timeout)."
+                    );
             } catch (error) {
-                console.error("Error releasing seats on backend:", error);
+                console.error("Error releasing seats (timeout):", error);
             }
         }
         sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
         shoppingCart = [];
+        updateTotalPaymentAndPassengerCount();
+        checkCartAndRedirectIfEmpty(); // Redirect if cart becomes empty due to timeout
     }
-    
-    // --- INDIVIDUAL SEAT HOLD TIMER (if needed on this page) ---
-    function startIndividualSeatTimer(cartItem, timerSpan, cartItemIndex) {
-        // This is more complex if holds from trip-result.js are still "live"
-        // For now, this is a placeholder or assumes holds are "soft-reserved"
-        // by the backend for the main payment duration.
-        // If true live individual timers are needed here, it's a deeper integration.
-        // For simplicity, let's assume the backend handles the hold validity during final payment.
-        // This span can show the original hold time if desired, but not actively count down to removal here.
+
+    function startIndividualSeatTimer(cartItem, timerSpan) {
         if (cartItem.holdExpiresAt) {
             const expiresAtDate = new Date(cartItem.holdExpiresAt);
             const now = new Date();
             const timeLeftMs = expiresAtDate.getTime() - now.getTime();
             if (timeLeftMs > 0) {
-                 const minutes = Math.floor(timeLeftMs / 60000);
-                 const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-                 timerSpan.textContent = `(Giữ đến ${minutes}:${String(seconds).padStart(2, '0')})`;
+                const minutes = Math.floor(timeLeftMs / 60000);
+                const seconds = Math.floor((timeLeftMs % 60000) / 1000);
+                timerSpan.textContent = `(Giữ đến ${minutes}:${String(
+                    seconds
+                ).padStart(2, "0")})`;
             } else {
                 timerSpan.textContent = "(Đã hết hạn giữ)";
-                // Potentially mark this row as invalid or remove from cart
             }
         }
-    }
-
-    // --- CALCULATIONS ---
-    function updateTotalPayment() {
-        let total = 0;
-        const rows = passengerDetailsBody.querySelectorAll("tr");
-        rows.forEach(row => {
-            if (row.id === 'no-passengers-row' && row.style.display !== 'none') return;
-            if (!row.querySelector(".final-price-cell")) return; // Skip if it's not a proper passenger row
-
-            const finalPriceText = row.querySelector(".final-price-cell").textContent;
-            total += parseCurrency(finalPriceText);
-        });
-        if (totalPaymentAmountSpan) totalPaymentAmountSpan.textContent = formatCurrency(total);
     }
 
     // --- FORM VALIDATION & SUBMISSION ---
@@ -298,129 +638,243 @@ document.addEventListener("DOMContentLoaded", function () {
         let isValid = true;
         clearAllErrors();
 
-        // Validate passenger details
-        const passengerRows = passengerDetailsBody.querySelectorAll("tr");
-        passengerRows.forEach((row, index) => {
-            if (row.id === 'no-passengers-row') return;
+        const passengerRows = passengerDetailsBody.querySelectorAll(
+            "tr:not(#no-passengers-row)"
+        );
+        passengerRows.forEach((row) => {
             if (!row.querySelector(".passenger-fullName")) return;
 
-
             const fullNameInput = row.querySelector(".passenger-fullName");
-            const passengerTypeSelect = row.querySelector(".passenger-type-selector");
+            const passengerTypeSelect = row.querySelector(
+                ".passenger-type-selector"
+            );
+            const selectedOption =
+                passengerTypeSelect.options[passengerTypeSelect.selectedIndex];
+            const isChildType = selectedOption.dataset.isChild === "true";
+            const passengerTypeName = selectedOption.textContent;
+
             const idCardInput = row.querySelector(".passenger-idCardNumber");
             const dobInput = row.querySelector(".passenger-dateOfBirth");
 
+            const fullNameErrorSpan = row.querySelector(".fullNameError");
+            const passengerTypeErrorSpan = row.querySelector(
+                ".passengerTypeError"
+            );
+            const idErrorSpan = row.querySelector(".idCardNumberError");
+            const dobErrorSpan = row.querySelector(".dateOfBirthError");
+
+            clearError(fullNameErrorSpan);
+            clearError(passengerTypeErrorSpan);
+            clearError(idErrorSpan);
+            clearError(dobErrorSpan);
+
             if (!fullNameInput.value.trim()) {
-                displayError(row.querySelector(".fullNameError"), "Vui lòng nhập họ tên.");
+                displayError(fullNameErrorSpan, "Vui lòng nhập họ tên.");
                 isValid = false;
             }
             if (!passengerTypeSelect.value) {
-                displayError(row.querySelector(".passengerTypeError"), "Vui lòng chọn đối tượng.");
-                isValid = false;
-            }
-            if (idCardInput.required && !idCardInput.value.trim()) {
-                displayError(row.querySelector(".idCardNumberError"), "Vui lòng nhập số CMND/CCCD.");
-                isValid = false;
-            } else if (idCardInput.required && idCardInput.value.trim() && !/^\d{9,12}$/.test(idCardInput.value.trim())) {
-                displayError(row.querySelector(".idCardNumberError"), "Số CMND/CCCD không hợp lệ (9-12 số).");
+                displayError(
+                    passengerTypeErrorSpan,
+                    "Vui lòng chọn đối tượng."
+                );
                 isValid = false;
             }
 
-            if (dobInput.required && !dobInput.value) {
-                displayError(row.querySelector(".dateOfBirthError"), "Vui lòng chọn ngày sinh.");
-                isValid = false;
-            } else if (dobInput.required && dobInput.value) {
-                const dob = new Date(dobInput.value);
-                const today = new Date();
-                today.setHours(0,0,0,0); // Compare dates only
-                if (dob > today) {
-                    displayError(row.querySelector(".dateOfBirthError"), "Ngày sinh không thể ở tương lai.");
+            if (!isChildType) {
+                if (!idCardInput.value.trim()) {
+                    displayError(idErrorSpan, "Vui lòng nhập số CMND/CCCD.");
                     isValid = false;
+                } else if (!/^\d{9,12}$/.test(idCardInput.value.trim())) {
+                    displayError(
+                        idErrorSpan,
+                        "Số CMND/CCCD không hợp lệ (9-12 số)."
+                    );
+                    isValid = false;
+                }
+            } else {
+                if (!dobInput.value) {
+                    displayError(dobErrorSpan, "Vui lòng chọn ngày sinh.");
+                    isValid = false;
+                } else {
+                    const age = getAge(dobInput.value);
+                    const dobDate = new Date(dobInput.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (age < 0 || dobDate > today) {
+                        displayError(
+                            dobErrorSpan,
+                            "Ngày sinh không hợp lệ hoặc ở tương lai."
+                        );
+                        isValid = false;
+                    } else if (passengerTypeName === "Trẻ em") {
+                        if (age < 6) {
+                            displayError(
+                                dobErrorSpan,
+                                "Trẻ em dưới 6 tuổi không cần mua vé. Vui lòng bỏ chọn."
+                            );
+                            isValid = false;
+                        } else if (age >= 16) {
+                            displayError(
+                                dobErrorSpan,
+                                "Trẻ em phải từ 6 đến dưới 16 tuổi."
+                            );
+                            isValid = false;
+                        }
+                    }
                 }
             }
         });
 
-        // Validate customer details
-        if (!customerFullNameInput.value.trim()) {
-            displayError(document.getElementById("customerFullNameError"), "Vui lòng nhập họ tên người đặt vé.");
+        const fieldsToValidate = [
+            {
+                input: customerFullNameInput,
+                errorId: "customerFullNameError",
+                msg: "Vui lòng nhập họ tên người đặt vé.",
+            },
+            {
+                input: customerEmailInput,
+                errorId: "customerEmailError",
+                msg: "Vui lòng nhập email.",
+                pattern: /\S+@\S+\.\S+/,
+                patternMsg: "Email không hợp lệ.",
+            },
+            {
+                input: customerEmailConfirmInput,
+                errorId: "customerEmailConfirmError",
+                msg: "Vui lòng nhập lại email.",
+            },
+            {
+                input: customerPhoneInput,
+                errorId: "customerPhoneError",
+                msg: "Vui lòng nhập số điện thoại.",
+                pattern: /^\d{10,11}$/,
+                patternMsg: "Số điện thoại không hợp lệ (10-11 số).",
+            },
+            {
+                input: customerIDCardInput,
+                errorId: "customerIDCardError",
+                pattern: /^\d{9,12}$/,
+                patternMsg: "Số CMND/CCCD người đặt vé không hợp lệ (9-12 số).",
+                optional: true,
+            },
+        ];
+
+        fieldsToValidate.forEach((field) => {
+            const errorSpan = document.getElementById(field.errorId);
+            clearError(errorSpan);
+            if (!field.optional && !field.input.value.trim()) {
+                displayError(errorSpan, field.msg);
+                isValid = false;
+            } else if (
+                field.pattern &&
+                field.input.value.trim() &&
+                !field.pattern.test(field.input.value.trim())
+            ) {
+                displayError(errorSpan, field.patternMsg);
+                isValid = false;
+            }
+        });
+
+        const emailConfirmErrorSpan = document.getElementById(
+            "customerEmailConfirmError"
+        );
+        clearError(emailConfirmErrorSpan);
+        if (!customerEmailConfirmInput.value.trim()) {
+            displayError(emailConfirmErrorSpan, "Vui lòng nhập lại email.");
             isValid = false;
-        }
-        if (!customerEmailInput.value.trim()) {
-            displayError(document.getElementById("customerEmailError"), "Vui lòng nhập email.");
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(customerEmailInput.value.trim())) {
-            displayError(document.getElementById("customerEmailError"), "Email không hợp lệ.");
-            isValid = false;
-        }
-        if (!validateEmailConfirmation(false)) { // Pass false to not show error if empty yet
-             isValid = false;
-        }
-        if (!customerPhoneInput.value.trim()) {
-            displayError(document.getElementById("customerPhoneError"), "Vui lòng nhập số điện thoại.");
-            isValid = false;
-        } else if (!/^\d{10,11}$/.test(customerPhoneInput.value.trim())) {
-            displayError(document.getElementById("customerPhoneError"), "Số điện thoại không hợp lệ (10-11 số).");
-            isValid = false;
-        }
-        if (customerIDCardInput.value.trim() && !/^\d{9,12}$/.test(customerIDCardInput.value.trim())) {
-             displayError(document.getElementById("customerIDCardError"), "Số CMND/CCCD người đặt vé không hợp lệ (9-12 số).");
+        } else if (
+            customerEmailInput.value.trim() !==
+            customerEmailConfirmInput.value.trim()
+        ) {
+            displayError(emailConfirmErrorSpan, "Email nhập lại không khớp.");
             isValid = false;
         }
 
-
+        const agreeTermsErrorSpan = document.getElementById("agreeTermsError");
+        clearError(agreeTermsErrorSpan);
         if (!agreeTermsCheckbox.checked) {
-            displayError(document.getElementById("agreeTermsError"), "Bạn phải đồng ý với điều khoản.");
+            displayError(
+                agreeTermsErrorSpan,
+                "Bạn phải đồng ý với điều khoản."
+            );
             isValid = false;
         }
-        
+
         return isValid;
     }
-    
+
     function validateEmailConfirmation(showErrorIfEmptyConfirm) {
-        const emailErrorSpan = document.getElementById("customerEmailConfirmError");
-        if (!customerEmailConfirmInput.value.trim() && !showErrorIfEmptyConfirm && !customerEmailInput.value.trim()) {
-            // If both are empty and we are not forced to show error for confirm, it's fine for now
-            clearError(emailErrorSpan);
-            return true;
+        const emailErrorSpan = document.getElementById(
+            "customerEmailConfirmError"
+        );
+        clearError(emailErrorSpan);
+        if (
+            !customerEmailConfirmInput.value.trim() &&
+            showErrorIfEmptyConfirm
+        ) {
+            displayError(emailErrorSpan, "Vui lòng nhập lại email.");
+            return false;
         }
-        if (!customerEmailConfirmInput.value.trim()) {
-             displayError(emailErrorSpan, "Vui lòng nhập lại email.");
-             return false;
-        }
-        if (customerEmailInput.value.trim() !== customerEmailConfirmInput.value.trim()) {
+        if (
+            customerEmailConfirmInput.value.trim() &&
+            customerEmailInput.value.trim() !==
+                customerEmailConfirmInput.value.trim()
+        ) {
             displayError(emailErrorSpan, "Email nhập lại không khớp.");
             return false;
         }
-        clearError(emailErrorSpan);
         return true;
     }
-
 
     async function handleFormSubmission(event) {
         event.preventDefault();
         if (!validateForm()) {
             displayGeneralError("Vui lòng kiểm tra lại các thông tin đã nhập.");
+            const firstError = document.querySelector(
+                ".error-message[style*='display: block'], .error-message[style*='display: inline']"
+            );
+            if (firstError)
+                firstError.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
             return;
         }
-        displayGeneralError(""); // Clear general error
+        displayGeneralError("");
 
         submitPaymentButton.disabled = true;
         submitPaymentButton.textContent = "Đang xử lý...";
 
-        const passengerData = [];
-        const passengerRows = passengerDetailsBody.querySelectorAll("tr");
-        passengerRows.forEach((row, cartIndex) => {
-            if (row.id === 'no-passengers-row' || !row.querySelector(".passenger-fullName")) return;
-
-            const cartItem = shoppingCart[row.dataset.cartItemIndex]; // Get original cart item
-            passengerData.push({
-                originalCartItem: cartItem, // Include original seat details, price, tripId etc.
-                fullName: row.querySelector(".passenger-fullName").value.trim(),
-                passengerTypeID: row.querySelector(".passenger-type-selector").value,
-                idCardNumber: row.querySelector(".passenger-idCardNumber").style.display !== 'none' ? row.querySelector(".passenger-idCardNumber").value.trim() : null,
-                dateOfBirth: row.querySelector(".passenger-dateOfBirth").style.display !== 'none' ? row.querySelector(".passenger-dateOfBirth").value : null,
-            });
-        });
+        const passengerData = shoppingCart
+            .map((cartItem, index) => {
+                const row = passengerDetailsBody.querySelector(
+                    `tr[data-cart-item-index="${index}"]`
+                );
+                if (!row) return null;
+                return {
+                    originalCartItem: cartItem,
+                    fullName: row
+                        .querySelector(".passenger-fullName")
+                        .value.trim(),
+                    passengerTypeID: row.querySelector(
+                        ".passenger-type-selector"
+                    ).value,
+                    idCardNumber:
+                        row.querySelector(".passenger-idCardNumber").style
+                            .display !== "none"
+                            ? row
+                                  .querySelector(".passenger-idCardNumber")
+                                  .value.trim()
+                            : null,
+                    dateOfBirth:
+                        row.querySelector(".passenger-dateOfBirth").style
+                            .display !== "none"
+                            ? row.querySelector(".passenger-dateOfBirth").value
+                            : null,
+                };
+            })
+            .filter((p) => p !== null);
 
         const paymentPayload = {
             customerDetails: {
@@ -431,78 +885,95 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             passengers: passengerData,
             paymentMethod: document.getElementById("paymentMethod").value,
-            totalAmount: parseCurrency(totalPaymentAmountSpan.textContent)
-            // shoppingCart: shoppingCart // Send the whole cart for backend to re-verify prices/availability
+            totalAmount: parseCurrency(totalPaymentAmountSpan.textContent),
         };
 
-        console.log("Payment Payload:", JSON.stringify(paymentPayload, null, 2));
+        console.log(
+            "Payment Payload:",
+            JSON.stringify(paymentPayload, null, 2)
+        );
 
         try {
-            // Assuming contextPath is globally available
-            const response = await fetch(`${contextPath}/processPaymentServlet`, { // Ensure this servlet path is correct
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(paymentPayload)
-            });
-
+            const response = await fetch(
+                `${contextPath}/processPaymentServlet`,
+                {
+                    // Ensure this servlet path is correct
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(paymentPayload),
+                }
+            );
             const responseData = await response.json();
 
             if (response.ok && responseData.status === "success") {
-                clearInterval(paymentTimerInterval); // Stop payment timer
-                sessionStorage.removeItem(SESSION_STORAGE_CART_KEY); // Clear cart
-                // Redirect to success page or display success message
-                // window.location.href = responseData.redirectUrl || `${contextPath}/bookingSuccess.jsp`;
-                displayGeneralError(`Đặt vé thành công! Mã đặt vé: ${responseData.bookingCode || ''}. Sẽ chuyển hướng sau 3 giây...`, false);
+                clearInterval(paymentTimerInterval);
+                sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
+                displayGeneralError(
+                    `Đặt vé thành công! Mã đặt vé: ${
+                        responseData.bookingCode || ""
+                    }. Sẽ chuyển hướng sau 3 giây...`,
+                    false
+                );
                 setTimeout(() => {
-                     window.location.href = responseData.redirectUrl || `${contextPath}/bookingConfirmation.jsp?bookingCode=${responseData.bookingCode}`;
+                    window.location.href =
+                        responseData.redirectUrl ||
+                        `${contextPath}/bookingConfirmation.jsp?bookingCode=${responseData.bookingCode}`; // Ensure this redirect is correct
                 }, 3000);
-
             } else {
-                displayGeneralError(`Lỗi: ${responseData.message || "Không thể xử lý thanh toán. Vui lòng thử lại."}`);
+                displayGeneralError(
+                    `Lỗi: ${
+                        responseData.message || "Không thể xử lý thanh toán."
+                    }`
+                );
                 submitPaymentButton.disabled = false;
                 submitPaymentButton.textContent = "Thanh toán";
             }
         } catch (error) {
             console.error("Payment submission error:", error);
-            displayGeneralError("Lỗi kết nối khi thực hiện thanh toán. Vui lòng thử lại.");
+            displayGeneralError("Lỗi kết nối khi thanh toán.");
             submitPaymentButton.disabled = false;
             submitPaymentButton.textContent = "Thanh toán";
         }
     }
 
-    // --- UTILITY FUNCTIONS ---
-    function formatCurrency(value) {
-        if (isNaN(parseFloat(value))) return "0";
-        return parseFloat(value).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    }
+    /**
+     * Checks if the shopping cart is empty and if so, triggers the go-back button.
+     */
+    function checkCartAndRedirectIfEmpty() {
+        if (shoppingCart.length === 0) {
+            // Check if a message is already being displayed by timeout handler
+            if (
+                !generalErrorMessage.textContent.includes(
+                    "Đã hết thời gian thanh toán"
+                )
+            ) {
+                displayGeneralError(
+                    "Giỏ hàng trống. Đang quay lại trang tìm kiếm..."
+                );
+            }
+            const goBackButton = document.querySelector(
+                ".go-back-button-as-link"
+            );
+            if (goBackButton) {
+                // Disable other interactions to prevent issues during auto-redirect
+                if (submitPaymentButton) submitPaymentButton.disabled = true;
+                if (clearAllSeatsBtn) clearAllSeatsBtn.disabled = true;
 
-    function parseCurrency(value) {
-        if (typeof value !== 'string') return 0;
-        return parseFloat(value.replace(/\./g, '').replace(/,/g, '.')) || 0; // Assuming vi-VN format like 1.000.000
-    }
-    
-    function displayError(element, message) {
-        if (element) {
-            element.textContent = message;
-            element.style.display = 'block'; // Or 'inline' depending on span
-        }
-    }
-
-    function clearError(element) {
-        if (element) {
-            element.textContent = '';
-            element.style.display = 'none';
-        }
-    }
-    
-    function clearAllErrors() {
-        document.querySelectorAll(".error-message").forEach(span => clearError(span));
-    }
-    
-    function displayGeneralError(message, isError = true) {
-        if(generalErrorMessage) {
-            generalErrorMessage.textContent = message;
-            generalErrorMessage.style.color = isError ? 'red' : 'green';
+                // Only redirect if not already in a timeout state that shows a specific message
+                if (
+                    !generalErrorMessage.textContent.includes(
+                        "Đã hết thời gian thanh toán"
+                    )
+                ) {
+                    setTimeout(() => {
+                        goBackButton.click();
+                    }, 1500);
+                }
+            } else {
+                console.error(
+                    "Go back button not found for automatic redirect."
+                );
+            }
         }
     }
 

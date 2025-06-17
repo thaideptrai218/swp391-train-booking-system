@@ -1,4 +1,4 @@
-package vn.vnrailway.controller.trip;
+package vn.vnrailway.controller.api.seat;
 
 import vn.vnrailway.dao.SeatRepository;
 import vn.vnrailway.dao.impl.SeatRepositoryImpl;
@@ -17,12 +17,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-// import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Not strictly needed for SeatStatusDTO as it is
 
-@WebServlet(name = "GetCoachSeatsServlet", urlPatterns = { "/getCoachSeatsWithPrice" }) // Updated URL Pattern
+@WebServlet(name = "GetCoachSeatsServlet", urlPatterns = { "/api/seats/getSeat" }) // Updated URL Pattern
 public class GetCoachSeatsServlet extends HttpServlet {
 
     private SeatRepository seatRepository;
@@ -33,8 +30,6 @@ public class GetCoachSeatsServlet extends HttpServlet {
         super.init();
         this.seatRepository = new SeatRepositoryImpl();
         this.objectMapper = new ObjectMapper();
-        // objectMapper.registerModule(new JavaTimeModule()); // If needed for other
-        // DTOs with Java 8 time
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,7 +49,8 @@ public class GetCoachSeatsServlet extends HttpServlet {
             String isRoundTripParam = request.getParameter("isRoundTrip");
 
             if (tripIdParam == null || coachIdParam == null || legOriginStationIdParam == null
-                    || legDestinationStationIdParam == null || bookingDateTimeParam == null || isRoundTripParam == null) {
+                    || legDestinationStationIdParam == null || bookingDateTimeParam == null
+                    || isRoundTripParam == null) {
                 throw new IllegalArgumentException(
                         "Missing required parameters: tripId, coachId, legOriginStationId, legDestinationStationId, bookingDateTime, isRoundTrip");
             }
@@ -64,17 +60,15 @@ public class GetCoachSeatsServlet extends HttpServlet {
             int legOriginStationId = Integer.parseInt(legOriginStationIdParam);
             int legDestinationStationId = Integer.parseInt(legDestinationStationIdParam);
             boolean isRoundTrip = Boolean.parseBoolean(isRoundTripParam);
-            
+
             Timestamp bookingTimestamp;
             try {
-                // Assuming JS sends ISO_LOCAL_DATE_TIME format e.g. "2023-10-26T10:15:30"
-                // The SP expects DATETIME2, which Timestamp can map to.
-                // If JS sends ISO_OFFSET_DATE_TIME (with Z or +07:00), parsing needs to change.
                 bookingTimestamp = Timestamp.valueOf(LocalDateTime.parse(bookingDateTimeParam));
             } catch (DateTimeParseException e) {
-                System.err.println("Invalid bookingDateTime format: " + bookingDateTimeParam + ". Falling back to current time. Error: " + e.getMessage());
+                System.err.println("Invalid bookingDateTime format: " + bookingDateTimeParam
+                        + ". Falling back to current time. Error: " + e.getMessage());
                 bookingTimestamp = new Timestamp(System.currentTimeMillis());
-                 // Optionally, you could re-throw or set a specific error for the client
+                // Optionally, you could re-throw or set a specific error for the client
             }
 
             // Get current user's session ID
@@ -82,7 +76,8 @@ public class GetCoachSeatsServlet extends HttpServlet {
             String currentUserSessionId = (session != null) ? session.getId() : null;
 
             List<SeatStatusDTO> seatStatusList = seatRepository.getCoachSeatsWithAvailabilityAndPrice(
-                    tripId, coachId, legOriginStationId, legDestinationStationId, bookingTimestamp, isRoundTrip, currentUserSessionId);
+                    tripId, coachId, legOriginStationId, legDestinationStationId, bookingTimestamp, isRoundTrip,
+                    currentUserSessionId);
 
             objectMapper.writeValue(out, seatStatusList);
 
@@ -112,14 +107,5 @@ public class GetCoachSeatsServlet extends HttpServlet {
                     errorMessage.replace("\\", "\\\\").replace("\"", "\\\""));
             response.getWriter().write(errorJson);
         }
-
-        // out.flush(); // Not strictly necessary as objectMapper.writeValue might
-        // flush, and getWriter().write() might too.
-        // If issues arise, can be re-added.
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Servlet to fetch coach seat availability for a given trip leg using Jackson for JSON.";
     }
 }
