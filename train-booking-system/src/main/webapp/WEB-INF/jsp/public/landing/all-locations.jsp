@@ -251,7 +251,7 @@
             </c:if>
             <c:forEach var="location" items="${allLocations}">
                 <div class="location-card">
-                    <img src="${contextPath}/assets/images/landing/locations/location${location.locationID}.jpg" alt="${location.locationName}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';">
+                    <img src="${contextPath}/assets/images/landing/locations/${location.locationCode}.jpg" alt="${location.locationName}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';">
                     <div class="location-card-content">
                         <h3>${location.locationName}</h3>
                         <p>Thành phố: ${location.city}</p>
@@ -303,5 +303,80 @@
 
         <a href="${contextPath}/landing" class="back-link">&larr; Quay lại Trang Chủ</a>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterForm = document.getElementById('filterSortForm');
+            const filterRegionInput = document.getElementById('filterRegion');
+            const filterCityInput = document.getElementById('filterCity');
+            const locationCards = document.querySelectorAll('.location-card');
+
+            // Helper function to remove accents and convert to lowercase
+            function normalizeString(str) {
+                if (typeof str !== 'string') return '';
+                return str.normalize('NFD')
+                          .replace(/[\u0300-\u036f]/g, "") // Remove combining diacritical marks
+                          .replace(/Đ/g, 'D') // Replace capital Vietnamese D with D
+                          .replace(/đ/g, 'd') // Replace small Vietnamese d with d
+                          .toLowerCase()
+                          .trim();
+            }
+
+            function applyFilters() {
+                const regionFilterNormalized = normalizeString(filterRegionInput.value);
+                const cityFilterNormalized = normalizeString(filterCityInput.value);
+
+                locationCards.forEach(card => {
+                    const locationNameElement = card.querySelector('h3');
+                    const cityElement = card.querySelector('p:nth-of-type(1)'); // Assuming city is the first <p>
+                    const regionElement = card.querySelector('p:nth-of-type(2)'); // Assuming region is the second <p>
+
+                    const locationName = locationNameElement ? normalizeString(locationNameElement.textContent) : '';
+                    const city = cityElement ? normalizeString(cityElement.textContent.replace('Thành phố: ', '')) : '';
+                    const region = regionElement ? normalizeString(regionElement.textContent.replace('Vùng: ', '')) : '';
+                    
+                    const matchesRegion = regionFilterNormalized === '' || region.includes(regionFilterNormalized);
+                    const matchesCity = cityFilterNormalized === '' || city.includes(cityFilterNormalized);
+
+                    if (matchesRegion && matchesCity) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // Apply filters on input change for instant feedback (client-side filtering)
+            // Note: This will filter the currently loaded page. For full dataset filtering, server-side is needed.
+            // The form submission will still handle server-side filtering and sorting.
+            if (filterRegionInput) {
+                filterRegionInput.addEventListener('input', applyFilters);
+            }
+            if (filterCityInput) {
+                filterCityInput.addEventListener('input', applyFilters);
+            }
+
+            // If you want the form to submit and re-fetch from server on every input for region/city,
+            // you might change the 'input' event listeners to submit the form.
+            // However, the current setup allows client-side preview filtering + server-side on "Áp dụng".
+
+            // Preserve filter/sort values in pagination links
+            const paginationLinks = document.querySelectorAll('.pagination a');
+            paginationLinks.forEach(link => {
+                const url = new URL(link.href);
+                const params = new URLSearchParams(url.search);
+
+                if (filterRegionInput.value) params.set('filterRegion', filterRegionInput.value);
+                if (filterCityInput.value) params.set('filterCity', filterCityInput.value);
+                
+                const sortField = document.getElementById('sortField').value;
+                const sortOrder = document.getElementById('sortOrder').value;
+                if (sortField) params.set('sortField', sortField);
+                if (sortOrder) params.set('sortOrder', sortOrder);
+                
+                link.href = `${url.pathname}?${params.toString()}`;
+            });
+        });
+    </script>
 </body>
 </html>

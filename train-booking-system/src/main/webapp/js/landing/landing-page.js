@@ -41,6 +41,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Profile Dropdown Toggle
+    const profileIcon = document.getElementById('profileIcon');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    if (profileIcon && profileDropdown) {
+        profileIcon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent click from immediately closing dropdown
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (profileDropdown.style.display === 'block' && !profileIcon.contains(event.target) && !profileDropdown.contains(event.target)) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+    } else {
+        if (!profileIcon) console.warn('Profile icon with ID "profileIcon" not found.');
+        if (!profileDropdown) console.warn('Profile dropdown with ID "profileDropdown" not found.');
+    }
 });
 
 // Hot Locations Carousel Functionality
@@ -112,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Station Info Popup Functions
-function showStationPopup(name, address, phone, stationID) {
+function showStationPopup(name, address, phone, stationCode) { // Changed stationID to stationCode
     const contextPath = document.body.dataset.contextPath || ''; // Get context path from body data attribute
 
     // Populate new modal structure
@@ -124,15 +145,15 @@ function showStationPopup(name, address, phone, stationID) {
     // document.getElementById('modalStationHotline').textContent = hotline; // Assuming you pass hotline
     
     const modalImage = document.getElementById('modalStationImage');
-    if (stationID) {
-        modalImage.src = `${contextPath}/assets/images/landing/stations/station${stationID}.jpg`;
+    if (stationCode) { // Changed stationID to stationCode
+        modalImage.src = `${contextPath}/assets/images/landing/stations/${stationCode}.jpg`; // Changed station${stationID} to ${stationCode}
         modalImage.onerror = function() { 
             this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'; 
-            console.warn('Modal image not found for stationID:', stationID, 'at path:', this.src);
+            console.warn('Modal image not found for stationCode:', stationCode, 'at path:', this.src); // Changed stationID to stationCode
         };
         modalImage.style.display = 'block'; // Show image element
     } else {
-        modalImage.style.display = 'none'; // Hide if no stationID
+        modalImage.style.display = 'none'; // Hide if no stationCode
         modalImage.src = ''; // Clear src
     }
     

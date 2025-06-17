@@ -17,9 +17,14 @@ body {
   color: white;
   margin: 27px;
   text-decoration: none;
-  font-weight: bold
+  font-weight: bold;
 }
-
+.logooo a {
+  color: white;
+  margin: 27px;
+  text-decoration: none;
+  font-weight: bold;
+}
 .logo {
   width: 12%;
 }
@@ -58,16 +63,14 @@ body {
   /* Canh giữa bảng */
 }
 
-
-
 .et-main-label {
-  background: url('../assets/images/label_bg.png') right bottom no-repeat #0082c4;
+  background: url("../assets/images/label_bg.png") right bottom no-repeat
+    #0082c4;
   padding: 5px 40px 5px 10px;
   margin-left: 5px;
   color: #fff;
   font-family: Verdana;
 }
-
 
 .check-info input,
 .check-info button {
@@ -106,7 +109,6 @@ body {
   color: white;
 }
 
-
 .booking-info-grid {
   max-width: 1000px;
   margin-top: 10px;
@@ -134,7 +136,6 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
 
 .footer {
   background-color: #003b65;
@@ -205,12 +206,3 @@ hr {
   color: #ccc;
   font-size: 14px;
 }
-
-
-
-
-
-
-
-
-

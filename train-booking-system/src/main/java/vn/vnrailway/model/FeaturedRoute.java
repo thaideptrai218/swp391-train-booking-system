@@ -13,6 +13,7 @@ public class FeaturedRoute {
     private int originStationID; // FK to Stations table
     private int destinationStationID; // FK to Stations table
     private String displayName; // e.g., "Ha Noi to Sai Gon"
+    private String destinationStationCode; // Code of the destination station, e.g., "SGO"
     private double distance; // Distance in km
     private int tripsPerDay; // Number of trips or trains per day
     private java.util.List<String> popularTrainNames; // List of popular train names/codes

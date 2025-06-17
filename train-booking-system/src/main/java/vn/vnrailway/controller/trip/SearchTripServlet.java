@@ -76,7 +76,7 @@ public class SearchTripServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -108,13 +108,13 @@ public class SearchTripServlet extends HttpServlet {
                 returnLocalDate = LocalDate.parse(returnDateStr, inputDateFormatter);
                 if (returnLocalDate.isBefore(departureLocalDate)) {
                     request.setAttribute("errorMessage", "Ngày về không thể trước ngày đi.");
-                    request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
                     return;
                 }
             }
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "ID ga không hợp lệ.");
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
             return;
         } catch (DateTimeParseException e) {
             request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy.");
@@ -152,18 +152,18 @@ public class SearchTripServlet extends HttpServlet {
                 request.setAttribute("returnDateDisplay", returnLocalDate.format(displayDateFormatter));
             }
 
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/tripResult.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/tripResult.jsp").forward(request, response);
 
         } catch (SQLException e) {
             e.printStackTrace(); // Log the full error for debugging
             // Provide a user-friendly error message
             request.setAttribute("errorMessage",
                     "Đã xảy ra lỗi khi tìm kiếm chuyến tàu. Vui lòng thử lại. Chi tiết: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace(); // Catch any other unexpected errors
             request.setAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
         }
     }
 }
