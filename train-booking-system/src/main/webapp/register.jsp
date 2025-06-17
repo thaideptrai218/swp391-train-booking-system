@@ -43,6 +43,14 @@
                     <span class="error-message" id="emailError"></span>
                 </div>
                 <div class="form-group">
+                    <label for="idCardNumber">Số CMND/CCCD</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-id-card icon"></i> <!-- Assuming a suitable icon for ID card -->
+                        <input type="text" id="idCardNumber" name="idCardNumber" placeholder="Nhập số CMND/CCCD của bạn" required>
+                    </div>
+                    <span class="error-message" id="idCardNumberError"></span>
+                </div>
+                <div class="form-group">
                     <label for="password">Mật khẩu</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-lock icon"></i>
@@ -50,14 +58,6 @@
                         <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
                     </div>
                     <span class="error-message" id="passwordError"></span>
-                </div>
-                <div class="form-group">
-                    <label for="idCardNumber">Số CMND/CCCD</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-id-card icon"></i> <!-- Assuming a suitable icon for ID card -->
-                        <input type="text" id="idCardNumber" name="idCardNumber" placeholder="Nhập số CMND/CCCD của bạn" required>
-                    </div>
-                    <span class="error-message" id="idCardNumberError"></span>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Xác nhận mật khẩu</label>
