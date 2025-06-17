@@ -74,6 +74,11 @@
                         </tr>
                     </tbody>
                 </table>
+                <div style="text-align: right; margin-top: 10px; margin-bottom: 20px;">
+                    <button type="button" id="clearAllSeatsButton" class="button secondary-button">
+                        <i class="fas fa-times-circle"></i> Hủy tất cả vé đã chọn
+                    </button>
+                </div>
             </section>
 
             <h2><i class="fas fa-user-circle"></i> Thông tin người đặt vé (người liên hệ)</h2>

@@ -219,6 +219,25 @@ input:focus, select:focus {
     cursor: not-allowed;
 }
 
+.button.secondary-button {
+    background-color: #6c757d; /* Bootstrap secondary color */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+.button.secondary-button:hover {
+    background-color: #5a6268;
+}
+.button.secondary-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+
 .button-icon {
     background: none;
     border: none;
