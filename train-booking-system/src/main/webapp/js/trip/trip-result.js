@@ -6,7 +6,7 @@ let seatHoldTimers = {}; // To store timers for individual seat holds { seatId: 
 const HOLD_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const SESSION_STORAGE_CART_KEY = "VNR_userShoppingCart";
 
-let currentCarriage; 
+let currentCarriage;
 let lastFetchCoachLayoutParams = null;
 
 // Function to load cart from session storage
@@ -36,8 +36,7 @@ function loadCartFromSession() {
             });
             shoppingCart = validItems;
             shoppingCart.forEach((item) => {
-                startSeatHoldTimer(item); // This function also updates timer display in the cart
-                // Attempt to find the seat on the map and mark it as selected if it's part of the current view
+                startSeatHoldTimer(item);
                 const trainItemElem = document.querySelector(
                     `.train-item[data-trip-id="${item.tripId}"]`
                 );
@@ -125,7 +124,6 @@ function selectCarriage(selectedCarriageElement, trainItemElement) {
         .querySelectorAll(".carriage-item")
         .forEach((c) => c.classList.remove("active"));
     selectedCarriageElement.classList.add("active");
-
 
     const coachId = selectedCarriageElement.dataset.coachId;
     const coachTypeName = selectedCarriageElement.dataset.coachTypename;
@@ -362,7 +360,7 @@ function fetchAndRenderCoachLayout(
         ? mainResultsContent.dataset.isRoundTrip === "true"
         : false;
 
-    const fetchUrl = `${contextPath}/getCoachSeatsWithPrice?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestinationStationId}&bookingDateTime=${encodeURIComponent(
+    const fetchUrl = `${contextPath}/api/seats/getSeat?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestinationStationId}&bookingDateTime=${encodeURIComponent(
         bookingDateTimeISO
     )}&isRoundTrip=${isRoundTripForFetch}`;
 

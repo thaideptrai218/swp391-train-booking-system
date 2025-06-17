@@ -10,17 +10,39 @@
     <title>Thanh toán vé tàu</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/reset.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/trip/ticket-payment.css"> <%-- New CSS file --%>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <%-- Inline styles moved to css/trip/ticket-payment.css --%>
 </head>
 <body>
     <div class="payment-container">
-        <a href="${pageContext.request.contextPath}/tripResult.jsp" class="go-back-link">
-            <i class="fas fa-arrow-left"></i> Quay lại chọn thêm vé
-        </a>
+        <form action="${pageContext.request.contextPath}/searchTrip" method="POST" class="go-back-form">
+            <c:if test="${not empty lastQuery_originalStationId}">
+                <input type="hidden" name="originalStationId" value="${lastQuery_originalStationId}">
+            </c:if>
+            <c:if test="${not empty lastQuery_destinationStationId}">
+                <input type="hidden" name="destinationStationId" value="${lastQuery_destinationStationId}">
+            </c:if>
+            <c:if test="${not empty lastQuery_departureDate}">
+                <input type="hidden" name="departure-date" value="${lastQuery_departureDate}">
+            </c:if>
+            <c:if test="${not empty lastQuery_returnDate}">
+                <input type="hidden" name="return-date" value="${lastQuery_returnDate}">
+            </c:if>
+            <c:if test="${not empty lastQuery_originalStationName}">
+                <input type="hidden" name="original-station-name" value="${lastQuery_originalStationName}">
+            </c:if>
+            <c:if test="${not empty lastQuery_destinationStationName}">
+                <input type="hidden" name="destination-station-name" value="${lastQuery_destinationStationName}">
+            </c:if>
+            <button type="submit" class="go-back-button-as-link">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn thêm vé
+            </button>
+        </form>
 
         <h1>Thông tin thanh toán vé</h1>
+
+        <div id="expired-holds-notice" class="info-notice warning-notice" style="display: none; margin-top: 15px; margin-bottom: 15px;">
+            <i class="fas fa-exclamation-triangle"></i> Các vé có biểu tượng <i class="fas fa-clock icon-expired-hold"></i> là các vé bị hết thời gian tạm giữ. Xin vui lòng loại bỏ các vé này khỏi danh sách vé đặt mua trước khi thực hiện giao dịch thanh toán tiền.
+        </div>
 
         <div class="payment-timer">
             <i class="fas fa-clock"></i> Thời gian còn lại để hoàn tất thanh toán: <span id="payment-countdown">05:00</span>
@@ -29,6 +51,9 @@
 
         <form id="paymentForm" novalidate> <%-- Action and method will be handled by JavaScript --%>
             
+            <div class="info-notice passenger-info-instructions">
+                <i class="fas fa-info-circle"></i> Quý khách vui lòng điền đầy đủ, chính xác tất cả các thông tin về hành khách đi tàu bao gồm: Họ tên đầy đủ, số giấy tờ tùy thân (Số chứng minh nhân dân hoặc số hộ chiếu hoặc số giấy phép lái xe đường bộ được pháp luật Việt Nam công nhận hoặc ngày tháng năm sinh nếu là trẻ em hoặc thẻ sinh viên nếu là sinh viên). Để đảm bảo an toàn, minh bạch trong quá trình bán vé các thông tin này sẽ được nhân viên soát vé kiểm tra trước khi lên tàu theo đúng các quy định của Tổng công ty Đường sắt Việt Nam.
+            </div>
             <h2><i class="fas fa-users"></i> Thông tin hành khách</h2>
             <section class="passenger-info-section">
                 <table>

@@ -16,10 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
-// import java.lang.reflect.Type; // No longer seems used directly
-// import java.math.BigDecimal; // No longer used as TotalPrice is not set here
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -47,7 +44,6 @@ public class InitiateBookingApiServlet extends HttpServlet {
 
         Connection conn = null;
         try {
-            // Use Jackson's TypeReference for parsing a list of objects
             TypeReference<ArrayList<SeatToBookDTO>> listTypeRef = new TypeReference<ArrayList<SeatToBookDTO>>() {
             };
             List<SeatToBookDTO> seatsToBook = JsonUtils.parse(request.getReader(), listTypeRef);
@@ -66,16 +62,11 @@ public class InitiateBookingApiServlet extends HttpServlet {
                 return;
             }
             String sessionId = httpSession.getId();
-            // Integer userId = (Integer) httpSession.getAttribute("userId"); // Not creating user here
-            // String bookingCodeForGuestHandling = CodeGenerator.generateBookingCode(); // Not creating booking/guest user here
-
-            // User and Booking creation logic is removed.
 
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            // Define an expiry time for the seat holds, e.g., 15 minutes from now
-            LocalDateTime bookingExpiryTime = LocalDateTime.now().plusMinutes(15);
+            LocalDateTime bookingExpiryTime = LocalDateTime.now().plusMinutes(10);
 
             // Verify all temporary holds and update their expiry.
             // The holds are associated with the session, not a booking ID at this stage.
@@ -105,16 +96,8 @@ public class InitiateBookingApiServlet extends HttpServlet {
                     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     return;
                 }
-                // Optional: If TemporarySeatHold had a bookingId field, it would not be set here.
             }
-
-            // Tickets are NOT created here. They will be created after passenger details
-            // are submitted and payment is confirmed.
-
             conn.commit();
-
-            // Store the list of seats (SeatToBookDTO) and a unique session identifier
-            // for this pending booking process in session for the next page
             String pendingBookingSessionIdentifier = UUID.randomUUID().toString();
             httpSession.setAttribute("pendingBookingSessionId", pendingBookingSessionIdentifier);
             httpSession.setAttribute("seatsForPendingBooking", new ArrayList<>(seatsToBook)); // Store a copy

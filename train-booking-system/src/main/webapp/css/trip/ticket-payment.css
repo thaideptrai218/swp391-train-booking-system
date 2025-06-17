@@ -67,6 +67,32 @@ body {
     color: #2980b9;
 }
 
+.go-back-form {
+    margin-bottom: 20px;
+}
+
+.go-back-button-as-link {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.95em;
+    text-decoration: none;
+    display: inline-flex; /* To align icon and text */
+    align-items: center;
+}
+
+.go-back-button-as-link:hover {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+.go-back-button-as-link i {
+    margin-right: 5px; /* Space between icon and text */
+}
+
+
 /* Passenger Info Table */
 .passenger-info-section table {
     width: 100%;
@@ -310,4 +336,36 @@ input:focus, select:focus {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border-width: 0;
+}
+
+/* Info Notices */
+.info-notice {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.95em;
+    display: flex; /* For icon alignment */
+    align-items: center; /* For icon alignment */
+}
+
+.info-notice i {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.2em; /* Slightly larger icon */
+}
+
+.info-notice.warning-notice {
+    color: #856404; /* Dark yellow text */
+    background-color: #fff3cd; /* Light yellow background */
+    border-color: #ffeeba; /* Yellow border */
+}
+.info-notice.warning-notice .icon-expired-hold {
+    color: #856404; /* Match text color */
+}
+
+.info-notice.passenger-info-instructions {
+    color: #0c5460; /* Dark cyan text */
+    background-color: #d1ecf1; /* Light cyan background */
+    border-color: #bee5eb; /* Cyan border */
+    line-height: 1.5;
 }

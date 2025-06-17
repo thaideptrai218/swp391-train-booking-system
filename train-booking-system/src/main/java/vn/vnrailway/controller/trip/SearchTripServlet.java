@@ -19,6 +19,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession; // Added for session Added for map
 import java.util.List;
 
 @WebServlet("/searchTrip")
@@ -69,13 +70,8 @@ public class SearchTripServlet extends HttpServlet {
 
             } catch (NumberFormatException e) {
                 System.err.println("SearchTripServlet: Invalid station ID format from parameters.");
-                // Optionally set an error message for the user
-                // request.setAttribute("errorMessage", "Lỗi ID ga không hợp lệ từ trang
-                // trước.");
             } catch (SQLException e) {
                 System.err.println("SearchTripServlet: SQL error fetching station details: " + e.getMessage());
-                // Optionally set an error message for the user
-                // request.setAttribute("errorMessage", "Lỗi truy vấn thông tin ga.");
                 e.printStackTrace();
             }
         }
@@ -100,8 +96,7 @@ public class SearchTripServlet extends HttpServlet {
         int destinationStationId;
         LocalDate departureLocalDate;
         LocalDate returnLocalDate = null;
-        DateTimeFormatter inputDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // Changed to accept
-                                                                                          // dd/MM/yyyy
+        DateTimeFormatter inputDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter displayDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         try {
@@ -122,9 +117,7 @@ public class SearchTripServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
             return;
         } catch (DateTimeParseException e) {
-            request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy."); // Updated
-                                                                                                               // error
-                                                                                                               // message
+            request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy.");
             request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
             return;
         }
@@ -138,6 +131,19 @@ public class SearchTripServlet extends HttpServlet {
             request.setAttribute("departureDateDisplay", departureLocalDate.format(displayDateFormatter));
             request.setAttribute("originStationDisplay", originStationName);
             request.setAttribute("destinationStationDisplay", destinationStationName);
+
+            // Store individual search criteria in session for POST-back
+            HttpSession session = request.getSession();
+            session.setAttribute("lastQuery_originalStationId", originStationIdStr);
+            session.setAttribute("lastQuery_destinationStationId", destinationStationIdStr);
+            session.setAttribute("lastQuery_departureDate", departureDateStr);
+            if (returnDateStr != null && !returnDateStr.trim().isEmpty()) {
+                session.setAttribute("lastQuery_returnDate", returnDateStr);
+            } else {
+                session.removeAttribute("lastQuery_returnDate"); // Ensure it's cleared if not present
+            }
+            session.setAttribute("lastQuery_originalStationName", originStationName);
+            session.setAttribute("lastQuery_destinationStationName", destinationStationName);
 
             if (returnLocalDate != null) {
                 List<TripSearchResultDTO> returnTrips = tripService.searchAvailableTrips(destinationStationId,

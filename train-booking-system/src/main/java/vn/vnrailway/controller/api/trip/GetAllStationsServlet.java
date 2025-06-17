@@ -1,4 +1,4 @@
-package vn.vnrailway.controller.trip;
+package vn.vnrailway.controller.api.trip;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import vn.vnrailway.dao.StationRepository;
