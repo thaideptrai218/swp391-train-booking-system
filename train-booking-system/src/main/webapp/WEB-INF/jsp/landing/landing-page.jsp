@@ -47,7 +47,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
                 >
               </li>
               <li><a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a></li>
-              <li><a href="#">Trả vé</a></li>
+              <li><a href="${pageContext.request.contextPath}/refundTicket">Trả vé</a></li>
               <li><a href="#">Hotline</a></li>
               <c:choose>
                 <c:when

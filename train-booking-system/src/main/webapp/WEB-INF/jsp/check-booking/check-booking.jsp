@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
   <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+  <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
     <!DOCTYPE html>
     <html>
 
@@ -20,7 +21,7 @@
             <a href="${pageContext.request.contextPath}/searchTrip">Tìm vé</a>
             <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
             <a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a>
-            <a href="#">Trả vé</a>
+            <a href="${pageContext.request.contextPath}/refundTicket">Trả vé</a>
           </nav>
 
           <c:choose>
@@ -32,9 +33,9 @@
             </c:when>
             <c:otherwise>
               <div class="auth">
-                  <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
-                  <a class="register" href="${pageContext.request.contextPath}/register">Đăng ký</a>
-                </div>
+                <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
+                <a class="register" href="${pageContext.request.contextPath}/register">Đăng ký</a>
+              </div>
             </c:otherwise>
           </c:choose>
         </div>
@@ -118,8 +119,18 @@
                       <td>${p.seatTypeName}</td>
                       <td>${p.coachName}</td>
                       <td>${p.trainName}</td>
-                      <td>${p.price}</td>
-                      <td>${p.ticketStatus}</td>
+                      <td>
+                        <fmt:formatNumber value="${p.price}" type="number" groupingUsed="true" />đ
+                      </td>
+                      <td>
+                        <c:choose>
+                          <c:when test="${p.ticketStatus == 'Valid'}">Hợp lệ</c:when>
+                          <c:when test="${p.ticketStatus == 'Used'}">Đã sử dụng</c:when>
+                          <c:when test="${p.ticketStatus == 'Cancelled'}">Đã hủy</c:when>
+                          <c:when test="${p.ticketStatus == 'Expired'}">Đã hết hạn</c:when>
+                          <c:otherwise>Không xác định</c:otherwise>
+                        </c:choose>
+                      </td>
                     </tr>
                   </tbody>
                 </c:forEach>

@@ -21,6 +21,7 @@ import vn.vnrailway.model.User;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
@@ -85,8 +86,8 @@ public class CheckTicketServlet extends HttpServlet {
             return;
         }
 
-        if (!idNumber.matches("^\\d{12}$")) {
-            request.setAttribute("errorMessage", "Số giấy tờ phải là 12 số, không có chữ cái. Vui lòng nhập lại.");
+        if (!idNumber.isEmpty() && !idNumber.matches("^\\d{12}$")) {
+            request.setAttribute("errorMessage", "Số giấy tờ phải là 12 chữ số nếu là vé người lớn, trẻ con không cần nhập. Vui lòng nhập lại.");
             request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
             return;
         }
@@ -108,7 +109,19 @@ public class CheckTicketServlet extends HttpServlet {
                     idCardMatches = true;
                 } else if (infoPassenger.getPassengerIDCard() != null
                         && infoPassenger.getPassengerIDCard().equals(idNumber)) {
+                    // Trường hợp người lớn, so sánh số CMND/CCC
                     idCardMatches = true;
+                }
+
+                // chuyển ngày dạng dđ-mm-yyyy sang Date
+                SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+                try {
+                    java.util.Date parsedDate = originalFormat.parse(departureDate);
+                    departureDate = targetFormat.format(parsedDate); // => "18-06-2025"
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
 
                 if (infoPassenger.getTrainName().equals(trainCode) &&
