@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@WebServlet("/api/booking/initiate")
+@WebServlet("/api/booking/initiateBooking")
 public class InitiateBookingApiServlet extends HttpServlet {
 
     private TemporarySeatHoldDAO temporarySeatHoldDAO;
@@ -72,8 +72,8 @@ public class InitiateBookingApiServlet extends HttpServlet {
             // The holds are associated with the session, not a booking ID at this stage.
             for (SeatToBookDTO seatReq : seatsToBook) {
                 TemporarySeatHold activeHold = temporarySeatHoldDAO.findActiveHoldBySessionAndLeg(
-                        conn, seatReq.getTripId(), seatReq.getSeatId(),
-                        seatReq.getLegOriginStationId(), seatReq.getLegDestinationStationId(), sessionId);
+                        conn, sessionId, seatReq.getTripId(), seatReq.getSeatId(), seatReq.getCoachId(),
+                        seatReq.getLegOriginStationId(), seatReq.getLegDestinationStationId());
 
                 if (activeHold == null) {
                     conn.rollback();

@@ -1,79 +1,78 @@
 package vn.vnrailway.dao;
 
+import vn.vnrailway.model.User;
+import vn.vnrailway.dto.payment.CustomerDetailsDto; // For creating/updating user from DTO
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import vn.vnrailway.utils.DBContext;
-import vn.vnrailway.utils.HashPassword;
 
-public class UserDAO {
+public interface UserDAO {
+
+    /**
+     * Finds a user by their email address.
+     *
+     * @param conn the database connection
+     * @param email The email address to search for.
+     * @return The User object if found, null otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    User findByEmail(Connection conn, String email) throws SQLException;
+
+    /**
+     * Creates a new user in the database.
+     *
+     * @param conn the database connection
+     * @param user The User object to create.
+     * @return The generated UserID of the newly created user, or -1 if creation failed.
+     * @throws SQLException If a database access error occurs.
+     */
+    long insertUser(Connection conn, User user) throws SQLException;
     
-    public boolean checkEmailExists(String email) {
-        String sql = "SELECT COUNT(*) FROM dbo.Users WHERE Email = ?";
-        System.out.println("Checking email existence: " + email);
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    boolean exists = rs.getInt(1) > 0;
-                    System.out.println("Email exists: " + exists);
-                    return exists;
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
-    }
+    /**
+     * Updates an existing user's details.
+     *
+     * @param conn the database connection
+     * @param user The User object with updated details.
+     * @return true if the update was successful, false otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    boolean updateUser(Connection conn, User user) throws SQLException;
 
-    public boolean updatePassword(String email, String newPassword) {
-        String sql = "UPDATE dbo.Users SET PasswordHash = ? WHERE Email = ?";
-        System.out.println("Debug - Password Update:");
-        System.out.println("Email: " + email);
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            // Hash the new password using the same method as registration
-            String hashedPassword = HashPassword.hashPassword(newPassword);
-            System.out.println("Password hashed successfully");
-            
-            ps.setString(1, hashedPassword);
-            ps.setString(2, email);
-            
-            int rowsAffected = ps.executeUpdate();
-            System.out.println("Rows affected: " + rowsAffected);
-            return rowsAffected > 0;
-            
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
+    /**
+     * Finds a user by ID.
+     * @param conn the database connection
+     * @param userId The ID of the user.
+     * @return User object if found, null otherwise.
+     * @throws SQLException
+     */
+    User findById(Connection conn, long userId) throws SQLException;
 
-    // Helper method to verify the database structure
-    public void verifyDatabaseStructure() {
-        String sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH " +
-                    "FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME = 'Users'";
-                    
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            System.out.println("Users Table Structure:");
-            while (rs.next()) {
-                String columnName = rs.getString("COLUMN_NAME");
-                String dataType = rs.getString("DATA_TYPE");
-                int maxLength = rs.getInt("CHARACTER_MAXIMUM_LENGTH");
-                System.out.println(columnName + " - " + dataType + " (" + maxLength + ")");
-            }
-        } catch (SQLException e) {
-            System.out.println("Error checking table structure: " + e.getMessage());
-        }
-    }
+    /**
+     * Helper to find or create a user based on customer details from payment payload.
+     * This method might encapsulate findByEmail, insertUser, and potentially updateUser.
+     *
+     * @param conn the database connection
+     * @param customerDetails The customer details from the payment payload.
+     * @return The User object (either existing or newly created).
+     * @throws SQLException If a database access error occurs.
+     */
+    User findOrCreateUser(Connection conn, CustomerDetailsDto customerDetails) throws SQLException;
+
+    /**
+     * Checks if an email already exists in the database.
+     * @param conn the database connection
+     * @param email The email to check.
+     * @return true if the email exists, false otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    boolean checkEmailExists(Connection conn, String email) throws SQLException;
+
+    /**
+     * Updates the password for a user identified by email.
+     * @param conn the database connection
+     * @param email The email of the user whose password is to be updated.
+     * @param newPasswordHash The new hashed password.
+     * @return true if the password was updated successfully, false otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    boolean updatePassword(Connection conn, String email, String newPasswordHash) throws SQLException;
 }

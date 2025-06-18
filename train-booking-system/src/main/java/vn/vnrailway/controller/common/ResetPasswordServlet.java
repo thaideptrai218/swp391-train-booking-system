@@ -7,11 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException; // Added for UserRepository
-import java.util.Optional; // Added for UserRepository
+import java.sql.Connection; // Import Connection
+import java.sql.SQLException; 
+import java.util.Optional; 
 import vn.vnrailway.dao.UserDAO;
-import vn.vnrailway.dao.UserRepository; // Added
-import vn.vnrailway.dao.impl.UserRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.UserDAOImpl; // Import UserDAOImpl
+import vn.vnrailway.config.DBContext; // Import DBContext
+import vn.vnrailway.dao.UserRepository; 
+import vn.vnrailway.dao.impl.UserRepositoryImpl; 
 import vn.vnrailway.model.User; // Added
 import vn.vnrailway.utils.HashPassword; // Added
 
@@ -84,10 +87,21 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-        UserDAO userDAO = new UserDAO();
+        UserDAO userDAO = new UserDAOImpl();
         // Hash the new password before updating
         String hashedNewPassword = HashPassword.hashPassword(newPassword);
-        boolean updateSuccess = userDAO.updatePassword(email, hashedNewPassword);
+        boolean updateSuccess = false;
+        
+        try (Connection conn = DBContext.getConnection()) {
+            updateSuccess = userDAO.updatePassword(conn, email, hashedNewPassword);
+        } catch (SQLException e) {
+            e.printStackTrace(); // Consider a proper logging mechanism
+            request.setAttribute("message", "Lỗi cơ sở dữ liệu khi cập nhật mật khẩu.");
+            request.setAttribute("messageType", "error");
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/newpassword.jsp").forward(request, response);
+            return;
+        }
+        
         System.out.println("Password update result: " + updateSuccess);
 
         if (updateSuccess) {

@@ -755,7 +755,7 @@ async function initiateBookingProcess() {
     console.log("Initiating booking with seats:", seatsToBook);
 
     try {
-        const response = await fetch(`${contextPath}/api/booking/initiate`, {
+        const response = await fetch(`${contextPath}/api/booking/initiateBooking`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(seatsToBook),

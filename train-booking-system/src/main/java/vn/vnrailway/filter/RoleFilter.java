@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.model.User;
 
-@WebFilter("/*")
 public class RoleFilter implements Filter {
 
     @Override
@@ -153,13 +152,6 @@ public class RoleFilter implements Filter {
     }
 
     private boolean isCommonPage(String path) {
-        // Define common pages accessible by multiple roles after login
         return path.equals("/profile") || path.equals("/update-profile");
-        // Add other common paths here e.g. path.equals("/settings")
-    }
-
-    @Override
-    public void destroy() {
-        // Cleanup code, if needed
     }
 }
