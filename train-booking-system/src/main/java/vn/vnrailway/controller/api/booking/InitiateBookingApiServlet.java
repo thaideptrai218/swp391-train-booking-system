@@ -66,7 +66,7 @@ public class InitiateBookingApiServlet extends HttpServlet {
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            LocalDateTime bookingExpiryTime = LocalDateTime.now().plusMinutes(10);
+            LocalDateTime bookingExpiryTime = LocalDateTime.now().plusMinutes(5);
 
             // Verify all temporary holds and update their expiry.
             // The holds are associated with the session, not a booking ID at this stage.

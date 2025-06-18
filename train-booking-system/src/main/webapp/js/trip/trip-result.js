@@ -70,6 +70,17 @@ function loadCartFromSession() {
     }
 }
 
+function updateItemHoldExpiration() {
+    const now = new Date();
+    shoppingCart.forEach((item) => {
+        if (item.holdExpiresAt) {
+            const newExpiresAt = new Date(now.getTime() + HOLD_DURATION_MS);
+            item.holdExpiresAt = newExpiresAt.toISOString();
+        }
+    });
+    saveCartToSession(); // Save updated cart to session storage
+}
+
 // Function to save cart to session storage
 function saveCartToSession() {
     sessionStorage.setItem(
@@ -756,6 +767,7 @@ async function initiateBookingProcess() {
                 "Booking initiated successfully, redirecting...",
                 responseData
             );
+            updateItemHoldExpiration(); // Update hold expiration times in the cart
             window.location.href = `${contextPath}/ticketPayment`; // Rely on server-provided redirect URL
         } else {
             alert(
