@@ -225,6 +225,11 @@ ul {
   transition: background-color 0.2s;
 }
 
+.profile-dropdown-menu .dropdown-item i {
+  color: var(--color-white); /* Make icon white */
+  margin-right: 10px; /* Add 10px right margin */
+}
+
 .profile-dropdown-menu .dropdown-item:hover {
   background-color: #3a3b3c; /* Hover effect */
 }
@@ -639,6 +644,7 @@ table {
   scroll-behavior: smooth; /* Smooth scrolling for JS-driven scroll */
   cursor: grab; /* Indicate draggable */
   user-select: none; /* Prevent text selection during drag */
+  -webkit-user-select: none; /* Safari support */
 }
 
 .carousel-container.grabbing {

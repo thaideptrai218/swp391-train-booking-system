@@ -12,7 +12,7 @@
 <body>
     <div class="profile-container">
         <div class="profile-header">
-            <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
+            <a href="${pageContext.request.contextPath}/landing" class="home-link">
                 <i class="fa-solid fa-house fa-xl home-icon"></i>
             </a>
             <h1>Hồ sơ người dùng</h1>
