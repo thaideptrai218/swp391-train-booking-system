@@ -64,7 +64,7 @@
                                             <span class="trip-station">${trip.destinationStationName}</span>
                                         </span>
                                         <span class="seats-info">
-                                            Còn trống: -- <br/> Đã đặt: --
+                                            Còn trống: ${trip.availableSeat} <br/> Đã đặt: ${trip.occupiedSeat}
                                         </span>
                                     </div>
                                     <div class="expanded-details" style="display:none;">

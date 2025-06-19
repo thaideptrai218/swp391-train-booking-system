@@ -221,8 +221,8 @@ public class TripRepositoryImpl implements TripRepository {
                         dto.setTrainName(rs.getString("TrainName"));
                         dto.setRouteName(rs.getString("RouteName"));
                         dto.setOriginStationName(rs.getString("OriginStation"));
-                        // dto.setTrainId(rs.getInt("trainId")); // Already mapped above as TrainID,
-                        // ensure SP output name consistency
+                        dto.setAvailableSeat(rs.getInt("AvailableSeats"));
+                        dto.setOccupiedSeat(rs.getInt("OccupiedSeats"));
 
                         Timestamp depTimestamp = rs.getTimestamp("DepartureTime");
                         if (depTimestamp != null) {

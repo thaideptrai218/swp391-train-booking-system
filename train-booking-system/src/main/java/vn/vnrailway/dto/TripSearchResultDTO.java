@@ -30,7 +30,9 @@ public class TripSearchResultDTO {
 
     private LocalDateTime tripOverallDepartureTime; // Overall departure time of the trip from its very first station -
                                                     // from SP: TripOverallDeparture
-    private LocalDateTime tripOverallArrivalTime; // Overall arrival time of the trip at its very last station - from
+    private LocalDateTime tripOverallArrivalTime;
+    private int availableSeat;
+    private int occupiedSeat; // Overall arrival time of the trip at its very last station - from
                                                   // SP: TripOverallArrival
 
     // Additional IDs for potential further operations or linking (can be populated
