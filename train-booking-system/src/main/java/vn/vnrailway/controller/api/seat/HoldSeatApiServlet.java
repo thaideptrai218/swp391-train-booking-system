@@ -64,8 +64,9 @@ public class HoldSeatApiServlet extends HttpServlet {
 
             // Step 1: Check if current session already holds this specific seat for this leg
             TemporarySeatHold ownExistingHold = temporarySeatHoldDAO.findActiveHoldBySessionAndLeg(
-                    conn, holdRequest.getTripId(), holdRequest.getSeatId(),
-                    holdRequest.getLegOriginStationId(), holdRequest.getLegDestinationStationId(), sessionId);
+                    conn, sessionId, holdRequest.getTripId(), holdRequest.getSeatId(),
+                    holdRequest.getCoachId(), // Added coachId
+                    holdRequest.getLegOriginStationId(), holdRequest.getLegDestinationStationId());
 
             if (ownExistingHold != null) {
                 Date newExpiresAt = new Date(System.currentTimeMillis() + (5 * 60 * 1000)); // 5 mins
@@ -122,9 +123,9 @@ public class HoldSeatApiServlet extends HttpServlet {
                     // CreatedAt will be set by DB default
                     .build();
 
-            boolean holdPlaced = temporarySeatHoldDAO.addHold(conn, newHold);
+            long holdId = temporarySeatHoldDAO.addHold(conn, newHold); // Changed to long
 
-            if (holdPlaced) {
+            if (holdId != -1) { // Check if holdId is valid
                 conn.commit();
                 sendSuccessResponse(response, "Seat held successfully.", holdRequest.getSeatId(), holdRequest.getTripId(), expiresAt);
             } else {

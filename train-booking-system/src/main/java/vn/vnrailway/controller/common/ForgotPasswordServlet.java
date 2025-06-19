@@ -21,6 +21,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.dao.UserDAO;
+import vn.vnrailway.dao.impl.UserDAOImpl; // Import UserDAOImpl
+import vn.vnrailway.config.DBContext; // Import DBContext
+import java.sql.Connection; // Import Connection
+import java.sql.SQLException; // Import SQLException
 
 @WebServlet(name = "ForgotPasswordServlet", urlPatterns = { "/forgotpassword" })
 public class ForgotPasswordServlet extends HttpServlet {
@@ -164,16 +168,26 @@ public class ForgotPasswordServlet extends HttpServlet {
         }
 
         // Kiểm tra email trong database
-        UserDAO userDAO = new UserDAO();
-        if (!userDAO.checkEmailExists(email)) {
-            message = "Email này chưa được đăng ký trong hệ thống";
+        UserDAO userDAO = new UserDAOImpl();
+        try (Connection conn = DBContext.getConnection()) { // Get connection
+            if (!userDAO.checkEmailExists(conn, email)) { // Pass connection
+                message = "Email này chưa được đăng ký trong hệ thống";
+                messageType = "error";
+            request.setAttribute("message", message);
+            request.setAttribute("messageType", messageType);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
+            return;
+        }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            message = "Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại sau.";
             messageType = "error";
             request.setAttribute("message", message);
             request.setAttribute("messageType", messageType);
             request.getRequestDispatcher("/WEB-INF/jsp/authentication/forgotpassword.jsp").forward(request, response);
             return;
         }
-
+        // Continue with email sending logic if email exists
         try {
             Properties props = new Properties();
             props.put("mail.smtp.host", "smtp.gmail.com");

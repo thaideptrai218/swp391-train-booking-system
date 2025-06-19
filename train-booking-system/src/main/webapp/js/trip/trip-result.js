@@ -70,6 +70,17 @@ function loadCartFromSession() {
     }
 }
 
+function updateItemHoldExpiration() {
+    const now = new Date();
+    shoppingCart.forEach((item) => {
+        if (item.holdExpiresAt) {
+            const newExpiresAt = new Date(now.getTime() + HOLD_DURATION_MS);
+            item.holdExpiresAt = newExpiresAt.toISOString();
+        }
+    });
+    saveCartToSession(); // Save updated cart to session storage
+}
+
 // Function to save cart to session storage
 function saveCartToSession() {
     sessionStorage.setItem(
@@ -744,7 +755,7 @@ async function initiateBookingProcess() {
     console.log("Initiating booking with seats:", seatsToBook);
 
     try {
-        const response = await fetch(`${contextPath}/api/booking/initiate`, {
+        const response = await fetch(`${contextPath}/api/booking/initiateBooking`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(seatsToBook),
@@ -756,6 +767,7 @@ async function initiateBookingProcess() {
                 "Booking initiated successfully, redirecting...",
                 responseData
             );
+            updateItemHoldExpiration(); // Update hold expiration times in the cart
             window.location.href = `${contextPath}/ticketPayment`; // Rely on server-provided redirect URL
         } else {
             alert(

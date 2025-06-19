@@ -895,7 +895,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const response = await fetch(
-                `${contextPath}/processPaymentServlet`,
+                `${contextPath}/api/booking/initiatePayment`, // Updated servlet path
                 {
                     // Ensure this servlet path is correct
                     method: "POST",
@@ -905,7 +905,24 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             const responseData = await response.json();
 
-            if (response.ok && responseData.status === "success") {
+            if (
+                response.ok &&
+                responseData.status === "VNPAY_REDIRECT" &&
+                responseData.paymentUrl
+            ) {
+                clearInterval(paymentTimerInterval);
+                // Do not remove shopping cart from session yet, VNPAY payment is pending
+                // sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
+                displayGeneralError(
+                    `Đang chuyển hướng đến VNPAY để thanh toán cho đơn hàng ${
+                        responseData.bookingCode || ""
+                    }...`,
+                    false
+                );
+
+                window.location.href = responseData.paymentUrl; // Redirect to VNPAY
+            } else if (response.ok && responseData.status === "success") {
+                // Keep existing success for non-VNPAY or direct success
                 clearInterval(paymentTimerInterval);
                 sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
                 displayGeneralError(
@@ -917,7 +934,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 setTimeout(() => {
                     window.location.href =
                         responseData.redirectUrl ||
-                        `${contextPath}/bookingConfirmation.jsp?bookingCode=${responseData.bookingCode}`; // Ensure this redirect is correct
+                        `${contextPath}/bookingConfirmation.jsp?bookingCode=${responseData.bookingCode}`;
                 }, 3000);
             } else {
                 displayGeneralError(
@@ -933,6 +950,9 @@ document.addEventListener("DOMContentLoaded", function () {
             displayGeneralError("Lỗi kết nối khi thanh toán.");
             submitPaymentButton.disabled = false;
             submitPaymentButton.textContent = "Thanh toán";
+        } finally {
+            sessionStorage.removeItem(SESSION_STORAGE_CART_KEY);
+            shoppingCart = [];
         }
     }
 
