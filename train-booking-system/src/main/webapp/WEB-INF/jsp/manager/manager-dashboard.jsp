@@ -58,24 +58,49 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
             </div>
           </div>
 
-          <div class="sales-by-month-year">
-            <h3>Doanh Thu Theo Tháng/Năm</h3>
-            <c:choose>
-              <c:when test="${not empty salesByMonthYearData}">
-                <div
-                  class="chart-container"
-                  style="position: relative; height: 40vh; width: 100%"
-                >
-                  <canvas
-                    id="salesByMonthYearChart"
-                    data-sales='<c:out value="${salesByMonthYearJson}" />'
-                  ></canvas>
-                </div>
-              </c:when>
-              <c:otherwise>
-                <p>Không có dữ liệu doanh thu theo tháng/năm.</p>
-              </c:otherwise>
-            </c:choose>
+          <div
+            class="charts-row"
+            style="
+              display: flex;
+              gap: 20px;
+              margin-bottom: 20px;
+              width: 100%;
+              box-sizing: border-box;
+            "
+          >
+            <div class="sales-by-week" style="flex: 1; min-width: 0">
+              <h3>Doanh Thu Theo Tuần</h3>
+              <c:choose>
+                <c:when test="${not empty salesByWeekData}">
+                  <div
+                    class="chart-container"
+                    style="position: relative; height: 320px"
+                  >
+                    <canvas id="salesByWeekChart"></canvas>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <p>Không có dữ liệu doanh thu theo tuần.</p>
+                </c:otherwise>
+              </c:choose>
+            </div>
+
+            <div class="sales-by-month-year" style="flex: 1; min-width: 0">
+              <h3>Doanh Thu Theo Tháng</h3>
+              <c:choose>
+                <c:when test="${not empty salesByMonthYearData}">
+                  <div
+                    class="chart-container"
+                    style="position: relative; height: 320px"
+                  >
+                    <canvas id="salesByMonthYearChart"></canvas>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <p>Không có dữ liệu doanh thu theo tháng.</p>
+                </c:otherwise>
+              </c:choose>
+            </div>
           </div>
 
           <div class="best-sellers">
@@ -142,7 +167,7 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
               </c:choose>
             </div>
           </div>
-
+          f
           <div class="popular-trips">
             <h3>Chuyến Đi Phổ Biến Nhất</h3>
             <c:choose>
@@ -187,6 +212,24 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
         </section>
       </div>
     </div>
+
+    <script type="text/javascript">
+      var salesByWeekDataForChart;
+      <c:choose>
+        <c:when test="${not empty salesByWeekJson}">
+          salesByWeekDataForChart = ${salesByWeekJson};
+        </c:when>
+        <c:otherwise>salesByWeekDataForChart = null;</c:otherwise>
+      </c:choose>;
+
+      var salesByMonthYearDataForChart;
+      <c:choose>
+        <c:when test="${not empty salesByMonthYearJson}">
+          salesByMonthYearDataForChart = ${salesByMonthYearJson};
+        </c:when>
+        <c:otherwise>salesByMonthYearDataForChart = null;</c:otherwise>
+      </c:choose>;
+    </script>
     <script src="${pageContext.request.contextPath}/js/manager/manager-dashboard.js"></script>
   </body>
 </html>

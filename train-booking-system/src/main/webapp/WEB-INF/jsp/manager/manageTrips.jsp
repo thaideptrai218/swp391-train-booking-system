@@ -9,54 +9,7 @@
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css"/>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/manager/manageTrips.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
-    <style>
-      body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; }
-      .dashboard-container { display: flex; }
-      .main-content { flex-grow: 1; padding: 25px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); margin: 20px; }
-      .dashboard-header h1 { color: #343a40; margin-bottom: 25px; font-weight: 400; border-bottom: 1px solid #e9ecef; padding-bottom: 15px; font-size: 1.8em; }
-      .message { padding: 12px 18px; margin-bottom: 20px; border-radius: 5px; font-size: 0.95em; }
-      .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-      .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-      .info-message { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-      .table-container table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
-      .table-container th, .table-container td { padding: 12px 15px; text-align: left; border: 1px solid #ddd; }
-      .table-container th { background-color: #f0f2f5; color: #333; font-weight: 600; font-size: 0.9em; }
-      .table-container tbody tr:nth-child(even) { background-color: #f9f9f9; }
-      .table-container tbody tr:hover { background-color: #e9ecef; }
-      .table-actions a, .table-actions button { display: inline-flex; align-items: center; padding: 6px 10px; color: white; border-radius: 4px; text-decoration: none; font-size: 0.85em; transition: background-color 0.2s ease; border: none; cursor: pointer; margin-right: 5px; }
-      .table-actions a.action-view-more { background-color: #17a2b8; }
-      .table-actions a.action-view-more:hover { background-color: #138496; }
-      .table-actions .action-delete { background-color: #dc3545; }
-      .table-actions .action-delete:hover { background-color: #c82333; }
-      .table-actions .fas { margin-right: 5px; }
-      td form { margin: 0; padding: 0; display: inline-flex; align-items: center; gap: 5px;}
-      .form-control-sm { padding: .25rem .5rem; font-size: .875rem; line-height: 1.5; border-radius: .2rem; border: 1px solid #ced4da; }
-      .sort-indicator { margin-left: 5px; font-size: 0.8em; }
-      th a { text-decoration: none; color: inherit; }
-      th a:hover { text-decoration: underline; }
-      .btn-update-multiplier {
-        padding: .25rem .5rem; 
-        font-size: .80rem; 
-        line-height: 1.2; 
-        border-radius: .2rem; 
-        color: #fff;
-        background-color: #007bff; 
-        border-color: #007bff; 
-        border: 1px solid transparent; 
-        cursor: pointer;
-        display: inline-flex; 
-        align-items: center; 
-        margin-left: 5px;
-      }
-      .btn-update-multiplier:hover { 
-        background-color: #0056b3; 
-        border-color: #0052cc;
-      }
-      .btn-update-multiplier .fas { 
-        margin-right: 3px;
-      }
-    </style>
-    <script>
+    <script type="text/javascript">
       function submitSort(sortField, currentSortOrder) {
         const form = document.getElementById("sortForm");
         form.elements["sortField"].value = sortField;
@@ -82,9 +35,6 @@
           multiplierDisplayInput.value = '1.00'; 
           if(saveMultiplierButton) saveMultiplierButton.style.display = 'none';
         }
-        // This form should ONLY submit the holiday status.
-        // The multiplier is handled by its own save button.
-        // If changing to "Không" (false) should auto-reset multiplier in DB, that logic is in servlet.
         holidayForm.elements['action'].value = 'updateHolidayStatus';
         holidayForm.submit();
       }
@@ -115,16 +65,67 @@
         multiplierInput.value = multiplierDisplay.value;
         form.appendChild(multiplierInput);
         
-        // Include isHolidayTrip status as it might be needed by servlet logic
         const isHolidayInput = document.createElement('input');
         isHolidayInput.type = 'hidden';
-        isHolidayInput.name = 'isHolidayTripHidden'; // Use a different name to avoid conflict if needed
+        isHolidayInput.name = 'isHolidayTripHidden';
         isHolidayInput.value = holidaySelect.value;
         form.appendChild(isHolidayInput);
 
         document.body.appendChild(form);
         form.submit();
       }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("tripSearchInput");
+        const searchBtn = document.getElementById("tripSearchBtn");
+        const tripTableRows = document.querySelectorAll(".table-container table tbody tr");
+        const noTripsRow = document.querySelector(".table-container table tbody tr td[colspan='6']");
+
+        function filterTripsTable() {
+          const searchTerm = searchInput.value.toLowerCase().trim();
+          let anyRowVisible = false;
+
+          tripTableRows.forEach(row => {
+            if (row.cells.length < 2) { 
+                return;
+            }
+            const tripIdCell = row.cells[0].textContent.toLowerCase();
+            const routeNameCell = row.cells[1].textContent.toLowerCase();
+
+            if (tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm)) {
+              row.style.display = "";
+              anyRowVisible = true;
+            } else {
+              row.style.display = "none";
+            }
+          });
+
+          if (noTripsRow) {
+            const noTripsRowTR = noTripsRow.closest('tr'); // Get the parent TR
+            if (noTripsRowTR) { // Check if TR is found
+              if (anyRowVisible) {
+                noTripsRowTR.style.display = "none";
+              } else {
+                // Show "No trips found" if search term is present and no rows match,
+                // OR if search term is empty and the only row present was the "No trips found" row initially.
+                if (searchTerm !== "" || (searchTerm === "" && tripTableRows.length === 1 && tripTableRows[0] === noTripsRowTR)) {
+                   noTripsRowTR.style.display = ""; 
+                } else if (searchTerm === "" && tripTableRows.length > 1) {
+                  // If search is empty and there are actual data rows, hide "No trips found"
+                  noTripsRowTR.style.display = "none";
+                }
+              }
+            }
+          }
+        }
+
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener("click", filterTripsTable);
+            searchInput.addEventListener("keyup", function(event) {
+                filterTripsTable();
+            });
+        }
+      });
     </script>
   </head>
   <body>
@@ -140,8 +141,12 @@
       <div class="main-content">
         <header class="dashboard-header"><h1>Manage Trips</h1></header>
         <section class="content-section">
-          <div class="controls-container" style="margin-bottom: 20px; text-align: right;">
-            <a href="${pageContext.request.contextPath}/manageTrips?action=showAddForm" class="btn btn-primary" style="padding: 8px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+          <div class="controls-container">
+            <div class="search-container">
+              <input type="text" id="tripSearchInput" placeholder="Tìm theo Mã chuyến đi, Tên tuyến...">
+              <button id="tripSearchBtn" class="action-search"><i class="fas fa-search"></i> Tìm kiếm</button>
+            </div>
+            <a href="${pageContext.request.contextPath}/manageTrips?action=showAddForm" class="btn btn-primary action-add">
               <i class="fas fa-plus-circle"></i> Thêm Chuyến Đi Mới
             </a>
           </div>
@@ -186,14 +191,16 @@
                         </td>
                         <td>
                            <input type="number" id="basePriceMultiplierDisplay_${trip.tripID}" class="form-control-sm" 
-                                  value="<fmt:formatNumber value="${trip.basePriceMultiplier}" pattern="#0.00" minFractionDigits="2" maxFractionDigits="2"/>" 
+                                  value="${trip.basePriceMultiplier}" 
                                   step="0.01" min="0" 
                                   ${!trip.holidayTrip ? 'readonly' : ''} style="width: 80px;"/>
+                           <c:set var="buttonDisplayStyleValue" value="${trip.holidayTrip ? 'inline-flex' : 'none'}" />
                            <button type="button" id="saveMultiplierBtn_${trip.tripID}" class="btn-update-multiplier" 
                                    onclick="submitMultiplierForm('${trip.tripID}')" 
-                                   style="display: ${trip.holidayTrip ? 'inline-flex' : 'none'};">
+                                   style="display: buttonDisplayStyleValue;">
                                <i class="fas fa-save"></i> Lưu
                            </button>
+
                         </td>
                         <td>
                           <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">

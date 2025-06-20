@@ -33,9 +33,18 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
       <a href="${pageContext.request.contextPath}/managerDashboard">
         <i class="fas fa-chart-line"></i> Xem Số Liệu Thống Kê
       </a>
-      <a href="${pageContext.request.contextPath}/manageRoutes">
-        <i class="fas fa-map-signs"></i> Quản Lý Tuyến Đường
+    </li>
+    <li>
+      <a href="${pageContext.request.contextPath}/manageStations">
+        <i class="fas fa-map-signs"></i> Quản Lý Ga Tàu
       </a>
+    </li>
+    <li>
+      <a href="${pageContext.request.contextPath}/manageRoutes">
+        <i class="fas fa-route"></i> Quản Lý Tuyến Đường
+      </a>
+    </li>
+    <li>
       <a href="${pageContext.request.contextPath}/manageTrips">
         <i class="fas fa-train"></i> Quản Lý Chuyến Đi
       </a>
@@ -51,7 +60,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/managerStaff">
+      <a href="${pageContext.request.contextPath}/manageStaffs">
         <i class="fas fa-users-cog"></i> Quản Lý Nhân Viên
       </a>
     </li>

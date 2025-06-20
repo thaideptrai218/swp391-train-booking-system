@@ -115,7 +115,7 @@
                             <th>Tên Trạm</th>
                             <th>Khoảng Cách (km)</th>
                             <th>Thời Gian Dừng (phút)</th>
-                            <%-- <th>Hành Động</th> --%>
+                            <th>Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,7 +126,7 @@
                                 <td><c:out value="${detail.stationName}" /> (ID: ${detail.stationID})</td>
                                 <td><fmt:formatNumber value="${detail.distanceFromStart}" minFractionDigits="1" maxFractionDigits="2"/></td>
                                 <td><c:out value="${detail.defaultStopTime}" /></td>
-                                <%-- <td class="actions">
+                                <td class="actions">
                                     <a href="${pageContext.request.contextPath}/manager/routeDetail?action=editRouteStation&routeId=${detail.routeID}&stationId=${detail.stationID}#editRouteStationForm" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Sửa Trạm</a>
                                     <form action="${pageContext.request.contextPath}/manageRoutes" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trạm này khỏi tuyến đường không?');">
                                         <input type="hidden" name="action" value="removeStationFromRoute">
@@ -134,11 +134,11 @@
                                         <input type="hidden" name="stationId" value="${detail.stationID}">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-times-circle"></i> Xóa Trạm</button>
                                     </form>
-                                </td> --%>
+                                </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${not hasStations}">
-                            <tr><td colspan="3">Tuyến đường này chưa có trạm nào.</td></tr>
+                            <tr><td colspan="4">Tuyến đường này chưa có trạm nào.</td></tr>
                         </c:if>
                     </tbody>
                 </table>
@@ -177,13 +177,17 @@
                             
                             <div class="form-group">
                                 <label for="editRsStationId">Trạm:</label>
-                                <select id="editRsStationId" name="stationId" required class="form-control">
+                                <c:set var="isStationLocked" value="${isFirstStation || isLastStation}" />
+                                <select id="editRsStationId" name="stationId" required class="form-control" ${isStationLocked ? 'disabled' : ''}>
                                     <c:forEach items="${allStations}" var="station">
                                         <option value="${station.stationID}" ${station.stationID == routeStationToEdit.stationID ? 'selected' : ''}>
                                             <c:out value="${station.stationName}" /> (ID: ${station.stationID})
                                         </option>
                                     </c:forEach>
                                 </select>
+                                <c:if test="${isStationLocked}">
+                                    <input type="hidden" name="stationId" value="${routeStationToEdit.stationID}">
+                                </c:if>
                             </div>
                             <div class="form-group">
                                 <label for="editRsDistanceFromStart">Khoảng Cách Từ Điểm Đầu (km):</label>

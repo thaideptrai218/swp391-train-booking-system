@@ -53,7 +53,7 @@ public class RouteDetailServlet extends HttpServlet {
 
                     // Fetch all stations for the "Add Station" modal dropdown
                     List<Station> allStations = routeRepository.getAllStations();
-                    // request.setAttribute("allStations", allStations); // We'll set
+                    request.setAttribute("allStations", allStations); // We'll set
                     // availableStationsToAdd instead
 
                     // Create a list of station IDs already in the current route
@@ -78,7 +78,24 @@ public class RouteDetailServlet extends HttpServlet {
                                 .filter(detail -> detail.getStationID() == stationIdToEdit)
                                 .findFirst();
                         if (stationToEditOpt.isPresent()) {
-                            request.setAttribute("routeStationToEdit", stationToEditOpt.get());
+                            RouteStationDetailDTO stationToEdit = stationToEditOpt.get();
+                            request.setAttribute("routeStationToEdit", stationToEdit);
+
+                            // Determine if it's the first or last station in the route
+                            boolean isFirstStation = false;
+                            boolean isLastStation = false;
+                            if (!routeDetailsForCurrentRoute.isEmpty()) {
+                                if (routeDetailsForCurrentRoute.get(0).getStationID() == stationToEdit.getStationID()) {
+                                    isFirstStation = true;
+                                }
+                                if (routeDetailsForCurrentRoute.get(routeDetailsForCurrentRoute.size() - 1)
+                                        .getStationID() == stationToEdit.getStationID()) {
+                                    isLastStation = true;
+                                }
+                            }
+                            request.setAttribute("isFirstStation", isFirstStation);
+                            request.setAttribute("isLastStation", isLastStation);
+
                         } else {
                             request.setAttribute("infoMessage", "Trạm cần sửa không tìm thấy trong tuyến này.");
                         }

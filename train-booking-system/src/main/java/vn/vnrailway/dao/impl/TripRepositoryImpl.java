@@ -574,6 +574,27 @@ public class TripRepositoryImpl implements TripRepository {
     }
 
     @Override
+    public boolean updateTripStationTimes(int tripId, int stationId, LocalDateTime newScheduledArrival,
+            LocalDateTime newScheduledDeparture) throws SQLException {
+        String sql = "UPDATE TripStations SET ScheduledArrival = ?, ScheduledDeparture = ? WHERE TripID = ? AND StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, newScheduledArrival != null ? Timestamp.valueOf(newScheduledArrival) : null);
+            ps.setTimestamp(2, newScheduledDeparture != null ? Timestamp.valueOf(newScheduledDeparture) : null);
+            ps.setInt(3, tripId);
+            ps.setInt(4, stationId);
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println(
+                    "Error updating times for TripID " + tripId + ", StationID " + stationId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
     public boolean updateTripHolidayStatus(int tripId, boolean isHoliday) throws SQLException {
         String sql = "UPDATE Trips SET IsHolidayTrip = ? WHERE TripID = ?";
         try (Connection conn = DBContext.getConnection();

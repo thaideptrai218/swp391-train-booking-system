@@ -11,6 +11,7 @@ import vn.vnrailway.dao.impl.TripRepositoryImpl;
 import vn.vnrailway.dto.TripStationInfoDTO;
 import java.sql.SQLException;
 import java.util.List;
+import java.math.BigDecimal; // Import BigDecimal
 
 @WebServlet("/tripDetail")
 public class TripDetailServlet extends HttpServlet {
@@ -70,21 +71,82 @@ public class TripDetailServlet extends HttpServlet {
 
         try {
             int tripId = Integer.parseInt(tripIdStr);
-            int stationId = Integer.parseInt(stationIdStr);
-            java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
-            java.time.LocalTime time = java.time.LocalTime.parse(timeStr);
-            java.time.LocalDateTime newScheduledDeparture = java.time.LocalDateTime.of(date, time);
+            // int stationId = Integer.parseInt(stationIdStr); // stationId from request is
+            // for the first station, not needed for loop logic directly
+            java.time.LocalDate firstStationDepartureDate = java.time.LocalDate.parse(dateStr);
+            java.time.LocalTime firstStationDepartureTime = java.time.LocalTime.parse(timeStr);
+            java.time.LocalDateTime firstStationActualDeparture = java.time.LocalDateTime.of(firstStationDepartureDate,
+                    firstStationDepartureTime);
 
-            boolean success = tripRepository.updateTripStationScheduledDeparture(tripId, stationId,
-                    newScheduledDeparture);
+            List<TripStationInfoDTO> stationDetails = tripRepository.findTripStationDetailsByTripId(tripId);
 
-            if (success) {
-                request.getSession().setAttribute("successMessage",
-                        "Scheduled departure updated successfully for station " + stationId + " in trip " + tripId
-                                + ".");
-            } else {
-                request.getSession().setAttribute("errorMessage", "Failed to update scheduled departure.");
+            if (stationDetails == null || stationDetails.isEmpty()) {
+                request.getSession().setAttribute("errorMessage",
+                        "No station details found to update for Trip ID: " + tripId);
+                response.sendRedirect(request.getContextPath() + "/tripDetail?tripId=" + originalTripIdForRedirect);
+                return;
             }
+
+            java.time.LocalDateTime previousStationDepartureCalc = firstStationActualDeparture;
+            // Estimate time for the first station is from the absolute start of the route.
+            // If the first station in the list IS the start of the route, its estimateTime
+            // might be 0 or null.
+            // The travel time to the first station is effectively 0 if it's the origin.
+            java.math.BigDecimal previousEstimateTimeHours = java.math.BigDecimal.ZERO;
+
+            // For the very first station in the list
+            TripStationInfoDTO firstStationDto = stationDetails.get(0);
+            java.time.LocalDateTime firstScheduledArrival = firstStationActualDeparture; // Arrives when it departs,
+                                                                                         // effectively
+            Integer firstStopTimeMinutes = firstStationDto.getDefaultStopTime();
+            if (firstStopTimeMinutes == null)
+                firstStopTimeMinutes = 0; // Handle null stop time
+            java.time.LocalDateTime firstScheduledDeparture = firstScheduledArrival.plusMinutes(firstStopTimeMinutes);
+
+            tripRepository.updateTripStationTimes(firstStationDto.getTripID(), firstStationDto.getStationId(),
+                    firstScheduledArrival, firstScheduledDeparture);
+
+            // Update for next iteration, using the *actual* departure of the first station
+            // as the basis.
+            previousStationDepartureCalc = firstScheduledDeparture;
+            if (firstStationDto.getEstimateTime() != null) {
+                previousEstimateTimeHours = firstStationDto.getEstimateTime();
+            }
+
+            for (int i = 1; i < stationDetails.size(); i++) {
+                TripStationInfoDTO currentStationDto = stationDetails.get(i);
+
+                java.math.BigDecimal currentEstimateTimeHours = currentStationDto.getEstimateTime();
+                Integer currentStopTimeMinutes = currentStationDto.getDefaultStopTime();
+
+                if (currentEstimateTimeHours == null) { // Should not happen if data is clean
+                    System.err.println("Warning: EstimateTime is null for station " + currentStationDto.getStationName()
+                            + ". Skipping its update.");
+                    continue;
+                }
+                if (currentStopTimeMinutes == null)
+                    currentStopTimeMinutes = 0;
+
+                // Travel time from previous station to current station
+                java.math.BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours
+                        .subtract(previousEstimateTimeHours);
+                long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
+
+                java.time.LocalDateTime currentScheduledArrival = previousStationDepartureCalc
+                        .plusSeconds(travelTimeSeconds);
+                java.time.LocalDateTime currentScheduledDeparture = currentScheduledArrival
+                        .plusMinutes(currentStopTimeMinutes);
+
+                tripRepository.updateTripStationTimes(currentStationDto.getTripID(), currentStationDto.getStationId(),
+                        currentScheduledArrival, currentScheduledDeparture);
+
+                previousStationDepartureCalc = currentScheduledDeparture;
+                previousEstimateTimeHours = currentEstimateTimeHours;
+            }
+
+            request.getSession().setAttribute("successMessage",
+                    "Scheduled times updated successfully for all stations in trip " + tripId + ".");
+
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("errorMessage", "Invalid ID or date/time format for update.");
             e.printStackTrace();

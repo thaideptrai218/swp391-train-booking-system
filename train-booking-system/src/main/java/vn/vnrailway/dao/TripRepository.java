@@ -51,6 +51,10 @@ public interface TripRepository {
         boolean updateTripStationScheduledDeparture(int tripId, int stationId,
                         java.time.LocalDateTime newScheduledDeparture) throws SQLException;
 
+        boolean updateTripStationTimes(int tripId, int stationId,
+                        java.time.LocalDateTime newScheduledArrival,
+                        java.time.LocalDateTime newScheduledDeparture) throws SQLException;
+
         boolean updateTripHolidayStatus(int tripId, boolean isHoliday) throws SQLException;
 
         boolean updateTripStatus(int tripId, String newStatus) throws SQLException;
