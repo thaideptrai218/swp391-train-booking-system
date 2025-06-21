@@ -20,7 +20,7 @@
         <div class="profile-details">
             <div class="detail-item">
                 <span class="label">Tên người dùng:</span>
-                <span class="value">${user.userName}</span>
+                <span class="value">${user.fullName}</span>
             </div>
             <div class="detail-item">
                 <span class="label">Email:</span>

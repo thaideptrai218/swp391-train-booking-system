@@ -141,25 +141,33 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean update(User user) throws SQLException {
-        String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, PasswordHash = ?, IDCardNumber = ?, Role = ?, IsActive = ?, LastLogin = ? WHERE UserID = ?";
+        String sql = "UPDATE Users SET FullName = ?, PhoneNumber = ?, IDCardNumber = ?, Role = ?, IsActive = ?, LastLogin = ?, DateOfBirth = ?, Gender = ?, Address = ?, Email = ? WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setString(1, user.getFullName());
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getPhoneNumber());
-            ps.setString(4, user.getPasswordHash()); // Use getPasswordHash for plain-text password
-            ps.setString(5, user.getIdCardNumber());
-            ps.setString(6, user.getRole());
-            ps.setBoolean(7, user.isActive());
-            
+            ps.setString(2, user.getPhoneNumber());
+            ps.setString(3, user.getIdCardNumber());
+            ps.setString(4, user.getRole());
+            ps.setBoolean(5, user.isActive());
+
             if (user.getLastLogin() != null) {
-                ps.setTimestamp(8, Timestamp.valueOf(user.getLastLogin()));
+                ps.setTimestamp(6, Timestamp.valueOf(user.getLastLogin()));
             } else {
-                ps.setNull(8, Types.TIMESTAMP);
+                ps.setNull(6, Types.TIMESTAMP);
             }
-            ps.setInt(9, user.getUserID());
-            
+
+            if (user.getDateOfBirth() != null) {
+                ps.setDate(7, Date.valueOf(user.getDateOfBirth()));
+            } else {
+                ps.setNull(7, Types.DATE);
+            }
+
+            ps.setString(8, user.getGender());
+            ps.setString(9, user.getAddress());
+            ps.setString(10, user.getEmail());
+            ps.setInt(11, user.getUserID());
+
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }

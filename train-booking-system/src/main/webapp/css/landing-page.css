@@ -22,7 +22,7 @@
 
   --color-accent-cyan: #4daac8;
   --color-accent-cyan-dark: #357a94;
-  --color-accent-orange: #df6951;
+  --color-accent-orange: #007bff; /* Changed from orange to blue */
   --color-accent-medium-blue: #006dae;
 
   --color-border-light: #ddd;
@@ -183,7 +183,7 @@ ul {
   position: absolute;
   top: 100%; /* Position below the icon */
   right: 0; /* Align to the right of the container */
-  background-color: #2c2c2c; /* Dark background like the image */
+  background-color: #1659b8; /* Dark background like the image */
   color: #e4e6eb; /* Light text color */
   min-width: 280px; /* Adjust as needed */
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -371,7 +371,7 @@ table {
 
 .hero-content .hero-title {
   padding: 20px 0;
-  color: var(--color-accent-orange);
+  color: var(--color-primary); /* Changed to primary blue */
   font-family: var(--font-tertiary);
   font-size: 20px;
   font-style: normal;
@@ -901,7 +901,7 @@ table {
 }
 
 .footer-social {
-  background-color: #3c2172;
+  background-color: #003b65; /* Changed from purple to dark blue */
   padding: 15px 10px;
   display: flex;
   justify-content: center;
@@ -1209,7 +1209,7 @@ hr {
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background-color: var(--color-accent-orange);
+  background-color: var(--color-primary); /* Changed to primary blue */
   color: var(--color-white);
   width: 44px; /* Square button */
   height: 44px;
@@ -1225,7 +1225,7 @@ hr {
 }
 
 .route-card-button:hover {
-  background-color: #e65a40; /* Darker orange on hover */
+  background-color: var(--color-primary-dark); /* Darker blue on hover */
 }
 
 .route-card-button .arrow-icon {
