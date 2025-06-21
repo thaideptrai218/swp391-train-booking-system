@@ -61,6 +61,7 @@ public class ResetPasswordServlet extends HttpServlet {
             Optional<User> userOptional = userRepository.findByEmail(email);
             if (userOptional.isPresent()) {
                 User currentUser = userOptional.get();
+                
                 if (HashPassword.checkPassword(newPassword, currentUser.getPasswordHash())) {
                     request.setAttribute("message", "Mật khẩu mới không được trùng với mật khẩu cũ.");
                     request.setAttribute("messageType", "error");

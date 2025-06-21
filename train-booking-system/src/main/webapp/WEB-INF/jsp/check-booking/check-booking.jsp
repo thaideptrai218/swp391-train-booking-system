@@ -124,11 +124,11 @@
                       </td>
                       <td>
                         <c:choose>
-                          <c:when test="${p.ticketStatus == 'Valid'}">Hợp lệ</c:when>
-                          <c:when test="${p.ticketStatus == 'Used'}">Đã sử dụng</c:when>
-                          <c:when test="${p.ticketStatus == 'Cancelled'}">Đã hủy</c:when>
-                          <c:when test="${p.ticketStatus == 'Expired'}">Đã hết hạn</c:when>
-                          <c:otherwise>Không xác định</c:otherwise>
+                          <c:when test="${p.ticketStatus == 'Valid'}"><span style="color: green; font-weight: bold;">Hợp lệ</span></c:when>
+                          <c:when test="${p.ticketStatus == 'Used'}"><span style="color: blue; font-weight: bold;">Đã sử dụng</span></c:when>
+                          <c:when test="${p.ticketStatus == 'Cancelled'}"><span style="color: red; font-weight: bold;">Đã hủy</span></c:when>
+                          <c:when test="${p.ticketStatus == 'Expired'}"><span style="color: gray; font-weight: bold;">Đã hết hạn</span></c:when>
+                          <c:otherwise><span style="color: black;">Không xác định</span></c:otherwise>
                         </c:choose>
                       </td>
                     </tr>

@@ -65,6 +65,8 @@ public class RefundTicketServlet extends HttpServlet {
                         request.setAttribute("checkInforRefundTicketDTO", checkInforRefundTicketDTO);
                     } else {
                         request.setAttribute("errorMessage", "Không tìm thấy thông tin đặt chỗ với mã đã nhập.");
+                        request.getRequestDispatcher("/WEB-INF/jsp/refund-ticket/refund-ticket.jsp").forward(request, response);
+                        return;
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();

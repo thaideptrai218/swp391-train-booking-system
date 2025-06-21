@@ -245,34 +245,34 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     public InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException {
         String sql = "SELECT \r\n" + //
-                        "    P.FullName AS PassengerFullName,\r\n" + //
-                        "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
-                        "    PT.TypeName AS PassengerType,\r\n" + //
-                        "    ST.TypeName AS SeatTypeName,\r\n" + //
-                        "    S.SeatNumber AS SeatNumber,\r\n" + //
-                        "    C.CoachName AS CoachName,\r\n" + //
-                        "    T.TrainName AS TrainName,\r\n" + //
-                        "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
-                        "    TK.TicketStatus,\r\n" + //
-                        "    TK.Price,\r\n" + //
-                        "    StartStation.StationName AS StartStationName,\r\n" + //
-                        "    EndStation.StationName AS EndStationName\r\n" + //
-                        "\r\n" + //
-                        "FROM Tickets TK\r\n" + //
-                        "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
-                        "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
-                        "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
-                        "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
-                        "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
-                        "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
-                        "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
-                        "\r\n" + //
-                        "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
-                        "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
-                        "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
-                        "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
-                        "\r\n" + //
-                        "WHERE TK.TicketCode = ?;";
+                "    P.FullName AS PassengerFullName,\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                "    PT.TypeName AS PassengerType,\r\n" + //
+                "    ST.TypeName AS SeatTypeName,\r\n" + //
+                "    S.SeatNumber AS SeatNumber,\r\n" + //
+                "    C.CoachName AS CoachName,\r\n" + //
+                "    T.TrainName AS TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                "    TK.TicketStatus,\r\n" + //
+                "    TK.Price,\r\n" + //
+                "    StartStation.StationName AS StartStationName,\r\n" + //
+                "    EndStation.StationName AS EndStationName\r\n" + //
+                "\r\n" + //
+                "FROM Tickets TK\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                "\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "WHERE TK.TicketCode = ?;";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ticketCode);
@@ -302,96 +302,100 @@ public class TicketRepositoryImpl implements TicketRepository {
     }
 
     @Override
-    public CheckInforRefundTicketDTO findInformationRefundTicketDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException {
+    public CheckInforRefundTicketDTO findInformationRefundTicketDetailsByCode(String bookingCode, String phoneNumber,
+            String email) throws SQLException {
         String sql = "SELECT \r\n" + //
-                        "    P.FullName AS PassengerFullName,\r\n" + //
-                        "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
-                        "    TK.TicketCode,\r\n" + //
-                        "    PT.TypeName AS PassengerType,\r\n" + //
-                        "    ST.TypeName AS SeatTypeName,\r\n" + //
-                        "    S.SeatNumber,\r\n" + //
-                        "    C.CoachName,\r\n" + //
-                        "    T.TrainName,\r\n" + //
-                        "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
-                        "    TK.TicketStatus,\r\n" + //
-                        "    TK.Price,\r\n" + //
-                        "    StartStation.StationName AS StartStationName,\r\n" + //
-                        "    EndStation.StationName AS EndStationName,\r\n" + //
-                        "    \r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
-                        "\r\n" + //
-                        "    -- Thông tin hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN 0 \r\n" + //
-                        "    ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
-                        "END AS IsRefundable,\r\n" + //
-                        "\r\n" + //
-                        "CASE \r\n" + //
-                        "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
-                        "    ELSE ISNULL(CP.PolicyName, N'Không áp dụng') \r\n" + //
-                        "END AS RefundPolicy,\r\n" + //
-                        "\r\n" + //
-                        "    -- Tính phí hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                        "            CASE \r\n" + //
-                        "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
-                        "                ELSE CP.FixedFeeAmount\r\n" + //
-                        "            END\r\n" + //
-                        "        ELSE 0\r\n" + //
-                        "    END AS RefundFee,\r\n" + //
-                        "\r\n" + //
-                        "    -- Tính số tiền được hoàn lại\r\n" + //
-                        "    CASE \r\n" + //
-                        "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                        "            CASE \r\n" + //
-                        "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
-                        "                ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
-                        "            END\r\n" + //
-                        "        ELSE 0\r\n" + //
-                        "    END AS RefundAmount,\r\n" + //
-                        "\r\n" + //
-                        "    -- Trạng thái hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
-                        "        WHEN CP.PolicyName IS NULL THEN N'Tàu đã đi không trả vé'\r\n" + //
-                        "        WHEN CP.IsRefundable = 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
-                        "        ELSE N'Được hoàn vé'\r\n" + //
-                        "    END AS RefundStatus,\r\n" + //
-                        "\r\n" + //
-                        "    -- Thông tin người đặt\r\n" + //
-                        "    u.FullName AS UserFullName,\r\n" + //
-                        "    u.Email,\r\n" + //
-                        "    u.IDCardNumber,\r\n" + //
-                        "    u.PhoneNumber\r\n" + //
-                        "\r\n" + //
-                        "FROM Tickets TK\r\n" + //
-                        "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
-                        "JOIN Users u ON B.UserID = u.UserID\r\n" + //
-                        "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
-                        "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
-                        "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
-                        "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
-                        "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
-                        "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
-                        "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
-                        "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
-                        "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
-                        "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
-                        "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
-                        "\r\n" + //
-                        "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
-                        "LEFT JOIN CancellationPolicies CP ON\r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
-                        "    (\r\n" + //
-                        "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
-                        "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
-                        "    )\r\n" + //
-                        "    AND CP.IsActive = 1\r\n" + //
-                        "\r\n" + //
-                        "WHERE \r\n" + //
-                        "    (B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?);";
+                "    P.FullName AS PassengerFullName,\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                "    TK.TicketCode,\r\n" + //
+                "    PT.TypeName AS PassengerType,\r\n" + //
+                "    ST.TypeName AS SeatTypeName,\r\n" + //
+                "    S.SeatNumber,\r\n" + //
+                "    C.CoachName,\r\n" + //
+                "    T.TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                "    TK.TicketStatus,\r\n" + //
+                "    TK.Price,\r\n" + //
+                "    StartStation.StationName AS StartStationName,\r\n" + //
+                "    EndStation.StationName AS EndStationName,\r\n" + //
+                "    \r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN 0 \r\n" + //
+                "    ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
+                "END AS IsRefundable,\r\n" + //
+                "\r\n" + //
+                "CASE \r\n" + //
+                "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
+                "    ELSE ISNULL(CP.PolicyName, N'Không áp dụng') \r\n" + //
+                "END AS RefundPolicy,\r\n" + //
+                "\r\n" + //
+                "    -- Tính phí hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                "            CASE \r\n" + //
+                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0)\r\n"
+                + //
+                "                ELSE CP.FixedFeeAmount\r\n" + //
+                "            END\r\n" + //
+                "        ELSE 0\r\n" + //
+                "    END AS RefundFee,\r\n" + //
+                "\r\n" + //
+                "    -- Tính số tiền được hoàn lại\r\n" + //
+                "    CASE \r\n" + //
+                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                "            CASE \r\n" + //
+                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n"
+                + //
+                "                ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
+                "            END\r\n" + //
+                "        ELSE 0\r\n" + //
+                "    END AS RefundAmount,\r\n" + //
+                "\r\n" + //
+                "    -- Trạng thái hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n"
+                + //
+                "        WHEN CP.PolicyName IS NULL THEN N'Tàu đã đi không trả vé'\r\n" + //
+                "        WHEN CP.IsRefundable = 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
+                "        ELSE N'Được hoàn vé'\r\n" + //
+                "    END AS RefundStatus,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin người đặt\r\n" + //
+                "    u.FullName AS UserFullName,\r\n" + //
+                "    u.Email,\r\n" + //
+                "    u.IDCardNumber,\r\n" + //
+                "    u.PhoneNumber\r\n" + //
+                "\r\n" + //
+                "FROM Tickets TK\r\n" + //
+                "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
+                "JOIN Users u ON B.UserID = u.UserID\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
+                "LEFT JOIN CancellationPolicies CP ON\r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
+                "    (\r\n" + //
+                "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
+                "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
+                "    )\r\n" + //
+                "    AND CP.IsActive = 1\r\n" + //
+                "\r\n" + //
+                "WHERE \r\n" + //
+                "    ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?)) AND TK.TicketStatus != 'Cancelled';";
 
         CheckInforRefundTicketDTO checkInforRefundTicketDTO = null;
         List<RefundTicketDTO> refundTicketDTOs = new ArrayList<>();
@@ -442,34 +446,39 @@ public class TicketRepositoryImpl implements TicketRepository {
             }
         }
 
-        if (refundTicketDTOs != null) {
+        if (!refundTicketDTOs.isEmpty() && checkInforRefundTicketDTO != null) {
             checkInforRefundTicketDTO.setRefundTicketDTOs(refundTicketDTOs);
+            return checkInforRefundTicketDTO;
         }
-        return checkInforRefundTicketDTO;
+        return null;
+
     }
 
     // Main method for testing (optional)
     public static void main(String[] args) {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
         // try {
-        //     System.out.println("Testing TicketRepository...");
-        //     // Example: Find all tickets for BookingID 1
-        //     List<Ticket> ticketsForBooking1 = ticketRepository.findByBookingId(1);
-        //     ticketsForBooking1.forEach(System.out::println);
-        //     InfoPassengerDTO infoPassenger = ticketRepository.findTicketByTicketCode("TK578DA14D68B643719668366273E01817");
-        //     if (infoPassenger != null) {
-        //         System.out.println("InfoPassengerDTO: " + infoPassenger);
-        //     } else {
-        //         System.out.println("No ticket found with the given code.");
-        //     }
+        // System.out.println("Testing TicketRepository...");
+        // // Example: Find all tickets for BookingID 1
+        // List<Ticket> ticketsForBooking1 = ticketRepository.findByBookingId(1);
+        // ticketsForBooking1.forEach(System.out::println);
+        // InfoPassengerDTO infoPassenger =
+        // ticketRepository.findTicketByTicketCode("TK578DA14D68B643719668366273E01817");
+        // if (infoPassenger != null) {
+        // System.out.println("InfoPassengerDTO: " + infoPassenger);
+        // } else {
+        // System.out.println("No ticket found with the given code.");
+        // }
 
-        //     // Add more specific tests as needed
+        // // Add more specific tests as needed
         // } catch (SQLException e) {
-        //     e.printStackTrace();
+        // e.printStackTrace();
         // }
 
         try {
-            CheckInforRefundTicketDTO checkInforRefundTicketDTO = ticketRepository.findInformationRefundTicketDetailsByCode("BK588C13461874490F905DD43C808A3ECA", "0912345678", "test@example.com");
+            CheckInforRefundTicketDTO checkInforRefundTicketDTO = ticketRepository
+                    .findInformationRefundTicketDetailsByCode("BK588C13461874490F905DD43C808A3ECA", "0912345678",
+                            "test@example.com");
             if (checkInforRefundTicketDTO != null) {
                 System.out.println("CheckInforRefundTicketDTO: " + checkInforRefundTicketDTO);
             } else {
@@ -478,7 +487,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         } catch (SQLException e) {
             e.printStackTrace(); // Log the error
         }
-        
+
     }
 
     @Override
