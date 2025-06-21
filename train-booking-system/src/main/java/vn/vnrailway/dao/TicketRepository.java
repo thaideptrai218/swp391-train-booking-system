@@ -2,6 +2,7 @@ package vn.vnrailway.dao;
 
 import vn.vnrailway.dto.CheckInforRefundTicketDTO;
 import vn.vnrailway.dto.InfoPassengerDTO;
+import vn.vnrailway.dto.RefundRequestDTO;
 import vn.vnrailway.model.Ticket;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,6 +23,7 @@ public interface TicketRepository {
 
     List<Ticket> findByTripIdAndSeatId(int tripId, int seatId) throws SQLException; // Check if a seat on a trip is
                                                                                     // booked
+    List<RefundRequestDTO> getAllPendingRefundRequests() throws SQLException;
 
     CheckInforRefundTicketDTO findInformationRefundTicketDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException;
 
@@ -36,4 +38,5 @@ public interface TicketRepository {
     long getTotalTicketsSold() throws SQLException;
 
     double getTotalRevenue() throws SQLException;
+    void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
 }

@@ -60,12 +60,15 @@ public class RefundTicketServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại hoặc email.");
             } else {
                 try {
-                    CheckInforRefundTicketDTO checkInforRefundTicketDTO = ticketRepository.findInformationRefundTicketDetailsByCode(bookingCode, phoneNumber, email);
+                    CheckInforRefundTicketDTO checkInforRefundTicketDTO = ticketRepository
+                            .findInformationRefundTicketDetailsByCode(bookingCode, phoneNumber, email);
                     if (checkInforRefundTicketDTO != null) {
+
                         request.setAttribute("checkInforRefundTicketDTO", checkInforRefundTicketDTO);
                     } else {
                         request.setAttribute("errorMessage", "Không tìm thấy thông tin đặt chỗ với mã đã nhập.");
-                        request.getRequestDispatcher("/WEB-INF/jsp/refund-ticket/refund-ticket.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/jsp/refund-ticket/refund-ticket.jsp").forward(request,
+                                response);
                         return;
                     }
                 } catch (SQLException e) {

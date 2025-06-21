@@ -216,7 +216,7 @@ public class ConfirmRefundTicketServlet extends HttpServlet {
             mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
 
             // Set subject with UTF-8 encoding
-            mimeMessage.setSubject(MimeUtility.encodeText("Mã OTP Đặt Lại Mật Khẩu - Vetaure", "UTF-8", "B"));
+            mimeMessage.setSubject(MimeUtility.encodeText("Mã OTP Xác Nhận Hủy Vé - Vetaure", "UTF-8", "B"));
 
             // Create HTML message content with proper encoding and styling
             String messageContent = String.format(
@@ -269,6 +269,10 @@ public class ConfirmRefundTicketServlet extends HttpServlet {
             session.setAttribute("email", email);
             session.setAttribute("otpTimestamp", System.currentTimeMillis());
 
+            String[] ticketCodes = request.getParameterValues("ticketCodes");
+            session.setAttribute("ticketCodes", ticketCodes);
+
+            request.setAttribute(messageContent, ticketCodes);
             // Chuyển hướng đến trang nhập OTP
             response.sendRedirect(request.getContextPath() + "/confirmOTP");
 

@@ -128,12 +128,27 @@
                       </td>
                       <td>
                         <c:choose>
-                          <c:when test="${infoPassenger.ticketStatus == 'Valid'}">Hợp lệ</c:when>
-                          <c:when test="${infoPassenger.ticketStatus == 'Used'}">Đã sử dụng</c:when>
-                          <c:when test="${infoPassenger.ticketStatus == 'Cancelled'}">Đã hủy</c:when>
-                          <c:when test="${infoPassenger.ticketStatus == 'Expired'}">Đã hết hạn</c:when>
-                          <c:otherwise>Không xác định</c:otherwise>
-                        </c:choose>
+                              <c:when test="${infoPassenger.ticketStatus == 'Valid'}">
+                                <span style="color: #28a745; font-weight: bold;">Hợp lệ</span> <!-- xanh lá đẹp -->
+                              </c:when>
+                              <c:when test="${infoPassenger.ticketStatus == 'Used'}">
+                                <span style="color: #007bff; font-weight: bold;">Đã sử dụng</span>
+                                <!-- xanh dương tươi -->
+                              </c:when>
+                              <c:when test="${infoPassenger.ticketStatus == 'Processing'}">
+                                <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
+                              </c:when>
+                              <c:when test="${infoPassenger.ticketStatus == 'Cancelled'}">
+                                <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                              </c:when>
+                              <c:when test="${infoPassenger.ticketStatus == 'Expired'}">
+                                <span style="color: #6c757d; font-weight: bold;">Đã hết hạn</span>
+                                <!-- xám trung tính -->
+                              </c:when>
+                              <c:otherwise>
+                                <span style="color: #343a40; font-weight: bold;">Không xác định</span> <!-- đen xám -->
+                              </c:otherwise>
+                            </c:choose>
                       </td>
                     </tr>
                   </tbody>
