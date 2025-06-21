@@ -52,11 +52,22 @@ public class CustomerProfileServlet extends HttpServlet {
                 if (dateOfBirth != null) {
                     date = Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
-                request.setAttribute("dateOfBirth", date);
-                request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
-            } else {
-                // User not found in DB, possibly an old session or data inconsistency
-                session.invalidate(); // Invalidate session
+  request.setAttribute("dateOfBirth", date);
+
+  String avatarURL = "";
+  if ("Male".equals(user.getGender())) {
+  avatarURL = "${pageContext.request.contextPath}/assets/images/avatars/male/default.png";
+  } else if ("Female".equals(user.getGender())) {
+  avatarURL = "${pageContext.request.contextPath}/assets/images/avatars/female/default.png";
+  } else {
+  avatarURL = "https://bootdey.com/img/Content/avatar/avatar7.png"; // Default avatar
+  }
+  request.setAttribute("avatarURL", avatarURL);
+
+  request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
+  } else {
+  // User not found in DB, possibly an old session or data inconsistency
+  session.invalidate(); // Invalidate session
                 response.sendRedirect(request.getContextPath() + "/login.jsp?error=userNotFound");
             }
         } catch (SQLException e) {
