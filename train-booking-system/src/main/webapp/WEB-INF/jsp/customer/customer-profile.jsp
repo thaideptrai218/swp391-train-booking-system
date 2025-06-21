@@ -119,7 +119,7 @@
                       <h6 class="mb-0">Ngày sinh</h6>
                     </div>
                     <div class="col-sm-9 text-secondary">
-                      <fmt:formatDate value="${user.dateOfBirth}" pattern="yyyy-MM-dd" />
+                      <fmt:formatDate value="${dateOfBirth}" pattern="yyyy-MM-dd" />
                     </div>
                   </div>
                   <hr>

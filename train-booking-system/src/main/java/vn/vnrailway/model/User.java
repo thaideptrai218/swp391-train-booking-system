@@ -173,12 +173,12 @@ public class User implements Serializable {
         return gender;
     }
 
-    public void setGender(String gender) {
-        if (gender == null || gender.equals("Male") || gender.equals("Female") || gender.equals("Other")) {
-            this.gender = gender;
-        } else {
-            throw new IllegalArgumentException("Gender must be 'Male', 'Female', 'Other', or null");
-        }
+  public void setGender(String gender) {
+  if (gender == null || gender.equals("Male") || gender.equals("Female") || gender.equals("Other") || gender.equals("Nam") || gender.equals("Nữ") || gender.equals("Khác")) {
+  this.gender = gender;
+  } else {
+  throw new IllegalArgumentException("Gender must be 'Male', 'Female', 'Other', or null");
+  }
     }
 
     public String getAddress() {

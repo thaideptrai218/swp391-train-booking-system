@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
+import java.time.ZoneId;
 
 @WebServlet("/customerprofile")
 public class CustomerProfileServlet extends HttpServlet {
@@ -44,6 +46,13 @@ public class CustomerProfileServlet extends HttpServlet {
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 request.setAttribute("user", user);
+                // Convert LocalDate to Date for JSP
+                LocalDate dateOfBirth = user.getDateOfBirth();
+                Date date = null;
+                if (dateOfBirth != null) {
+                    date = Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                }
+                request.setAttribute("dateOfBirth", date);
                 request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
             } else {
                 // User not found in DB, possibly an old session or data inconsistency
