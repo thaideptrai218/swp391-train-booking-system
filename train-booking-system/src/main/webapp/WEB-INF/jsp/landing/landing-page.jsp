@@ -67,26 +67,25 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
                           >${sessionScope.loggedInUser.fullName}</span
                         >
                       </div>
-<a
-                        href="${pageContext.request.contextPath}/customerprofile"
-                        class="dropdown-item"
-                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/about-us-male.png" alt="about-us-male"/></i>   Xem tất cả trang cá nhân</a
-                      >
-                      <a href="#" class="dropdown-item"
-                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/users-settings.png" alt="users-settings"/>
-                      </i>   Cài đặt và quyền riêng tư</a>
+                      <a href="${pageContext.request.contextPath}/customerprofile" class="dropdown-item">
+                        <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/about-us-male.png" alt="about-us-male"/> -->
+                      </i>   Tài Khoản</a>
 
-                      <a href="#" class="dropdown-item"
-                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/online-support.png" alt="online-support"/>
+                      <a href="${pageContext.request.contextPath}/feedback" class="dropdown-item">
+                        <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/users-settings.png" alt="users-settings"/> -->
+                      </i>   Góp ý</a>
+
+                      <a href="#" class="dropdown-item">
+                        <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/online-support.png" alt="online-support"/> -->
                       </i>   Trợ giúp và hỗ trợ</a>
 
-                      <a href="#" class="dropdown-item"
-                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/>
-                      </i>   Màn hình & trợ năng</a>
+                      <a href="#" class="dropdown-item">
+                        <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/> -->
+                      </i>   Mua thẻ VIP</a>
 
-                      <a href="#" class="dropdown-item"
-                      ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/>
-                    </i>   Đóng góp ý kiến</a>
+                      <a href="#" class="dropdown-item">
+                        <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/> -->
+                    </i>   Giỏ vé</a>
                       
                       <a href="${pageContext.request.contextPath}/logout"
                         class="dropdown-item logout-item"
