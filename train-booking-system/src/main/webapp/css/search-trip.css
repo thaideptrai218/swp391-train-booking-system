@@ -1,13 +1,3 @@
-/* General Page Styles */
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    margin: 0;
-    padding: 40px; /* Increased padding for better spacing on larger screens */
-    text-align: center;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-}
-
 /* Wrapper for the entire search trip content */
 .search-trip-wrapper {
     margin: 0 auto;

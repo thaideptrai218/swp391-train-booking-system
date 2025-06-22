@@ -6,8 +6,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.sql.SQLException;
 import java.util.Optional; // Added for Optional
+import java.util.ArrayList; // For initializing empty list in case of error
+// List is already imported by other List usage, but good to be explicit if needed elsewhere
 
 import vn.vnrailway.dto.TripSearchResultDTO;
+import vn.vnrailway.model.PassengerType;
+import vn.vnrailway.dao.PassengerTypeRepository;
+import vn.vnrailway.dao.impl.PassengerTypeRepositoryImpl;
 import vn.vnrailway.service.TripService;
 import vn.vnrailway.service.impl.TripServiceImpl;
 import vn.vnrailway.dao.StationRepository; // Added
@@ -28,12 +33,14 @@ public class SearchTripServlet extends HttpServlet {
 
     private TripService tripService;
     private StationRepository stationRepository; // Added
+    private PassengerTypeRepository passengerTypeRepository;
 
     @Override
     public void init() throws ServletException {
         super.init();
         tripService = new TripServiceImpl();
         stationRepository = new StationRepositoryImpl(); // Added initialization
+        passengerTypeRepository = new PassengerTypeRepositoryImpl();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -76,6 +83,19 @@ public class SearchTripServlet extends HttpServlet {
             }
         }
 
+        // Add this block to fetch passenger types
+        try {
+            List<PassengerType> passengerTypes = passengerTypeRepository.findAllOrderByDiscountPercentage();
+            request.setAttribute("passengerTypes", passengerTypes);
+        } catch (SQLException e) {
+            System.err.println("SearchTripServlet: SQL error fetching passenger types: " + e.getMessage());
+            e.printStackTrace(); // Consider using a proper logger
+            request.setAttribute("passengerTypes", new ArrayList<PassengerType>()); // Set an empty list to avoid JSP
+                                                                                    // errors
+            // Optionally, set an error message for the user, though this page is primarily
+            // for search input
+            // request.setAttribute("errorMessage", "Lỗi tải danh sách loại hành khách.");
+        }
         request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
     }
 
@@ -107,18 +127,46 @@ public class SearchTripServlet extends HttpServlet {
             if (returnDateStr != null && !returnDateStr.trim().isEmpty()) {
                 returnLocalDate = LocalDate.parse(returnDateStr, inputDateFormatter);
                 if (returnLocalDate.isBefore(departureLocalDate)) {
+                    try {
+                        List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
+                        request.setAttribute("passengerTypes", passengerTypes);
+                    } catch (SQLException sqlEx) {
+                        System.err.println("SearchTripServlet (doPost error path): SQL error fetching passenger types: "
+                                + sqlEx.getMessage());
+                        sqlEx.printStackTrace();
+                        request.setAttribute("passengerTypes", new ArrayList<PassengerType>());
+                    }
                     request.setAttribute("errorMessage", "Ngày về không thể trước ngày đi.");
                     request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
                     return;
                 }
             }
         } catch (NumberFormatException e) {
+            try {
+                List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
+                request.setAttribute("passengerTypes", passengerTypes);
+            } catch (SQLException sqlEx) {
+                System.err.println("SearchTripServlet (doPost error path): SQL error fetching passenger types: "
+                        + sqlEx.getMessage());
+                sqlEx.printStackTrace();
+                request.setAttribute("passengerTypes", new ArrayList<PassengerType>());
+            }
             request.setAttribute("errorMessage", "ID ga không hợp lệ.");
             request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
             return;
         } catch (DateTimeParseException e) {
+            try {
+                List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
+                request.setAttribute("passengerTypes", passengerTypes);
+            } catch (SQLException sqlEx) {
+                System.err.println("SearchTripServlet (doPost error path): SQL error fetching passenger types: "
+                        + sqlEx.getMessage());
+                sqlEx.printStackTrace();
+                request.setAttribute("passengerTypes", new ArrayList<PassengerType>());
+            }
             request.setAttribute("errorMessage", "Định dạng ngày không hợp lệ. Vui lòng sử dụng dd/MM/yyyy.");
-            request.getRequestDispatcher("/WEB-INF/jsp/trip/searchTrip.jsp").forward(request, response);
+            // Corrected path
+            request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
             return;
         }
 
@@ -159,9 +207,27 @@ public class SearchTripServlet extends HttpServlet {
             // Provide a user-friendly error message
             request.setAttribute("errorMessage",
                     "Đã xảy ra lỗi khi tìm kiếm chuyến tàu. Vui lòng thử lại. Chi tiết: " + e.getMessage());
+            try {
+                List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
+                request.setAttribute("passengerTypes", passengerTypes);
+            } catch (SQLException sqlEx) {
+                System.err.println("SearchTripServlet (doPost error path): SQL error fetching passenger types: "
+                        + sqlEx.getMessage());
+                sqlEx.printStackTrace();
+                request.setAttribute("passengerTypes", new ArrayList<PassengerType>());
+            }
             request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace(); // Catch any other unexpected errors
+            try {
+                List<PassengerType> passengerTypes = passengerTypeRepository.findAll();
+                request.setAttribute("passengerTypes", passengerTypes);
+            } catch (SQLException sqlEx) {
+                System.err.println("SearchTripServlet (doPost error path): SQL error fetching passenger types: "
+                        + sqlEx.getMessage());
+                sqlEx.printStackTrace();
+                request.setAttribute("passengerTypes", new ArrayList<PassengerType>());
+            }
             request.setAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
         }

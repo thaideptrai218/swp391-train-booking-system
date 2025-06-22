@@ -38,6 +38,97 @@ body {
     line-height: 1.6;
 }
 
+.nav-profile-icon {
+    font-size: 1.2em; /* Adjust size for a better fit within the circle */
+    text-decoration: none;
+    color: #fff; /* White icon color */
+    background-color: var(--color-primary); /* Blue background for the circle */
+    width: 36px; /* Fixed width for a circle */
+    height: 36px; /* Fixed height for a circle */
+    border-radius: 50%; /* Makes it a circle */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0; /* Remove padding if fixed size is used */
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 0 2px #fff; /* White border around the circle */
+}
+
+.nav-profile-icon:hover {
+    background-color: var(--color-primary-dark); /* Darker blue on hover */
+    box-shadow: 0 0 0 2px #ddd; /* Slightly darker border on hover */
+}
+
+/* Profile Dropdown Styles */
+.profile-dropdown-container {
+    position: relative;
+    display: inline-block; /* Or 'block' if it's a direct child of ul */
+}
+
+.profile-dropdown-menu {
+    display: none; /* Hidden by default, shown by JS */
+    position: absolute;
+    top: 100%; /* Position below the icon */
+    right: 0; /* Align to the right of the container */
+    background-color: #2c2c2c; /* Dark background like the image */
+    color: #e4e6eb; /* Light text color */
+    min-width: 280px; /* Adjust as needed */
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1001; /* Ensure it's above other nav items */
+    padding: 8px 0;
+    margin-top: 8px; /* Small gap between icon and dropdown */
+}
+
+.profile-dropdown-menu .dropdown-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4b4c4e; /* Separator */
+    margin-bottom: 8px;
+}
+
+.profile-dropdown-menu .dropdown-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.profile-dropdown-menu .dropdown-username {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.profile-dropdown-menu .dropdown-item {
+    display: flex; /* Use flex for icon and text alignment */
+    align-items: center;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #e4e6eb; /* Light text color */
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.profile-dropdown-menu .dropdown-item:hover {
+    background-color: #3a3b3c; /* Hover effect */
+}
+
+.profile-dropdown-menu .dropdown-item .arrow-right {
+    margin-left: auto; /* Pushes arrow to the right */
+    font-size: 0.8em;
+    color: #a0a3a7;
+}
+
+.profile-dropdown-menu .logout-item {
+    border-top: 1px solid #4b4c4e; /* Separator above logout */
+    margin-top: 8px;
+    padding-top: 12px; /* More padding for logout */
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
