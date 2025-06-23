@@ -16,12 +16,12 @@ import java.util.List;
 
 @WebServlet(name = "CheckRefundTicketServlet", urlPatterns = { "/checkRefundTicket" })
 public class CheckRefundTicketServlet extends HttpServlet {
-     private TicketRepository ticketRepository = new TicketRepositoryImpl();
+    private TicketRepository ticketRepository = new TicketRepositoryImpl();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         List<RefundRequestDTO> refundRequests;
         try {
             refundRequests = ticketRepository.getAllPendingRefundRequests();
@@ -30,9 +30,9 @@ public class CheckRefundTicketServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/jsp/staff/refund-requests.jsp").forward(request, response);
             } else {
                 request.setAttribute("refundRequests", refundRequests);
-            request.getRequestDispatcher("/WEB-INF/jsp/staff/refund-requests.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/staff/refund-requests.jsp").forward(request, response);
             }
-            
+
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
