@@ -25,6 +25,9 @@
         </head>
 
         <body>
+            <li>
+                <a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
+            </li>
             <h2>Danh sách yêu cầu hoàn vé</h2>
 
             <c:if test="${not empty message}">
@@ -61,8 +64,8 @@
                             <td>${req.userFullName} (${req.phoneNumber})</td>
                             <td>
                                 <!-- chỉnh sửa ở chuyển tiền, sau đó xóa dữ liệu trong bảng mới là TempRefundRequests, lưu vào bảng Refunds -->
-                                <form method="post">
-                                    <input type="hidden" name="refundId" value="${req.refundID}" />
+                                <form method="post" action="refundProcessing">
+                                    <input type="hidden" name="ticketCode" value="${req.ticketCode}" />
                                     <button type="submit" name="action" value="approve">Chấp nhận</button>
                                     <button type="submit" name="action" value="reject">Từ chối</button>
                                 </form>
