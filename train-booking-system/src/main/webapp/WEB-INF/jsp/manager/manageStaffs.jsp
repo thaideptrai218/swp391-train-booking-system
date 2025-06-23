@@ -2,11 +2,11 @@
 Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manage Staffs</title>
+    <title>Quản lý nhân viên</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -99,18 +99,18 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         </c:if>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h1>Manage Staff Users</h1>
+          <h1>Quản lý nhân viên</h1>
           <div class="d-flex align-items-center">
             <div class="search-container mr-2">
               <input
                 type="text"
                 id="staffSearchInput"
                 class="form-control form-control-sm"
-                placeholder="Search ID, Name, Email, Phone, ID Card..."
+                placeholder="Tìm kiếm ID, Tên, Email, Điện thoại, CCCD..."
               />
             </div>
             <button class="btn btn-success btn-sm" onclick="openAddModal()">
-              <i class="fas fa-plus"></i> Add New Staff
+              <i class="fas fa-plus"></i> Thêm nhân viên mới
             </button>
           </div>
         </div>
@@ -120,13 +120,13 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <thead class="thead-dark">
               <tr>
                 <th>ID</th>
-                <th>Full Name</th>
+                <th>Họ và tên</th>
                 <th>Email</th>
-                <th>Phone Number</th>
-                <th>ID Card Number</th>
-                <th>Role</th>
-                <th>Active</th>
-                <th>Actions</th>
+                <th>Số điện thoại</th>
+                <th>Số CCCD</th>
+                <th>Vai trò</th>
+                <th>Hoạt động</th>
+                <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -141,10 +141,10 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                   <td>
                     <c:choose>
                       <c:when test="${user.active}">
-                        <span class="badge badge-success">Yes</span>
+                        <span class="badge badge-success">Có</span>
                       </c:when>
                       <c:otherwise>
-                        <span class="badge badge-danger">No</span>
+                        <span class="badge badge-danger">Không</span>
                       </c:otherwise>
                     </c:choose>
                   </td>
@@ -153,20 +153,22 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                       class="btn btn-sm btn-primary"
                       onclick="openEditModal('${user.userID}')"
                     >
-                      <i class="fas fa-edit"></i> Edit
+                      <i class="fas fa-edit"></i> Sửa
                     </button>
                     <button
                       class="btn btn-sm btn-danger"
                       onclick="deleteStaff('${user.userID}')"
                     >
-                      <i class="fas fa-trash"></i> Delete
+                      <i class="fas fa-trash"></i> Xóa
                     </button>
                   </td>
                 </tr>
               </c:forEach>
               <c:if test="${empty staffUsers}">
                 <tr>
-                  <td colspan="8" class="text-center">No staff users found.</td>
+                  <td colspan="8" class="text-center">
+                    Không tìm thấy nhân viên nào.
+                  </td>
                 </tr>
               </c:if>
             </tbody>
@@ -194,7 +196,9 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <input type="hidden" name="action" id="formAction" />
             <input type="hidden" name="userID" id="userID" />
             <div class="modal-header">
-              <h5 class="modal-title" id="staffModalLabel">Staff Details</h5>
+              <h5 class="modal-title" id="staffModalLabel">
+                Chi tiết nhân viên
+              </h5>
               <button
                 type="button"
                 class="close"
@@ -207,7 +211,7 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <div class="modal-body">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label for="fullName">Full Name:</label>
+                  <label for="fullName">Họ và tên:</label>
                   <input
                     type="text"
                     class="form-control"
@@ -229,7 +233,7 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               </div>
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label for="phoneNumber">Phone Number:</label>
+                  <label for="phoneNumber">Số điện thoại:</label>
                   <input
                     type="text"
                     class="form-control"
@@ -237,39 +241,39 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                     name="phoneNumber"
                     required
                     pattern="\d{10}"
-                    title="Phone number must be 10 digits."
+                    title="Số điện thoại phải có 10 chữ số."
                   />
                 </div>
                 <div class="form-group col-md-6">
-                  <label for="idCardNumber">ID Card Number:</label>
+                  <label for="idCardNumber">Số CCCD:</label>
                   <input
                     type="text"
                     class="form-control"
                     id="idCardNumber"
                     name="idCardNumber"
                     pattern="\d{12}"
-                    title="ID Card number must be 12 digits."
+                    title="Số CCCD phải có 12 chữ số."
                   />
                 </div>
               </div>
               <!-- Password field removed for edit mode by manager -->
               <!-- The JavaScript will need to handle showing this field only for 'add' mode -->
               <div class="form-group" id="passwordFieldContainer">
-                <label for="password">Password:</label>
+                <label for="password">Mật khẩu:</label>
                 <input
                   type="password"
                   class="form-control"
                   id="password"
                   name="password"
-                  placeholder="Enter password for new staff"
+                  placeholder="Nhập mật khẩu cho nhân viên mới"
                 />
               </div>
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label for="role">Role:</label>
+                  <label for="role">Vai trò:</label>
                   <select id="role" name="role" class="form-control" required>
-                    <option value="Staff">Staff</option>
-                    <option value="Manager">Manager</option>
+                    <option value="Staff">Nhân viên</option>
+                    <option value="Manager">Quản lý</option>
                   </select>
                 </div>
                 <div class="form-group col-md-6 d-flex align-items-center">
@@ -283,7 +287,7 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                       checked
                     />
                     <label class="form-check-label" for="isActive"
-                      >Active</label
+                      >Hoạt động</label
                     >
                   </div>
                 </div>
@@ -295,9 +299,11 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                 class="btn btn-secondary"
                 data-dismiss="modal"
               >
-                Close
+                Đóng
               </button>
-              <button type="submit" class="btn btn-primary">Save Staff</button>
+              <button type="submit" class="btn btn-primary">
+                Lưu nhân viên
+              </button>
             </div>
           </form>
         </div>
@@ -321,7 +327,7 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         const tableBody = document.querySelector(".table-responsive tbody");
         const allRows = Array.from(tableBody.querySelectorAll("tr"));
         const noStaffRowHTML =
-          '<tr><td colspan="8" class="text-center">No staff users match your search.</td></tr>';
+          '<tr><td colspan="8" class="text-center">Không có nhân viên nào khớp với tìm kiếm của bạn.</td></tr>';
         const originalNoStaffRow = tableBody.querySelector('td[colspan="8"]');
 
         if (searchInput) {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.ArrayList; // Added for stationsOrder list
 import java.util.Map; // Added for creating response maps
 import java.util.Optional; // Added for Optional type
 import com.fasterxml.jackson.core.type.TypeReference; // Added for Jackson
@@ -268,11 +267,6 @@ public class ManageRoutesServlet extends HttpServlet {
             return;
         }
 
-        // Fetch station names to create the route name
-        // This requires a method in StationRepository or getting all stations and
-        // filtering
-        // For simplicity, assuming routeRepository can provide station details or we
-        // fetch all and find
         List<Station> allStations = routeRepository.getAllStations(); // Already fetched in listRoutesAndStations
         String departureStationName = allStations.stream()
                 .filter(s -> s.getStationID() == departureStationId)
@@ -290,7 +284,7 @@ public class ManageRoutesServlet extends HttpServlet {
         // Check if a route with this name already exists
         Optional<Route> existingRouteOpt = routeRepository.findByRouteName(routeName);
         if (existingRouteOpt.isPresent()) {
-            request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồnS tại.");
+            request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồn tại.");
             listRoutesAndStations(request, response);
             return;
         }

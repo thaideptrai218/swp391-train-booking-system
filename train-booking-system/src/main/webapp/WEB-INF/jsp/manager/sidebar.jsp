@@ -1,5 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %> <%@ taglib
-prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" pageEncoding="UTF-8" %> <%@ taglib prefix="c"
+uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!-- Font Awesome CDN -->
 <link
@@ -23,7 +23,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <p><strong>Vai Trò:</strong> <c:out value="${loggedInUser.role}" /></p>
   </c:if>
   <c:if test="${empty loggedInUser}">
-    <p>User information not available.</p>
+    <p>Thông tin người dùng không có sẵn.</p>
   </c:if>
 
   <!-- Add other sidebar links/content here as needed -->
@@ -51,7 +51,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     </li>
     <li>
       <a href="${pageContext.request.contextPath}/manage-trains-seats">
-        <i class="fas fa-building"></i> Quản Lý Tàu và Ghế Ngồi
+        <i class="fas fa-building"></i> Quản Lý Tàu và Ghế
       </a>
     </li>
     <li>

@@ -96,6 +96,7 @@ public class RoleFilter implements Filter {
                     path.equals("/manageTrips") ||
                     path.equals("/manageRoutes") ||
                     path.equals("/manageStations") ||
+                    path.equals("/managePrice") ||
                     path.equals("/manageStaffs") ||
                     path.equals("/routeDetail") ||
                     path.equals("/tripDetail") ||

@@ -12,16 +12,40 @@ import vn.vnrailway.dto.TripStationInfoDTO;
 import java.sql.SQLException;
 import java.util.List;
 import java.math.BigDecimal; // Import BigDecimal
+import vn.vnrailway.model.Trip;
+import java.util.Optional;
+import vn.vnrailway.dao.TripStationRepository;
+import vn.vnrailway.dao.impl.TripStationRepositoryImpl;
+import java.time.LocalDateTime;
+import vn.vnrailway.dao.RouteRepository;
+import vn.vnrailway.dao.TrainRepository;
+import vn.vnrailway.dao.TrainTypeRepository;
+import vn.vnrailway.dao.impl.RouteRepositoryImpl;
+import vn.vnrailway.dao.impl.TrainRepositoryImpl;
+import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl;
+import vn.vnrailway.dto.RouteStationDetailDTO;
+import vn.vnrailway.model.Train;
+import vn.vnrailway.model.TrainType;
+import java.math.RoundingMode;
+import java.util.Comparator;
 
 @WebServlet("/tripDetail")
 public class TripDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TripRepository tripRepository;
+    private TripStationRepository tripStationRepository;
+    private RouteRepository routeRepository;
+    private TrainRepository trainRepository;
+    private TrainTypeRepository trainTypeRepository;
 
     @Override
     public void init() throws ServletException {
         super.init();
         tripRepository = new TripRepositoryImpl();
+        tripStationRepository = new TripStationRepositoryImpl();
+        routeRepository = new RouteRepositoryImpl();
+        trainRepository = new TrainRepositoryImpl();
+        trainTypeRepository = new TrainTypeRepositoryImpl();
     }
 
     @Override
@@ -35,8 +59,44 @@ public class TripDetailServlet extends HttpServlet {
                 List<TripStationInfoDTO> tripStationDetails = tripRepository.findTripStationDetailsByTripId(tripId);
 
                 if (tripStationDetails != null && !tripStationDetails.isEmpty()) {
+
+                    TripStationInfoDTO firstStation = tripStationDetails.get(0);
+                    if (firstStation.getScheduledDepartureDate() != null
+                            && firstStation.getScheduledDepartureTime() != null) {
+                        LocalDateTime previousDepartureDateTime = LocalDateTime
+                                .of(firstStation.getScheduledDepartureDate(), firstStation.getScheduledDepartureTime());
+                        BigDecimal previousEstimateTimeHours = firstStation.getEstimateTime() != null
+                                ? firstStation.getEstimateTime()
+                                : BigDecimal.ZERO;
+
+                        for (int i = 1; i < tripStationDetails.size(); i++) {
+                            TripStationInfoDTO currentStation = tripStationDetails.get(i);
+                            BigDecimal currentEstimateTimeHours = currentStation.getEstimateTime();
+                            Integer defaultStopTimeMinutes = currentStation.getDefaultStopTime();
+                            if (defaultStopTimeMinutes == null) {
+                                defaultStopTimeMinutes = 0;
+                            }
+
+                            if (currentEstimateTimeHours != null) {
+                                BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours
+                                        .subtract(previousEstimateTimeHours);
+                                long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
+
+                                LocalDateTime arrivalAtCurrentStation = previousDepartureDateTime
+                                        .plusSeconds(travelTimeSeconds);
+                                LocalDateTime departureFromCurrentStation = arrivalAtCurrentStation
+                                        .plusMinutes(defaultStopTimeMinutes);
+
+                                currentStation.setScheduledDepartureDate(departureFromCurrentStation.toLocalDate());
+                                currentStation.setScheduledDepartureTime(departureFromCurrentStation.toLocalTime());
+
+                                previousDepartureDateTime = departureFromCurrentStation;
+                                previousEstimateTimeHours = currentEstimateTimeHours;
+                            }
+                        }
+                    }
+
                     request.setAttribute("tripStationDetails", tripStationDetails);
-                    // Optionally, set the tripId itself if needed in the JSP for a header or title
                     request.setAttribute("tripIdForDetail", tripId);
                 } else {
                     request.setAttribute("message", "No station details found for Trip ID: " + tripId);
@@ -45,7 +105,6 @@ public class TripDetailServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid Trip ID format: " + tripIdStr);
             } catch (SQLException e) {
                 request.setAttribute("errorMessage", "Database error retrieving trip station details.");
-                // Log the exception for server-side debugging
                 e.printStackTrace();
             }
         } else {
@@ -59,106 +118,104 @@ public class TripDetailServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String tripIdStr = request.getParameter("tripId");
-        String stationIdStr = request.getParameter("stationId");
         String dateStr = request.getParameter("scheduledDepartureDate");
         String timeStr = request.getParameter("scheduledDepartureTime");
-        String originalTripIdForRedirect = request.getParameter("originalTripId"); // To redirect back to the correct
-                                                                                   // trip detail
-
-        if (originalTripIdForRedirect == null || originalTripIdForRedirect.trim().isEmpty()) {
-            originalTripIdForRedirect = tripIdStr; // Fallback if not passed separately
-        }
 
         try {
             int tripId = Integer.parseInt(tripIdStr);
-            // int stationId = Integer.parseInt(stationIdStr); // stationId from request is
-            // for the first station, not needed for loop logic directly
-            java.time.LocalDate firstStationDepartureDate = java.time.LocalDate.parse(dateStr);
-            java.time.LocalTime firstStationDepartureTime = java.time.LocalTime.parse(timeStr);
-            java.time.LocalDateTime firstStationActualDeparture = java.time.LocalDateTime.of(firstStationDepartureDate,
-                    firstStationDepartureTime);
+            LocalDateTime newDepartureDateTime = LocalDateTime.of(java.time.LocalDate.parse(dateStr),
+                    java.time.LocalTime.parse(timeStr));
 
+            Optional<Trip> tripOpt = tripRepository.findById(tripId);
+            if (tripOpt.isEmpty()) {
+                throw new ServletException("Trip not found with ID: " + tripId);
+            }
+            Trip trip = tripOpt.get();
+            trip.setDepartureDateTime(newDepartureDateTime);
+
+            // Recalculate arrival time
+            Optional<Train> trainOpt = trainRepository.findById(trip.getTrainID());
+            if (trainOpt.isEmpty()) {
+                throw new ServletException("Train not found with ID: " + trip.getTrainID());
+            }
+            Train train = trainOpt.get();
+            Optional<TrainType> trainTypeOpt = trainTypeRepository.findById(train.getTrainTypeID());
+            if (trainTypeOpt.isEmpty()) {
+                throw new ServletException("TrainType not found with ID: " + train.getTrainTypeID());
+            }
+            TrainType trainType = trainTypeOpt.get();
+            BigDecimal averageVelocity = trainType.getAverageVelocity();
+            if (averageVelocity == null || averageVelocity.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ServletException("Average velocity for train type is not valid.");
+            }
+            List<RouteStationDetailDTO> routeStations = routeRepository.findStationDetailsByRouteId(trip.getRouteID());
+            if (routeStations == null || routeStations.isEmpty()) {
+                throw new ServletException("No stations found for route.");
+            }
+            RouteStationDetailDTO lastRouteStation = routeStations.stream()
+                    .max(Comparator.comparing(RouteStationDetailDTO::getDistanceFromStart,
+                            Comparator.nullsLast(BigDecimal::compareTo)))
+                    .orElse(null);
+            if (lastRouteStation == null || lastRouteStation.getDistanceFromStart() == null) {
+                throw new ServletException("Could not determine the last station or its distance.");
+            }
+            BigDecimal distanceToLastStation = lastRouteStation.getDistanceFromStart();
+            BigDecimal travelTimeHoursDecimal = distanceToLastStation.divide(averageVelocity, 4, RoundingMode.HALF_UP);
+            long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
+            LocalDateTime newArrivalDateTime = newDepartureDateTime.plusSeconds(travelTimeSeconds);
+            trip.setArrivalDateTime(newArrivalDateTime);
+
+            tripRepository.update(trip);
+
+            // Update trip stations
             List<TripStationInfoDTO> stationDetails = tripRepository.findTripStationDetailsByTripId(tripId);
+            if (stationDetails != null && !stationDetails.isEmpty()) {
+                LocalDateTime previousDepartureDateTime = newDepartureDateTime;
+                BigDecimal previousEstimateTimeHours = BigDecimal.ZERO;
 
-            if (stationDetails == null || stationDetails.isEmpty()) {
-                request.getSession().setAttribute("errorMessage",
-                        "No station details found to update for Trip ID: " + tripId);
-                response.sendRedirect(request.getContextPath() + "/tripDetail?tripId=" + originalTripIdForRedirect);
-                return;
-            }
+                for (int i = 0; i < stationDetails.size(); i++) {
+                    TripStationInfoDTO currentStation = stationDetails.get(i);
+                    BigDecimal currentEstimateTimeHours = currentStation.getEstimateTime();
+                    if (currentEstimateTimeHours == null) {
+                        currentEstimateTimeHours = BigDecimal.ZERO;
+                    }
+                    Integer defaultStopTimeMinutes = currentStation.getDefaultStopTime();
+                    if (defaultStopTimeMinutes == null) {
+                        defaultStopTimeMinutes = 0;
+                    }
 
-            java.time.LocalDateTime previousStationDepartureCalc = firstStationActualDeparture;
-            // Estimate time for the first station is from the absolute start of the route.
-            // If the first station in the list IS the start of the route, its estimateTime
-            // might be 0 or null.
-            // The travel time to the first station is effectively 0 if it's the origin.
-            java.math.BigDecimal previousEstimateTimeHours = java.math.BigDecimal.ZERO;
+                    LocalDateTime arrivalAtCurrentStation;
+                    LocalDateTime departureFromCurrentStation;
 
-            // For the very first station in the list
-            TripStationInfoDTO firstStationDto = stationDetails.get(0);
-            java.time.LocalDateTime firstScheduledArrival = firstStationActualDeparture; // Arrives when it departs,
-                                                                                         // effectively
-            Integer firstStopTimeMinutes = firstStationDto.getDefaultStopTime();
-            if (firstStopTimeMinutes == null)
-                firstStopTimeMinutes = 0; // Handle null stop time
-            java.time.LocalDateTime firstScheduledDeparture = firstScheduledArrival.plusMinutes(firstStopTimeMinutes);
+                    if (i == 0) {
+                        arrivalAtCurrentStation = newDepartureDateTime;
+                        departureFromCurrentStation = newDepartureDateTime;
+                    } else {
+                        travelTimeHoursDecimal = currentEstimateTimeHours
+                                .subtract(previousEstimateTimeHours);
+                        travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
+                        arrivalAtCurrentStation = previousDepartureDateTime.plusSeconds(travelTimeSeconds);
+                        departureFromCurrentStation = arrivalAtCurrentStation.plusMinutes(defaultStopTimeMinutes);
+                    }
 
-            tripRepository.updateTripStationTimes(firstStationDto.getTripID(), firstStationDto.getStationId(),
-                    firstScheduledArrival, firstScheduledDeparture);
+                    if (i == stationDetails.size() - 1) {
+                        departureFromCurrentStation = arrivalAtCurrentStation;
+                    }
 
-            // Update for next iteration, using the *actual* departure of the first station
-            // as the basis.
-            previousStationDepartureCalc = firstScheduledDeparture;
-            if (firstStationDto.getEstimateTime() != null) {
-                previousEstimateTimeHours = firstStationDto.getEstimateTime();
-            }
+                    tripRepository.updateTripStationTimes(tripId, currentStation.getStationId(),
+                            arrivalAtCurrentStation, departureFromCurrentStation);
 
-            for (int i = 1; i < stationDetails.size(); i++) {
-                TripStationInfoDTO currentStationDto = stationDetails.get(i);
-
-                java.math.BigDecimal currentEstimateTimeHours = currentStationDto.getEstimateTime();
-                Integer currentStopTimeMinutes = currentStationDto.getDefaultStopTime();
-
-                if (currentEstimateTimeHours == null) { // Should not happen if data is clean
-                    System.err.println("Warning: EstimateTime is null for station " + currentStationDto.getStationName()
-                            + ". Skipping its update.");
-                    continue;
+                    previousDepartureDateTime = departureFromCurrentStation;
+                    previousEstimateTimeHours = currentEstimateTimeHours;
                 }
-                if (currentStopTimeMinutes == null)
-                    currentStopTimeMinutes = 0;
 
-                // Travel time from previous station to current station
-                java.math.BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours
-                        .subtract(previousEstimateTimeHours);
-                long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
-
-                java.time.LocalDateTime currentScheduledArrival = previousStationDepartureCalc
-                        .plusSeconds(travelTimeSeconds);
-                java.time.LocalDateTime currentScheduledDeparture = currentScheduledArrival
-                        .plusMinutes(currentStopTimeMinutes);
-
-                tripRepository.updateTripStationTimes(currentStationDto.getTripID(), currentStationDto.getStationId(),
-                        currentScheduledArrival, currentScheduledDeparture);
-
-                previousStationDepartureCalc = currentScheduledDeparture;
-                previousEstimateTimeHours = currentEstimateTimeHours;
+                request.getSession().setAttribute("successMessage", "Trip schedule updated successfully.");
             }
 
-            request.getSession().setAttribute("successMessage",
-                    "Scheduled times updated successfully for all stations in trip " + tripId + ".");
-
-        } catch (NumberFormatException e) {
-            request.getSession().setAttribute("errorMessage", "Invalid ID or date/time format for update.");
-            e.printStackTrace();
-        } catch (java.time.format.DateTimeParseException e) {
-            request.getSession().setAttribute("errorMessage", "Invalid date or time string format for update.");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            request.getSession().setAttribute("errorMessage", "Database error during update: " + e.getMessage());
+        } catch (Exception e) {
+            request.getSession().setAttribute("errorMessage", "Error updating trip schedule: " + e.getMessage());
             e.printStackTrace();
         }
-        // Redirect back to the trip detail page using GET to refresh data and show
-        // message
-        response.sendRedirect(request.getContextPath() + "/tripDetail?tripId=" + originalTripIdForRedirect);
+        response.sendRedirect(request.getContextPath() + "/tripDetail?tripId=" + tripIdStr);
     }
 }

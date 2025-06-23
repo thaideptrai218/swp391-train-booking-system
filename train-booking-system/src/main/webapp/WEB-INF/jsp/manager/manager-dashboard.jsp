@@ -167,7 +167,6 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
               </c:choose>
             </div>
           </div>
-          f
           <div class="popular-trips">
             <h3>Chuyến Đi Phổ Biến Nhất</h3>
             <c:choose>

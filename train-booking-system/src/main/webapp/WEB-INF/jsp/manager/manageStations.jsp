@@ -2,11 +2,11 @@
 pageEncoding="UTF-8"%> <%@ taglib uri="http://java.sun.com/jsp/jstl/core"
 prefix="c" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manage Stations</title>
+    <title>Quản lý ga</title>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>" />
     <link
       rel="stylesheet"
@@ -30,7 +30,7 @@ prefix="c" %>
       <div class="main-content">
         <header class="dashboard-header">
           <%-- Added header --%>
-          <h1>Manage Stations</h1>
+          <h1>Quản lý ga</h1>
         </header>
         <section class="content-section">
           <%-- Added content section wrapper --%>
@@ -52,15 +52,14 @@ prefix="c" %>
               <input
                 type="text"
                 id="searchInput"
-                placeholder="Search by ID, Code, or Name..."
+                placeholder="Tìm kiếm theo ID, Mã, hoặc Tên..."
               />
               <button id="searchBtn" class="action-search">
-                <i class="fas fa-search"></i> Search
+                <i class="fas fa-search"></i> Tìm kiếm
               </button>
             </div>
             <button id="showAddFormBtn" class="action-add">
-              <%-- Changed class --%> <i class="fas fa-plus"></i> Add New
-              Station
+              <%-- Changed class --%> <i class="fas fa-plus"></i> Thêm ga mới
             </button>
           </div>
 
@@ -70,7 +69,7 @@ prefix="c" %>
             <div class="modal-content">
               <span class="close-button">&times;</span>
               <div class="form-section">
-                <h2>Add/Edit Station</h2>
+                <h2>Thêm/Sửa ga</h2>
                 <form id="stationForm" action="manageStations" method="post">
                   <input
                     type="hidden"
@@ -80,8 +79,7 @@ prefix="c" %>
                   />
                   <div class="form-group">
                     <label for="stationCode"
-                      >Station Code:
-                      <span class="required-asterisk">*</span></label
+                      >Mã ga: <span class="required-asterisk">*</span></label
                     >
                     <input
                       type="text"
@@ -92,8 +90,7 @@ prefix="c" %>
                   </div>
                   <div class="form-group">
                     <label for="stationName"
-                      >Station Name:
-                      <span class="required-asterisk">*</span></label
+                      >Tên ga: <span class="required-asterisk">*</span></label
                     >
                     <input
                       type="text"
@@ -103,19 +100,19 @@ prefix="c" %>
                     />
                   </div>
                   <div class="form-group">
-                    <label for="address">Address:</label>
+                    <label for="address">Địa chỉ:</label>
                     <input type="text" id="address" name="address" />
                   </div>
                   <div class="form-group">
-                    <label for="city">City:</label>
+                    <label for="city">Thành phố:</label>
                     <input type="text" id="city" name="city" />
                   </div>
                   <div class="form-group">
-                    <label for="region">Region:</label>
+                    <label for="region">Khu vực:</label>
                     <input type="text" id="region" name="region" />
                   </div>
                   <div class="form-group">
-                    <label for="phoneNumber">Phone Number:</label>
+                    <label for="phoneNumber">Số điện thoại:</label>
                     <input type="text" id="phoneNumber" name="phoneNumber" />
                   </div>
                   <div class="form-group">
@@ -125,14 +122,14 @@ prefix="c" %>
                       id="submitButton"
                       value="add"
                     >
-                      Add Station
+                      Thêm ga
                     </button>
                     <button
                       type="button"
                       id="cancelEditButton"
                       style="display: none"
                     >
-                      Cancel Edit
+                      Hủy chỉnh sửa
                     </button>
                   </div>
                 </form>
@@ -146,13 +143,13 @@ prefix="c" %>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Address</th>
-                  <th>City</th>
-                  <th>Region</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
+                  <th>Mã</th>
+                  <th>Tên</th>
+                  <th>Địa chỉ</th>
+                  <th>Thành phố</th>
+                  <th>Khu vực</th>
+                  <th>Điện thoại</th>
+                  <th>Hành động</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,17 +173,17 @@ prefix="c" %>
                         data-region="${station.region}"
                         data-phone="${station.phoneNumber}"
                       >
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit"></i> Sửa
                       </button>
                       <button class="delete-btn" data-id="${station.stationID}">
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash"></i> Xóa
                       </button>
                     </td>
                   </tr>
                 </c:forEach>
                 <c:if test="${empty stations}">
                   <tr>
-                    <td colspan="8">No stations found.</td>
+                    <td colspan="8">Không tìm thấy ga nào.</td>
                   </tr>
                 </c:if>
               </tbody>
@@ -234,7 +231,7 @@ prefix="c" %>
               this.dataset.phone === "null" ? "" : this.dataset.phone;
 
             submitButton.value = "edit";
-            submitButton.textContent = "Update Station";
+            submitButton.textContent = "Cập nhật ga";
             cancelEditButton.style.display = "inline-block";
             addStationModal.classList.add("active"); // <-- ADD THIS LINE TO SHOW MODAL FOR EDIT
             console.log("Form populated for editing. Modal shown.");
@@ -246,7 +243,7 @@ prefix="c" %>
           stationForm.reset();
           stationIDInput.value = "";
           submitButton.value = "add";
-          submitButton.textContent = "Add Station";
+          submitButton.textContent = "Thêm ga";
           cancelEditButton.style.display = "none";
           // addStationModal.style.display = "none"; /* Hide modal on cancel */
           addStationModal.classList.remove("active"); /* Hide modal on cancel */
@@ -263,7 +260,7 @@ prefix="c" %>
           stationForm.reset();
           stationIDInput.value = ""; // Clear any existing station ID
           submitButton.value = "add";
-          submitButton.textContent = "Add Station";
+          submitButton.textContent = "Thêm ga";
           cancelEditButton.style.display = "none";
           addStationModal.classList.add("active");
           console.log("Form reset for new station. Modal shown.");
@@ -284,7 +281,7 @@ prefix="c" %>
         document.querySelectorAll(".delete-btn").forEach((button) => {
           button.addEventListener("click", function () {
             console.log("Delete button clicked. Station ID:", this.dataset.id);
-            if (confirm("Are you sure you want to delete this station?")) {
+            if (confirm("Bạn có chắc chắn muốn xóa ga này không?")) {
               const stationId = this.dataset.id;
               const form = document.createElement("form");
               form.method = "post";

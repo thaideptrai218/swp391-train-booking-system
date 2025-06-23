@@ -3,6 +3,7 @@ package vn.vnrailway.dao.impl;
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.TripRepository;
 import vn.vnrailway.dto.BestSellerLocationDTO;
+import vn.vnrailway.dto.TripDTO;
 import vn.vnrailway.dto.TripPopularityDTO;
 import vn.vnrailway.dto.TripSearchResultDTO;
 import vn.vnrailway.model.Trip;
@@ -491,8 +492,13 @@ public class TripRepositoryImpl implements TripRepository {
         // Updated SQL to include EstimateTime and DefaultStopTime
         String sql = "SELECT t.TripID, s.StationID, s.StationName, rs.DistanceFromStart, " +
                 "ts.ScheduledDeparture, ty.AverageVelocity, " +
-                "rs.DistanceFromStart / NULLIF(ty.AverageVelocity, 0) AS EstimateTime, " + // Calculate EstimateTime,
-                                                                                           // handle division by zero
+                "rs.DistanceFromStart / COALESCE(NULLIF(ty.AverageVelocity, 0), 100) AS EstimateTime, " + // Calculate
+                                                                                                          // EstimateTime,
+                                                                                                          // handle
+                                                                                                          // division by
+                                                                                                          // zero,
+                                                                                                          // default to
+                                                                                                          // 100
                 "rs.DefaultStopTime " + // Added DefaultStopTime
                 "FROM Trips t " +
                 "JOIN Routes r ON t.RouteID = r.RouteID " +
@@ -737,5 +743,24 @@ public class TripRepositoryImpl implements TripRepository {
             }
         }
         return success;
+    }
+
+    @Override
+    public List<TripDTO> findAllAsDTO() throws SQLException {
+        List<TripDTO> tripDTOs = new ArrayList<>();
+        String sql = "SELECT t.*, r.RouteName, tr.TrainName " +
+                "FROM Trips t " +
+                "JOIN Routes r ON t.RouteID = r.RouteID " +
+                "JOIN Trains tr ON t.TrainID = tr.TrainID";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Trip trip = mapResultSetToTrip(rs);
+                String tripName = rs.getString("TrainName") + ": " + rs.getString("RouteName");
+                tripDTOs.add(new TripDTO(trip, tripName));
+            }
+        }
+        return tripDTOs;
     }
 }

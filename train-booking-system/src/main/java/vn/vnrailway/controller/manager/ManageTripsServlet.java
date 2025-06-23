@@ -223,6 +223,11 @@ public class ManageTripsServlet extends HttpServlet {
                     // Fetch stations for the route
                     List<RouteStationDetailDTO> routeStations = routeRepository
                             .findStationDetailsByRouteId(savedTrip.getRouteID());
+
+                    RouteStationDetailDTO lastStation = routeStations.stream()
+                            .max(Comparator.comparing(RouteStationDetailDTO::getSequenceNumber))
+                            .orElse(null);
+
                     for (RouteStationDetailDTO rsDetail : routeStations) {
                         TripStation newTripStation = new TripStation();
                         newTripStation.setTripID(savedTrip.getTripID());
@@ -230,13 +235,13 @@ public class ManageTripsServlet extends HttpServlet {
                         newTripStation.setSequenceNumber(rsDetail.getSequenceNumber());
 
                         // Set scheduled times
-                        // For the first station, its ScheduledDeparture is the Trip's DepartureDateTime
-                        // Arrival at the first station is not applicable or can be considered same as
-                        // departure
-                        if (rsDetail.getSequenceNumber() == 1) { // Assuming sequence starts at 1 for the first station
-                            newTripStation.setScheduledArrival(null); // Or newTrip.getDepartureDateTime() if arrival
-                                                                      // means ready at platform
+                        if (rsDetail.getSequenceNumber() == 1) { // First station
+                            newTripStation.setScheduledArrival(newTrip.getDepartureDateTime());
                             newTripStation.setScheduledDeparture(newTrip.getDepartureDateTime());
+                        } else if (lastStation != null && rsDetail.getStationID() == lastStation.getStationID()) { // Last
+                                                                                                                   // station
+                            newTripStation.setScheduledArrival(null); // Or calculate based on distance
+                            newTripStation.setScheduledDeparture(newTrip.getArrivalDateTime());
                         } else {
                             // For subsequent stations, these will be calculated/set later or remain null
                             // initially
