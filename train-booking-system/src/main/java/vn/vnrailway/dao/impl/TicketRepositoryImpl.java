@@ -396,7 +396,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    AND CP.IsActive = 1\r\n" + //
                 "\r\n" + //
                 "WHERE \r\n" + //
-                "    ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?)) AND TK.TicketStatus = 'Valid';";
+                "    ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?)) AND TK.TicketStatus != 'Processing';";
 
         CheckInforRefundTicketDTO checkInforRefundTicketDTO = null;
         List<RefundTicketDTO> refundTicketDTOs = new ArrayList<>();
@@ -499,18 +499,23 @@ public class TicketRepositoryImpl implements TicketRepository {
     public List<RefundRequestDTO> getAllPendingRefundRequests() throws SQLException {
         List<RefundRequestDTO> list = new ArrayList<>();
 
-        String sql = "SELECT TR.RefundID, TR.RequestedAt, TK.TicketCode, TK.TicketStatus, TK.Price AS OriginalTicketPrice, " +
+        String sql = "SELECT TR.RefundID, TR.RequestedAt, TK.TicketCode, TK.TicketStatus, TK.Price AS OriginalTicketPrice, "
+                +
                 "P.FullName AS PassengerFullName, P.IDCardNumber AS PassengerIDCard, PT.TypeName AS PassengerType, " +
-                "ST.TypeName AS SeatTypeName, S.SeatNumber, C.CoachName, T.TrainName, TS1.ScheduledDeparture AS ScheduledDepartureTime, " +
+                "ST.TypeName AS SeatTypeName, S.SeatNumber, C.CoachName, T.TrainName, TS1.ScheduledDeparture AS ScheduledDepartureTime, "
+                +
                 "DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) AS HoursBeforeDeparture, " +
                 "StartStation.StationName AS StartStationName, EndStation.StationName AS EndStationName, " +
                 "U.FullName AS UserFullName, U.Email, U.IDCardNumber AS UserIDCard, U.PhoneNumber, " +
-                "ISNULL(CP.IsRefundable, 0) AS IsRefundable, ISNULL(CP.PolicyName, N'Không áp dụng') AS RefundPolicy, " +
+                "ISNULL(CP.IsRefundable, 0) AS IsRefundable, ISNULL(CP.PolicyName, N'Không áp dụng') AS RefundPolicy, "
+                +
                 "CASE WHEN CP.IsRefundable = 1 THEN " +
-                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0) " +
+                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0) "
+                +
                 "    ELSE CP.FixedFeeAmount END ELSE 0 END AS RefundFee, " +
                 "CASE WHEN CP.IsRefundable = 1 THEN " +
-                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0) " +
+                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0) "
+                +
                 "    ELSE TK.Price - CP.FixedFeeAmount END ELSE 0 END AS RefundAmount, " +
                 "CASE WHEN DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé' " +
                 "WHEN CP.PolicyName IS NULL THEN N'Tàu đã đi không trả vé' " +
@@ -532,14 +537,15 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID " +
                 "LEFT JOIN CancellationPolicies CP ON DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= 0 " +
                 "AND DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min " +
-                "AND (CP.HoursBeforeDeparture_Max IS NULL OR DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max) " +
+                "AND (CP.HoursBeforeDeparture_Max IS NULL OR DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max) "
+                +
                 "AND CP.IsActive = 1 " +
                 "WHERE TK.TicketStatus = 'Processing' " +
                 "ORDER BY TR.RequestedAt DESC";
 
         try (Connection conn = DBContext.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 RefundRequestDTO dto = new RefundRequestDTO();
@@ -575,7 +581,31 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
 
         return list;
-    
+
+    }
+
+    public void rejectRefundTicket(String ticketCode) throws SQLException {
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Valid' WHERE TicketCode = ?;";
+        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID = (SELECT TicketID FROM Tickets WHERE TicketCode = ?)";
+
+        try (Connection conn = DBContext.getConnection()) {
+            conn.setAutoCommit(false); // dùng transaction
+
+            try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
+                ps.setString(1, ticketCode);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(deleteTempRefundSql)) {
+                ps.setString(1, ticketCode);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e; // Ném lại ngoại lệ để caller có thể xử lý
+        }
     }
 
     // Main method for testing (optional)
