@@ -152,7 +152,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
             step="0.01"
             id="basePricePerKm"
             name="basePricePerKm"
-            value="${pricingRule.basePricePerKm}"
+            value="${pricingRule.basePricePerKm / 1000}"
           />
         </div>
 

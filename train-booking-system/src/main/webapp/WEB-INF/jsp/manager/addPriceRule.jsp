@@ -268,6 +268,13 @@ prefix="c" %>
         });
 
         setMinDates();
+
+        form.addEventListener("submit", function (event) {
+          const basePriceInput = document.getElementById("basePricePerKm");
+          if (basePriceInput.value) {
+            basePriceInput.value = parseFloat(basePriceInput.value).toString();
+          }
+        });
       });
     </script>
   </body>

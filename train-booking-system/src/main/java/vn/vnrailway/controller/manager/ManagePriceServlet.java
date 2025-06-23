@@ -148,7 +148,7 @@ public class ManagePriceServlet extends HttpServlet {
     }
 
     private void updatePricingRule(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws SQLException, IOException, ServletException {
         try {
             int ruleID = Integer.parseInt(request.getParameter("ruleID"));
             String ruleName = request.getParameter("ruleName");
@@ -156,8 +156,14 @@ public class ManagePriceServlet extends HttpServlet {
             Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
             Integer routeID = getNullableIntParameter(request, "routeID");
             BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
-            if (basePricePerKm != null) {
+
+            PricingRule existingRule = pricingRuleRepository.findById(ruleID)
+                    .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + ruleID));
+
+            if (basePricePerKm != null && (!basePricePerKm.equals(existingRule.getBasePricePerKm()))) {
                 basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
+            } else {
+                basePricePerKm = existingRule.getBasePricePerKm();
             }
             boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
             LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
