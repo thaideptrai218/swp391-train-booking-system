@@ -1,0 +1,162 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 10px; /* Reduced padding */
+}
+
+.container {
+    max-width: 1000px; /* Adjusted max-width */
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 25px; /* Adjusted padding */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.breadcrumbs a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.profile-content {
+    display: flex;
+    gap: 20px;
+}
+
+.sidebar {
+    flex: 0 0 220px; /* Adjusted width */
+    background-color: #f9f9f9;
+    padding: 20px 0; /* Adjusted padding */
+    border-radius: 8px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 12px 20px; /* Adjusted padding */
+    margin-bottom: 2px; /* Reduced margin */
+    border-radius: 0; /* Removed border-radius */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-size: 15px; /* Adjusted font size */
+}
+
+.sidebar li:hover {
+    background-color: #e9e9e9;
+}
+
+.sidebar li.active {
+    background-color: #e0f2ff;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.sidebar li i {
+    font-size: 20px;
+}
+
+.main-content {
+    flex: 1;
+    background-color: #fff;
+    padding: 25px; /* Adjusted padding */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.personal-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.personal-info-header h2 {
+    margin: 0;
+    font-size: 22px; /* Adjusted font size */
+    color: #333;
+}
+
+.personal-info-header p {
+    margin: 0;
+    font-size: 13px; /* Adjusted font size */
+    color: #777;
+}
+
+.personal-info-header .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+.personal-info-header .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.info-section .info-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0; /* Adjusted padding */
+    border-bottom: 1px solid #f0f0f0; /* Lighter border */
+}
+
+.info-section .info-item:last-child {
+    border-bottom: none;
+}
+
+.info-section .label {
+    flex: 0 0 220px; /* Adjusted width */
+    color: #555;
+    font-weight: normal; /* Adjusted font weight */
+    font-size: 15px; /* Adjusted font size */
+}
+
+.info-section .value {
+    flex: 1;
+    color: #333;
+    font-size: 15px; /* Adjusted font size */
+}
+
+.info-section .value .sub-text {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.info-section .action {
+    flex: 0 0 80px; /* Adjusted width */
+    text-align: right;
+    font-size: 14px; /* Adjusted font size */
+}
+
+.info-section .action a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.info-section .action a:hover {
+    text-decoration: underline;
+}

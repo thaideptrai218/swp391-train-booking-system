@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/customer-profile.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/edit-profile.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -57,82 +57,57 @@
                 <a class="btn btn-secondary btn-sm" style="margin-left: 1rem;" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
               </div>
             </div>
+
             <div class="col-md-8">
-              <div class="card mb-3">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Họ và tên</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      ${user.fullName}
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Email</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      ${user.email}
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Số điện thoại</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      ${user.phoneNumber}
-                    </div>
-                  </div>
-                  <hr>
-                   <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Số CMND</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      ${user.idCardNumber}
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Địa chỉ</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      ${user.address}
-                    </div>
-                  </div>
-                  <hr>
-                   <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Giới tính</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      <c:out value="${user.gender}" />
-                    </div>
-                  </div>
-                  <hr>
-                   <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Ngày sinh</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                      <fmt:formatDate value="${dateOfBirth}" pattern="yyyy-MM-dd" />
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-12 text-center">
-                      <a class="btn btn-info" href="${pageContext.request.contextPath}/editprofile">Chỉnh sửa</a>
-                    </div>
-                  </div>
+                <div class="profile-container">
+                    <h2>Chỉnh sửa Hồ Sơ</h2>
+        <c:if test="${not empty errorMessage}">
+            <div class="error-message">${errorMessage}</div>
+        </c:if>
+        <c:if test="${not empty successMessage}">
+            <div class="success-message">${successMessage}</div>
+        </c:if>
+
+        <form action="<c:url value="/editprofile"/>" method="post">
+            <div class="form-group">
+                <label for="fullName">Họ và tên:</label>
+                <input type="text" id="fullName" name="fullName" value="${user.fullName}" required>
             </div>
-          </div>
-        </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="${user.email}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Số điện thoại:</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" value="${user.phoneNumber}">
+            </div>
+            <div class="form-group">
+                <label for="idCardNumber">Số CMND/CCCD:</label>
+                <input type="text" id="idCardNumber" name="idCardNumber" value="${user.idCardNumber}">
+            </div>
+            <div class="form-group">
+                <label for="dateOfBirth">Ngày sinh:</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" value="${user.dateOfBirth}">
+            </div>
+            <div class="form-group">
+                <label for="gender">Giới tính:</label>
+                <select id="gender" name="gender">
+                    <option value="">Chọn Giới Tính</option>
+                    <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Nam</option>
+                    <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Nữ</option>
+                    <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Khác</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="address">Địa chỉ:</label>
+                <input type="text" id="address" name="address" value="${user.address}">
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+        </form>
     </div>
-    <style type="text/css">
+
+    <c:import url="/WEB-INF/jsp/common/footer.jsp" />
+<style type="text/css">
 body{
     margin-top:20px;
     color: #1a202c;
