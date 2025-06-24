@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -54,114 +54,103 @@
                     <span class="text-secondary">https://vnrailway.vn</span>
                   </li>
                 </ul>
-                <a class="btn btn-secondary btn-sm" style="margin-left: 1rem;" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+                <a class="btn btn-secondary btn-sm btn-logout-custom" style="margin-left: 1rem;text-align:center" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
               </div>
             </div>
 
             <div class="col-md-8">
-                <div class="profile-container">
-                    <h2>Chỉnh sửa Hồ Sơ</h2>
-        <c:if test="${not empty errorMessage}">
-            <div class="error-message">${errorMessage}</div>
-        </c:if>
-        <c:if test="${not empty successMessage}">
-            <div class="success-message">${successMessage}</div>
-        </c:if>
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h2 class="mb-3 text-center">Chỉnh sửa Hồ Sơ</h2>
+                  <c:if test="${not empty errorMessage}">
+                      <div class="error-message text-center">${errorMessage}</div>
 
-        <form action="<c:url value="/editprofile"/>" method="post">
-            <div class="form-group">
-                <label for="fullName">Họ và tên:</label>
-                <input type="text" id="fullName" name="fullName" value="${user.fullName}" required>
+                  </c:if>
+                  <c:if test="${not empty successMessage}">
+                      <div class="success-message text-center">${successMessage}</div>
+                  </c:if>
+
+                  <form action="<c:url value="/editprofile"/>" method="post">
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Họ và tên</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="text" class="form-control" id="fullName" name="fullName" value="${user.fullName}" required>
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Email</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="email" class="form-control" id="email" name="email" value="${user.email}" readonly>
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Số điện thoại</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="${user.phoneNumber}">
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Số CMND/CCCD</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="text" class="form-control" id="idCardNumber" name="idCardNumber" value="${user.idCardNumber}">
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Ngày sinh</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="${user.dateOfBirth}">
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Giới tính</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <select id="gender" name="gender" class="form-control">
+                                  <option value="">Chọn Giới Tính</option>
+                                  <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Nam</option>
+                                  <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Nữ</option>
+                                  <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Khác</option>
+                              </select>
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row mb-3">
+                          <div class="col-sm-3">
+                              <h6 class="mb-0">Địa chỉ</h6>
+                          </div>
+                          <div class="col-sm-9 text-secondary">
+                              <input type="text" class="form-control" id="address" name="address" value="${user.address}">
+                          </div>
+                      </div>
+                      <hr>
+                      <div class="row">
+                          <div class="col-sm-12 text-center">
+                              <button type="submit" class="btn btn-info">Lưu Thay Đổi</button>
+                          </div>
+                      </div>
+                  </form>
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="${user.email}" readonly>
-            </div>
-            <div class="form-group">
-                <label for="phoneNumber">Số điện thoại:</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" value="${user.phoneNumber}">
-            </div>
-            <div class="form-group">
-                <label for="idCardNumber">Số CMND/CCCD:</label>
-                <input type="text" id="idCardNumber" name="idCardNumber" value="${user.idCardNumber}">
-            </div>
-            <div class="form-group">
-                <label for="dateOfBirth">Ngày sinh:</label>
-                <input type="date" id="dateOfBirth" name="dateOfBirth" value="${user.dateOfBirth}">
-            </div>
-            <div class="form-group">
-                <label for="gender">Giới tính:</label>
-                <select id="gender" name="gender">
-                    <option value="">Chọn Giới Tính</option>
-                    <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Nam</option>
-                    <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Nữ</option>
-                    <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Khác</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="address">Địa chỉ:</label>
-                <input type="text" id="address" name="address" value="${user.address}">
-            </div>
-            <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
-        </form>
+          </div>
+        </div>
     </div>
-
-    <c:import url="/WEB-INF/jsp/common/footer.jsp" />
-<style type="text/css">
-body{
-    margin-top:20px;
-    color: #1a202c;
-    text-align: left;
-    background-color: #e2e8f0;    
-}
-.main-body {
-    padding: 15px;
-}
-.card {
-    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);
-}
-
-.card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: #fff;
-    background-clip: border-box;
-    border: 0 solid rgba(0,0,0,.125);
-    border-radius: .25rem;
-}
-
-.card-body {
-    flex: 1 1 auto;
-    min-height: 1px;
-    padding: 1rem;
-}
-
-.gutters-sm {
-    margin-right: -8px;
-    margin-left: -8px;
-}
-
-.gutters-sm>.col, .gutters-sm>[class*=col-] {
-    padding-right: 8px;
-    padding-left: 8px;
-}
-.mb-3, .my-3 {
-    margin-bottom: 1rem!important;
-}
-
-.bg-gray-300 {
-    background-color: #e2e8f0;
-}
-.h-100 {
-    height: 100%!important;
-}
-.shadow-none {
-    box-shadow: none!important;
-}
-</style>
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

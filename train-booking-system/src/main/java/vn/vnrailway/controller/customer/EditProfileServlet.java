@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @WebServlet(name = "EditProfileServlet", urlPatterns = {"/editprofile"})
 public class EditProfileServlet extends HttpServlet {
@@ -52,7 +54,7 @@ public class EditProfileServlet extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error retrieving user profile: " + e.getMessage());
+            request.setAttribute("errorMessage", "Lỗi khi truy xuất hồ sơ người dùng: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response); // Assuming an error.jsp
         }
     }
@@ -80,6 +82,8 @@ public class EditProfileServlet extends HttpServlet {
                 String gender = request.getParameter("gender");
                 String address = request.getParameter("address");
 
+                String errorMessage = null; // Initialize errorMessage variable
+
                 // Update user object
                 user.setFullName(fullName);
                 user.setEmail(email);
@@ -87,6 +91,38 @@ public class EditProfileServlet extends HttpServlet {
                 user.setIdCardNumber(idCardNumber);
                 user.setGender(gender);
                 user.setAddress(address);
+
+        if (errorMessage == null) {
+            String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+            Pattern emailPattern = Pattern.compile(emailRegex);
+            Matcher emailMatcher = emailPattern.matcher(email);
+            if (!emailMatcher.matches()) {
+                errorMessage = "Email không đúng định dạng.";
+            }
+        }
+
+        // 3. Phone number validation (starts with 0 and contains only digits)
+        if (errorMessage == null) {
+            if (!phoneNumber.startsWith("0") || !phoneNumber.matches("\\d+")) {
+                errorMessage = "Số điện thoại phải bắt đầu bằng 0 và chỉ chứa các chữ số.";
+            }
+        }
+
+        // 4. CCCD length and digit validation (exactly 12 digits)
+        if (errorMessage == null) {
+            if (idCardNumber.length() != 12 || !idCardNumber.matches("\\d+")) {
+                errorMessage = "CCCD phải có đúng 12 chữ số.";
+            }
+        }
+
+        // 5. Date of birth validation (must be a valid date)
+        if (errorMessage == null) {
+            try {
+                LocalDate.parse(dateOfBirthStr);
+            } catch (DateTimeParseException e) {
+                errorMessage = "Ngày sinh không hợp lệ. Hãy nhập theo định dạng: YYYY-MM-DD.";
+            }
+        }
 
                 if (dateOfBirthStr != null && !dateOfBirthStr.isEmpty()) {
                     user.setDateOfBirth(LocalDate.parse(dateOfBirthStr));
@@ -96,19 +132,49 @@ public class EditProfileServlet extends HttpServlet {
 
                 userRepository.update(user);
                 session.setAttribute("loggedInUser", user); // Update user in session
-                request.setAttribute("successMessage", "Profile updated successfully!");
-                response.sendRedirect(request.getContextPath() + "/customer/profile"); // Redirect to profile page
+                request.setAttribute("successMessage", "Cập nhật thành công!");
+                request.setAttribute("user", user); // Set user attribute for JSP
+                request.getRequestDispatcher("/WEB-INF/jsp/customer/edit-profile.jsp").forward(request, response);
             } else {
                 session.invalidate();
                 response.sendRedirect(request.getContextPath() + "/login.jsp?error=userNotFound");
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error updating profile: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(request, response);
+            request.setAttribute("errorMessage", "Lỗi cập nhật: " + e.getMessage());
+            // Re-fetch user to populate form fields correctly in case of error
+            User loggedInUserAfterError = (User) session.getAttribute("loggedInUser");
+            try {
+                Optional<User> userOptional = userRepository.findByEmail(loggedInUserAfterError.getEmail());
+                userOptional.ifPresent(user -> request.setAttribute("user", user));
+            } catch (SQLException ex) {
+                ex.printStackTrace(); // Log this secondary error
+            }
+            request.getRequestDispatcher("/WEB-INF/jsp/customer/edit-profile.jsp").forward(request, response);
+        } catch (DateTimeParseException e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Nhập không đúng định dạng. Hãy nhập theo định dạng: YYYY-MM-DD.");
+            // Re-fetch user to populate form fields correctly in case of error
+            User loggedInUserAfterError = (User) session.getAttribute("loggedInUser");
+            try {
+                Optional<User> userOptional = userRepository.findByEmail(loggedInUserAfterError.getEmail());
+                userOptional.ifPresent(user -> request.setAttribute("user", user));
+            } catch (SQLException ex) {
+                ex.printStackTrace(); // Log this secondary error
+            }
+            request.getRequestDispatcher("/WEB-INF/jsp/customer/edit-profile.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/customer/profile"); // Redirect to profile page even on error
+            request.setAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
+            // Re-fetch user to populate form fields correctly in case of error
+            User loggedInUserAfterError = (User) session.getAttribute("loggedInUser");
+            try {
+                Optional<User> userOptional = userRepository.findByEmail(loggedInUserAfterError.getEmail());
+                userOptional.ifPresent(user -> request.setAttribute("user", user));
+            } catch (SQLException ex) {
+                ex.printStackTrace(); // Log this secondary error
+            }
+            request.getRequestDispatcher("/WEB-INF/jsp/customer/edit-profile.jsp").forward(request, response);
         }
     }
 }

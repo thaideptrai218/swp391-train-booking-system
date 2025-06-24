@@ -73,3 +73,14 @@ a:hover {
 .button-common:hover {
     background-color: #0056b3;
 }
+
+/* Message styling */
+.error-message {
+    color: #dc3545; /* Red color for errors */
+    font-weight: bold;
+}
+
+.success-message {
+    color: #28a745; /* Green color for success */
+    font-weight: bold;
+}
