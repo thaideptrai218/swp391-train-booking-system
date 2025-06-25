@@ -135,7 +135,10 @@
                               <c:when test="${p.ticketStatus == 'Processing'}">
                                 <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
                               </c:when>
-                              <c:when test="${p.ticketStatus == 'Cancelled'}">
+                              <c:when test="${p.ticketStatus == 'Refunded'}">
+                                <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                              </c:when>
+                              <c:when test="${p.ticketStatus == 'RejectedRefund'}">
                                 <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
                               </c:when>
                               <c:when test="${p.ticketStatus == 'Expired'}">
