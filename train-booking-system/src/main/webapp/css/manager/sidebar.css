@@ -49,6 +49,12 @@
   z-index: 1000;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto; /* Allow scrolling within sidebar if content is long */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .sidebar.open {
@@ -109,10 +115,20 @@
   padding-left: 20px; /* Indent on hover/active */
 }
 
-/* Optional: Style for the main content area to push it when sidebar is open */
+/* Styles for the main content area that is pushed by the sidebar */
+.main-content {
+  padding-top: 80px; /* To clear the fixed sidebar toggle button */
+  padding-left: 80px; /* To clear the fixed sidebar toggle button */
+  padding-right: 20px;
+  padding-bottom: 20px;
+  box-sizing: border-box; /* Ensures padding is included in width/height calculations */
+  transition: margin-left 0.3s ease; /* Smooth transition for margin changes */
+}
+
 .main-content.shifted {
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease; /* Match sidebar transition */
+  margin-left: var(
+    --sidebar-width
+  ); /* Pushes content right when sidebar is open */
 }
 
 /* Prevent body scroll when sidebar is open */

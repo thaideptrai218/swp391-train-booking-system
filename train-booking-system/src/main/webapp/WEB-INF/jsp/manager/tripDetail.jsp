@@ -3,8 +3,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Station Details</title>
     <link
       rel="stylesheet"
@@ -219,20 +221,22 @@
                         <td>
                           <input type="date" name="scheduledDepartureDate" 
                                  id="departureDate-${loop.index}" 
-                                 value="${stationDetail.scheduledDepartureDate}" required 
+                                 value="${stationDetail.scheduledDepartureDate}"
                                  class="form-control-sm departure-date" 
+                                 aria-label="Ngày khởi hành dự kiến"
                                  <c:if test="${loop.index != 0}">disabled</c:if> />
                         </td>
                         <td>
                           <input type="time" name="scheduledDepartureTime" 
                                  id="departureTime-${loop.index}" 
-                                 value="${stationDetail.scheduledDepartureTime != null ? stationDetail.scheduledDepartureTime.format(DateTimeFormatter.ofPattern('HH:mm')) : ''}" required 
+                                 value="${stationDetail.scheduledDepartureTime != null ? stationDetail.scheduledDepartureTime.format(DateTimeFormatter.ofPattern('HH:mm')) : ''}"
                                  class="form-control-sm departure-time" step="60" <%-- Step 60 for minute precision --%>
+                                 aria-label="Giờ khởi hành dự kiến"
                                  <c:if test="${loop.index != 0}">disabled</c:if> />
                         </td>
                         <td>
                           <c:if test="${loop.index == 0}">
-                            <button type="submit" class="btn-update-time">
+                            <button type="submit" class="btn-update-time" title="Lưu">
                               <i class="fas fa-save"></i> Lưu
                             </button>
                           </c:if>
@@ -255,71 +259,7 @@
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const stationRows = document.querySelectorAll('.station-row');
-        if (stationRows.length === 0) return;
-
-        const firstDepartureDateInput = document.getElementById('departureDate-0');
-        const firstDepartureTimeInput = document.getElementById('departureTime-0');
-
-        function calculateScheduledTimes() {
-          if (!firstDepartureDateInput.value || !firstDepartureTimeInput.value) {
-            // Don't calculate if the first station's date or time is not set
-            return;
-          }
-
-          let previousDepartureDateTime = new Date(firstDepartureDateInput.value + 'T' + firstDepartureTimeInput.value);
-          let previousEstimateTimeHours = parseFloat(stationRows[0].dataset.estimateTime) || 0;
-
-          for (let i = 1; i < stationRows.length; i++) {
-            const currentRow = stationRows[i];
-            const currentEstimateTimeHours = parseFloat(currentRow.dataset.estimateTime);
-            const defaultStopTimeMinutes = parseInt(currentRow.dataset.defaultStopTime, 10) || 0;
-
-            const dateInput = document.getElementById('departureDate-' + i);
-            const timeInput = document.getElementById('departureTime-' + i);
-
-            if (isNaN(currentEstimateTimeHours)) {
-                console.warn('Invalid estimateTime for station index ' + i + '. Skipping calculation for this and subsequent stations.');
-                // Clear subsequent fields if data is missing
-                for (let j = i; j < stationRows.length; j++) {
-                    document.getElementById('departureDate-' + j).value = '';
-                    document.getElementById('departureTime-' + j).value = '';
-                }
-                return; 
-            }
-            
-            // Calculate travel time from previous station to current station in milliseconds
-            // estimateTime is total time from start of route
-            const travelTimeHours = currentEstimateTimeHours - previousEstimateTimeHours;
-            const travelTimeMilliseconds = travelTimeHours * 60 * 60 * 1000;
-
-            // Calculate arrival time at current station
-            let arrivalAtCurrentStation = new Date(previousDepartureDateTime.getTime() + travelTimeMilliseconds);
-
-            // Calculate departure time from current station
-            let departureFromCurrentStation = new Date(arrivalAtCurrentStation.getTime() + (defaultStopTimeMinutes * 60 * 1000));
-
-            // Format and set the date and time for the current station
-            dateInput.value = departureFromCurrentStation.toISOString().split('T')[0];
-            timeInput.value = departureFromCurrentStation.toTimeString().split(' ')[0].substring(0,5); // HH:MM
-
-            // Update for the next iteration
-            previousDepartureDateTime = departureFromCurrentStation;
-            previousEstimateTimeHours = currentEstimateTimeHours;
-          }
-        }
-
-        if (firstDepartureDateInput && firstDepartureTimeInput) {
-          firstDepartureDateInput.addEventListener('change', calculateScheduledTimes);
-          firstDepartureTimeInput.addEventListener('change', calculateScheduledTimes);
-          
-          // Initial calculation if first station already has values (e.g., on page load with existing data)
-          if (firstDepartureDateInput.value && firstDepartureTimeInput.value) {
-            calculateScheduledTimes();
-          }
-        }
-      });
+      // Client-side calculations removed as they are now handled on the server.
     </script>
   </body>
 </html>

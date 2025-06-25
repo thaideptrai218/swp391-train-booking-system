@@ -181,6 +181,13 @@
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box; /* Added to include padding and border in the element's total width */
+}
+
+.chart-container canvas {
+  max-width: 100%; /* Ensure canvas does not overflow its container */
+  height: auto !important; /* Allow Chart.js to control height, override potential fixed CSS height */
+  display: block; /* Ensure canvas behaves as a block element for sizing */
 }
 
 /* Responsive Table Container */

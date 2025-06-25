@@ -3,6 +3,7 @@ package vn.vnrailway.dao.impl;
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.TripRepository;
 import vn.vnrailway.dto.BestSellerLocationDTO;
+import vn.vnrailway.dto.TripDTO;
 import vn.vnrailway.dto.TripPopularityDTO;
 import vn.vnrailway.dto.TripSearchResultDTO;
 import vn.vnrailway.model.Trip;
@@ -491,8 +492,13 @@ public class TripRepositoryImpl implements TripRepository {
         // Updated SQL to include EstimateTime and DefaultStopTime
         String sql = "SELECT t.TripID, s.StationID, s.StationName, rs.DistanceFromStart, " +
                 "ts.ScheduledDeparture, ty.AverageVelocity, " +
-                "rs.DistanceFromStart / NULLIF(ty.AverageVelocity, 0) AS EstimateTime, " + // Calculate EstimateTime,
-                                                                                           // handle division by zero
+                "rs.DistanceFromStart / COALESCE(NULLIF(ty.AverageVelocity, 0), 100) AS EstimateTime, " + // Calculate
+                                                                                                          // EstimateTime,
+                                                                                                          // handle
+                                                                                                          // division by
+                                                                                                          // zero,
+                                                                                                          // default to
+                                                                                                          // 100
                 "rs.DefaultStopTime " + // Added DefaultStopTime
                 "FROM Trips t " +
                 "JOIN Routes r ON t.RouteID = r.RouteID " +
@@ -502,7 +508,7 @@ public class TripRepositoryImpl implements TripRepository {
                 "JOIN Trains tr ON tr.TrainID = t.TrainID " + // Join with Trains
                 "JOIN TrainTypes ty ON ty.TrainTypeID = tr.TrainTypeID " + // Join with TrainTypes
                 "WHERE t.TripID = ? " +
-                "ORDER BY rs.DistanceFromStart";
+                "order by ts.SequenceNumber";
 
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -569,6 +575,27 @@ public class TripRepositoryImpl implements TripRepository {
         } catch (SQLException e) {
             System.err.println("Error updating scheduled departure for TripID " + tripId + ", StationID " + stationId
                     + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateTripStationTimes(int tripId, int stationId, LocalDateTime newScheduledArrival,
+            LocalDateTime newScheduledDeparture) throws SQLException {
+        String sql = "UPDATE TripStations SET ScheduledArrival = ?, ScheduledDeparture = ? WHERE TripID = ? AND StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, newScheduledArrival != null ? Timestamp.valueOf(newScheduledArrival) : null);
+            ps.setTimestamp(2, newScheduledDeparture != null ? Timestamp.valueOf(newScheduledDeparture) : null);
+            ps.setInt(3, tripId);
+            ps.setInt(4, stationId);
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println(
+                    "Error updating times for TripID " + tripId + ", StationID " + stationId + ": " + e.getMessage());
             throw e;
         }
     }
@@ -716,5 +743,24 @@ public class TripRepositoryImpl implements TripRepository {
             }
         }
         return success;
+    }
+
+    @Override
+    public List<TripDTO> findAllAsDTO() throws SQLException {
+        List<TripDTO> tripDTOs = new ArrayList<>();
+        String sql = "SELECT t.*, r.RouteName, tr.TrainName " +
+                "FROM Trips t " +
+                "JOIN Routes r ON t.RouteID = r.RouteID " +
+                "JOIN Trains tr ON t.TrainID = tr.TrainID";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Trip trip = mapResultSetToTrip(rs);
+                String tripName = rs.getString("TrainName") + ": " + rs.getString("RouteName");
+                tripDTOs.add(new TripDTO(trip, tripName));
+            }
+        }
+        return tripDTOs;
     }
 }
