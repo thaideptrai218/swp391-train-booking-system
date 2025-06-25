@@ -19,16 +19,34 @@ body {
 }
 
 .sidebar {
-    width: 250px;
-    background-color: #2c3e50; /* Dark blue-gray */
-    color: #ecf0f1; /* Light gray */
-    padding: 20px;
-    padding-top: 60px; /* Adjusted for home icon */
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    width: 260px; /* A bit wider */
+    background-color: #2c3e50;
+    color: #ecf0f1;
     display: flex;
     flex-direction: column;
-    position: relative; /* Establish positioning context for absolute children */
-    animation: slideInLeft 0.5s ease-out;
+    transition: width 0.3s ease;
+    position: relative;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .admin-info,
+.sidebar.collapsed .main-nav {
+    display: none;
+}
+
+.sidebar.collapsed .main-nav ul li a i {
+    margin-right: 0;
+}
+
+.sidebar.collapsed .main-nav ul li a {
+    justify-content: center;
 }
 
 .home-link {
@@ -63,11 +81,18 @@ body {
 .sidebar ul li a {
     color: #ecf0f1;
     text-decoration: none;
-    padding: 10px 15px;
-    display: block;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
     border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-size: 1.1rem; /* Consistent with login.css buttons/labels */
+    transition: background-color 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
 }
 
 .sidebar ul li a:hover {
@@ -75,10 +100,53 @@ body {
     transform: translateX(5px);
 }
 
+.menu-toggle {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+}
+
+.sidebar {
+    padding-top: 60px;
+}
+
+.admin-info {
+    padding: 15px;
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.admin-info h3 {
+    margin-top: 0;
+}
+
+.admin-info p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.main-nav h3 {
+    padding: 0 15px;
+}
+
 .main-content {
     flex-grow: 1;
     padding: 30px;
-    background-color: #ecf0f1; /* Light gray */
+    background-color: #ecf0f1;
+    transition: margin-left 0.3s ease;
+    width: calc(100% - 260px);
+}
+
+.dashboard-container.collapsed .main-content {
+    width: 100%;
+    margin-left: 0;
 }
 
 .header {
@@ -188,64 +256,141 @@ body {
     }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .dashboard-container {
-        flex-direction: column;
-    }
+/* No responsive adjustments needed for this part */
 
-    .sidebar {
-        width: 100%;
-        padding-top: 20px; /* Reset padding for smaller screens */
-        position: relative; /* Keep relative for home-link positioning */
-        flex-direction: row; /* Arrange sidebar items horizontally */
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
+/* User Table Styles */
+.user-table-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 25px;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.5s;
+}
 
-    .sidebar h2 {
-        margin-bottom: 0;
-    }
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
 
-    .sidebar nav {
-        width: 100%;
-        margin-top: 15px;
-    }
+.user-table th, .user-table td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
 
-    .sidebar ul {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
+.user-table th {
+    background-color: #3498db;
+    color: #ffffff;
+    font-weight: 600;
+}
 
-    .sidebar ul li {
-        margin-bottom: 0;
-    }
+.user-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
 
-    .sidebar ul li a {
-        padding: 8px 12px;
-        font-size: 1.1rem; /* Consistent with other links/buttons */
-    }
+.user-table tbody tr:hover {
+    background-color: #e9ecef;
+}
 
-    .home-link {
-        position: static; /* Remove absolute positioning */
-        margin-right: 15px; /* Add some space */
-        font-size: 2.5rem; /* Keep original font-size as per user's request */
-    }
+.user-table td a {
+    color: #3498db;
+    text-decoration: none;
+    margin-right: 10px;
+}
 
-    .main-content {
-        padding: 20px;
-    }
+.user-table td a:hover {
+    text-decoration: underline;
+}
 
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+/* Button Styles */
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
 
-    .cards-container {
-        grid-template-columns: 1fr; /* Stack cards on small screens */
-    }
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* Form Styles */
+.add-user-form {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 25px;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: .5rem;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+/* Pagination Styles */
+.pagination {
+    margin-top: 20px;
+}
+
+.pagination a, .pagination span {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+}
+
+.pagination a:hover {
+    background-color: #f1f1f1;
+}
+
+.pagination span {
+    background-color: #3498db;
+    color: white;
+    border: 1px solid #3498db;
 }

@@ -26,6 +26,11 @@ public interface UserRepository {
     List<User> findByAddress(String address) throws SQLException;
     List<User> findByGender(String gender) throws SQLException;
     Optional<User> findByDateOfBirth(LocalDate dateOfBirth) throws SQLException;
+    boolean lockById(int userId) throws SQLException;
+    boolean unlockById(int userId) throws SQLException;
+    boolean hideById(int userId) throws SQLException;
+    List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException;
+    int getTotalLogCount() throws SQLException;
     // Optional: A method to verify credentials, though this might also fit in a service
     // Optional<User> findByEmailAndPassword(String email, String passwordHash) throws SQLException;
 }
