@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title>Chỉnh sửa Hồ sơ Người dùng</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/edit-profile.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -18,8 +18,8 @@
           <nav aria-label="breadcrumb" class="main-breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/landing">Trang chủ</a></li>
-              <li class="breadcrumb-item"><a href="javascript:void(0)">Tài Khoản</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Thông tin Tài Khoản</li>
+              <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/customerprofile">Tài Khoản</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa Hồ sơ</li>
             </ol>
           </nav>
           <!-- /Breadcrumb -->
