@@ -50,7 +50,6 @@ public class ManageStaffsServlet extends HttpServlet {
 
                     Map<String, Object> userMap = new HashMap<>();
                     userMap.put("userID", user.getUserID());
-                    userMap.put("userName", user.getUserName());
                     // It's good practice to not send password hashes in API responses
                     // userMap.put("passwordHash", user.getPasswordHash());
                     userMap.put("fullName", user.getFullName());
