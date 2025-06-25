@@ -42,40 +42,44 @@
         </header>
 
         <main class="main-content">
-          <!-- <div>
-                    <img src="${pageContext.request.contextPath}/assets/images/image-26-72.png" class="news" alt="news">
-                </div> -->
-
           <section class="check-info">
             <div class="form-checking">
-              <label class="et-main-label">TRA CỨU THÔNG TIN ĐẶT CHỖ</label>
-              <p>Để tra cứu thông tin, quý khách vui lòng thông tin bên dưới.</p>
-              <form id="returnForm" method="get" action="checkBooking">
+              <label class="et-main-label">KIỂM TRA VÉ</label>
+              <p>Để tra cứu thông tin, quý khách vui lòng nhập đầy đủ thông tin bên dưới.</p>
+              <form id="ticketLookupForm" method="get" action="checkTicket">
                 <table cellspacing="10">
                   <tbody>
                     <tr>
-                      <td><strong>Mã đặt chỗ</strong> <span style="color: red">*</span></td>
-                      <td>
-                        <input type="text" name="bookingCode" placeholder="Nhập mã đặt chỗ" value="${bookingCode}"
-                          required />
+                      <td style="padding-right: 20px;"><strong>Mã vé</strong></td>
+                      <td style="padding-right: 40px;"><input type="text" name="ticketCode" placeholder="Nhập mã vé"
+                          value="${ticketCode}" /></td>
+                      <td style="padding-right: 20px;"><strong>Mác tàu</strong></strong></td>
+                      <td><input type="text" name="trainCode" placeholder="Nhập mác tàu" value="${trainCode}" /></td>
+                    </tr>
+                    <tr>
+                      <td style="padding-right: 20px;"><strong>Ga đi</strong></strong></td>
+                      <td style="padding-right: 40px;"><input type="text" name="departureStation" id="departureStation"
+                          placeholder="Nhập ga đi" list="departureSuggestions" value="${departureStation}" />
+                        <datalist id="departureSuggestions"></datalist>
+                      </td>
+                      <td style="padding-right: 20px;"><strong>Ga đến</strong></strong></td>
+                      <td><input type="text" name="arrivalStation" id="arrivalStation" placeholder="Nhập ga đến"
+                          list="arrivalSuggestions" autocomplete="off" value="${arrivalStation}" />
+                        <datalist id="arrivalSuggestions"></datalist>
                       </td>
                     </tr>
                     <tr>
-                      <td><strong>Điện thoại</strong></td>
-                      <td>
-                        <input type="text" name="phoneNumber" placeholder="Nhập số điện thoại"
-                          value="${checkBookingDTO.userPhoneNumber}" />
+                      <td style="padding-right: 20px;"><strong>Ngày đi</strong></td>
+                      <td style="padding-right: 40px;"><input type="date" name="departureDate"
+                          value="${departureDate}" />
                       </td>
+                      <td style="padding-right: 20px;"><strong>Số giấy tờ</strong></strong></td>
+                      <td><input type="text" name="idNumber" placeholder="Nhập số giấy tờ" value="${idNumber}" /></td>
                     </tr>
                     <tr>
-                      <td><strong>Email</strong></td>
                       <td>
-                        <input type="email" placeholder="Email" name="email"
-                          value="${checkBookingDTO.userEmail}" /><br />
+                        <button type="submit"><strong>Kiểm tra vé</strong></button>
                       </td>
-                    </tr>
-                    <tr>
-                      <td><button type="submit"><strong>Xác Nhận</strong></button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -87,8 +91,8 @@
                 <p style="color: red">${errorMessage}</p>
               </c:if>
 
-              <c:if test="${not empty checkBookingDTO}">
-                <h3 style="color: red">Danh sách vé:</h3>
+              <c:if test="${not empty infoPassenger}">
+                <h3 style="color: red">Thông tin vé:</h3>
                 <table border="1" cellpadding="5" cellspacing="0">
                   <thead>
                     <tr style="background-color: #5e5e5e50">
@@ -104,41 +108,40 @@
                     </tr>
                   </thead>
 
-                  <c:forEach var="p" items="${checkBookingDTO.infoPassengers}">
-                    <tbody>
-                      <tr>
-                        <td colspan="9" style="font-weight: bold">
-                          ${p.startStationName} - ${p.endStationName}
-                          ${p.scheduledDepartureTime}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>${p.passengerFullName}</td>
-                        <td>${p.passengerIDCard}</td>
-                        <td>${p.passengerType}</td>
-                        <td>${p.seatNumber}</td>
-                        <td>${p.seatTypeName}</td>
-                        <td>${p.coachName}</td>
-                        <td>${p.trainName}</td>
-                        <td>
-                          <fmt:formatNumber value="${p.price}" type="number" groupingUsed="true" />đ
-                        </td>
-                        <td>
-                            <c:choose>
-                              <c:when test="${p.ticketStatus == 'Valid'}">
+                  <tbody>
+                    <tr>
+                      <td colspan="9" style="font-weight: bold">
+                        ${infoPassenger.startStationName} - ${infoPassenger.endStationName}
+                        ${infoPassenger.scheduledDepartureTime}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>${infoPassenger.passengerFullName}</td>
+                      <td>${infoPassenger.passengerIDCard}</td>
+                      <td>${infoPassenger.passengerType}</td>
+                      <td>${infoPassenger.seatNumber}</td>
+                      <td>${infoPassenger.seatTypeName}</td>
+                      <td>${infoPassenger.coachName}</td>
+                      <td>${infoPassenger.trainName}</td>
+                      <td>
+                        <fmt:formatNumber value="${infoPassenger.price}" type="number" groupingUsed="true" />đ
+                      </td>
+                      <td>
+                        <c:choose>
+                              <c:when test="${infoPassenger.ticketStatus == 'Valid'}">
                                 <span style="color: #28a745; font-weight: bold;">Hợp lệ</span> <!-- xanh lá đẹp -->
                               </c:when>
-                              <c:when test="${p.ticketStatus == 'Used'}">
+                              <c:when test="${infoPassenger.ticketStatus == 'Used'}">
                                 <span style="color: #007bff; font-weight: bold;">Đã sử dụng</span>
                                 <!-- xanh dương tươi -->
                               </c:when>
-                              <c:when test="${p.ticketStatus == 'Processing'}">
+                              <c:when test="${infoPassenger.ticketStatus == 'Processing'}">
                                 <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
                               </c:when>
-                              <c:when test="${p.ticketStatus == 'Cancelled'}">
+                              <c:when test="${infoPassenger.ticketStatus == 'Cancelled'}">
                                 <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
                               </c:when>
-                              <c:when test="${p.ticketStatus == 'Expired'}">
+                              <c:when test="${infoPassenger.ticketStatus == 'Expired'}">
                                 <span style="color: #6c757d; font-weight: bold;">Đã hết hạn</span>
                                 <!-- xám trung tính -->
                               </c:when>
@@ -146,35 +149,17 @@
                                 <span style="color: #343a40; font-weight: bold;">Không xác định</span> <!-- đen xám -->
                               </c:otherwise>
                             </c:choose>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </c:forEach>
+                      </td>
+                    </tr>
+                  </tbody>
                 </table>
-
-                <h3 style="color: red">Thông tin người đặt vé</h3>
-                <div class="booking-info-grid">
-                  <div class="form-row">
-                    <label>Họ và tên</label>
-                    <input type="text" value="${checkBookingDTO.userFullName}" readonly />
-                    <label>Email</label>
-                    <input type="text" value="${checkBookingDTO.userEmail}" readonly />
-                  </div>
-                  <div class="form-row">
-                    <label>Số CMND</label>
-                    <input type="text" value="${checkBookingDTO.userIDCardNumber}" readonly />
-                    <label>Số điện thoại</label>
-                    <input type="text" value="${checkBookingDTO.userPhoneNumber}" readonly />
-                  </div>
-                </div>
               </c:if>
             </div>
           </section>
-
-          <!-- <div>
-                    <img src="${pageContext.request.contextPath}/assets/images/image-27-73.png" class="news" alt="news">
-                </div> -->
         </main>
+
+        <script src="${pageContext.request.contextPath}/js/check-ticket/check-ticket.js"></script>
+
 
         <footer class="footer">
           <div class="footer-top">

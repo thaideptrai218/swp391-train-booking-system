@@ -129,7 +129,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
           </div>
         </div>
       </div>
-    </section>
+    </body>
 
     <div class="body">
       <div class="container">
