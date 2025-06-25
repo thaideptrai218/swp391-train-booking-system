@@ -11,49 +11,87 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  	
-  	<div class="feedback">
-    <div class="feedback-container">
-        <div class="feedback-child">
-            <div class="nhng-ni-dung">Những nội dung chúng tôi rất mong nhận được từ bạn</div>
-            <ul class="feedback-list">
-                <li>Góp ý về giao diện và trải nghiệm đặt vé</li>
-                <li>Phản ánh sự cố kỹ thuật, lỗi thanh toán hoặc sai thông tin vé</li>
-                <li>Đề xuất tính năng mới hoặc dịch vụ bổ sung</li>
-                <li>Cảm nhận về dịch vụ khách hàng</li>
-                <li>Mọi ý kiến khác liên quan đến website</li>
-            </ul>
+    <div class="feedback">
+        <div class="rectangle-parent">
+            <div class="group-child"></div>
+            <div class="gp-v-phn-hi-ca-qu-khc-parent">
+                <b class="gp-v">GÓP Ý VÀ PHẢN HỒI CỦA QUÝ KHÁCH</b>
+                <div class="cm-n-qu">
+                    Cảm ơn Quý khách đã sử dụng dịch vụ đặt vé tàu trực tuyến tại Vetaure. 
+                    Sự hài lòng của Quý khách là động lực để chúng tôi không ngừng hoàn thiện và nâng cao chất lượng dịch vụ.
+                </div>
+                <form id="feedbackForm" action="<%=request.getContextPath()%>/feedback" method="post">
+                    <div class="h-v-tn-container">
+                        <span>Họ và tên </span><span class="span">*</span>
+                    </div>
+                    <input type="text" name="fullName" class="group-item" required>
+                    
+                    <div class="email-lin-h-container">
+                        <span>Email liên hệ </span><span class="span">*</span>
+                    </div>
+                    <input type="email" name="email" class="group-inner" required>
+                    
+                    <div class="ni-dung-gp">Nội dung góp ý</div>
+                    <textarea name="feedbackContent" class="group-child1" required></textarea>
+                    
+                    <button type="submit" class="rectangle-div">
+                        <div class="gi">Gửi</div>
+                    </button>
+                    <div id="feedbackMessage" style="display: none;"></div>
+                </form>
+            </div>
         </div>
-        <div class="feedback-item">
-            <div class="gp-v">GÓP Ý VÀ PHẢN HỒI CỦA QUÝ KHÁCH</div>
-            <div class="cm-n-qu">Cảm ơn Quý khách đã sử dụng dịch vụ đặt vé tàu trực tuyến Cảm ơn Quý khách đã sử dụng dịch vụ đặt vé tàu trực tuyến tại VEXERE.COM. Sự hài lòng của Quý khách là động lực để chúng tôi không ngừng hoàn thiện và nâng cao chất lượng dịch vụ.</div>
-            <form id="feedbackForm" action="${pageContext.request.contextPath}/feedback" method="post">
-                <div class="form-group">
-                    <div class="h-v-tn-container">Họ và tên <span class="span">*</span></div>
-                    <div class="feedback-inner"><input type="text" name="customerName" required></div>
-                </div>
-                <div class="form-group">
-                    <div class="email-lin-h-container">Email liên hệ <span class="span">*</span></div>
-                    <div class="rectangle-div"><input type="email" name="customerEmail" required></div>
-                </div>
-                <div class="form-group">
-                    <div class="ni-dung-gp">Tiêu đề <span class="span">*</span></div>
-                    <div class="feedback-child2"><input type="text" name="subject" required></div>
-                </div>
-                <div class="form-group">
-                    <div class="ni-dung-gp">Nội dung góp ý <span class="span">*</span></div>
-                    <div class="feedback-child2"><textarea name="message" required></textarea></div>
-                </div>
-                <button type="submit" class="feedback-child1">
-                    <div class="gi">Gửi</div>
-                </button>
-            </form>
+        <div class="rectangle-group">
+            <div class="group-child2"></div>
+            <div class="nhng-ni-dung-chng-ti-rt-m-parent">
+                <div class="nhng-ni-dung">Những nội dung chúng tôi rất mong nhận được từ bạn</div>
+                <div class="phn-nh-s">Phản ánh sự cố kỹ thuật, lỗi thanh toán hoặc sai thông tin vé</div>
+                <div class="xut-tnh-nng">Đề xuất tính năng mới hoặc dịch vụ bổ sung</div>
+                <div class="cm-nhn-v">Cảm nhận về dịch vụ khách hàng</div>
+                <div class="mi-kin">Mọi ý kiến khác liên quan đến website</div>
+                <div class="line-div"></div>
+                <div class="group-child3"></div>
+                <div class="group-child4"></div>
+                <div class="group-child5"></div>
+                <div class="group-child6"></div>
+                <div class="thng-tin">THÔNG TIN</div>
+                <!-- <img class="info-preview-1-icon" alt="Info icon" src="info-preview 1.png"> -->
+                
+                <form id="infoForm">
+                    <div class="tn-phiu-container">
+                        <span>Tên phiếu </span><span class="span">*</span>
+                    </div>
+                    <input type="text" name="ticketName" class="group-child7" required>
+                    
+                    <div class="loi-phiu-container">
+                        <span>Loại phiếu </span>
+                        <span class="span">*</span>
+                    </div>
+                    <select name="ticketType" class="group-child8" required>
+                        <option value="">Chọn loại phiếu</option>
+                        <option value="1">Góp ý</option>
+                        <option value="2">Phản ánh</option>
+                        <option value="3">Đề xuất</option>
+                    </select>
+                    
+                    <div class="m-t">Mô tả</div>
+                    <textarea name="description" class="group-child9" required></textarea>
+                </form>
+                <!-- <img class="polygon-icon" alt="Dropdown icon" src="Polygon 1.svg"> -->
+            </div>
         </div>
     </div>
-</div>
-  	
-  	
-  	
-  	
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackMessage = document.getElementById('feedbackMessage');
+            <c:if test="${not empty feedbackSuccess and feedbackSuccess}">
+                feedbackMessage.style.display = 'block';
+                feedbackMessage.style.color = 'green';
+                feedbackMessage.textContent = 'Góp ý của bạn đã được gửi thành công!';
+                // Clear form fields after successful submission
+                document.getElementById('feedbackForm').reset();
+            </c:if>
+        });
+    </script>
 </body>
 </html>

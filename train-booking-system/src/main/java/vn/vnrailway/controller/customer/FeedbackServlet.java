@@ -23,10 +23,11 @@ public class FeedbackServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String customerName = request.getParameter("customerName");
-        String customerEmail = request.getParameter("customerEmail");
-        String subject = request.getParameter("subject");
-        String message = request.getParameter("message");
+        String customerName = request.getParameter("fullName");
+        String customerEmail = request.getParameter("email");
+        String message = request.getParameter("feedbackContent");
+        // Assuming 'subject' is not directly from the form, or can be derived/defaulted
+        String subject = "General Feedback"; // Default subject or derive from ticketType if needed
 
         Feedback feedback = new Feedback();
         feedback.setCustomerName(customerName);
@@ -38,6 +39,7 @@ public class FeedbackServlet extends HttpServlet {
         FeedbackDAO feedbackDAO = new FeedbackDAOImpl();
         feedbackDAO.saveFeedback(feedback);
 
-        response.sendRedirect(request.getContextPath() + "/feedback");
+        request.setAttribute("feedbackSuccess", true);
+        doGet(request, response); // Forward to doGet to display the JSP
     }
 }
