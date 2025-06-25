@@ -27,39 +27,26 @@
         <div class="feedback-item">
             <div class="gp-v">GÓP Ý VÀ PHẢN HỒI CỦA QUÝ KHÁCH</div>
             <div class="cm-n-qu">Cảm ơn Quý khách đã sử dụng dịch vụ đặt vé tàu trực tuyến Cảm ơn Quý khách đã sử dụng dịch vụ đặt vé tàu trực tuyến tại VEXERE.COM. Sự hài lòng của Quý khách là động lực để chúng tôi không ngừng hoàn thiện và nâng cao chất lượng dịch vụ.</div>
-            <form id="feedbackForm">
+            <form id="feedbackForm" action="${pageContext.request.contextPath}/feedback" method="post">
                 <div class="form-group">
                     <div class="h-v-tn-container">Họ và tên <span class="span">*</span></div>
-                    <div class="feedback-inner"><input type="text" name="fullName" required></div>
+                    <div class="feedback-inner"><input type="text" name="customerName" required></div>
                 </div>
                 <div class="form-group">
                     <div class="email-lin-h-container">Email liên hệ <span class="span">*</span></div>
-                    <div class="rectangle-div"><input type="email" name="email" required></div>
+                    <div class="rectangle-div"><input type="email" name="customerEmail" required></div>
+                </div>
+                <div class="form-group">
+                    <div class="ni-dung-gp">Tiêu đề <span class="span">*</span></div>
+                    <div class="feedback-child2"><input type="text" name="subject" required></div>
                 </div>
                 <div class="form-group">
                     <div class="ni-dung-gp">Nội dung góp ý <span class="span">*</span></div>
-                    <div class="feedback-child2"><textarea name="feedbackContent" required></textarea></div>
+                    <div class="feedback-child2"><textarea name="message" required></textarea></div>
                 </div>
-                <div class="form-group">
-                    <div class="thng-tin">THÔNG TIN</div>
-                    <div class="info-preview-1-icon"></div>
-                    <div class="tn-phiu-container">Tên phiếu <span class="span">*</span></div>
-                    <div class="feedback-child8"><input type="text" name="ticketName" required></div>
-                    <div class="loi-phiu-container">Loại phiếu <span class="span">*</span></div>
-                    <div class="feedback-child9">
-                        <select name="ticketType" required>
-                            <option value="" disabled selected>Chọn loại phiếu</option>
-                            <option value="Góp ý">Góp ý</option>
-                            <option value="Phản ánh">Phản ánh</option>
-                            <option value="Đề xuất">Đề xuất</option>
-                        </select>
-                    </div>
-                    <div class="m-t">Mô tả</div>
-                    <div class="feedback-child10"><textarea name="description" required></textarea></div>
-                </div>
-                <div class="feedback-child1">
+                <button type="submit" class="feedback-child1">
                     <div class="gi">Gửi</div>
-                </div>
+                </button>
             </form>
         </div>
     </div>

@@ -10,6 +10,8 @@ import vn.vnrailway.dao.FeedbackDAO;
 import vn.vnrailway.dao.impl.FeedbackDAOImpl;
 import vn.vnrailway.model.Feedback;
 
+import java.util.Date;
+
 @WebServlet("/feedback")
 public class FeedbackServlet extends HttpServlet {
 
@@ -21,14 +23,21 @@ public class FeedbackServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String title = request.getParameter("title");
-        String comment = request.getParameter("comment");
+        String customerName = request.getParameter("customerName");
+        String customerEmail = request.getParameter("customerEmail");
+        String subject = request.getParameter("subject");
+        String message = request.getParameter("message");
 
-        Feedback feedback = new Feedback(title, comment);
+        Feedback feedback = new Feedback();
+        feedback.setCustomerName(customerName);
+        feedback.setCustomerEmail(customerEmail);
+        feedback.setSubject(subject);
+        feedback.setMessage(message);
+        feedback.setSubmissionDate(new Date());
 
         FeedbackDAO feedbackDAO = new FeedbackDAOImpl();
         feedbackDAO.saveFeedback(feedback);
 
-        response.sendRedirect("/train-booking-system/feedback");
+        response.sendRedirect(request.getContextPath() + "/feedback");
     }
 }
