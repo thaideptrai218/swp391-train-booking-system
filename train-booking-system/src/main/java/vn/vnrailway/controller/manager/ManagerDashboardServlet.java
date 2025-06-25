@@ -21,6 +21,7 @@ import vn.vnrailway.dto.BestSellerLocationDTO;
 // import vn.vnrailway.dto.SalesByMonthDTO; // Reverted
 // import vn.vnrailway.dto.SalesByYearDTO; // Reverted
 import vn.vnrailway.dto.SalesByMonthYearDTO;
+import vn.vnrailway.dto.SalesByWeekDTO; // Added for weekly sales
 // import vn.vnrailway.dto.BookingTrendDTO; // Already marked as removed
 import vn.vnrailway.dto.StationPopularityDTO;
 import vn.vnrailway.dto.TripPopularityDTO;
@@ -79,12 +80,30 @@ public class ManagerDashboardServlet extends HttpServlet {
 
                         // Serialize to JSON for JavaScript
                         String salesByMonthYearJson = salesByMonthYearData.stream()
-                                        .map(dto -> String.format(
-                                                        "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalSales\":%.2f}",
-                                                        dto.getYear(), dto.getMonth(), dto.getMonthName(),
-                                                        dto.getTotalSales()))
+                                        .map(dto -> {
+                                                // Ensure monthName is set if not already
+                                                if (dto.getMonthName() == null || dto.getMonthName().isEmpty()) {
+                                                        dto.setMonthNameFromMonth();
+                                                }
+                                                return String.format(
+                                                                "{\"label\":\"%s %d\",\"totalSales\":%.2f}",
+                                                                dto.getMonthName(), dto.getYear(), dto.getTotalSales());
+                                        })
                                         .collect(Collectors.joining(",", "[", "]"));
                         request.setAttribute("salesByMonthYearJson", salesByMonthYearJson);
+
+                        // Fetch sales by week
+                        List<SalesByWeekDTO> salesByWeekData = dashboardDAO.getSalesByWeek();
+                        request.setAttribute("salesByWeekData", salesByWeekData); // Keep for JSP check
+
+                        // Serialize weekly sales to JSON for JavaScript
+                        String salesByWeekJson = salesByWeekData.stream()
+                                        .map(dto -> String.format(
+                                                        "{\"year\":%d,\"week\":%d,\"weekOfYear\":\"%s\",\"totalSales\":%.2f}",
+                                                        dto.getYear(), dto.getWeek(), dto.getWeekOfYear(),
+                                                        dto.getTotalSales()))
+                                        .collect(Collectors.joining(",", "[", "]"));
+                        request.setAttribute("salesByWeekJson", salesByWeekJson);
 
                         // Removed: Fetch all tickets for the new table
                         // List<Ticket> allTickets = ticketRepository.findAll();

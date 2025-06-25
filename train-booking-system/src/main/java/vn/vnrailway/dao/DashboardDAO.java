@@ -1,6 +1,7 @@
 package vn.vnrailway.dao;
 
 import vn.vnrailway.dto.SalesByMonthYearDTO;
+import vn.vnrailway.dto.SalesByWeekDTO;
 import vn.vnrailway.utils.DBContext;
 import java.sql.*;
 import java.util.ArrayList;
@@ -81,12 +82,44 @@ public class DashboardDAO {
                 int year = rs.getInt("BookingYear");
                 int month = rs.getInt("BookingMonth");
                 BigDecimal totalSales = rs.getBigDecimal("MonthlySales");
+                if (rs.wasNull()) {
+                    totalSales = BigDecimal.ZERO;
+                }
                 SalesByMonthYearDTO dto = new SalesByMonthYearDTO(year, month, totalSales);
                 dto.setMonthNameFromMonth(); // Set the month name
                 salesData.add(dto);
             }
         } catch (SQLException e) {
             System.out.println("Error fetching sales by month and year: " + e);
+            // Consider logging the error more formally or re-throwing a custom exception
+        }
+        return salesData;
+    }
+
+    public List<SalesByWeekDTO> getSalesByWeek() {
+        List<SalesByWeekDTO> salesData = new ArrayList<>();
+        // SQL Server uses DATEPART(wk, date) for week number
+        String sql = "SELECT YEAR(BookingDateTime) AS BookingYear, " +
+                "       DATEPART(wk, BookingDateTime) AS BookingWeek, " +
+                "       SUM(TotalPrice) AS WeeklySales " +
+                "FROM dbo.Bookings " +
+                "WHERE BookingStatus = 'Confirmed' AND PaymentStatus = 'Paid' " +
+                "GROUP BY YEAR(BookingDateTime), DATEPART(wk, BookingDateTime) " +
+                "ORDER BY BookingYear, BookingWeek";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int year = rs.getInt("BookingYear");
+                int week = rs.getInt("BookingWeek");
+                BigDecimal totalSales = rs.getBigDecimal("WeeklySales");
+                if (rs.wasNull()) {
+                    totalSales = BigDecimal.ZERO;
+                }
+                salesData.add(new SalesByWeekDTO(year, week, totalSales));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching sales by week: " + e);
             // Consider logging the error more formally or re-throwing a custom exception
         }
         return salesData;

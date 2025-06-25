@@ -68,16 +68,36 @@
       a:hover {
         background-color: #c0392b; /* Darker red on hover */
       }
+      .link-container {
+        display: flex;
+        justify-content: space-around; /* Distributes space evenly around items */
+        align-items: center; /* Vertically aligns items in the center */
+        width: 100%; /* Ensures the container takes full width to allow even spacing */
+        margin-top: 20px; /* Adds some space above the link container */
+      }
+      .link-container a {
+        margin-top: 0; /* Reset margin-top for individual links as container handles spacing */
+        /* Adjust padding or margins on individual links if more specific spacing is needed */
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>TRUY CẬP BỊ TỪ CHỐI</h1>
       <p>Bạn không thể qua các trang khác bằng cách tà đạo.</p>
-      <p>Bạn cần phải có quyền truy cập để đến trang này</p>
       <p>Nếu bạn nghĩ đây là lỗi thì nó là tính năng</p>
       <p>Không thì hãy hỏi con mèo</p>
-      <a href="${pageContext.request.contextPath}/landing">Về Trang Chủ</a>
+      <p>
+        ĐIỀU NÀY CÓ THỂ DO BẠN ĐANG CỐ GẮNG TRUY CẬP ĐẾN MỘT ĐỊA CHỈ BỊ HẠN CHẾ
+        (QUAY LẠI MÀN HÌNH CHÍNH)
+      </p>
+      <p>HOẶC PHIÊN ĐĂNG NHẬP CỦA BẠN ĐÃ HẾT HẠN (QUAY LẠI MÀN ĐĂNG NHẬP).</p>
+      <div class="link-container">
+        <a href="${pageContext.request.contextPath}/landing">Màn hình chính</a>
+        <a href="${pageContext.request.contextPath}/login"
+          >Màn hình đăng nhập</a
+        >
+      </div>
       <%-- Or a more specific link based on user role if available, e.g., back
       to their dashboard --%>
     </div>

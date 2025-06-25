@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.ArrayList; // Added for stationsOrder list
 import java.util.Map; // Added for creating response maps
 import java.util.Optional; // Added for Optional type
 import com.fasterxml.jackson.core.type.TypeReference; // Added for Jackson
@@ -268,11 +267,6 @@ public class ManageRoutesServlet extends HttpServlet {
             return;
         }
 
-        // Fetch station names to create the route name
-        // This requires a method in StationRepository or getting all stations and
-        // filtering
-        // For simplicity, assuming routeRepository can provide station details or we
-        // fetch all and find
         List<Station> allStations = routeRepository.getAllStations(); // Already fetched in listRoutesAndStations
         String departureStationName = allStations.stream()
                 .filter(s -> s.getStationID() == departureStationId)
@@ -290,7 +284,7 @@ public class ManageRoutesServlet extends HttpServlet {
         // Check if a route with this name already exists
         Optional<Route> existingRouteOpt = routeRepository.findByRouteName(routeName);
         if (existingRouteOpt.isPresent()) {
-            request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồnS tại.");
+            request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồn tại.");
             listRoutesAndStations(request, response);
             return;
         }
@@ -381,41 +375,28 @@ public class ManageRoutesServlet extends HttpServlet {
         // This requires careful logic to remove old start/end stations if they changed,
         // add new start/end stations, and potentially re-sequence or adjust
         // intermediate stations.
-        // This is a placeholder for the complex DB operations.
-        // Ideally, this would be a single transactional method in a service/DAO layer.
-        // For now, we'll update the route name/description and assume station updates
-        // are more complex.
+        routeRepository.update(routeToUpdate);
 
-        // Simplified: Update Route table. Actual station replacement is complex.
-        // To fully implement, we'd need:
-        // 1. Get current first and last RouteStation entries.
-        // 2. If newDepartureStationId is different from current first:
-        // - Remove current first RouteStation.
-        // - Add newDepartureStationId as RouteStation with sequence 1, distance 0.
-        // 3. If newArrivalStationId is different from current last:
-        // - Remove current last RouteStation.
-        // - Add newArrivalStationId as RouteStation with new last sequence number.
-        // Distance calculation is tricky.
-        // This simplified version will only update the Route's name and description.
-        // The actual stations in RouteStations table are NOT changed by this simplified
-        // logic.
-        // A full implementation would require more DAO methods and careful transaction
-        // management.
-
-        boolean routeUpdated = routeRepository.update(routeToUpdate); // Updates name and description
-
-        if (routeUpdated) {
-            // Placeholder for actual station replacement logic
-            // Example: if (departureChanged) routeRepository.replaceFirstStation(routeId,
-            // newDepartureStationId, ...);
-            // Example: if (arrivalChanged) routeRepository.replaceLastStation(routeId,
-            // newArrivalStationId, ...);
-            request.getSession().setAttribute("successMessage",
-                    "Thông tin tuyến đường '" + routeToUpdate.getRouteName() + "' đã được cập nhật (Mô tả và Tên). " +
-                            "Thay đổi trạm đầu/cuối cần xử lý phức tạp hơn ở tầng DAO.");
+        List<RouteStationDetailDTO> currentStations = routeRepository.findStationDetailsByRouteId(routeId);
+        if (currentStations.isEmpty()) {
+            routeRepository.addStationToRoute(routeId, newDepartureStationId, 1, BigDecimal.ZERO, 0);
+            routeRepository.addStationToRoute(routeId, newArrivalStationId, 2, BigDecimal.ZERO, 0);
         } else {
-            request.getSession().setAttribute("errorMessage", "Không thể cập nhật thông tin tuyến đường.");
+            RouteStationDetailDTO currentDeparture = currentStations.get(0);
+            if (currentDeparture.getStationID() != newDepartureStationId) {
+                routeRepository.removeStationFromRoute(routeId, currentDeparture.getStationID());
+                routeRepository.addStationToRoute(routeId, newDepartureStationId, 1, BigDecimal.ZERO, 0);
+            }
+
+            RouteStationDetailDTO currentArrival = currentStations.get(currentStations.size() - 1);
+            if (currentArrival.getStationID() != newArrivalStationId) {
+                routeRepository.removeStationFromRoute(routeId, currentArrival.getStationID());
+                int nextSequence = routeRepository.getNextSequenceNumberForRoute(routeId);
+                routeRepository.addStationToRoute(routeId, newArrivalStationId, nextSequence, BigDecimal.ZERO, 0);
+            }
         }
+
+        request.getSession().setAttribute("successMessage", "Tuyến đường đã được cập nhật thành công!");
         response.sendRedirect(request.getContextPath() + "/manageRoutes");
     }
 

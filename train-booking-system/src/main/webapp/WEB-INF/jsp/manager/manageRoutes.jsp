@@ -88,6 +88,9 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
       .routes-table .action-link:hover {
         text-decoration: underline;
       }
+      .edit-form-hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -242,10 +245,13 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
       </c:choose>
 
       <!-- Edit Route Form (conditionally shown or populated) -->
-      <div class="container" id="editRouteFormContainer" style="margin-top: 30px; <c:if test="${empty routeToEditOnPage}">display: none;</c:if>">
+      <c:set var="editFormContainerClass" value=""/>
+      <c:if test="${empty routeToEditOnPage}">
+          <c:set var="editFormContainerClass" value="edit-form-hidden"/>
+      </c:if>
+      <div class="container<c:if test='${not empty editFormContainerClass}'> ${editFormContainerClass}</c:if>" id="editRouteFormContainer" style="margin-top: 30px;">
         <h2><i class="fas fa-edit"></i> Chỉnh Sửa Tuyến Đường</h2>
         <form action="${pageContext.request.contextPath}/manageRoutes" method="post">
-          <input type="hidden" name="action" value="updateRoute" />
           <input type="hidden" name="action" value="updateRoute" />
           <input type="hidden" name="routeId" value="${routeToEditOnPage.routeID}" />
           <input type="hidden" name="originalDepartureStationId" value="${departureStationIdForEdit}" /> <%-- Need original IDs --%>
