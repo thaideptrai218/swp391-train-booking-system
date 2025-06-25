@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
+import jakarta.servlet.http.HttpSession;
+import vn.vnrailway.model.User;
 
 @WebServlet("/admin/dashboard")
 public class AdminDashboardServlet extends HttpServlet {
@@ -20,6 +22,12 @@ public class AdminDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            request.setAttribute("user", user);
+        }
+
         DashboardDAO dashboardDAO = new DashboardDAO();
         
         // Lấy các thống kê

@@ -17,16 +17,16 @@ public class UserRepositoryImpl implements UserRepository {
         user.setFullName(rs.getString("FullName"));
         user.setEmail(rs.getString("Email"));
         user.setPhoneNumber(rs.getString("PhoneNumber"));
-        user.setPasswordHash(rs.getString("PasswordHash")); // Use setPasswordHash for plain-text password
+        user.setPasswordHash(rs.getString("PasswordHash"));
         user.setIdCardNumber(rs.getString("IDCardNumber"));
         user.setRole(rs.getString("Role"));
         user.setActive(rs.getBoolean("IsActive"));
-        
+
         Timestamp createdAtTimestamp = rs.getTimestamp("CreatedAt");
         if (createdAtTimestamp != null) {
             user.setCreatedAt(createdAtTimestamp.toLocalDateTime());
         }
-        
+
         Timestamp lastLoginTimestamp = rs.getTimestamp("LastLogin");
         if (lastLoginTimestamp != null) {
             user.setLastLogin(lastLoginTimestamp.toLocalDateTime());
@@ -98,40 +98,37 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "INSERT INTO Users (FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhoneNumber());
-            ps.setString(4, user.getPasswordHash()); // Use getPasswordHash for plain-text password
+            ps.setString(4, user.getPasswordHash());
             ps.setString(5, user.getIdCardNumber());
             ps.setString(6, user.getRole());
             ps.setBoolean(7, user.isActive());
-            
+
             if (user.getCreatedAt() != null) {
                 ps.setTimestamp(8, Timestamp.valueOf(user.getCreatedAt()));
             } else {
-                ps.setTimestamp(8, Timestamp.valueOf(java.time.LocalDateTime.now())); // Default to now if not set
+                ps.setTimestamp(8, Timestamp.valueOf(java.time.LocalDateTime.now()));
             }
-            
+
             if (user.getLastLogin() != null) {
                 ps.setTimestamp(9, Timestamp.valueOf(user.getLastLogin()));
             } else {
                 ps.setNull(9, Types.TIMESTAMP);
             }
-            
+
             int affectedRows = ps.executeUpdate();
-            
+
             if (affectedRows == 0) {
                 throw new SQLException("Creating user failed, no rows affected.");
             }
-            
+
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     user.setUserID(generatedKeys.getInt(1));
                 } else {
-                    // This might happen if UserID is not an identity column or not configured to return.
-                    // Or if the DB doesn't support RETURN_GENERATED_KEYS in this way for this table.
-                    // For now, we assume it should return an ID.
                     System.err.println("Creating user succeeded, but no ID was obtained. UserID might not be auto-generated or not configured to be returned.");
                 }
             }
@@ -144,22 +141,22 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, PasswordHash = ?, IDCardNumber = ?, Role = ?, IsActive = ?, LastLogin = ? WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhoneNumber());
-            ps.setString(4, user.getPasswordHash()); // Use getPasswordHash for plain-text password
+            ps.setString(4, user.getPasswordHash());
             ps.setString(5, user.getIdCardNumber());
             ps.setString(6, user.getRole());
             ps.setBoolean(7, user.isActive());
-            
+
             if (user.getLastLogin() != null) {
                 ps.setTimestamp(8, Timestamp.valueOf(user.getLastLogin()));
             } else {
                 ps.setNull(8, Types.TIMESTAMP);
             }
             ps.setInt(9, user.getUserID());
-            
+
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
@@ -170,89 +167,86 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "DELETE FROM Users WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             ps.setInt(1, userId);
-            
+
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
     }
 
-    // Main method for testing
-    public static void main(String[] args) {
-        UserRepository userRepository = new UserRepositoryImpl();
-        try {
-            // Test findAll
-            System.out.println("Testing findAll users:");
-            List<User> users = userRepository.findAll();
-            if (users.isEmpty()) {
-                System.out.println("No users found.");
-            } else {
-                users.forEach(u -> System.out.println(u));
-            }
-
-            // Test findById (assuming user with ID 1 exists, or change ID for testing)
-            int testUserId = 1; // Ensure this ID exists
-            System.out.println("\nTesting findById for user ID: " + testUserId);
-            Optional<User> userOpt = userRepository.findById(testUserId);
-            userOpt.ifPresentOrElse(
-                u -> System.out.println("Found user: " + u),
-                () -> System.out.println("User with ID " + testUserId + " not found.")
-            );
-            
-            // Test findByEmail
-            String testEmail = "test@example.com"; // Ensure this email exists or use a real one from your DB
-            System.out.println("\nTesting findByEmail for email: " + testEmail);
-            Optional<User> userByEmailOpt = userRepository.findByEmail(testEmail);
-            userByEmailOpt.ifPresentOrElse(
-                u -> System.out.println("Found user by email: " + u),
-                () -> System.out.println("User with email " + testEmail + " not found.")
-            );
-            
-            // Test findByPhone
-            String testPhone = "0123456789"; // Ensure this phone number exists or use a real one from your DB
-            System.out.println("\nTesting findByPhone for phone: " + testPhone);
-            Optional<User> userByPhoneOpt = userRepository.findByPhone(testPhone);
-            userByPhoneOpt.ifPresentOrElse(
-                u -> System.out.println("Found user by phone: " + u),
-                () -> System.out.println("User with phone " + testPhone + " not found.")
-            );
-
-            // Example of saving a new user (uncomment and modify to test)
-            /*
-            System.out.println("\nTesting save new user:");
-            User newUser = new User();
-            newUser.setFullName("Test User Main");
-            newUser.setEmail("newusermain@example.com");
-            newUser.setPhoneNumber("1234567890");
-            newUser.setPasswordHash("hashedpasswordmain"); // In a real app, hash this properly
-            newUser.setRole("Customer");
-            newUser.setActive(true);
-            newUser.setCreatedAt(java.time.LocalDateTime.now());
-            
-            User savedUser = userRepository.save(newUser);
-            System.out.println("Saved user: " + savedUser);
-
-            if (savedUser.getUserID() > 0) {
-                // Example of updating the user
-                System.out.println("\nTesting update user ID: " + savedUser.getUserID());
-                savedUser.setPhoneNumber("0987654321");
-                boolean updated = userRepository.update(savedUser);
-                System.out.println("Update successful: " + updated);
-
-                Optional<User> updatedUserOpt = userRepository.findById(savedUser.getUserID());
-                updatedUserOpt.ifPresent(u -> System.out.println("Updated user details: " + u));
-
-                // Example of deleting the user
-                System.out.println("\nTesting delete user ID: " + savedUser.getUserID());
-                boolean deleted = userRepository.deleteById(savedUser.getUserID());
-                System.out.println("Delete successful: " + deleted);
-            }
-            */
-
-        } catch (SQLException e) {
-            System.err.println("Error testing UserRepository: " + e.getMessage());
-            e.printStackTrace();
+    @Override
+    public boolean lockById(int userId) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = 0 WHERE UserID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
         }
+    }
+
+    @Override
+    public boolean unlockById(int userId) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = 1 WHERE UserID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean hideById(int userId) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = 0 WHERE UserID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException {
+        List<Object[]> auditLogs = new ArrayList<>();
+        String sql = "SELECT LogId, LogTime, Username, TableName, RowId, ColumnName, OldValue, NewValue FROM dbo.AuditLogs ORDER BY LogId ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Object[] log = new Object[8];
+                    log[0] = rs.getInt("LogId");
+                    log[1] = rs.getTimestamp("LogTime");
+                    log[2] = rs.getString("Username");
+                    log[3] = rs.getString("TableName");
+                    log[4] = rs.getString("RowId");
+                    log[5] = rs.getString("ColumnName");
+                    log[6] = rs.getString("OldValue");
+                    log[7] = rs.getString("NewValue");
+                    auditLogs.add(log);
+                }
+            }
+        }
+        return auditLogs;
+    }
+
+    @Override
+    public int getTotalLogCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM dbo.AuditLogs";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
     }
 }

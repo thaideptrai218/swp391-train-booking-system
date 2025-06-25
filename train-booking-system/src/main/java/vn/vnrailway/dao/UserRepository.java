@@ -13,6 +13,11 @@ public interface UserRepository {
     User save(User user) throws SQLException; // Returns the saved user, possibly with generated ID
     boolean update(User user) throws SQLException;
     boolean deleteById(int userId) throws SQLException;
+    boolean lockById(int userId) throws SQLException;
+    boolean unlockById(int userId) throws SQLException;
+    boolean hideById(int userId) throws SQLException;
+    List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException;
+    int getTotalLogCount() throws SQLException;
     // Optional: A method to verify credentials, though this might also fit in a service
     // Optional<User> findByEmailAndPassword(String email, String passwordHash) throws SQLException;
 }
