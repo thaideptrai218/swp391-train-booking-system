@@ -66,6 +66,7 @@
                                 <!-- chỉnh sửa ở chuyển tiền, sau đó xóa dữ liệu trong bảng mới là TempRefundRequests, lưu vào bảng Refunds -->
                                 <form method="post" action="refundProcessing">
                                     <input type="hidden" name="ticketCode" value="${req.ticketCode}" />
+                                    <input type="hidden" name="email" value="${req.email}" />
                                     <button type="submit" name="action" value="approve">Chấp nhận</button>
                                     <button type="submit" name="action" value="reject">Từ chối</button>
                                 </form>
