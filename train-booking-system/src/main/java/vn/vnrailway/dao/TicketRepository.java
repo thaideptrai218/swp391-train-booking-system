@@ -44,4 +44,6 @@ public interface TicketRepository {
     void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
 
     void rejectRefundTicket(String ticketCode) throws SQLException;
+
+    void approveRefundTicket(String ticketCode) throws SQLException;
 }

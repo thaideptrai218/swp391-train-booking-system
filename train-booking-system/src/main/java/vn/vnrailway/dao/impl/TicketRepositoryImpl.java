@@ -607,6 +607,30 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
+    public void approveRefundTicket(String ticketCode) throws SQLException {
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Refunded' WHERE TicketCode = ?;";
+        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID = (SELECT TicketID FROM Tickets WHERE TicketCode = ?)";
+
+        try (Connection conn = DBContext.getConnection()) {
+            conn.setAutoCommit(false); // dùng transaction
+
+            try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
+                ps.setString(1, ticketCode);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(deleteTempRefundSql)) {
+                ps.setString(1, ticketCode);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e; // Ném lại ngoại lệ để caller có thể xử lý
+        }
+    }
+
     // Main method for testing (optional)
     public static void main(String[] args) {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
