@@ -68,69 +68,52 @@ public class RoleFilter implements Filter {
             return;
         }
 
-        String role = user.getRole() != null ? user.getRole().toLowerCase() : null; // Convert role to uppercase
+        String role = user.getRole() != null ? user.getRole().toLowerCase() : ""; // Use empty string for null role
 
-        if ("admin".equals(role)) {
-            // Admin has access to all pages, or specific admin pages
-            if (path.startsWith("/admin/") || path.equals("/admin-dashboard")) { // Added /admin-dashboard
-                chain.doFilter(request, response);
-            } else if (isCommonPage(path)) {
-                chain.doFilter(request, response);
-            } else {
-                // Unauthorized access attempt by Admin
-                request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request, response);
-                return;
-            }
-        } else if ("manager".equals(role)) {
-            // Manager specific access
-            if (path.equals("/managerDashboard") || path.startsWith("/manager/") ||
-                    path.equals("/manageTrips") ||
-                    path.equals("/manageRoutes") ||
-                    path.equals("/manageStations") ||
-                    path.equals("/managePrice") ||
-                    path.equals("/manageStaffs") ||
-                    path.equals("/routeDetail") ||
-                    path.equals("/tripDetail") ||
-                    path.equals("/manage-trains-seats") ||
-                    path.equals("/managePrice") ||
-                    path.equals("/managerStaff")) {
-                chain.doFilter(request, response);
-            } else if (isCommonPage(path)) {
-                chain.doFilter(request, response);
-            } else {
-                // Unauthorized access attempt by Manager
-                request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request, response);
-                return;
-            }
-        } else if ("staff".equals(role)) {
-            // Manager specific access
-            // Allow access if path is exactly /managerDashboard OR starts with /manager/
-            // if (path.equals("/managerDashboard") || path.startsWith("/manager/")) {
-            // chain.doFilter(request, response);
-            // } else if (isCommonPage(path)) {
-            // chain.doFilter(request, response);
-            // } else {
-            // // Unauthorized access attempt by Manager
-            // request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request,
-            // response);
-            // return;
-            // }
-        } else if ("customer".equals(role)) {
-            // Customer specific access
-            if (path.startsWith("/customer/") || path.equals("/changepassword") // Check servlet path
-                    || path.equals("/change-password") || path.equals("/landing")) { // Added /landing
-                chain.doFilter(request, response);
-            } else if (isCommonPage(path)) {
-                chain.doFilter(request, response);
-            } else {
-                // Unauthorized access attempt by Customer
-                request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request, response);
-                return;
-            }
+        boolean authorized = false;
+
+        switch (role) {
+            case "admin":
+                if (path.startsWith("/admin/") || path.equals("/admin-dashboard") || isCommonPage(path)) {
+                    authorized = true;
+                }
+                break;
+            case "manager":
+                if (path.equals("/managerDashboard") || path.startsWith("/manager/") ||
+                        path.equals("/manageTrips") ||
+                        path.equals("/manageRoutes") ||
+                        path.equals("/manageStations") ||
+                        path.equals("/managePrice") ||
+                        path.equals("/manageStaffs") ||
+                        path.equals("/routeDetail") ||
+                        path.equals("/tripDetail") ||
+                        path.equals("/manage-trains-seats") ||
+                        path.equals("/managerStaff") ||
+                        isCommonPage(path)) {
+                    authorized = true;
+                }
+                break;
+            case "staff":
+                 if (path.equals("/staff-dashboard") || path.startsWith("/staff/") || isCommonPage(path)) {
+                    authorized = true;
+                }
+                break;
+            case "customer":
+                if (path.startsWith("/customer/") || path.equals("/changepassword")
+                        || path.equals("/change-password") || path.equals("/landing") || isCommonPage(path)) {
+                    authorized = true;
+                }
+                break;
+            default:
+                // For unknown roles, authorized remains false
+                break;
+        }
+
+        if (authorized) {
+            chain.doFilter(request, response);
         } else {
-            // Unknown role or role not handled, redirect to login (or unauthorized)
+            // Unauthorized access attempt
             request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request, response);
-            return;
         }
     }
 
