@@ -9,14 +9,7 @@
     </welcome-file-list>
 
     <!-- Servlet mapping will be handled by @WebServlet annotation in SearchTripServlet.java -->
-    <filter>
-        <filter-name>RoleFilter</filter-name>
-        <filter-class>vn.vnrailway.filter.RoleFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>RoleFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+
 
     <!-- Default Servlet Mapping for Static Resources -->
     <servlet-mapping>
@@ -37,4 +30,13 @@
     <session-config>
         <session-timeout>60</session-timeout>
     </session-config>
+
+    <filter>
+        <filter-name>RoleFilter</filter-name>
+        <filter-class>vn.vnrailway.filter.RoleFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RoleFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 </web-app>
