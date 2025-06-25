@@ -4,6 +4,7 @@ import vn.vnrailway.model.User;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public interface UserRepository {
     Optional<User> findById(int userId) throws SQLException;
@@ -22,9 +23,9 @@ public interface UserRepository {
 
     boolean deleteById(int userId) throws SQLException;
 
-    void delete(int userID) throws SQLException;
-    // Optional: A method to verify credentials, though this might also fit in a
-    // service
-    // Optional<User> findByEmailAndPassword(String email, String passwordHash)
-    // throws SQLException;
+    List<User> findByAddress(String address) throws SQLException;
+    List<User> findByGender(String gender) throws SQLException;
+    Optional<User> findByDateOfBirth(LocalDate dateOfBirth) throws SQLException;
+    // Optional: A method to verify credentials, though this might also fit in a service
+    // Optional<User> findByEmailAndPassword(String email, String passwordHash) throws SQLException;
 }

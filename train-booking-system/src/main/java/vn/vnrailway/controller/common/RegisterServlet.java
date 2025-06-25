@@ -140,9 +140,8 @@ public class RegisterServlet extends HttpServlet {
             } else {
                 // Hash the password before saving
                 String hashedPassword = HashPassword.hashPassword(password);
-
-                User newUser = new User(fullName, hashedPassword, fullName, email, phoneNumber, idCardNumber, "",
-                        "Customer"); // Default role "Customer"
+                
+                User newUser = new User(fullName, email, phoneNumber, hashedPassword, idCardNumber, "Customer", false, null, null, ""); // Default role "Customer"
 
                 userRepository.save(newUser);
                 response.sendRedirect(request.getContextPath() + "/login?registrationSuccess=true"); // Redirect to

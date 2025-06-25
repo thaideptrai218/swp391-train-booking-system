@@ -113,7 +113,7 @@ public class LoginServlet extends HttpServlet {
                 String role = user.getRole();
                 switch (role) {
                     case "Admin":
-                        response.sendRedirect(request.getContextPath() + "/admin-dashboard");
+                        response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                         break;
                     case "Staff":
                         response.sendRedirect(request.getContextPath() + "/staff/dashboard");

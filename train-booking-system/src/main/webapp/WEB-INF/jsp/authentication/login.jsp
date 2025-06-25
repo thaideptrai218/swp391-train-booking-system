@@ -37,10 +37,10 @@
                     }
                 %>
                 <div class="form-group">
-                    <label for="identifier">Email hoặc số điện thoại</label>
+                    <label for="identifier">Email hoặc Số Điện thoại</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-user icon"></i>
-                        <input type="text" id="identifier" name="identifier" placeholder="Nhập email hoặc số điện thoại của bạn" value="<%= rememberedIdentifier %>">
+                        <input type="text" id="identifier" name="identifier" placeholder="Nhập email hoặc Số Điện thoại của bạn" value="<%= rememberedIdentifier %>">
                     </div>
                 </div>
                 <div class="form-group">

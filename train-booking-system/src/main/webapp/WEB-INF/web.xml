@@ -31,12 +31,12 @@
         <session-timeout>60</session-timeout>
     </session-config>
 
-    <filter>
+    <!-- <filter>
         <filter-name>RoleFilter</filter-name>
         <filter-class>vn.vnrailway.filter.RoleFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>RoleFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping> -->
 </web-app>

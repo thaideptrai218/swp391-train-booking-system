@@ -48,7 +48,7 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("bookingTrends", trendDataJson);
 
         // Forward to dashboard
-        request.getRequestDispatcher("/WEB-INF/jsp/admin/dashboard.jsp")
+        request.getRequestDispatcher("/WEB-INF/jsp/admin/home.jsp")
                 .forward(request, response);
     }
 }

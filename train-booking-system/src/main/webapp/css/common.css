@@ -450,4 +450,14 @@ a:hover {
 
 .footer-bottom p.copyright {
     margin-top: 15px;
+    /* Message styling */
+    .error-message {
+        color: #dc3545; /* Red color for errors */
+        font-weight: bold;
+    }
+
+    .success-message {
+        color: #28a745; /* Green color for success */
+        font-weight: bold;
+    }
 }

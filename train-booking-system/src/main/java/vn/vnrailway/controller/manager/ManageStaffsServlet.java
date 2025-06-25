@@ -204,7 +204,7 @@ public class ManageStaffsServlet extends HttpServlet {
                         break;
                     case "delete":
                         int userID = Integer.parseInt(request.getParameter("userID"));
-                        userRepository.delete(userID);
+                        userRepository.deleteById(userID);
                         request.getSession().setAttribute("successMessage", "Staff member deleted successfully.");
                         break;
                     default:
