@@ -30,22 +30,28 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
   <h3><i class="fas fa-cogs"></i> Chức Năng</h3>
   <ul>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/trips">
-        <i class="fas fa-route"></i> Quản Lý Chuyến Đi
+      <a href="${pageContext.request.contextPath}/managerDashboard">
+        <i class="fas fa-chart-line"></i> Xem Số Liệu Thống Kê
+      </a>
+      <a href="${pageContext.request.contextPath}/manageRoutes">
+        <i class="fas fa-map-signs"></i> Quản Lý Tuyến Đường
+      </a>
+      <a href="${pageContext.request.contextPath}/manageTrips">
+        <i class="fas fa-train"></i> Quản Lý Chuyến Đi
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/trains-seats">
-        <i class="fas fa-building"></i> Quản Lý Ga Tàu và Ghế Ngồi
+      <a href="${pageContext.request.contextPath}/manage-trains-seats">
+        <i class="fas fa-building"></i> Quản Lý Tàu và Ghế Ngồi
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/schedules-pricing">
+      <a href="${pageContext.request.contextPath}/managePrice">
         <i class="fas fa-dollar-sign"></i> Quản Lý Giá cả
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/home">
+      <a href="${pageContext.request.contextPath}/managerStaff">
         <i class="fas fa-users-cog"></i> Quản Lý Nhân Viên
       </a>
     </li>

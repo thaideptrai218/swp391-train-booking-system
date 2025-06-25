@@ -126,7 +126,11 @@ public class TripRepositoryImpl implements TripRepository {
             ps.setInt(1, trip.getTrainID());
             ps.setInt(2, trip.getRouteID());
             ps.setTimestamp(3, Timestamp.valueOf(trip.getDepartureDateTime()));
-            ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
+            if (trip.getArrivalDateTime() != null) {
+                ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
+            } else {
+                ps.setNull(4, Types.TIMESTAMP); // This should not happen if DB column is NOT NULL
+            }
             ps.setBoolean(5, trip.isHolidayTrip());
             ps.setString(6, trip.getTripStatus());
             ps.setBigDecimal(7, trip.getBasePriceMultiplier());
@@ -158,7 +162,11 @@ public class TripRepositoryImpl implements TripRepository {
             ps.setInt(1, trip.getTrainID());
             ps.setInt(2, trip.getRouteID());
             ps.setTimestamp(3, Timestamp.valueOf(trip.getDepartureDateTime()));
-            ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
+            if (trip.getArrivalDateTime() != null) {
+                ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
+            } else {
+                ps.setNull(4, Types.TIMESTAMP); // This should not happen if DB column is NOT NULL
+            }
             ps.setBoolean(5, trip.isHolidayTrip());
             ps.setString(6, trip.getTripStatus());
             ps.setBigDecimal(7, trip.getBasePriceMultiplier());
@@ -213,8 +221,8 @@ public class TripRepositoryImpl implements TripRepository {
                         dto.setTrainName(rs.getString("TrainName"));
                         dto.setRouteName(rs.getString("RouteName"));
                         dto.setOriginStationName(rs.getString("OriginStation"));
-                        // dto.setTrainId(rs.getInt("trainId")); // Already mapped above as TrainID,
-                        // ensure SP output name consistency
+                        dto.setAvailableSeat(rs.getInt("AvailableSeats"));
+                        dto.setOccupiedSeat(rs.getInt("OccupiedSeats"));
 
                         Timestamp depTimestamp = rs.getTimestamp("DepartureTime");
                         if (depTimestamp != null) {
@@ -410,5 +418,303 @@ public class TripRepositoryImpl implements TripRepository {
             }
         }
         return popularTrips;
+    }
+
+    @Override
+    public List<vn.vnrailway.dto.ManageTripViewDTO> findAllForManagerView(String searchTerm, String sortField,
+            String sortOrder) throws SQLException {
+        List<vn.vnrailway.dto.ManageTripViewDTO> managerTrips = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder sqlBuilder = new StringBuilder("SELECT ");
+        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier ");
+        sqlBuilder.append("FROM Trips t ");
+        sqlBuilder.append("JOIN Routes r ON t.RouteID = r.RouteID ");
+
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            sqlBuilder.append(
+                    "WHERE (LOWER(r.RouteName) LIKE LOWER(?) OR LOWER(t.TripStatus) LIKE LOWER(?)) ");
+            String wildCardSearchTerm = "%" + searchTerm.trim() + "%";
+            params.add(wildCardSearchTerm);
+            params.add(wildCardSearchTerm);
+        }
+
+        // Validate sortField to prevent SQL injection and map to actual DB columns
+        String validSortField = "t.TripID"; // Default sort
+        if ("routeName".equalsIgnoreCase(sortField))
+            validSortField = "r.RouteName";
+        else if ("isHolidayTrip".equalsIgnoreCase(sortField))
+            validSortField = "t.IsHolidayTrip";
+        else if ("tripStatus".equalsIgnoreCase(sortField))
+            validSortField = "t.TripStatus";
+        // tripID is already the default if no other match
+
+        // Ensure sortOrder is either ASC or DESC
+        String SOrder = "DESC"; // Default sort order
+        if ("ASC".equalsIgnoreCase(sortOrder)) {
+            SOrder = "ASC";
+        }
+        sqlBuilder.append("ORDER BY ").append(validSortField).append(" ").append(SOrder);
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sqlBuilder.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    vn.vnrailway.dto.ManageTripViewDTO dto = new vn.vnrailway.dto.ManageTripViewDTO();
+                    dto.setTripID(rs.getInt("TripID"));
+                    dto.setRouteName(rs.getString("RouteName"));
+                    dto.setHolidayTrip(rs.getBoolean("IsHolidayTrip"));
+                    dto.setTripStatus(rs.getString("TripStatus"));
+                    dto.setRouteID(rs.getInt("RouteID"));
+                    dto.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier"));
+                    // trainName, departureDateTime, arrivalDateTime, trainID are no longer part of
+                    // the DTO's active fields
+                    // or are not selected by the current query for this view.
+                    managerTrips.add(dto);
+                }
+            } // Closing brace for try (ResultSet rs = ps.executeQuery())
+        } catch (SQLException e) {
+            System.err.println("Error fetching trips for manager view: " + e.getMessage());
+            throw e; // Re-throw to allow higher layers to handle it
+        }
+        return managerTrips;
+    }
+
+    @Override
+    public List<vn.vnrailway.dto.TripStationInfoDTO> findTripStationDetailsByTripId(int tripId) throws SQLException {
+        List<vn.vnrailway.dto.TripStationInfoDTO> tripStationInfos = new ArrayList<>();
+        // Updated SQL to include EstimateTime and DefaultStopTime
+        String sql = "SELECT t.TripID, s.StationID, s.StationName, rs.DistanceFromStart, " +
+                "ts.ScheduledDeparture, ty.AverageVelocity, " +
+                "rs.DistanceFromStart / NULLIF(ty.AverageVelocity, 0) AS EstimateTime, " + // Calculate EstimateTime,
+                                                                                           // handle division by zero
+                "rs.DefaultStopTime " + // Added DefaultStopTime
+                "FROM Trips t " +
+                "JOIN Routes r ON t.RouteID = r.RouteID " +
+                "JOIN TripStations ts ON ts.TripID = t.TripID " +
+                "JOIN Stations s ON s.StationID = ts.StationID " +
+                "JOIN RouteStations rs ON rs.StationID = ts.StationID AND t.RouteID = rs.RouteID " +
+                "JOIN Trains tr ON tr.TrainID = t.TrainID " + // Join with Trains
+                "JOIN TrainTypes ty ON ty.TrainTypeID = tr.TrainTypeID " + // Join with TrainTypes
+                "WHERE t.TripID = ? " +
+                "ORDER BY rs.DistanceFromStart";
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, tripId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    vn.vnrailway.dto.TripStationInfoDTO dto = new vn.vnrailway.dto.TripStationInfoDTO();
+                    dto.setTripID(rs.getInt("TripID"));
+                    dto.setStationId(rs.getInt("StationID"));
+                    dto.setStationName(rs.getString("StationName"));
+                    dto.setDistanceFromStart(rs.getBigDecimal("DistanceFromStart"));
+
+                    Timestamp departureTimestamp = rs.getTimestamp("ScheduledDeparture");
+                    if (departureTimestamp != null) {
+                        LocalDateTime ldt = departureTimestamp.toLocalDateTime();
+                        dto.setScheduledDepartureDate(ldt.toLocalDate());
+                        dto.setScheduledDepartureTime(ldt.toLocalTime());
+                    }
+
+                    // Populate new fields
+                    BigDecimal estimateTime = rs.getBigDecimal("EstimateTime");
+                    if (rs.wasNull()) { // Check if EstimateTime was NULL (e.g., due to division by zero)
+                        dto.setEstimateTime(null); // Or BigDecimal.ZERO, depending on desired handling
+                    } else {
+                        dto.setEstimateTime(estimateTime);
+                    }
+
+                    int defaultStopTime = rs.getInt("DefaultStopTime");
+                    if (rs.wasNull()) {
+                        dto.setDefaultStopTime(null); // Or 0, if that's a more appropriate default
+                    } else {
+                        dto.setDefaultStopTime(defaultStopTime);
+                    }
+
+                    tripStationInfos.add(dto);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching trip station details for TripID " + tripId + ": " + e.getMessage());
+            throw e;
+        }
+        return tripStationInfos;
+    }
+
+    @Override
+    public boolean updateTripStationScheduledDeparture(int tripId, int stationId, LocalDateTime newScheduledDeparture)
+            throws SQLException {
+        String sql = "UPDATE TripStations SET ScheduledDeparture = ? WHERE TripID = ? AND StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (newScheduledDeparture == null) {
+                ps.setNull(1, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(1, Timestamp.valueOf(newScheduledDeparture));
+            }
+            ps.setInt(2, tripId);
+            ps.setInt(3, stationId);
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating scheduled departure for TripID " + tripId + ", StationID " + stationId
+                    + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateTripHolidayStatus(int tripId, boolean isHoliday) throws SQLException {
+        String sql = "UPDATE Trips SET IsHolidayTrip = ? WHERE TripID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isHoliday);
+            ps.setInt(2, tripId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating holiday status for TripID " + tripId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateTripStatus(int tripId, String newStatus) throws SQLException {
+        String sql = "UPDATE Trips SET TripStatus = ? WHERE TripID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, tripId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating trip status for TripID " + tripId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateTripBasePriceMultiplier(int tripId, BigDecimal newMultiplier) throws SQLException {
+        String sql = "UPDATE Trips SET BasePriceMultiplier = ? WHERE TripID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBigDecimal(1, newMultiplier);
+            ps.setInt(2, tripId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating base price multiplier for TripID " + tripId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public int countTripsByRouteId(int routeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Trips WHERE RouteID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, routeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0; // Should not happen if COUNT(*) is used, but as a fallback
+    }
+
+    @Override
+    public boolean deleteTripsByRouteId(int routeId) throws SQLException {
+        // Before deleting trips, we might need to delete related records in other
+        // tables
+        // that have a foreign key to TripID, e.g., Tickets, TripStations.
+        // This example assumes that cascading deletes are set up in the DB
+        // or that these related entities are handled elsewhere or don't exist.
+        // If not, you'd need to delete from child tables first.
+
+        // For example, if Tickets and TripStations depend on Trips:
+        // String deleteTicketsSql = "DELETE FROM Tickets WHERE TripID IN (SELECT TripID
+        // FROM Trips WHERE RouteID = ?)";
+        // String deleteTripStationsSql = "DELETE FROM TripStations WHERE TripID IN
+        // (SELECT TripID FROM Trips WHERE RouteID = ?)";
+
+        // For simplicity, this example only deletes from Trips.
+        // In a real application, ensure all dependencies are handled.
+        // A common approach is to first delete from tables that reference TripID.
+        // For instance, delete tickets associated with these trips, then trip stations,
+        // then the trips themselves.
+        // This example will only delete from the Trips table.
+        // WARNING: This does not handle dependent records in Tickets, TripStations etc.
+        // You MUST ensure those are handled, e.g. by database CASCADE DELETE or by
+        // explicit DELETE statements here.
+
+        // Let's assume for now we need to delete Tickets and TripStations first.
+        // This requires a transaction.
+        Connection conn = null;
+        boolean success = false;
+        try {
+            conn = DBContext.getConnection();
+            conn.setAutoCommit(false);
+
+            // Step 1: Delete from Tickets (assuming Tickets table has TripID FK)
+            // This is a placeholder; actual ticket deletion logic might be more complex
+            // (e.g., refunds, notifications)
+            String deleteTicketsSql = "DELETE FROM Tickets WHERE TripID IN (SELECT TripID FROM Trips WHERE RouteID = ?)";
+            try (PreparedStatement psTickets = conn.prepareStatement(deleteTicketsSql)) {
+                psTickets.setInt(1, routeId);
+                psTickets.executeUpdate(); // Number of affected rows not critical here unless for logging
+            }
+
+            // Step 2: Delete from TripStations (assuming TripStations table has TripID FK)
+            String deleteTripStationsSql = "DELETE FROM TripStations WHERE TripID IN (SELECT TripID FROM Trips WHERE RouteID = ?)";
+            try (PreparedStatement psTripStations = conn.prepareStatement(deleteTripStationsSql)) {
+                psTripStations.setInt(1, routeId);
+                psTripStations.executeUpdate();
+            }
+
+            // Step 3: Delete from Trips
+            String deleteTripsSql = "DELETE FROM Trips WHERE RouteID = ?";
+            try (PreparedStatement psTrips = conn.prepareStatement(deleteTripsSql)) {
+                psTrips.setInt(1, routeId);
+                int affectedRows = psTrips.executeUpdate();
+                // success = affectedRows > 0; // Success if at least one trip was deleted, or
+                // if no trips existed.
+                // For this method, returning true if the operation completes without error is
+                // fine.
+            }
+
+            conn.commit();
+            success = true; // If all operations complete without error
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    System.err.println("Error rolling back transaction in deleteTripsByRouteId: " + ex.getMessage());
+                }
+            }
+            System.err.println("Error deleting trips by RouteID " + routeId + ": " + e.getMessage());
+            throw e; // Re-throw the exception
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    /* ignored */ }
+            }
+        }
+        return success;
     }
 }

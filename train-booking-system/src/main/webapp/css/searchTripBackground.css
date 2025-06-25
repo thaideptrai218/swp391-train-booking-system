@@ -1,356 +1,215 @@
 /* Reset and base styles */
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #ffffff;
-  color: #333;
-  line-height: 1.6;
-}
-
-/* Header styles */
-header {
-  background-color: #10375C; 
-  width: 100%;
-  color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 10px 0; 
-  position: relative; 
-  z-index: 1000; 
-}
-
-header nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px; 
-  margin: 0 auto;
-  padding: 0 20px; 
-}
-
-header .logo img {
-  height: 90px; /* Increased by 40% from 50px */
-  width: auto;
-}
-
-header .menu {
-  display: flex;
-  align-items: center;
-  gap: 20px; 
-}
-
-header .menu a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px; 
-  font-weight: bold; /* Changed to bold as per request */
-  padding: 8px 12px;
-  transition: color 0.3s;
-  white-space: nowrap;
-}
-
-header .menu a:hover, header .menu a.active {
-  color: #ddd; 
-}
-
-header .menu a.btn-register {
-  background-color: #3498db; 
-  padding: 8px 20px;
-  border-radius: 20px; 
-  font-weight: bold;
-}
-
-header .menu a.btn-register:hover {
-  background-color: #2980b9;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #333;
+    line-height: 1.6;
 }
 
 /* Main content - now full width by default */
 main {
-  width: 100%;
-  padding: 0; 
-  background-color: white;
+    width: 100%;
+    padding: 0;
+    background-color: white;
 }
 
 /* Hero Section - Full Width */
 .hero-section {
-  width: 100%; /* Takes full width of main */
-  height: 450px; /* Adjust height as needed, slightly more than before */
-  overflow: hidden;
-  position: relative;
-  /* margin-top: -70px; Consider if header height is fixed or auto. If auto, this might need adjustment or removal if header is taller. */
-  /* For simplicity, let's remove margin-top and let it flow naturally after header */
+    width: 100%; /* Takes full width of main */
+    height: 600px; /* Adjust height as needed, slightly more than before */
+    position: relative;
+    display: flex; /* For centering the search form container */
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center */
+    background-image: url("../assets/images/searchTripBackground.png"); /* Corrected path relative to CSS file */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.hero-background-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; 
-  object-position: center;
+/* .hero-background-image rule is removed as it's no longer used */
+
+.search-trip-container {
+    /* Styles for the container of the included search form */
+    position: relative; /* Ensure it's part of the stacking context */
+    z-index: 2; /* Place it above the background image */
+    /* background-color: rgba(255, 255, 255, 0.8); Optional: for readability */
+    /* padding: 20px; */ /* Padding is handled by search-panel inside search-trip.css */
+    border-radius: 8px;
+    width: 100%; /* Take available width within hero-section */
 }
 
 /* Content Wrapper for sections that need to be constrained */
 .content-wrapper {
-  max-width: 1000px; /* Max width for content sections */
-  margin: 0 auto; /* Center the wrapper */
-  padding: 40px 20px; /* Padding for content inside */
+    max-width: 1000px; /* Max width for content sections */
+    margin: 0 auto; /* Center the wrapper */
+    padding: 40px 20px; /* Padding for content inside */
 }
 
 /* Why Vetaure Section - uses content-wrapper */
 .why-vetaure {
-  text-align: center;
-  background-color: #fff; 
+    text-align: center;
+    background-color: #fff;
 }
 
 .why-vetaure h2 {
-  font-size: 28px; 
-  color: #333;
-  margin-bottom: 40px;
-  font-weight: bold;
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 40px;
+    font-weight: bold;
 }
 
 .features {
-  display: flex;
-  justify-content: space-around; 
-  align-items: flex-start; 
-  flex-wrap: wrap; 
-  gap: 30px; 
-  /* max-width: 1000px; No longer needed here, handled by content-wrapper */
-  /* margin: 0 auto; No longer needed here, handled by content-wrapper */
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 30px;
 }
 
 .feature-item {
-  flex-basis: 200px; 
-  text-align: center;
+    flex-basis: 200px;
+    text-align: center;
 }
 
 .feature-item img {
-  width: 60px; 
-  height: 60px;
-  margin-bottom: 15px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
 }
 
 .feature-item h3 {
-  font-size: 18px;
-  color: #333;
-  margin-bottom: 10px;
-  font-weight: bold;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: bold;
 }
 
 .feature-item p {
-  font-size: 14px;
-  color: #555;
-  line-height: 1.5;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
 }
 
 /* Price Board Section - uses content-wrapper */
 .price-board {
-  background-color: #f8f9fa; 
-  border-radius: 8px;
-  margin-top: 20px; /* Add some top margin if it's also a content-wrapper */
-  margin-bottom: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .price-board h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-align: left;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: left;
 }
 
 .price-board-intro {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 25px;
-  text-align: left;
-  line-height: 1.6;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 25px;
+    text-align: left;
+    line-height: 1.6;
 }
 
 .price-board ul {
-  list-style: none;
-  padding-left: 0;
-  text-align: left;
+    list-style: none;
+    padding-left: 0;
+    text-align: left;
 }
 
 .price-board li {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 12px;
-  line-height: 1.7;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.7;
 }
 
 .price-board .bullet {
-  color: #007bff; 
-  margin-right: 8px;
-  font-weight: bold;
+    color: #007bff;
+    margin-right: 8px;
+    font-weight: bold;
 }
 
 /* Train Schedule Section - uses content-wrapper */
 .train-schedule {
-  background-color: #fff; /* Or a slightly different shade if desired */
-  border-radius: 8px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .train-schedule h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-align: left;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: left;
 }
 
 .train-schedule p {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 10px; /* Spacing between paragraphs */
-  text-align: left;
-  line-height: 1.6;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: left;
+    line-height: 1.6;
 }
 
 .train-schedule ul {
-  list-style: none;
-  padding-left: 0;
-  text-align: left;
-  margin-top: 15px; /* Space above the list */
+    list-style: none;
+    padding-left: 0;
+    text-align: left;
+    margin-top: 15px;
 }
 
 .train-schedule li {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 10px; /* Spacing between list items */
-  line-height: 1.7;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.7;
 }
 
-.train-schedule .bullet { /* Reusing bullet style, or can be specific if needed */
-  color: #007bff; 
-  margin-right: 8px;
-  font-weight: bold;
+.train-schedule .bullet {
+    color: #007bff;
+    margin-right: 8px;
+    font-weight: bold;
 }
 
 /* Railway Map Section - uses content-wrapper */
 .railway-map {
-  background-color: #f8f9fa; /* Similar to price-board or white */
-  border-radius: 8px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .railway-map h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-align: left;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: left;
 }
 
 .railway-map p {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 20px; /* Space before the map */
-  text-align: left;
-  line-height: 1.6;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: left;
+    line-height: 1.6;
 }
 
 .map-image {
-  width: 100%;
-  max-width: 800px; /* Max width for the map image itself */
-  height: auto;
-  display: block; /* To allow margin auto to center if max-width is less than container */
-  margin: 20px auto; /* Top/bottom margin and auto left/right for centering */
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-
-/* Footer styles */
-footer {
-  background-color: #10375C;
-  color: white;
-  padding: 0;
-  margin-top: 40px;
-  text-align: center;
-  width: 100%; /* Ensure footer is also full width */
-}
-
-.footer-content {
-  /* max-width: 1200px; Allow full width, inner elements can be constrained if needed */
-  margin: 0 auto;
-}
-
-.footer-nav {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  background-color: #006DAE;
-  padding: 15px 0;
-  margin: 0;
-  width: 100%;
-}
-
-.footer-nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.social-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  background: #2C215D;
-  padding: 20px;
-  border-top: 1px solid #000; 
-  border-bottom: 1px solid #000; 
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.social-links h4 { 
-    margin: 0;
-    font-size: 16px;
-    color: white;
-    margin-right: 20px; 
-}
-
-.social-icons {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.social-icons img {
-  width: 30px;
-  height: 30px;
-}
-
-.footer-logo {
-  margin-top: 30px;
-  text-align: center;
-  width: 100%;
-}
-
-.footer-logo img {
-  width: 180px;
-  display: block;
-  margin: 0 auto;
-}
-
-.footer-motto {
-  color: white;
-  font-style: italic;
-  margin: 20px 0;
-  font-size: 16px;
-}
-
-.copyright {
-  color: #ccc;
-  font-size: 14px;
-  margin-top: 20px;
-  padding-bottom: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

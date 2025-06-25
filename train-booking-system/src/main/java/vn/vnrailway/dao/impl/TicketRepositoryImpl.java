@@ -2,13 +2,15 @@ package vn.vnrailway.dao.impl;
 
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.TicketRepository;
+// import vn.vnrailway.dto.BookingTrendDTO; // Removed import
 import vn.vnrailway.model.Ticket;
 
 import java.sql.*;
+// import java.util.Date; // Removed import
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.math.BigDecimal; // Import BigDecimal
+import java.math.BigDecimal;
 
 public class TicketRepositoryImpl implements TicketRepository {
 
@@ -30,7 +32,6 @@ public class TicketRepositoryImpl implements TicketRepository {
         ticket.setPassengerIDCardNumber(rs.getString("PassengerIDCardNumber"));
         ticket.setFareComponentDetails(rs.getString("FareComponentDetails"));
 
-        // Handle nullable ParentTicketID
         int parentTicketIdVal = rs.getInt("ParentTicketID");
         if (rs.wasNull()) {
             ticket.setParentTicketID(null);
@@ -73,7 +74,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     @Override
     public List<Ticket> findAll() throws SQLException {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT * FROM Tickets";
+        String sql = "SELECT * FROM Tickets ORDER BY TicketID DESC";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -223,30 +224,12 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     @Override
     public boolean deleteById(int ticketId) throws SQLException {
-        // Tickets are usually not hard-deleted. Consider changing status to "Cancelled"
-        // or "Void".
-        // For this example, a hard delete is implemented.
         String sql = "DELETE FROM Tickets WHERE TicketID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ticketId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
-        }
-    }
-
-    // Main method for testing (optional)
-    public static void main(String[] args) {
-        TicketRepository ticketRepository = new TicketRepositoryImpl();
-        try {
-            System.out.println("Testing TicketRepository...");
-            // Example: Find all tickets for BookingID 1
-            List<Ticket> ticketsForBooking1 = ticketRepository.findByBookingId(1);
-            ticketsForBooking1.forEach(System.out::println);
-
-            // Add more specific tests as needed
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -270,12 +253,11 @@ public class TicketRepositoryImpl implements TicketRepository {
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                // Handle potential NULL if no tickets match (though SUM usually returns NULL
-                // not 0 for no rows)
                 BigDecimal totalRevenue = rs.getBigDecimal(1);
                 return totalRevenue == null ? 0.0 : totalRevenue.doubleValue();
             }
         }
         return 0.0;
     }
+    // Removed Trend Method Implementations
 }

@@ -75,10 +75,11 @@ public class SeatRepositoryImpl implements SeatRepository {
             int legOriginStationId,
             int legDestinationStationId,
             java.sql.Timestamp bookingDateTime,
-            boolean isRoundTrip) throws SQLException {
+            boolean isRoundTrip,
+            String currentUserSessionId) throws SQLException { // Added currentUserSessionId
         List<SeatStatusDTO> seatStatusList = new ArrayList<>();
-        // Updated to call the new stored procedure
-        String callSP = "{CALL dbo.GetCoachSeatsWithAvailabilityAndPrice(?, ?, ?, ?, ?, ?)}";
+        // Updated to call the new stored procedure with 7 parameters
+        String callSP = "{CALL dbo.GetCoachSeatsWithAvailabilityAndPrice(?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection conn = DBContext.getConnection();
              CallableStatement cs = conn.prepareCall(callSP)) {
@@ -89,6 +90,11 @@ public class SeatRepositoryImpl implements SeatRepository {
             cs.setInt(4, legDestinationStationId);
             cs.setTimestamp(5, bookingDateTime);
             cs.setBoolean(6, isRoundTrip);
+            if (currentUserSessionId != null) {
+                cs.setString(7, currentUserSessionId);
+            } else {
+                cs.setNull(7, java.sql.Types.NVARCHAR);
+            }
 
             try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {

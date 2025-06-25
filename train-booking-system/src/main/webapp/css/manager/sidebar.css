@@ -14,7 +14,7 @@
   position: fixed;
   top: 20px;
   left: 20px;
-  z-index: 1001;
+  z-index: 1002; /* Ensure toggle is above sidebar during transition */
   background-color: var(--toggle-btn-bg);
   color: var(--toggle-btn-text);
   border: none;
@@ -32,6 +32,7 @@
 
 .sidebar {
   width: var(--sidebar-width);
+  box-sizing: border-box; /* Ensure padding/border don't expand width */
   padding: 20px;
   padding-top: 80px; /* Increased padding for toggle button */
   border-right: 1px solid var(--sidebar-border-color);
@@ -40,15 +41,18 @@
   color: var(--sidebar-text-color);
   position: fixed;
   top: 0;
-  left: calc(-1 * var(--sidebar-width)); /* Initially hidden */
-  transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+  left: 0; /* Start at edge for transform */
+  transform: translateX(
+    calc(-1 * var(--sidebar-width))
+  ); /* Initially hidden using transform */
+  transition: transform 0.3s ease; /* Simplified transition */
   z-index: 1000;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  overflow-y: hidden; /* Hide vertical scrollbar */
+  overflow-y: auto; /* Allow scrolling within sidebar if content is long */
 }
 
 .sidebar.open {
-  left: 0;
+  transform: translateX(0); /* Show sidebar */
 }
 
 .sidebar h2,
@@ -108,5 +112,10 @@
 /* Optional: Style for the main content area to push it when sidebar is open */
 .main-content.shifted {
   margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: margin-left 0.3s ease; /* Match sidebar transition */
+}
+
+/* Prevent body scroll when sidebar is open */
+body.sidebar-is-open {
+  overflow-x: hidden;
 }

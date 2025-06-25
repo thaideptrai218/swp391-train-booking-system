@@ -51,11 +51,13 @@
 }
 
 .statistics-section h2 {
+  /* General h2 for sections like "Thống Kê Chung" */
   color: #333;
   margin-bottom: 20px;
   font-size: 1.5em;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
+  text-align: left; /* Default alignment for general section titles */
 }
 
 .stats-cards {
@@ -88,27 +90,44 @@
   font-weight: bold;
 }
 
-/* Table Styles for Statistics */
+/* Table Styles for Statistics & Other Sections */
 .best-sellers,
 .popular-stations-origin,
 .popular-stations-destination,
 .popular-trips {
+  /* .all-tickets-section removed from this group */
   margin-bottom: 30px;
+}
+
+.popular-stations-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.popular-stations-row .popular-stations-origin,
+.popular-stations-row .popular-stations-destination {
+  flex: 1;
+  margin-bottom: 0;
+  min-width: 0; /* Allow flex items to shrink properly */
 }
 
 .best-sellers h3,
 .popular-stations-origin h3,
 .popular-stations-destination h3,
 .popular-trips h3 {
+  /* .all-tickets-section h2 removed */
   color: #333;
   font-size: 1.3em;
   margin-bottom: 15px;
+  text-align: center;
 }
 
 .best-sellers table,
 .popular-stations-origin table,
 .popular-stations-destination table,
 .popular-trips table {
+  /* .all-tickets-section table removed */
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95em;
@@ -122,6 +141,7 @@
 .popular-stations-destination td,
 .popular-trips th,
 .popular-trips td {
+  /* .all-tickets-section th, td removed */
   border: 1px solid #ddd;
   padding: 10px;
   text-align: left;
@@ -131,6 +151,7 @@
 .popular-stations-origin th,
 .popular-stations-destination th,
 .popular-trips th {
+  /* .all-tickets-section th removed */
   background-color: #007bff;
   color: white;
   font-weight: bold;
@@ -140,6 +161,7 @@
 .popular-stations-origin tr:nth-child(even),
 .popular-stations-destination tr:nth-child(even),
 .popular-trips tr:nth-child(even) {
+  /* .all-tickets-section tr removed */
   background-color: #f8f9fa;
 }
 
@@ -147,30 +169,30 @@
 .popular-stations-origin tr:hover,
 .popular-stations-destination tr:hover,
 .popular-trips tr:hover {
+  /* .all-tickets-section tr:hover removed */
   background-color: #e9ecef;
 }
 
-/* Chart Container Styles */
+/* General Chart Container Styles (used by pie charts) */
 .chart-container {
-  margin: 20px auto; /* Center chart and add some margin */
+  margin: 10px 0;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  max-width: 90%; /* Control max width for larger screens */
 }
 
 /* Responsive Table Container */
 .table-responsive-container {
   overflow-x: auto;
-  margin-bottom: 1em; /* Add some space below the scrollable table */
-  border: 1px solid #ddd; /* Optional: adds a border around the scrollable area */
-  border-radius: 4px; /* Optional: rounds the corners of the border */
+  margin-bottom: 1em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .table-responsive-container table {
-  min-width: 600px; /* Ensure table has a minimum width to demonstrate scrolling if needed */
+  min-width: 600px;
 }
 
 /* Error Message Style */
@@ -186,3 +208,5 @@
 .error-message p {
   margin: 0;
 }
+
+/* Removed Booking Trend Charts Section Specific Styles and .all-tickets-section styles */
