@@ -354,8 +354,8 @@ public class TicketRepositoryImpl implements TicketRepository {
                         "    -- Trạng thái hoàn vé\r\n" + //
                         "    CASE \r\n" + //
                         "\t\tWHEN TK.TicketStatus IN ('Used', 'Expired') THEN N'Không thể hoàn vé (vé đã sử dụng hoặc hết hạn)'\r\n" + //
-                        "    WHEN TK.TicketStatus = 'Refunded' THEN N'Đã hoàn tiền'\r\n" + //
-                        "    WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối (đã hoàn tiền)'\r\n" + //
+                        "    WHEN TK.TicketStatus = 'Refunded' THEN N'Yêu cầu được chấp nhận'\r\n" + //
+                        "    WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối'\r\n" + //
                         "\tWHEN TK.TicketStatus = 'Processing' THEN N'Đang trong quá trình xửa lý hoàn vé'\r\n" + //
                         "\r\n" + //
                         "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
