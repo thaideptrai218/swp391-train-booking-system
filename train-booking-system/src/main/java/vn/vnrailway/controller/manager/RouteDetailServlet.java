@@ -44,11 +44,8 @@ public class RouteDetailServlet extends HttpServlet {
                     Route currentRoute = currentRouteOpt.get();
                     request.setAttribute("currentRoute", currentRoute);
 
-                    // Fetch all route station details and filter for the current route
-                    List<RouteStationDetailDTO> allRouteDetails = routeRepository.getAllRouteStationDetails();
-                    List<RouteStationDetailDTO> routeDetailsForCurrentRoute = allRouteDetails.stream()
-                            .filter(detail -> detail.getRouteID() == routeId)
-                            .collect(Collectors.toList());
+                    List<RouteStationDetailDTO> routeDetailsForCurrentRoute = routeRepository
+                            .findStationDetailsByRouteId(routeId);
                     request.setAttribute("routeDetailsForCurrentRoute", routeDetailsForCurrentRoute);
 
                     // Fetch all stations for the "Add Station" modal dropdown

@@ -508,7 +508,7 @@ public class TripRepositoryImpl implements TripRepository {
                 "JOIN Trains tr ON tr.TrainID = t.TrainID " + // Join with Trains
                 "JOIN TrainTypes ty ON ty.TrainTypeID = tr.TrainTypeID " + // Join with TrainTypes
                 "WHERE t.TripID = ? " +
-                "ORDER BY rs.DistanceFromStart";
+                "order by ts.SequenceNumber";
 
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
