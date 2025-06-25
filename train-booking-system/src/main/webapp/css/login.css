@@ -18,11 +18,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url('../assets/img/image_27.png'); /* Set background image */
-    background-size: cover; /* Cover the entire background */
-    background-position: center; /* Center the background image */
-    background-repeat: no-repeat; /* Prevent image repetition */
     color: #ffffff;
+    background: url('../assets/img/image_28.jpg') no-repeat center center fixed;
+    background-size: cover;
 }
 
 a {
@@ -245,44 +243,6 @@ a {
     margin-top: 20px; /* Add some space above the button */
 }
 
-.social-login {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.social-login p {
-    font-size: 0.9rem;
-    color: #e0e0e0;
-    margin: 0;
-}
-
-.google-login-button {
-    background-color: #db4437; /* Google red */
-    color: #ffffff;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.google-login-button:hover {
-    background-color: #c23321;
-    transform: translateY(-2px);
-}
-
-.google-login-button .fa-brands {
-    font-size: 1.2rem;
-}
 
 .register-section {
     margin-top: 20px;

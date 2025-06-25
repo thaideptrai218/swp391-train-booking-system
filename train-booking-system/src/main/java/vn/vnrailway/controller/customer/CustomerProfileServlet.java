@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
 
-@WebServlet("/customerProfile")
+@WebServlet("/customerprofile")
 public class CustomerProfileServlet extends HttpServlet {
     private UserRepository userRepository;
 

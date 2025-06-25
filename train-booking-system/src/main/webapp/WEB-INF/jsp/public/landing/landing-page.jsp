@@ -67,42 +67,42 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
                           >${sessionScope.loggedInUser.fullName}</span
                         >
                       </div>
-                      <a
-                        href="${pageContext.request.contextPath}/customer-profile"
+<a
+                        href="${pageContext.request.contextPath}/customerprofile"
                         class="dropdown-item"
-                        >👥 Xem tất cả trang cá nhân</a
+                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/about-us-male.png" alt="about-us-male"/></i>   Xem tất cả trang cá nhân</a
                       >
                       <a href="#" class="dropdown-item"
-                        >⚙️ Cài đặt và quyền riêng tư
-                        <span class="arrow-right">➡️</span></a
-                      >
+                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/users-settings.png" alt="users-settings"/>
+                      </i>   Cài đặt và quyền riêng tư</a>
+
                       <a href="#" class="dropdown-item"
-                        >❓ Trợ giúp và hỗ trợ
-                        <span class="arrow-right">➡️</span></a
-                      >
+                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/online-support.png" alt="online-support"/>
+                      </i>   Trợ giúp và hỗ trợ</a>
+
                       <a href="#" class="dropdown-item"
-                        >🌙 Màn hình & trợ năng
-                        <span class="arrow-right">➡️</span></a
-                      >
-                      <a href="#" class="dropdown-item">💬 Đóng góp ý kiến</a>
-                      <a
-                        href="${pageContext.request.contextPath}/logout"
+                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/>
+                      </i>   Màn hình & trợ năng</a>
+
+                      <a href="#" class="dropdown-item"
+                      ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/>
+                    </i>   Đóng góp ý kiến</a>
+                      
+                      <a href="${pageContext.request.contextPath}/logout"
                         class="dropdown-item logout-item"
-                        >🚪 Đăng xuất</a
-                      >
+                        ><img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/exit--v1.png" alt="exit--v1"/>
+                      </i>   Đăng xuất</a>
                     </div>
                   </li>
                 </c:when>
                 <c:otherwise>
                   <li>
                     <a href="${pageContext.request.contextPath}/login"
-                      >Đăng nhập</a
-                    >
+                      >Đăng nhập</a>
                   </li>
                   <li class="btn">
                     <a href="${pageContext.request.contextPath}/register"
-                      >Đăng kí</a
-                    >
+                      >Đăng kí</a>
                   </li>
                 </c:otherwise>
               </c:choose>
@@ -116,11 +116,9 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
           <p class="hero-subtitle">Trải nghiệm dịch vụ chất lượng</p>
 
           <div class="actions">
-            <a
-              href="${pageContext.request.contextPath}/train-info"
+              <a href="${pageContext.request.contextPath}/train-info"
               class="btn btn-primary"
-              >Tìm hiểu thêm</a
-            >
+              >Tìm hiểu thêm</a>
             <button class="btn btn-secondary">
               <img
                 src="${pageContext.request.contextPath}/assets/images/landing/common/phone.png"

@@ -37,17 +37,10 @@
                     }
                 %>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="identifier">Email hoặc số điện thoại</label>
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-user icon"></i> <!-- Changed icon to user for username -->
-                        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" value="<%= rememberedIdentifier.contains("@") ? rememberedIdentifier : "" %>">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Số điện thoại</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-phone icon"></i>
-                        <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại của bạn" pattern="0[0-9]{9}" title="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số" value="<%= !rememberedIdentifier.contains("@") ? rememberedIdentifier : "" %>">
+                        <i class="fa-solid fa-user icon"></i>
+                        <input type="text" id="identifier" name="identifier" placeholder="Nhập email hoặc số điện thoại của bạn" value="<%= rememberedIdentifier %>">
                     </div>
                 </div>
                 <div class="form-group">
@@ -74,12 +67,6 @@
                     <button type="submit" class="login-button">Đăng nhập</button>
                 </div>
             </form>
-            <div class="social-login">
-                <p>Hoặc đăng nhập với</p>
-                <button class="google-login-button">
-                    <i class="fa-brands fa-google"></i> Tài khoản Google
-                </button>
-            </div>
             <div class="register-section">
                 <p>Bạn chưa có tài khoản?</p>
                 <a href="register.jsp" class="register-link">Đăng ký ngay</a>

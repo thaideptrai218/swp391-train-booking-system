@@ -52,22 +52,22 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
+        String identifier = request.getParameter("identifier");
         String password = request.getParameter("password");
         String rememberMe = request.getParameter("rememberMe"); // "on" if checked, null otherwise
 
         UserRepository userRepository = new UserRepositoryImpl();
         Optional<User> userOptional = Optional.empty();
-        String loginIdentifier = ""; // To store the identifier used for login (email or phone)
+        String loginIdentifier = identifier; // To store the identifier used for login (email or phone)
 
         try {
-            if (email != null && !email.trim().isEmpty()) {
-                userOptional = userRepository.findByEmail(email);
-                loginIdentifier = email;
-            } else if (phone != null && !phone.trim().isEmpty()) {
-                userOptional = userRepository.findByPhone(phone);
-                loginIdentifier = phone;
+            if (identifier != null && !identifier.trim().isEmpty()) {
+                // Check if the identifier is an email or a phone number
+                if (identifier.contains("@")) { // Simple check for email
+                    userOptional = userRepository.findByEmail(identifier);
+                } else { // Assume it's a phone number
+                    userOptional = userRepository.findByPhone(identifier);
+                }
             }
         } catch (SQLException e) {
             throw new ServletException("Database error during login", e);

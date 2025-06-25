@@ -18,7 +18,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url('../assets/img/image_27.png'); /* Set background image */
+    background-image: url('../assets/img/image_28.jpg'); /* Set background image */
     background-size: cover; /* Cover the entire background */
     background-position: center; /* Center the background image */
     background-repeat: no-repeat; /* Prevent image repetition */
@@ -45,6 +45,7 @@ a {
     border-radius: 20px;
     padding: 40px; /* Adjusted below to account for icon */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(10px); /* Frosted glass effect for Safari */
     backdrop-filter: blur(10px); /* Frosted glass effect */
     border: 1px solid rgba(255, 255, 255, 0.2);
     width: 100%;
@@ -57,6 +58,19 @@ a {
     padding-left: 40px; /* Keep original padding for left */
     padding-right: 40px; /* Keep original padding for right */
     padding-bottom: 40px; /* Keep original padding for bottom */
+    animation: fadeInSlideUp 1s ease-out forwards; /* Apply animation */
+}
+
+/* Keyframe animation for fade-in and slide-up effect */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .register-header {
