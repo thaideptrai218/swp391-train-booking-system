@@ -93,13 +93,13 @@ public class RefundProcessingServlet extends HttpServlet {
                         <html>
                         <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
                             <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
-                                <h2 style='color: #2c3e50;'>Thông báo từ VeTauRe</h2>
+                                <h2 style='color: #2c3e50;'>Thông báo từ Vetaure</h2>
                                 <p>Xin chào,</p>
                                 <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
                                 <p>Xin cảm ơn!</p>
                                 <br/>
                                 <p>Trân trọng,</p>
-                                <p><strong>Đội ngũ VeTauRe</strong></p>
+                                <p><strong>Đội ngũ Vetaure</strong></p>
                             </div>
                         </body>
                         </html>
@@ -111,7 +111,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 try {
-                    ticketRepository.rejectRefundTicket(ticketCode);
+                    ticketRepository.approveRefundTicket(ticketCode);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
