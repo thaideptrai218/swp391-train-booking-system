@@ -35,7 +35,6 @@ public class AddUserServlet extends HttpServlet {
         String role = request.getParameter("role");
 
         User newUser = new User();
-        newUser.setUserName(username);
         newUser.setPasswordHash(vn.vnrailway.utils.HashPassword.hashPassword(password));
         newUser.setFullName(fullName);
         newUser.setEmail(email);
@@ -53,10 +52,11 @@ public class AddUserServlet extends HttpServlet {
         }
     }
 
-    private void logAudit(HttpServletRequest request, String tableName, String action, String rowId, String oldValue, String newValue) {
+    private void logAudit(HttpServletRequest request, String tableName, String action, String rowId, String oldValue,
+            String newValue) {
         String sql = "INSERT INTO dbo.AuditLogs (LogTime, Username, TableName, RowId, ColumnName, OldValue, NewValue) VALUES (GETDATE(), ?, ?, ?, ?, ?, ?)";
         try (java.sql.Connection connection = vn.vnrailway.utils.DBContext.getConnection();
-             java.sql.PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                java.sql.PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             jakarta.servlet.http.HttpSession session = request.getSession(false);
             String loggedInUsername = "N/A";
