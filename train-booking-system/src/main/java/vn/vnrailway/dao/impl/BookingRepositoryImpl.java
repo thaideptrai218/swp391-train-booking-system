@@ -261,7 +261,8 @@ public class BookingRepositoryImpl implements BookingRepository {
                 "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
                 "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID\r\n" + //
                 "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID\r\n" + //
-                "WHERE B.BookingCode = ? AND (u.PhoneNumber = ? OR u.Email = ? OR (? IS NULL AND ? IS NULL))";
+                "WHERE B.BookingCode = ? AND (u.PhoneNumber = ? OR u.Email = ?)";
+
 
         CheckBookingDTO checkBookingDTO = null;
         List<InfoPassengerDTO> passengers = new ArrayList<>();
@@ -271,8 +272,6 @@ public class BookingRepositoryImpl implements BookingRepository {
             ps.setString(1, bookingCode);
             ps.setString(2, phoneNumber);
             ps.setString(3, email);
-            ps.setString(4, phoneNumber);
-            ps.setString(5, email);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     if (checkBookingDTO == null) {
