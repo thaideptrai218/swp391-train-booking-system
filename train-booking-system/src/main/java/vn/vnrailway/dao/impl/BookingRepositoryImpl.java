@@ -228,8 +228,10 @@ public class BookingRepositoryImpl implements BookingRepository {
     }
 
     @Override
-    public CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException {
+    public CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email)
+            throws SQLException {
         String sql = "SELECT \r\n" +
+                "    TK.TicketCode,\r\n" + //
                 "    P.FullName AS PassengerFullName,\r\n" + //
                 "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
                 "    PT.TypeName AS PassengerType,\r\n" + //
@@ -283,6 +285,7 @@ public class BookingRepositoryImpl implements BookingRepository {
                     }
 
                     InfoPassengerDTO passenger = new InfoPassengerDTO();
+                    passenger.setTicketCode(rs.getString("TicketCode"));
                     passenger.setPassengerFullName(rs.getString("PassengerFullName"));
                     passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
                     passenger.setPassengerType(rs.getString("PassengerType"));
@@ -348,7 +351,8 @@ public class BookingRepositoryImpl implements BookingRepository {
             // () -> System.out.println("Booking with ID " + testBookingId + " not
             // found."));
 
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK588C13461874490F905DD43C808A3ECA", "0912345678", "customer.an@example.com");
+            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(
+                    "VNR1750245599712", "0987300269", "customer.an@example.com");
             if (checkBookingDTO != null) {
                 System.out.println("Booking details found:");
                 System.out.println("User Full Name: " + checkBookingDTO.getUserFullName());

@@ -113,7 +113,8 @@
                         </td>
                       </tr>
                       <tr>
-                        <td>${p.passengerFullName}</td>
+                        <td style="text-align: start;">${p.passengerFullName}<br>
+                        Mã vé: ${p.ticketCode}</td>
                         <td>${p.passengerIDCard}</td>
                         <td>${p.passengerType}</td>
                         <td>${p.seatNumber}</td>

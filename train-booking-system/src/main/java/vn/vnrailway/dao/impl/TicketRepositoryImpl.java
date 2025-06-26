@@ -242,6 +242,7 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     public InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException {
         String sql = "SELECT \r\n" + //
+                "    TK.TicketCode,\r\n" + //
                 "    P.FullName AS PassengerFullName,\r\n" + //
                 "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
                 "    PT.TypeName AS PassengerType,\r\n" + //
@@ -276,6 +277,7 @@ public class TicketRepositoryImpl implements TicketRepository {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     InfoPassengerDTO passenger = new InfoPassengerDTO();
+                    passenger.setTicketCode(rs.getString("TicketCode"));
                     passenger.setPassengerFullName(rs.getString("PassengerFullName"));
                     passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
                     passenger.setPassengerType(rs.getString("PassengerType"));
@@ -302,101 +304,105 @@ public class TicketRepositoryImpl implements TicketRepository {
     public CheckInforRefundTicketDTO findInformationRefundTicketDetailsByCode(String bookingCode, String phoneNumber,
             String email) throws SQLException {
         String sql = "USE TrainTicketSystemDB_V2;\r\n" + //
-                        "\r\n" + //
-                        "SELECT \r\n" + //
-                        "    P.FullName AS PassengerFullName,\r\n" + //
-                        "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
-                        "    TK.TicketCode,\r\n" + //
-                        "    PT.TypeName AS PassengerType,\r\n" + //
-                        "    ST.TypeName AS SeatTypeName,\r\n" + //
-                        "    S.SeatNumber,\r\n" + //
-                        "    C.CoachName,\r\n" + //
-                        "    T.TrainName,\r\n" + //
-                        "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
-                        "    TK.TicketStatus,\r\n" + //
-                        "    TK.Price,\r\n" + //
-                        "    StartStation.StationName AS StartStationName,\r\n" + //
-                        "    EndStation.StationName AS EndStationName,\r\n" + //
-                        "    \r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
-                        "\r\n" + //
-                        "    -- Thông tin hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 OR TK.IsRefundable = 0 THEN 0 \r\n" + //
-                        "    ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
-                        "END AS IsRefundable,\r\n" + //
-                        "\r\n" + //
-                        "CASE \r\n" + //
-                        "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
-                        "    ELSE ISNULL(CP.PolicyName, N'Không áp dụng') \r\n" + //
-                        "END AS RefundPolicy,\r\n" + //
-                        "\r\n" + //
-                        "    -- Tính phí hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                        "            CASE \r\n" + //
-                        "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
-                        "                ELSE CP.FixedFeeAmount\r\n" + //
-                        "            END\r\n" + //
-                        "        ELSE 0\r\n" + //
-                        "    END AS RefundFee,\r\n" + //
-                        "\r\n" + //
-                        "    -- Tính số tiền được hoàn lại\r\n" + //
-                        "    CASE \r\n" + //
-                        "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                        "            CASE \r\n" + //
-                        "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
-                        "                ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
-                        "            END\r\n" + //
-                        "        ELSE 0\r\n" + //
-                        "    END AS RefundAmount,\r\n" + //
-                        "\r\n" + //
-                        "    -- Trạng thái hoàn vé\r\n" + //
-                        "    CASE \r\n" + //
-                        "\t\tWHEN TK.TicketStatus IN ('Used', 'Expired') THEN N'Không thể hoàn vé (vé đã sử dụng hoặc hết hạn)'\r\n" + //
-                        "    WHEN TK.TicketStatus = 'Refunded' THEN N'Yêu cầu được chấp nhận'\r\n" + //
-                        "    WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối'\r\n" + //
-                        "\tWHEN TK.TicketStatus = 'Processing' THEN N'Đang trong quá trình xửa lý hoàn vé'\r\n" + //
-                        "\r\n" + //
-                        "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
-                        "        WHEN CP.PolicyName IS NULL THEN N'Không có chính sách hoàn vé'\r\n" + //
-                        "        WHEN CP.IsRefundable = 0 THEN N'Không đủ điều kiện hoàn vé'\r\n" + //
-                        "        ELSE N'Được hoàn vé'\r\n" + //
-                        "    END AS RefundStatus,\r\n" + //
-                        "\r\n" + //
-                        "    -- Thông tin người đặt\r\n" + //
-                        "    u.FullName AS UserFullName,\r\n" + //
-                        "    u.Email,\r\n" + //
-                        "    u.IDCardNumber,\r\n" + //
-                        "    u.PhoneNumber\r\n" + //
-                        "\r\n" + //
-                        "FROM Tickets TK\r\n" + //
-                        "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
-                        "JOIN Users u ON B.UserID = u.UserID\r\n" + //
-                        "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
-                        "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
-                        "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
-                        "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
-                        "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
-                        "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
-                        "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
-                        "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
-                        "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
-                        "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
-                        "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
-                        "\r\n" + //
-                        "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
-                        "LEFT JOIN CancellationPolicies CP ON\r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
-                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
-                        "    (\r\n" + //
-                        "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
-                        "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
-                        "    )\r\n" + //
-                        "    AND CP.IsActive = 1\r\n" + //
-                        "\r\n" + //
-                        "WHERE \r\n" + //
-                        "    ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?));\r\n";
+                "\r\n" + //
+                "SELECT \r\n" + //
+                "    P.FullName AS PassengerFullName,\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                "    TK.TicketCode,\r\n" + //
+                "    PT.TypeName AS PassengerType,\r\n" + //
+                "    ST.TypeName AS SeatTypeName,\r\n" + //
+                "    S.SeatNumber,\r\n" + //
+                "    C.CoachName,\r\n" + //
+                "    T.TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                "    TK.TicketStatus,\r\n" + //
+                "    TK.Price,\r\n" + //
+                "    StartStation.StationName AS StartStationName,\r\n" + //
+                "    EndStation.StationName AS EndStationName,\r\n" + //
+                "    \r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 OR TK.IsRefundable = 0 THEN 0 \r\n" + //
+                "    ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
+                "END AS IsRefundable,\r\n" + //
+                "\r\n" + //
+                "CASE \r\n" + //
+                "    WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
+                "    ELSE ISNULL(CP.PolicyName, N'Không áp dụng') \r\n" + //
+                "END AS RefundPolicy,\r\n" + //
+                "\r\n" + //
+                "    -- Tính phí hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                "            CASE \r\n" + //
+                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0)\r\n"
+                + //
+                "                ELSE CP.FixedFeeAmount\r\n" + //
+                "            END\r\n" + //
+                "        ELSE 0\r\n" + //
+                "    END AS RefundFee,\r\n" + //
+                "\r\n" + //
+                "    -- Tính số tiền được hoàn lại\r\n" + //
+                "    CASE \r\n" + //
+                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                "            CASE \r\n" + //
+                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n"
+                + //
+                "                ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
+                "            END\r\n" + //
+                "        ELSE 0\r\n" + //
+                "    END AS RefundAmount,\r\n" + //
+                "\r\n" + //
+                "    -- Trạng thái hoàn vé\r\n" + //
+                "    CASE \r\n" + //
+                "\t\tWHEN TK.TicketStatus IN ('Used', 'Expired') THEN N'Không thể hoàn vé (vé đã sử dụng hoặc hết hạn)'\r\n"
+                + //
+                "    WHEN TK.TicketStatus = 'Refunded' THEN N'Yêu cầu được chấp nhận'\r\n" + //
+                "    WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối'\r\n" + //
+                "\tWHEN TK.TicketStatus = 'Processing' THEN N'Đang trong quá trình xửa lý hoàn vé'\r\n" + //
+                "\r\n" + //
+                "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n"
+                + //
+                "        WHEN CP.PolicyName IS NULL THEN N'Không có chính sách hoàn vé'\r\n" + //
+                "        WHEN CP.IsRefundable = 0 THEN N'Không đủ điều kiện hoàn vé'\r\n" + //
+                "        ELSE N'Được hoàn vé'\r\n" + //
+                "    END AS RefundStatus,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin người đặt\r\n" + //
+                "    u.FullName AS UserFullName,\r\n" + //
+                "    u.Email,\r\n" + //
+                "    u.IDCardNumber,\r\n" + //
+                "    u.PhoneNumber\r\n" + //
+                "\r\n" + //
+                "FROM Tickets TK\r\n" + //
+                "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
+                "JOIN Users u ON B.UserID = u.UserID\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
+                "LEFT JOIN CancellationPolicies CP ON\r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
+                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
+                "    (\r\n" + //
+                "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
+                "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
+                "    )\r\n" + //
+                "    AND CP.IsActive = 1\r\n" + //
+                "\r\n" + //
+                "WHERE \r\n" + //
+                "    ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?));\r\n";
 
         CheckInforRefundTicketDTO checkInforRefundTicketDTO = null;
         List<RefundTicketDTO> refundTicketDTOs = new ArrayList<>();
