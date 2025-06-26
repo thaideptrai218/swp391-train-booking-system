@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InfoPassengerDTO {
+    private String TicketCode;
     private String PassengerFullName;
     private String PassengerIDCard;
     private String PassengerType;
