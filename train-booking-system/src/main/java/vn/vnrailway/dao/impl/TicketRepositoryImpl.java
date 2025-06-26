@@ -271,29 +271,45 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
                 "\r\n" + //
                 "WHERE TK.TicketCode = ?;";
-        try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, ticketCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    InfoPassengerDTO passenger = new InfoPassengerDTO();
-                    passenger.setTicketCode(rs.getString("TicketCode"));
-                    passenger.setPassengerFullName(rs.getString("PassengerFullName"));
-                    passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
-                    passenger.setPassengerType(rs.getString("PassengerType"));
-                    passenger.setSeatTypeName(rs.getString("SeatTypeName"));
-                    passenger.setSeatNumber(rs.getString("SeatNumber"));
-                    passenger.setCoachName(rs.getString("CoachName"));
-                    passenger.setTrainName(rs.getString("TrainName"));
-                    Timestamp ts = rs.getTimestamp("ScheduledDepartureTime");
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-                    String formattedDateTime = sdf.format(ts); // Kết quả: "10-06-2025 08:00"
-                    passenger.setScheduledDepartureTime(formattedDateTime);
-                    passenger.setTicketStatus(rs.getString("TicketStatus"));
-                    passenger.setPrice(rs.getDouble("Price"));
-                    passenger.setStartStationName(rs.getString("StartStationName"));
-                    passenger.setEndStationName(rs.getString("EndStationName"));
-                    return passenger;
+
+        String updateSql = "UPDATE TK " +
+                "SET TicketStatus = 'Expired' " +
+                "FROM Tickets TK " +
+                "JOIN Trips TR ON TK.TripID = TR.TripID " +
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID " +
+                "WHERE DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 " +
+                "AND TK.TicketStatus = 'Valid' " +
+                "AND TK.TicketCode = ?;";
+
+        try (Connection conn = DBContext.getConnection()) {
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, ticketCode);
+                updateStmt.executeUpdate(); // Không cần kết quả, chỉ cập nhật
+            }
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, ticketCode);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        InfoPassengerDTO passenger = new InfoPassengerDTO();
+                        passenger.setTicketCode(rs.getString("TicketCode"));
+                        passenger.setPassengerFullName(rs.getString("PassengerFullName"));
+                        passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
+                        passenger.setPassengerType(rs.getString("PassengerType"));
+                        passenger.setSeatTypeName(rs.getString("SeatTypeName"));
+                        passenger.setSeatNumber(rs.getString("SeatNumber"));
+                        passenger.setCoachName(rs.getString("CoachName"));
+                        passenger.setTrainName(rs.getString("TrainName"));
+                        Timestamp ts = rs.getTimestamp("ScheduledDepartureTime");
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        String formattedDateTime = sdf.format(ts); // Kết quả: "10-06-2025 08:00"
+                        passenger.setScheduledDepartureTime(formattedDateTime);
+                        passenger.setTicketStatus(rs.getString("TicketStatus"));
+                        passenger.setPrice(rs.getDouble("Price"));
+                        passenger.setStartStationName(rs.getString("StartStationName"));
+                        passenger.setEndStationName(rs.getString("EndStationName"));
+                        return passenger;
+                    }
+
                 }
             }
         }
