@@ -75,6 +75,11 @@ public class LoginServlet extends HttpServlet {
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+            if (!user.isActive()) {
+                request.setAttribute("errorMessage", "Tài khoản của bạn đã bị khóa do vi phạm chính sách, xin vui lòng liên hệ với email admin@vnr.com để được hỗ trợ thêm!");
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/login.jsp").forward(request, response);
+                return;
+            }
             if (HashPassword.checkPassword(password, user.getPasswordHash())) {
                 HttpSession session = request.getSession(true); // Ensure session is created if not existing
                 session.setAttribute("loggedInUser", user);

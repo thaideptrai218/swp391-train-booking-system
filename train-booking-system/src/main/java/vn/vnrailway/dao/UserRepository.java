@@ -31,6 +31,7 @@ public interface UserRepository {
     boolean hideById(int userId) throws SQLException;
     List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException;
     int getTotalLogCount() throws SQLException;
+    Optional<User> getUserByBookingCode(String bookingCode) throws SQLException;
     // Optional: A method to verify credentials, though this might also fit in a service
     // Optional<User> findByEmailAndPassword(String email, String passwordHash) throws SQLException;
 }

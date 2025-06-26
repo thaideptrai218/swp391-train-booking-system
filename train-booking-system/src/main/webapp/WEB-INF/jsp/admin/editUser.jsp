@@ -7,6 +7,21 @@
     <title>Sửa thông tin người dùng</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -46,7 +61,12 @@
                             <option value="false" ${!user.isActive() ? 'selected' : ''}>Bị khóa</option>
                         </select>
                     </div>
-                    <input type="submit" value="Cập nhật thông tin" class="btn btn-primary">
+                    <div class="form-buttons">
+                        <input type="submit" value="Cập nhật thông tin" class="btn btn-primary">
+                        <c:if test="${user.role != 'Customer' && user.role != 'Guest'}">
+                            <a href="${pageContext.request.contextPath}/admin/editUser?action=delete&userId=${user.userID}" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này không?');">Xóa</a>
+                        </c:if>
+                    </div>
                 </form>
             </section>
         </main>

@@ -384,22 +384,21 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException {
         List<Object[]> auditLogs = new ArrayList<>();
-        String sql = "SELECT LogId, LogTime, Username, TableName, RowId, ColumnName, OldValue, NewValue FROM dbo.AuditLogs ORDER BY LogId ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT LogId, EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime FROM dbo.AuditLogs ORDER BY LogId ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Object[] log = new Object[8];
+                    Object[] log = new Object[7];
                     log[0] = rs.getInt("LogId");
-                    log[1] = rs.getTimestamp("LogTime");
-                    log[2] = rs.getString("Username");
-                    log[3] = rs.getString("TableName");
-                    log[4] = rs.getString("RowId");
-                    log[5] = rs.getString("ColumnName");
-                    log[6] = rs.getString("OldValue");
-                    log[7] = rs.getString("NewValue");
+                    log[1] = rs.getString("EditorEmail");
+                    log[2] = rs.getString("Action");
+                    log[3] = rs.getString("TargetEmail");
+                    log[4] = rs.getString("OldValue");
+                    log[5] = rs.getString("NewValue");
+                    log[6] = rs.getTimestamp("LogTime");
                     auditLogs.add(log);
                 }
             }
@@ -418,5 +417,20 @@ public class UserRepositoryImpl implements UserRepository {
             }
         }
         return 0;
+    }
+
+    @Override
+    public Optional<User> getUserByBookingCode(String bookingCode) throws SQLException {
+        String sql = "SELECT u.* FROM Users u JOIN Bookings b ON u.UserID = b.UserID WHERE b.BookingCode = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bookingCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

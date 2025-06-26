@@ -50,68 +50,33 @@ public class UserManagementServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        int userId = Integer.parseInt(request.getParameter("userId"));
-        System.out.println("Action: " + action + ", UserID: " + userId);
-
-        try {
-            Optional<User> userOpt = userRepository.findById(userId);
-            if (!userOpt.isPresent()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-                return;
-            }
-            User existingUser = userOpt.get();
-
-            switch (action) {
-                case "delete":
-                    if ("Customer".equals(existingUser.getRole())) {
-                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Cannot delete customer accounts. Only locking is allowed.");
-                        return;
-                    }
-                    userRepository.deleteById(userId);
-                    logAudit(request, "User", "Delete", String.valueOf(userId), existingUser.toString(), null);
-                    break;
-                case "lock":
-                    userRepository.lockById(userId);
-                    logAudit(request, "User", "Lock", String.valueOf(userId), existingUser.toString(), null);
-                    break;
-                case "unlock":
-                    userRepository.unlockById(userId);
-                    logAudit(request, "User", "Unlock", String.valueOf(userId), existingUser.toString(), null);
-                    break;
-                case "hide":
-                    userRepository.hideById(userId);
-                    logAudit(request, "User", "Hide", String.valueOf(userId), existingUser.toString(), null);
-                    break;
-                default:
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
-                    return;
-            }
-            response.sendRedirect(request.getContextPath() + "/admin/userManagement");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error performing action");
-        }
+        // This servlet no longer handles actions, so this method can be left empty
+        // or redirect to the user management page.
+        response.sendRedirect(request.getContextPath() + "/admin/userManagement");
     }
 
-    private void logAudit(HttpServletRequest request, String tableName, String action, String rowId, String oldValue, String newValue) {
-        String sql = "INSERT INTO dbo.AuditLogs (LogTime, Username, TableName, RowId, ColumnName, OldValue, NewValue) VALUES (GETDATE(), ?, ?, ?, ?, ?, ?)";
+    private void logAudit(HttpServletRequest request, String action, String targetEmail, String oldValue, String newValue) {
+        String sql = "INSERT INTO dbo.AuditLogs (EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime) VALUES (?, ?, ?, ?, ?, GETDATE())";
         try (Connection connection = DBContext.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             HttpSession session = request.getSession(false);
-            String loggedInUsername = (session != null && session.getAttribute("userName") != null) ? session.getAttribute("userName").toString() : "N/A";
+            String editorEmail = "N/A";
+            if (session != null) {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                if (loggedInUser != null) {
+                    editorEmail = loggedInUser.getEmail();
+                }
+            }
 
-            preparedStatement.setString(1, loggedInUsername);
-            preparedStatement.setString(2, tableName);
-            preparedStatement.setString(3, rowId);
-            preparedStatement.setString(4, null); // ColumnName is not applicable here
-            preparedStatement.setString(5, oldValue);
-            preparedStatement.setString(6, newValue);
+            preparedStatement.setString(1, editorEmail);
+            preparedStatement.setString(2, action);
+            preparedStatement.setString(3, targetEmail);
+            preparedStatement.setString(4, oldValue);
+            preparedStatement.setString(5, newValue);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            // Log the exception to a file or monitoring system
         }
     }
 }

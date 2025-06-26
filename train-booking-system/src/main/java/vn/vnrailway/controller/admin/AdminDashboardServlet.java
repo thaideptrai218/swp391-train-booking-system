@@ -15,6 +15,9 @@ import java.util.Map;
 import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.model.User;
 
+import java.util.Calendar;
+import java.util.List;
+
 @WebServlet("/admin/dashboard")
 public class AdminDashboardServlet extends HttpServlet {
 
@@ -32,31 +35,30 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Lấy các thống kê
         int totalUsers = dashboardDAO.getTotalUsers();
-        int totalTrains = dashboardDAO.getTotalTrains();
-        int totalBookings = dashboardDAO.getTotalBookings();
-        double totalRevenue = dashboardDAO.getTotalRevenue();
-
-        // Format doanh thu theo tiền tệ VND
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        String formattedRevenue = currencyFormat.format(totalRevenue);
+        double avgUsersPerMonth = dashboardDAO.getAverageUsersPerMonth();
+        double avgUsersPerYear = dashboardDAO.getAverageUsersPerYear();
 
         // Set attributes
         request.setAttribute("totalUsers", totalUsers);
-        request.setAttribute("totalTrains", totalTrains);
-        request.setAttribute("totalBookings", totalBookings);
-        request.setAttribute("totalRevenue", formattedRevenue);
+        request.setAttribute("avgUsersPerMonth", String.format("%.2f", avgUsersPerMonth));
+        request.setAttribute("avgUsersPerYear", String.format("%.2f", avgUsersPerYear));
 
         // Lấy dữ liệu cho biểu đồ
-        BookingTrendDAO trendDAO = new BookingTrendDAO();
-        Map<String, Integer> trends = trendDAO.getBookingTrends();
+        String yearParam = request.getParameter("year");
+        int year = (yearParam != null) ? Integer.parseInt(yearParam) : Calendar.getInstance().get(Calendar.YEAR);
+
+        Map<String, Integer> trends = dashboardDAO.getMonthlyUserRegistrations(year);
+        List<Integer> registrationYears = dashboardDAO.getRegistrationYears();
 
         // Chuyển Map thành JSON string
         Gson gson = new Gson();
         String trendDataJson = gson.toJson(trends);
-        request.setAttribute("bookingTrends", trendDataJson);
+        request.setAttribute("userChart", trendDataJson);
+        request.setAttribute("selectedYear", year);
+        request.setAttribute("registrationYears", registrationYears);
 
         // Forward to dashboard
-        request.getRequestDispatcher("/WEB-INF/jsp/admin/home.jsp")
+        request.getRequestDispatcher("/WEB-INF/jsp/admin/dashboard.jsp")
                 .forward(request, response);
     }
 }

@@ -47,19 +47,7 @@
                                     </c:choose>
                                  </td>
                                  <td>
-                                     <a href="${pageContext.request.contextPath}/admin/editUser?userId=${user.userID}">Sửa</a>
-                                     <c:if test="${user.role != 'Customer'}">
-                                        <a href="${pageContext.request.contextPath}/admin/userManagement?action=delete&userId=${user.userID}" class="delete-user">Xóa</a>
-                                    </c:if>
-                                    <c:choose>
-                                        <c:when test="${user.isActive()}">
-                                            <a href="${pageContext.request.contextPath}/admin/userManagement?action=lock&userId=${user.userID}">Khóa</a>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <a href="${pageContext.request.contextPath}/admin/userManagement?action=unlock&userId=${user.userID}">Mở khóa</a>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <a href="${pageContext.request.contextPath}/admin/userManagement?action=hide&userId=${user.userID}">Ẩn</a>
+                                     <a href="${pageContext.request.contextPath}/admin/editUser?userId=${user.userID}" class="btn btn-primary">Sửa</a>
                                 </td>
                             </tr>
                         </c:forEach>

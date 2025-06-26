@@ -72,7 +72,7 @@
             </form>
             <div class="login-section">
                 <p>Bạn đã có tài khoản?</p>
-                <a href="login.jsp" class="login-link">Đăng nhập</a>
+                <a href="${pageContext.request.contextPath}/login" class="login-link">Đăng nhập</a>
             </div>
         </div>
     </div>

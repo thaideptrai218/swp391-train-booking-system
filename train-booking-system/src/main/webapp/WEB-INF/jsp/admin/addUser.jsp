@@ -18,14 +18,6 @@
             <section class="user-table-container">
                 <form action="${pageContext.request.contextPath}/admin/addUser" method="post" class="add-user-form">
                     <div class="form-group">
-                        <label for="username">Tên đăng nhập:</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Mật khẩu:</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
                         <label for="fullName">Họ và tên:</label>
                         <input type="text" id="fullName" name="fullName" required>
                     </div>
@@ -36,6 +28,10 @@
                     <div class="form-group">
                         <label for="phoneNumber">Số điện thoại:</label>
                         <input type="text" id="phoneNumber" name="phoneNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mật khẩu:</label>
+                        <input type="password" id="password" name="password" required>
                     </div>
                     <div class="form-group">
                         <label for="role">Role:</label>

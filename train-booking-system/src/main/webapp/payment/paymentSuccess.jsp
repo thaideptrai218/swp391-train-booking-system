@@ -42,5 +42,16 @@
             <a href="${pageContext.request.contextPath}/checkBooking">Kiểm tra đặt vé</a>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingCode = urlParams.get('bookingCode');
+            if (bookingCode) {
+                fetch('${pageContext.request.contextPath}/payment/success?bookingCode=' + bookingCode, {
+                    method: 'GET'
+                });
+            }
+        });
+    </script>
 </body>
 </html>

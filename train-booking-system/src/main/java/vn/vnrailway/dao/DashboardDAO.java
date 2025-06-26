@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 public class DashboardDAO {
 
     public int getTotalUsers() {
@@ -22,6 +26,73 @@ public class DashboardDAO {
             System.out.println("Error counting users: " + e);
         }
         return 0;
+    }
+
+    public double getAverageUsersPerMonth() {
+        String sql = "SELECT AVG(CAST(UserCount AS FLOAT)) FROM (SELECT COUNT(UserID) AS UserCount FROM Users GROUP BY YEAR(CreatedAt), MONTH(CreatedAt)) AS MonthlyCounts";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public double getAverageUsersPerYear() {
+        String sql = "SELECT AVG(CAST(UserCount AS FLOAT)) FROM (SELECT COUNT(UserID) AS UserCount FROM Users GROUP BY YEAR(CreatedAt)) AS YearlyCounts";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Map<String, Integer> getMonthlyUserRegistrations(int year) {
+        Map<String, Integer> monthlyData = new LinkedHashMap<>();
+        String[] months = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
+        for (String month : months) {
+            monthlyData.put(month, 0);
+        }
+
+        String sql = "SELECT MONTH(CreatedAt) AS month, COUNT(UserID) AS count FROM Users WHERE YEAR(CreatedAt) = ? GROUP BY MONTH(CreatedAt)";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int month = rs.getInt("month");
+                    int count = rs.getInt("count");
+                    monthlyData.put(months[month - 1], count);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return monthlyData;
+    }
+
+    public List<Integer> getRegistrationYears() {
+        List<Integer> years = new ArrayList<>();
+        String sql = "SELECT DISTINCT YEAR(CreatedAt) AS year FROM Users ORDER BY year DESC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                years.add(rs.getInt("year"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return years;
     }
 
     public int getTotalTrains() {

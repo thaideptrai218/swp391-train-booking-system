@@ -27,7 +27,6 @@ public class AddUserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("username");
         String password = request.getParameter("password");
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
@@ -44,7 +43,9 @@ public class AddUserServlet extends HttpServlet {
 
         try {
             User savedUser = userRepository.save(newUser);
-            logAudit(request, "Users", "Insert", String.valueOf(savedUser.getUserID()), null, savedUser.toString());
+            String newValue = String.format("Thêm tài khoản với ID: %d, tên: %s, email: %s, sđt: %s, role: %s",
+                    savedUser.getUserID(), savedUser.getFullName(), savedUser.getEmail(), savedUser.getPhoneNumber(), savedUser.getRole());
+            logAudit(request, "Add", savedUser.getEmail(), null, newValue);
             response.sendRedirect(request.getContextPath() + "/admin/userManagement");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -52,27 +53,25 @@ public class AddUserServlet extends HttpServlet {
         }
     }
 
-    private void logAudit(HttpServletRequest request, String tableName, String action, String rowId, String oldValue,
-            String newValue) {
-        String sql = "INSERT INTO dbo.AuditLogs (LogTime, Username, TableName, RowId, ColumnName, OldValue, NewValue) VALUES (GETDATE(), ?, ?, ?, ?, ?, ?)";
+    private void logAudit(HttpServletRequest request, String action, String targetEmail, String oldValue, String newValue) {
+        String sql = "INSERT INTO dbo.AuditLogs (EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime) VALUES (?, ?, ?, ?, ?, GETDATE())";
         try (java.sql.Connection connection = vn.vnrailway.utils.DBContext.getConnection();
-                java.sql.PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+             java.sql.PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             jakarta.servlet.http.HttpSession session = request.getSession(false);
-            String loggedInUsername = "N/A";
+            String editorEmail = "N/A";
             if (session != null) {
                 User loggedInUser = (User) session.getAttribute("loggedInUser");
                 if (loggedInUser != null) {
-                    loggedInUsername = loggedInUser.getEmail();
+                    editorEmail = loggedInUser.getEmail();
                 }
             }
 
-            preparedStatement.setString(1, loggedInUsername);
-            preparedStatement.setString(2, tableName);
-            preparedStatement.setString(3, rowId);
-            preparedStatement.setString(4, action); // Using ColumnName to store the action
-            preparedStatement.setString(5, oldValue);
-            preparedStatement.setString(6, newValue);
+            preparedStatement.setString(1, editorEmail);
+            preparedStatement.setString(2, action);
+            preparedStatement.setString(3, targetEmail);
+            preparedStatement.setString(4, oldValue);
+            preparedStatement.setString(5, newValue);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

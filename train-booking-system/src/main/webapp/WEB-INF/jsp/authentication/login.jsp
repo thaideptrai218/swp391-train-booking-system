@@ -69,7 +69,7 @@
             </form>
             <div class="register-section">
                 <p>Bạn chưa có tài khoản?</p>
-                <a href="register.jsp" class="register-link">Đăng ký ngay</a>
+                <a href="${pageContext.request.contextPath}/register" class="register-link">Đăng ký ngay</a>
             </div>
         </div>
     </div>

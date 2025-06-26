@@ -1,28 +1,32 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.querySelector('.menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const dashboardContainer = document.querySelector('.dashboard-container');
+document.addEventListener("DOMContentLoaded", function () {
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const sidebar = document.getElementById("sidebar");
+  const mainContent = document.querySelector(".main-content");
+  const body = document.body;
 
-    if (menuToggle && sidebar && dashboardContainer) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            dashboardContainer.classList.toggle('collapsed');
-        });
+  function applySidebarState(isOpen) {
+    if (isOpen) {
+      sidebar.classList.add("open");
+      if (mainContent) mainContent.classList.add("shifted");
+      body.classList.add("sidebar-is-open");
+    } else {
+      sidebar.classList.remove("open");
+      if (mainContent) mainContent.classList.remove("shifted");
+      body.classList.remove("sidebar-is-open");
     }
+  }
 
-    const deleteButtons = document.querySelectorAll('a.delete-user');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault();
-            const confirmed = confirm('Bạn có chắc chắn muốn xóa người dùng này không?');
-            if (confirmed) {
-                const url = this.href;
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = url;
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
+  let isSidebarOpen = localStorage.getItem("sidebarOpen") === "true";
+  applySidebarState(isSidebarOpen);
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", function () {
+      isSidebarOpen = !isSidebarOpen;
+      applySidebarState(isSidebarOpen);
+      localStorage.setItem("sidebarOpen", isSidebarOpen);
     });
+  } else {
+    if (!sidebarToggle) console.error("Sidebar toggle button not found.");
+    if (!sidebar) console.error("Sidebar element not found.");
+  }
 });

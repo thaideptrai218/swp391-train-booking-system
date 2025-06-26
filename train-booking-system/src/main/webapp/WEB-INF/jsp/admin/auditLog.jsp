@@ -19,14 +19,13 @@
                 <table class="user-table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID Ghi lại</th>
-                            <th>Thời gian</th>
-                            <th>Người dùng</th>
-                            <th>Bảng</th>
-                            <th>ID Hàng</th>
-                            <th>Cột</th>
+                            <th>ID</th>
+                            <th>Email người sửa</th>
+                            <th>Chức năng</th>
+                            <th>Email đối tượng</th>
                             <th>Giá trị cũ</th>
                             <th>Giá trị mới</th>
+                            <th>Thời gian</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +38,6 @@
                                 <td>${log[4]}</td>
                                 <td>${log[5]}</td>
                                 <td>${log[6]}</td>
-                                <td>${log[7]}</td>
                             </tr>
                         </c:forEach>
                     </tbody>
