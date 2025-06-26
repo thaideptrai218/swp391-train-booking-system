@@ -100,7 +100,11 @@ public class RoleFilter implements Filter {
                 break;
             case "customer":
                 if (path.startsWith("/customer/") || path.equals("/changepassword")
-                        || path.equals("/change-password") || path.equals("/landing") || isCommonPage(path)) {
+                        || path.equals("/change-password") ||
+                        path.equals("/checkBooking") ||
+                        path.equals("/checkTicket") ||
+                        path.equals("/refundTicket") ||
+                        path.equals("/landing") || isCommonPage(path)) {
                     authorized = true;
                 }
                 break;
