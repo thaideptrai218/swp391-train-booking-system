@@ -5,28 +5,34 @@ body {
 
 .feedback {
     width: 100%;
-    position: relative;
     background-color: #fff;
-    height: 865px;
-    overflow: hidden;
+    min-height: 865px;
     text-align: justify;
     font-size: 14px;
     color: #000;
     font-family: Inter, sans-serif;
+    padding: 20px;
+    position: relative;
+}
+
+.feedback-content {
+    max-width: 1326px;
+    margin: 0 auto;
+    position: relative;
 }
 
 .feedback-form {
     position: relative;
-    width: 100%;
-    height: 100%;
+    height: 702px;
 }
 
 .rectangle-parent {
     position: absolute;
-    top: 82px;
+    top: 0;
     left: 574px;
     width: 772px;
     height: 702px;
+    z-index: 10;
 }
 
 .group-child {
@@ -137,7 +143,7 @@ body {
 
 .gi {
     position: absolute;
-    top: 481px;
+    top: 8px;
     left: 43px;
     font-size: 17px;
     font-weight: 600;
@@ -149,11 +155,11 @@ body {
 
 .rectangle-group {
     position: absolute;
-    top: 82px;
-    left: 69px;
+    top: 0;
+    left: 0;
     width: 484px;
     height: 702px;
-    font-size: 13px;
+    z-index: 10;
 }
 
 .group-child2 {
@@ -254,7 +260,6 @@ body {
     height: 29px;
 }
 
-/* Thêm các class mới cho cột phải */
 .tn-phiu-container {
     position: absolute;
     top: 332px;
@@ -325,6 +330,31 @@ body {
     color: #ff0000;
 }
 
+.feedback-list-container {
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.feedback-list {
+    display: block;
+}
+
+.feedback-list table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.feedback-list th,
+.feedback-list td {
+    padding: 10px;
+    text-align: left;
+}
+
+.feedback-list th {
+    background-color: #f2f2f2;
+}
+
 input[type="text"],
 input[type="email"],
 textarea,
@@ -375,5 +405,23 @@ button {
 
 #feedbackMessage {
     display: none;
-    /* Initially hidden */
+}
+
+.back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0082c4;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: Inter, sans-serif;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #006bb3;
+    text-decoration: none;
+    color: #fff;
 }

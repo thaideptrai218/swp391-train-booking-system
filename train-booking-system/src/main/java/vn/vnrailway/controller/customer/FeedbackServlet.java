@@ -12,13 +12,28 @@ import vn.vnrailway.dao.impl.FeedbackDAOImpl;
 import vn.vnrailway.model.Feedback;
 import vn.vnrailway.model.User;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @WebServlet("/feedback")
 public class FeedbackServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser != null) {
+            FeedbackDAO feedbackDAO = new FeedbackDAOImpl();
+            List<Feedback> feedbacks = feedbackDAO.getFeedbacksByUserId(loggedInUser.getUserID());
+            System.out.println("Number of feedbacks for user " + loggedInUser.getUserID() + ": " + feedbacks.size());
+            request.setAttribute("feedbacks", feedbacks);
+        } else {
+            System.out.println("No loggedInUser in session");
+            request.setAttribute("feedbacks", new ArrayList<>());
+        }
+        System.out.println(
+                "Forwarding to JSP with feedbacks size: " + ((List<?>) request.getAttribute("feedbacks")).size());
         request.getRequestDispatcher("/WEB-INF/jsp/customer/feedback.jsp").forward(request, response);
     }
 
@@ -31,14 +46,12 @@ public class FeedbackServlet extends HttpServlet {
         String ticketName = request.getParameter("ticketName");
         String description = request.getParameter("description");
 
-        // Ánh xạ ticketType sang FeedbackTypeID
-        int feedbackTypeId = 1; // Default là Góp ý (ID 1)
+        int feedbackTypeId = 1;
         if ("2".equals(ticketType))
-            feedbackTypeId = 2; // Phản ánh
+            feedbackTypeId = 2;
         if ("3".equals(ticketType))
-            feedbackTypeId = 3; // Đề xuất
+            feedbackTypeId = 3;
 
-        // Lấy UserID từ session (nếu đã đăng nhập)
         HttpSession session = request.getSession();
         Integer userId = null;
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -61,6 +74,6 @@ public class FeedbackServlet extends HttpServlet {
         feedbackDAO.saveFeedback(feedback);
 
         request.setAttribute("feedbackSuccess", true);
-        doGet(request, response);
+        doGet(request, response); // Gọi lại doGet để hiển thị danh sách
     }
 }

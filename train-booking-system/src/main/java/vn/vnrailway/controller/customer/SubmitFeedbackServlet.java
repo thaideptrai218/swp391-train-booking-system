@@ -19,10 +19,10 @@ public class SubmitFeedbackServlet extends HttpServlet {
         String title = request.getParameter("title");
         String comment = request.getParameter("comment");
 
-        Feedback feedback = new Feedback(title, comment);
+        // Feedback feedback = new Feedback(title, comment);
 
-        FeedbackDAO feedbackDAO = new FeedbackDAOImpl();
-        feedbackDAO.saveFeedback(feedback);
+        // FeedbackDAO feedbackDAO = new FeedbackDAOImpl();
+        // feedbackDAO.saveFeedback(feedback);
 
         response.sendRedirect("/train-booking-system/feedback");
     }

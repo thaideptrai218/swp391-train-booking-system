@@ -10,5 +10,9 @@ public interface FeedbackDAO {
 
     List<Feedback> getPendingFeedbacks();
 
-    void updateFeedbackResponse(int feedbackId, String response, int respondedByUserId);
+    void updateFeedback(Feedback feedback);
+
+    Feedback getFeedbackById(int feedbackId);
+
+    List<Feedback> getFeedbacksByUserId(Integer userId);
 }
