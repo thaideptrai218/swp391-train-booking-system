@@ -3,70 +3,142 @@ package vn.vnrailway.model;
 import java.util.Date;
 
 public class Feedback {
-    private int feedbackId;
-    private String customerName;
-    private String customerEmail;
-    private String subject;
-    private String message;
-    private Date submissionDate;
+    private Integer feedbackId;
+    private Integer userId;
+    private Integer feedbackTypeId;
+    private String fullName;
+    private String email;
+    private String feedbackContent;
+    private String ticketName;
+    private String description;
+    private Date submittedAt;
+    private String status;
+    private String response;
+    private Date respondedAt;
+    private Integer respondedByUserId;
 
     public Feedback() {
     }
 
-    public Feedback(int feedbackId, String customerName, String customerEmail, String subject, String message, Date submissionDate) {
+    public Feedback(Integer feedbackId, Integer userId, Integer feedbackTypeId, String fullName, String email,
+            String feedbackContent, Date submittedAt, String status, String response, Date respondedAt,
+            Integer respondedByUserId, String ticketName, String description) {
         this.feedbackId = feedbackId;
-        this.customerName = customerName;
-        this.customerEmail = customerEmail;
-        this.subject = subject;
-        this.message = message;
-        this.submissionDate = submissionDate;
+        this.userId = userId;
+        this.feedbackTypeId = feedbackTypeId;
+        this.fullName = fullName;
+        this.email = email;
+        this.feedbackContent = feedbackContent;
+        this.submittedAt = submittedAt;
+        this.status = status;
+        this.response = response;
+        this.respondedAt = respondedAt;
+        this.respondedByUserId = respondedByUserId;
+        this.ticketName = ticketName;
+        this.description = description;
     }
 
-    public int getFeedbackId() {
+    public Integer getFeedbackId() {
         return feedbackId;
     }
 
-    public void setFeedbackId(int feedbackId) {
+    public void setFeedbackId(Integer feedbackId) {
         this.feedbackId = feedbackId;
     }
 
-    public String getCustomerName() {
-        return customerName;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public String getCustomerEmail() {
-        return customerEmail;
+    public Integer getFeedbackTypeId() {
+        return feedbackTypeId;
     }
 
-    public void setCustomerEmail(String customerEmail) {
-        this.customerEmail = customerEmail;
+    public void setFeedbackTypeId(Integer feedbackTypeId) {
+        this.feedbackTypeId = feedbackTypeId;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getMessage() {
-        return message;
+    public String getEmail() {
+        return email;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public Date getSubmissionDate() {
-        return submissionDate;
+    public String getFeedbackContent() {
+        return feedbackContent;
     }
 
-    public void setSubmissionDate(Date submissionDate) {
-        this.submissionDate = submissionDate;
+    public void setFeedbackContent(String feedbackContent) {
+        this.feedbackContent = feedbackContent;
+    }
+
+    public Date getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(Date submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    public Date getRespondedAt() {
+        return respondedAt;
+    }
+
+    public void setRespondedAt(Date respondedAt) {
+        this.respondedAt = respondedAt;
+    }
+
+    public Integer getRespondedByUserId() {
+        return respondedByUserId;
+    }
+
+    public void setRespondedByUserId(Integer respondedByUserId) {
+        this.respondedByUserId = respondedByUserId;
+    }
+
+    public String getTicketName() {
+        return ticketName;
+    }
+
+    public void setTicketName(String ticketName) {
+        this.ticketName = ticketName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

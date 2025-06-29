@@ -12,35 +12,173 @@ public class FeedbackDAOImpl implements FeedbackDAO {
 
     @Override
     public void saveFeedback(Feedback feedback) {
-        String sql = "INSERT INTO Feedbacks (customer_name, customer_email, subject, message, submission_date) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Feedback (UserID, FeedbackTypeID, FullName, Email, FeedbackContent, TicketName, Description, SubmittedAt, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, feedback.getCustomerName());
-            ps.setString(2, feedback.getCustomerEmail());
-            ps.setString(3, feedback.getSubject());
-            ps.setString(4, feedback.getMessage());
-            ps.setTimestamp(5, new Timestamp(feedback.getSubmissionDate().getTime()));
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            if (feedback.getUserId() != null) {
+                ps.setInt(1, feedback.getUserId());
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+            ps.setInt(2, feedback.getFeedbackTypeId());
+            ps.setString(3, feedback.getFullName());
+            ps.setString(4, feedback.getEmail());
+            ps.setString(5, feedback.getFeedbackContent());
+            ps.setString(6, feedback.getTicketName());
+            ps.setString(7, feedback.getDescription());
+            ps.setTimestamp(8, new Timestamp(feedback.getSubmittedAt().getTime()));
+            ps.setString(9, feedback.getStatus());
+            ps.executeUpdate();
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    feedback.setFeedbackId(generatedKeys.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Feedback> getAllFeedbacks() {
+        List<Feedback> feedbacks = new ArrayList<>();
+        String sql = "SELECT * FROM Feedback ORDER BY SubmittedAt DESC";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Feedback feedback = new Feedback();
+                feedback.setFeedbackId(rs.getInt("FeedbackID"));
+                feedback.setUserId(rs.getInt("UserID"));
+                feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
+                feedback.setFullName(rs.getString("FullName"));
+                feedback.setEmail(rs.getString("Email"));
+                feedback.setFeedbackContent(rs.getString("FeedbackContent"));
+                feedback.setTicketName(rs.getString("TicketName"));
+                feedback.setDescription(rs.getString("Description"));
+                feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
+                feedback.setStatus(rs.getString("Status"));
+                feedback.setResponse(rs.getString("Response"));
+                feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
+                feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
+                feedbacks.add(feedback);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return feedbacks;
+    }
+
+    @Override
+    public List<Feedback> getPendingFeedbacks() {
+        List<Feedback> feedbacks = new ArrayList<>();
+        String sql = "SELECT * FROM Feedback WHERE Status = 'Pending' ORDER BY SubmittedAt DESC";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Feedback feedback = new Feedback();
+                feedback.setFeedbackId(rs.getInt("FeedbackID"));
+                feedback.setUserId(rs.getInt("UserID"));
+                feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
+                feedback.setFullName(rs.getString("FullName"));
+                feedback.setEmail(rs.getString("Email"));
+                feedback.setFeedbackContent(rs.getString("FeedbackContent"));
+                feedback.setTicketName(rs.getString("TicketName"));
+                feedback.setDescription(rs.getString("Description"));
+                feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
+                feedback.setStatus(rs.getString("Status"));
+                feedback.setResponse(rs.getString("Response"));
+                feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
+                feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
+                feedbacks.add(feedback);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return feedbacks;
+    }
+
+    @Override
+    public void updateFeedback(Feedback feedback) {
+        String sql = "UPDATE Feedback SET Response = ?, RespondedAt = ?, RespondedByUserID = ?, Status = 'Reviewed' WHERE FeedbackID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, feedback.getResponse());
+            ps.setTimestamp(2, new Timestamp(feedback.getRespondedAt() != null ? feedback.getRespondedAt().getTime()
+                    : new java.util.Date().getTime()));
+            ps.setInt(3, feedback.getRespondedByUserId() != null ? feedback.getRespondedByUserId() : 0);
+            ps.setInt(4, feedback.getFeedbackId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public List<Feedback> getAllFeedbacks() {
-        List<Feedback> feedbacks = new ArrayList<>();
-        String sql = "SELECT feedback_id, customer_name, customer_email, subject, message, submission_date FROM Feedbacks ORDER BY submission_date DESC";
+    @Override
+    public Feedback getFeedbackById(int feedbackId) {
+        Feedback feedback = null;
+        String sql = "SELECT * FROM Feedback WHERE FeedbackID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Feedback feedback = new Feedback();
-                feedback.setFeedbackId(rs.getInt("feedback_id"));
-                feedback.setCustomerName(rs.getString("customer_name"));
-                feedback.setCustomerEmail(rs.getString("customer_email"));
-                feedback.setSubject(rs.getString("subject"));
-                feedback.setMessage(rs.getString("message"));
-                feedback.setSubmissionDate(rs.getTimestamp("submission_date"));
-                feedbacks.add(feedback);
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, feedbackId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    feedback = new Feedback();
+                    feedback.setFeedbackId(rs.getInt("FeedbackID"));
+                    feedback.setUserId(rs.getInt("UserID"));
+                    feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
+                    feedback.setFullName(rs.getString("FullName"));
+                    feedback.setEmail(rs.getString("Email"));
+                    feedback.setFeedbackContent(rs.getString("FeedbackContent"));
+                    feedback.setTicketName(rs.getString("TicketName"));
+                    feedback.setDescription(rs.getString("Description"));
+                    feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
+                    feedback.setStatus(rs.getString("Status"));
+                    feedback.setResponse(rs.getString("Response"));
+                    feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
+                    feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return feedback;
+    }
+
+    @Override
+    public List<Feedback> getFeedbacksByUserId(Integer userId) {
+        List<Feedback> feedbacks = new ArrayList<>();
+        String sql = "SELECT * FROM Feedback WHERE UserID = ? ORDER BY SubmittedAt DESC";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (userId != null) {
+                ps.setInt(1, userId);
+                System.out.println("Querying feedbacks for UserID: " + userId);
+            } else {
+                ps.setNull(1, Types.INTEGER);
+                System.out.println("UserID is null, querying all feedbacks");
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Feedback feedback = new Feedback();
+                    feedback.setFeedbackId(rs.getInt("FeedbackID"));
+                    feedback.setUserId(rs.getInt("UserID"));
+                    feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
+                    feedback.setFullName(rs.getString("FullName"));
+                    feedback.setEmail(rs.getString("Email"));
+                    feedback.setFeedbackContent(rs.getString("FeedbackContent"));
+                    feedback.setTicketName(rs.getString("TicketName"));
+                    feedback.setDescription(rs.getString("Description"));
+                    feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
+                    feedback.setStatus(rs.getString("Status"));
+                    feedback.setResponse(rs.getString("Response"));
+                    feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
+                    feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
+                    feedbacks.add(feedback);
+                }
+                System.out.println("Found " + feedbacks.size() + " feedbacks");
             }
         } catch (SQLException e) {
             e.printStackTrace();
