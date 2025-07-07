@@ -3,6 +3,8 @@ package vn.vnrailway.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * Class representing a User entity in the railway system.
@@ -31,8 +33,8 @@ public class User implements Serializable {
 
     // Constructor for creating new users (without userID, createdAt, lastLogin)
     public User(String fullName, String email, String phoneNumber, String passwordHash,
-                String idCardNumber, String role, boolean isGuestAccount, 
-                LocalDate dateOfBirth, String gender, String address) {
+            String idCardNumber, String role, boolean isGuestAccount,
+            LocalDate dateOfBirth, String gender, String address) {
         this.fullName = (fullName != null) ? fullName : "";
         this.email = (email != null) ? email : "";
         this.phoneNumber = (phoneNumber != null) ? phoneNumber : "";
@@ -48,10 +50,10 @@ public class User implements Serializable {
     }
 
     // All-argument constructor
-    public User(int userID, String fullName, String email, String phoneNumber, 
-                String passwordHash, String idCardNumber, String role, boolean isActive, 
-                LocalDateTime createdAt, LocalDateTime lastLogin, boolean isGuestAccount, 
-                LocalDate dateOfBirth, String gender, String address) {
+    public User(int userID, String fullName, String email, String phoneNumber,
+            String passwordHash, String idCardNumber, String role, boolean isActive,
+            LocalDateTime createdAt, LocalDateTime lastLogin, boolean isGuestAccount,
+            LocalDate dateOfBirth, String gender, String address) {
         this.userID = userID;
         this.fullName = (fullName != null) ? fullName : "";
         this.email = (email != null) ? email : "";
@@ -133,6 +135,10 @@ public class User implements Serializable {
         return isActive;
     }
 
+    public boolean getIsActive() {
+        return isActive;
+    }
+
     public void setActive(boolean isActive) {
         this.isActive = isActive;
     }
@@ -169,16 +175,21 @@ public class User implements Serializable {
         this.dateOfBirth = dateOfBirth; // Can be null
     }
 
+    public Date getDateOfBirthAsDate() {
+        return dateOfBirth != null ? Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
+    }
+
     public String getGender() {
         return gender;
     }
 
-  public void setGender(String gender) {
-  if (gender == null || gender.equals("Male") || gender.equals("Female") || gender.equals("Other") || gender.equals("Nam") || gender.equals("Nữ") || gender.equals("Khác")) {
-  this.gender = gender;
-  } else {
-  throw new IllegalArgumentException("Gender must be 'Male', 'Female', 'Other', or null");
-  }
+    public void setGender(String gender) {
+        if (gender == null || gender.equals("Male") || gender.equals("Female") || gender.equals("Other")
+                || gender.equals("Nam") || gender.equals("Nữ") || gender.equals("Khác")) {
+            this.gender = gender;
+        } else {
+            throw new IllegalArgumentException("Gender must be 'Male', 'Female', 'Other', or null");
+        }
     }
 
     public String getAddress() {

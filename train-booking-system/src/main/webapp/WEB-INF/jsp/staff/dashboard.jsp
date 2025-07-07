@@ -21,7 +21,7 @@
                         <li><a href="#">Bảng điều khiển</a></li>
                         <li><a href="#">Quản lý đặt chỗ</a></li>
                         <li><a href="#">Kiểm tra vào/ra</a></li>
-                        <li><a href="#">Hỗ trợ khách hàng</a></li>
+                        <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a></li>
                         <li><a href="#">Báo cáo</a></li>
                         <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a></li>
                         <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a></li>
