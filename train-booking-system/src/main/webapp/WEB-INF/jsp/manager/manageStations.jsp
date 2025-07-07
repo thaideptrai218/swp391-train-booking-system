@@ -46,6 +46,60 @@ prefix="c" %>
             <p class="message error-message">${errorMessage}</p>
           </c:if>
 
+          <!-- Form for adding/editing stations -->
+          <div
+            id="stationFormContainer"
+            class="form-section"
+            style="display: none"
+          >
+            <h2 id="formTitle"></h2>
+            <form id="stationForm" action="manageStations" method="post">
+              <input type="hidden" id="stationID" name="stationID" value="" />
+              <div class="form-group">
+                <label for="stationCode"
+                  >Mã ga: <span class="required-asterisk">*</span></label
+                >
+                <input
+                  type="text"
+                  id="stationCode"
+                  name="stationCode"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="stationName"
+                  >Tên ga: <span class="required-asterisk">*</span></label
+                >
+                <input
+                  type="text"
+                  id="stationName"
+                  name="stationName"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="address">Địa chỉ:</label>
+                <input type="text" id="address" name="address" />
+              </div>
+              <div class="form-group">
+                <label for="city">Thành phố:</label>
+                <input type="text" id="city" name="city" />
+              </div>
+              <div class="form-group">
+                <label for="region">Khu vực:</label>
+                <input type="text" id="region" name="region" />
+              </div>
+              <div class="form-group">
+                <label for="phoneNumber">Số điện thoại:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" />
+              </div>
+              <div class="form-group">
+                <button type="submit" name="command" id="submitButton"></button>
+                <button type="button" id="cancelButton">Hủy</button>
+              </div>
+            </form>
+          </div>
+
           <div class="controls-container">
             <%-- Controls container for search and add button --%>
             <div class="search-container">
@@ -61,80 +115,6 @@ prefix="c" %>
             <button id="showAddFormBtn" class="action-add">
               <%-- Changed class --%> <i class="fas fa-plus"></i> Thêm ga mới
             </button>
-          </div>
-
-          <!-- The Modal -->
-          <div id="addStationModal" class="modal">
-            <!-- Modal content -->
-            <div class="modal-content">
-              <span class="close-button">&times;</span>
-              <div class="form-section">
-                <h2>Thêm/Sửa ga</h2>
-                <form id="stationForm" action="manageStations" method="post">
-                  <input
-                    type="hidden"
-                    id="stationID"
-                    name="stationID"
-                    value=""
-                  />
-                  <div class="form-group">
-                    <label for="stationCode"
-                      >Mã ga: <span class="required-asterisk">*</span></label
-                    >
-                    <input
-                      type="text"
-                      id="stationCode"
-                      name="stationCode"
-                      required
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="stationName"
-                      >Tên ga: <span class="required-asterisk">*</span></label
-                    >
-                    <input
-                      type="text"
-                      id="stationName"
-                      name="stationName"
-                      required
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="address">Địa chỉ:</label>
-                    <input type="text" id="address" name="address" />
-                  </div>
-                  <div class="form-group">
-                    <label for="city">Thành phố:</label>
-                    <input type="text" id="city" name="city" />
-                  </div>
-                  <div class="form-group">
-                    <label for="region">Khu vực:</label>
-                    <input type="text" id="region" name="region" />
-                  </div>
-                  <div class="form-group">
-                    <label for="phoneNumber">Số điện thoại:</label>
-                    <input type="text" id="phoneNumber" name="phoneNumber" />
-                  </div>
-                  <div class="form-group">
-                    <button
-                      type="submit"
-                      name="command"
-                      id="submitButton"
-                      value="add"
-                    >
-                      Thêm ga
-                    </button>
-                    <button
-                      type="button"
-                      id="cancelEditButton"
-                      style="display: none"
-                    >
-                      Hủy chỉnh sửa
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
           </div>
 
           <div class="table-container">
@@ -195,6 +175,9 @@ prefix="c" %>
     </div>
 
     <script>
+      function removeDiacritics(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      }
       document.addEventListener("DOMContentLoaded", function () {
         console.log("DOM Content Loaded: manageStations.jsp script started.");
 
@@ -203,6 +186,11 @@ prefix="c" %>
         const stationTableRows = document.querySelectorAll(
           ".table-container tbody tr"
         );
+
+        const stationFormContainer = document.getElementById(
+          "stationFormContainer"
+        );
+        const formTitle = document.getElementById("formTitle");
         const stationForm = document.getElementById("stationForm");
         const stationIDInput = document.getElementById("stationID");
         const stationCodeInput = document.getElementById("stationCode");
@@ -212,7 +200,8 @@ prefix="c" %>
         const regionInput = document.getElementById("region");
         const phoneNumberInput = document.getElementById("phoneNumber");
         const submitButton = document.getElementById("submitButton");
-        const cancelEditButton = document.getElementById("cancelEditButton");
+        const cancelButton = document.getElementById("cancelButton");
+        const showAddFormBtn = document.getElementById("showAddFormBtn");
 
         document.querySelectorAll(".edit-btn").forEach((button) => {
           button.addEventListener("click", function () {
@@ -230,52 +219,35 @@ prefix="c" %>
             phoneNumberInput.value =
               this.dataset.phone === "null" ? "" : this.dataset.phone;
 
+            formTitle.textContent = "Sửa ga";
             submitButton.value = "edit";
             submitButton.textContent = "Cập nhật ga";
-            cancelEditButton.style.display = "inline-block";
-            addStationModal.classList.add("active"); // <-- ADD THIS LINE TO SHOW MODAL FOR EDIT
-            console.log("Form populated for editing. Modal shown.");
+
+            stationFormContainer.style.display = "block";
+            stationFormContainer.scrollIntoView({ behavior: "smooth" });
+            console.log("Form populated for editing.");
           });
         });
 
-        cancelEditButton.addEventListener("click", function () {
-          console.log("Cancel Edit button clicked.");
-          stationForm.reset();
-          stationIDInput.value = "";
-          submitButton.value = "add";
-          submitButton.textContent = "Thêm ga";
-          cancelEditButton.style.display = "none";
-          // addStationModal.style.display = "none"; /* Hide modal on cancel */
-          addStationModal.classList.remove("active"); /* Hide modal on cancel */
-          console.log("Form reset.");
-        });
-
-        const showAddFormBtn = document.getElementById("showAddFormBtn");
-        const addStationModal = document.getElementById("addStationModal");
-        const closeButton = document.querySelector(".close-button");
-
         showAddFormBtn.addEventListener("click", function () {
           console.log("Add New Station button clicked.");
-          // Reset form for adding a new station
           stationForm.reset();
-          stationIDInput.value = ""; // Clear any existing station ID
+          stationIDInput.value = "";
+
+          formTitle.textContent = "Thêm ga mới";
           submitButton.value = "add";
           submitButton.textContent = "Thêm ga";
-          cancelEditButton.style.display = "none";
-          addStationModal.classList.add("active");
-          console.log("Form reset for new station. Modal shown.");
+
+          stationFormContainer.style.display = "block";
+          stationFormContainer.scrollIntoView({ behavior: "smooth" });
+          console.log("Form reset for new station.");
         });
 
-        closeButton.addEventListener("click", function () {
-          // addStationModal.style.display = "none";
-          addStationModal.classList.remove("active");
-        });
-
-        window.addEventListener("click", function (event) {
-          if (event.target == addStationModal) {
-            // addStationModal.style.display = "none";
-            addStationModal.classList.remove("active");
-          }
+        cancelButton.addEventListener("click", function () {
+          console.log("Cancel button clicked.");
+          stationFormContainer.style.display = "none";
+          stationForm.reset();
+          console.log("Form hidden and reset.");
         });
 
         document.querySelectorAll(".delete-btn").forEach((button) => {
@@ -308,64 +280,53 @@ prefix="c" %>
           });
         });
 
+        const tableBody = document.querySelector(".table-container tbody");
+        const allRows = Array.from(tableBody.querySelectorAll("tr"));
+        const noResultsRowHTML =
+          '<tr><td colspan="8" style="text-align: center;">Không tìm thấy ga nào khớp.</td></tr>';
+
         function filterTable() {
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          stationTableRows.forEach((row) => {
-            // Check if this is a "No stations found" row
+          const searchTerm = removeDiacritics(
+            searchInput.value.toLowerCase().trim().replace(/\s+/g, " ")
+          );
+          let visibleRows = 0;
+
+          while (tableBody.firstChild) {
+            tableBody.removeChild(tableBody.firstChild);
+          }
+
+          allRows.forEach((row) => {
             if (row.querySelector('td[colspan="8"]')) {
-              // If it's the "no stations" message, always show it if no other rows are visible,
-              // or hide it if other rows will be visible. This logic is handled implicitly
-              // by checking if any data rows are visible later.
               return;
             }
 
-            const idCell = row.cells[0].textContent.toLowerCase();
-            const codeCell = row.cells[1].textContent.toLowerCase();
-            const nameCell = row.cells[2].textContent.toLowerCase();
+            const idCell = removeDiacritics(
+              row.cells[0].textContent.toLowerCase()
+            );
+            const codeCell = removeDiacritics(
+              row.cells[1].textContent.toLowerCase()
+            );
+            const nameCell = removeDiacritics(
+              row.cells[2].textContent.toLowerCase()
+            );
 
             if (
               idCell.includes(searchTerm) ||
               codeCell.includes(searchTerm) ||
               nameCell.includes(searchTerm)
             ) {
-              row.style.display = "";
-            } else {
-              row.style.display = "none";
+              tableBody.appendChild(row);
+              visibleRows++;
             }
           });
 
-          // Show "No stations found" if all data rows are hidden by search
-          const noStationsRow = document.querySelector(
-            ".table-container tbody tr td[colspan='8']"
-          );
-          if (noStationsRow) {
-            let anyRowVisible = false;
-            stationTableRows.forEach((row) => {
-              if (
-                row.style.display !== "none" &&
-                !row.querySelector('td[colspan="8"]')
-              ) {
-                anyRowVisible = true;
-              }
-            });
-            if (!anyRowVisible && searchTerm !== "") {
-              // Only show if search term is active and no results
-              // If the "no stations found" row was part of the original items, it might be hidden.
-              // We might need to dynamically add/remove it or ensure it's correctly handled.
-              // For simplicity, let's assume it's always there and we just control its display.
-              // This part might need refinement based on how `empty stations` is handled.
-              // A better approach might be to have a dedicated "no results from search" message.
-            }
+          if (visibleRows === 0) {
+            tableBody.insertAdjacentHTML("beforeend", noResultsRowHTML);
           }
         }
 
         searchBtn.addEventListener("click", filterTable);
         searchInput.addEventListener("keyup", function (event) {
-          // Optional: Trigger search on Enter key as well
-          // if (event.key === "Enter") {
-          //   filterTable();
-          // }
-          // For live search on every key press:
           filterTable();
         });
       });

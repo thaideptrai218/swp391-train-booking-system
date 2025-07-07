@@ -9,6 +9,7 @@ public interface FeaturedRouteRepository {
     // We primarily need a method to get all featured routes for display
     List<FeaturedRoute> findAll() throws SQLException;
 
+    void deleteByRouteId(int routeId) throws SQLException;
     // Optional: Add other methods if direct manipulation from admin side is needed
     // later
     // FeaturedRoute save(FeaturedRoute featuredRoute) throws SQLException;

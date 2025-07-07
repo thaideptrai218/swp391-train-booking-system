@@ -15,7 +15,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import vn.vnrailway.dao.FeaturedRouteRepository;
 import vn.vnrailway.dao.RouteRepository;
+import vn.vnrailway.dao.impl.FeaturedRouteRepositoryImpl;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
@@ -28,6 +30,7 @@ public class ManageRoutesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RouteRepository routeRepository;
     private TripRepository tripRepository; // Added
+    private FeaturedRouteRepository featuredRouteRepository;
 
     public ManageRoutesServlet() {
         super();
@@ -38,6 +41,7 @@ public class ManageRoutesServlet extends HttpServlet {
         super.init();
         this.routeRepository = new RouteRepositoryImpl();
         this.tripRepository = new TripRepositoryImpl(); // Added
+        this.featuredRouteRepository = new FeaturedRouteRepositoryImpl();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -424,6 +428,7 @@ public class ManageRoutesServlet extends HttpServlet {
 
         // Proceed with deletion (either no trips or confirmed)
         try {
+            featuredRouteRepository.deleteByRouteId(routeId);
             boolean deleted = routeRepository.deleteById(routeId); // This now also deletes trips via TripRepository
             if (deleted) {
                 request.getSession().setAttribute("successMessage",

@@ -112,6 +112,7 @@
                 <table class="stations-table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Tên Trạm</th>
                             <th>Khoảng Cách (km)</th>
                             <th>Thời Gian Dừng (phút)</th>
@@ -123,7 +124,8 @@
                         <c:forEach items="${routeDetailsForCurrentRoute}" var="detail" varStatus="loopStatus">
                             <c:set var="hasStations" value="${true}" />
                             <tr class="${(loopStatus.first || loopStatus.last) && fn:length(routeDetailsForCurrentRoute) > 1 ? 'non-draggable' : ''}">
-                                <td><c:out value="${detail.stationName}" /> (ID: ${detail.stationID})</td>
+                                <td>${detail.stationID}</td>
+                                <td><c:out value="${detail.stationName}" /></td>
                                 <td><fmt:formatNumber value="${detail.distanceFromStart}" minFractionDigits="1" maxFractionDigits="2"/></td>
                                 <td><c:out value="${detail.defaultStopTime}" /></td>
                                 <td class="actions">
@@ -181,7 +183,7 @@
                                 <select id="editRsStationId" name="stationId" required class="form-control" ${isStationLocked ? 'disabled' : ''}>
                                     <c:forEach items="${allStations}" var="station">
                                         <option value="${station.stationID}" ${station.stationID == routeStationToEdit.stationID ? 'selected' : ''}>
-                                            <c:out value="${station.stationName}" /> (ID: ${station.stationID})
+                                            <c:out value="${station.stationName}" /> 
                                         </option>
                                     </c:forEach>
                                 </select>

@@ -149,44 +149,14 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
         </div>
       </c:if>
 
-      <!-- Add New Route Form -->
-      <div class="container">
-        <h2><i class="fas fa-plus-circle"></i> Thêm Tuyến Đường Mới</h2>
-        <form
-          action="${pageContext.request.contextPath}/manageRoutes"
-          method="post"
-        >
-          <input type="hidden" name="action" value="addRoute" />
-          <div class="form-group">
-            <label for="departureStationId">Điểm Đi:</label>
-            <select name="departureStationId" id="departureStationId" required>
-              <option value="">-- Chọn Điểm Đi --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
-              </c:forEach>
-            </select>
+      <!-- Toolbar -->
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div class="search-container" style="flex-grow: 1; margin-right: 20px;">
+              <input type="text" id="routeSearchInput" placeholder="Tìm kiếm theo ID hoặc Tên Tuyến Đường..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
           </div>
-          <div class="form-group">
-            <label for="arrivalStationId">Điểm Đến:</label>
-            <select name="arrivalStationId" id="arrivalStationId" required>
-              <option value="">-- Chọn Điểm Đến --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
-              </c:forEach>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="description">Mô Tả:</label>
-            <textarea id="description" name="description"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Lưu Tuyến Đường
-          </button>
-        </form>
+          <a href="${pageContext.request.contextPath}/manager/addRoute" class="btn btn-primary">
+              <i class="fas fa-plus-circle"></i> Thêm Tuyến Đường Mới
+          </a>
       </div>
 
       <!-- List of Routes -->
@@ -199,16 +169,16 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
           <table class="routes-table">
             <thead>
               <tr>
-                <th>Tên Tuyến Đường (ID)</th>
+                <th>ID</th>
+                <th>Tên Tuyến Đường</th>
                 <th>Hành Động</th>
               </tr>
             </thead>
             <tbody>
               <c:forEach items="${allRoutes}" var="route">
                 <tr>
-                  <td>
-                    <c:out value="${route.routeName}" /> (ID: ${route.routeID})
-                  </td>
+                  <td><c:out value="${route.routeID}" /></td>
+                  <td><c:out value="${route.routeName}" /></td>
                   <td>
                     <a
                       href="${pageContext.request.contextPath}/manager/routeDetail?routeId=${route.routeID}"
@@ -293,9 +263,47 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
     <!-- End Main Content -->
 
     <script>
+      function removeDiacritics(str) {
+          return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      }
+      
       document.addEventListener("DOMContentLoaded", function () {
-        const addDepartureSelect = document.getElementById('departureStationId');
-        const addArrivalSelect = document.getElementById('arrivalStationId');
+        const searchInput = document.getElementById("routeSearchInput");
+        const tableBody = document.querySelector(".routes-table tbody");
+        const allRows = tableBody ? Array.from(tableBody.querySelectorAll("tr")) : [];
+        const noResultsRowHTML = '<tr><td colspan="3" style="text-align: center;">Không tìm thấy tuyến đường nào khớp.</td></tr>';
+
+        if (searchInput && tableBody) {
+            searchInput.addEventListener("keyup", function () {
+                const searchTerm = removeDiacritics(searchInput.value.trim().toLowerCase().replace(/\s+/g, " "));
+                let visibleRows = 0;
+
+                // Clear current rows
+                while (tableBody.firstChild) {
+                    tableBody.removeChild(tableBody.firstChild);
+                }
+
+                // Add back matching rows
+                allRows.forEach((row) => {
+                    const idCell = row.cells[0];
+                    const nameCell = row.cells[1];
+                    if (idCell && nameCell) {
+                        const idText = removeDiacritics(idCell.textContent.toLowerCase());
+                        const nameText = removeDiacritics(nameCell.textContent.toLowerCase());
+                        if (idText.includes(searchTerm) || nameText.includes(searchTerm)) {
+                            tableBody.appendChild(row);
+                            visibleRows++;
+                        }
+                    }
+                });
+
+                // Show message if no rows are visible
+                if (visibleRows === 0) {
+                    tableBody.insertAdjacentHTML("beforeend", noResultsRowHTML);
+                }
+            });
+        }
+
         const editDepartureSelect = document.getElementById('editDepartureStationId');
         const editArrivalSelect = document.getElementById('editArrivalStationId');
 
@@ -309,18 +317,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
                     option.style.display = '';
                 }
             }
-        }
-
-        if (addDepartureSelect && addArrivalSelect) {
-            addDepartureSelect.addEventListener('change', function() {
-                updateStationOptions(this, addArrivalSelect);
-            });
-            addArrivalSelect.addEventListener('change', function() {
-                updateStationOptions(this, addDepartureSelect);
-            });
-            // Initial sync for add form (if needed, though usually starts empty)
-            // updateStationOptions(addDepartureSelect, addArrivalSelect);
-            // updateStationOptions(addArrivalSelect, addDepartureSelect);
         }
 
         if (editDepartureSelect && editArrivalSelect) {

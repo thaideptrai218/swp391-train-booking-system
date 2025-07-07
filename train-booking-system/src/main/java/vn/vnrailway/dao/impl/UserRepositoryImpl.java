@@ -32,7 +32,6 @@ public class UserRepositoryImpl implements UserRepository {
         if (lastLoginTimestamp != null) {
             user.setLastLogin(lastLoginTimestamp.toLocalDateTime());
         }
-        user.setDateOfBirth(rs.getObject("DateOfBirth", LocalDate.class));
         user.setGender(rs.getString("Gender"));
         user.setAddress(rs.getString("Address"));
         return user;
@@ -100,7 +99,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> findByRole(String role) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin FROM Users WHERE Role = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, Gender, Address FROM Users WHERE Role = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, role);
@@ -423,7 +422,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> getUserByBookingCode(String bookingCode) throws SQLException {
         String sql = "SELECT u.* FROM Users u JOIN Bookings b ON u.UserID = b.UserID WHERE b.BookingCode = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bookingCode);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

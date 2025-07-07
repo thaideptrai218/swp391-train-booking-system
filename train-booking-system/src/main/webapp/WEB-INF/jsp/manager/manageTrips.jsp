@@ -75,6 +75,10 @@
         form.submit();
       }
 
+      function removeDiacritics(str) {
+          return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("tripSearchInput");
         const searchBtn = document.getElementById("tripSearchBtn");
@@ -82,15 +86,15 @@
         const noTripsRow = document.querySelector(".table-container table tbody tr td[colspan='6']");
 
         function filterTripsTable() {
-          const searchTerm = searchInput.value.toLowerCase().trim();
+          const searchTerm = removeDiacritics(searchInput.value.toLowerCase().trim().replace(/\s+/g, " "));
           let anyRowVisible = false;
 
           tripTableRows.forEach(row => {
             if (row.cells.length < 2) { 
                 return;
             }
-            const tripIdCell = row.cells[0].textContent.toLowerCase();
-            const routeNameCell = row.cells[1].textContent.toLowerCase();
+            const tripIdCell = removeDiacritics(row.cells[0].textContent.toLowerCase());
+            const routeNameCell = removeDiacritics(row.cells[1].textContent.toLowerCase());
 
             if (tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm)) {
               row.style.display = "";
@@ -144,7 +148,6 @@
           <div class="controls-container">
             <div class="search-container">
               <input type="text" id="tripSearchInput" placeholder="Tìm theo Mã chuyến đi, Tên tuyến...">
-              <button id="tripSearchBtn" class="action-search"><i class="fas fa-search"></i> Tìm kiếm</button>
             </div>
             <a href="${pageContext.request.contextPath}/manageTrips?action=showAddForm" class="btn btn-primary action-add">
               <i class="fas fa-plus-circle"></i> Thêm Chuyến Đi Mới

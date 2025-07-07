@@ -149,7 +149,6 @@ public class ManageStaffsServlet extends HttpServlet {
                         String phoneNumber = request.getParameter("phoneNumber");
                         String idCardNumber = request.getParameter("idCardNumber");
                         String password = request.getParameter("password");
-                        String role = request.getParameter("role"); // Read role
                         boolean isActive = request.getParameter("isActive") != null;
 
                         User newUser = new User();
@@ -158,21 +157,18 @@ public class ManageStaffsServlet extends HttpServlet {
                         newUser.setPhoneNumber(phoneNumber);
                         newUser.setIdCardNumber(idCardNumber);
                         newUser.setPasswordHash(password); // Hash the password before saving
-                        newUser.setRole(role); // Set role from request
+                        newUser.setRole("Staff"); // Set role from request
                         newUser.setActive(isActive);
 
                         userRepository.save(newUser);
                         request.getSession().setAttribute("successMessage", "Staff member added successfully.");
                         break;
-                    case "edit":
+                    case "update":
                         int userIDToEdit = Integer.parseInt(request.getParameter("userID"));
                         String fullNameEdit = request.getParameter("fullName");
                         String emailEdit = request.getParameter("email");
                         String phoneNumberEdit = request.getParameter("phoneNumber");
                         String idCardNumberEdit = request.getParameter("idCardNumber");
-                        // String passwordEdit = request.getParameter("password"); // Password editing
-                        // removed for managers
-                        String roleEdit = request.getParameter("role"); // Read role
                         boolean isActiveEdit = request.getParameter("isActive") != null;
 
                         Optional<User> userToUpdateOptional = userRepository.findById(userIDToEdit);
@@ -182,12 +178,6 @@ public class ManageStaffsServlet extends HttpServlet {
                             userToUpdate.setEmail(emailEdit);
                             userToUpdate.setPhoneNumber(phoneNumberEdit);
                             userToUpdate.setIdCardNumber(idCardNumberEdit);
-                            // Password update logic removed for existing staff by manager
-                            // if (passwordEdit != null && !passwordEdit.isEmpty()) {
-                            // userToUpdate.setPasswordHash(passwordEdit); // Hash the password before
-                            // saving
-                            // }
-                            userToUpdate.setRole(roleEdit); // Set role from request
                             userToUpdate.setActive(isActiveEdit);
                             boolean updated = userRepository.update(userToUpdate);
                             if (updated) {
