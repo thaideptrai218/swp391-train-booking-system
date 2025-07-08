@@ -3,6 +3,8 @@ package vn.vnrailway.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * Class representing a User entity in the railway system.
@@ -140,6 +142,10 @@ public class User implements Serializable {
         return isActive;
     }
 
+    public boolean getIsActive() {
+        return isActive;
+    }
+
     public void setActive(boolean isActive) {
         this.isActive = isActive;
     }
@@ -174,6 +180,10 @@ public class User implements Serializable {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth; // Can be null
+    }
+
+    public Date getDateOfBirthAsDate() {
+        return dateOfBirth != null ? Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
     }
 
     public String getGender() {

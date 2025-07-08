@@ -1,0 +1,252 @@
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    /* Base font size */
+    margin: 0;
+    background-color: #e9ecef;
+    /* Light gray background */
+    color: #343a40;
+    /* Dark text */
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    /* Dark blue-gray */
+    color: #ffffff;
+    padding: 20px;
+    padding-top: 60px;
+    /* Adjusted for home icon */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    /* Establish positioning context for absolute children */
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.home-link {
+    position: absolute;
+    top: 30px;
+    left: 15px;
+    color: #93caff;
+    font-size: 1.5rem;
+    /* Keep this font-size as per user's request */
+}
+
+.home-link:hover {
+    color: #b0d8ff;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #ffffff;
+    font-size: 2.2rem;
+    /* Consistent with login.css h2 */
+    font-weight: 700;
+    /* Consistent with login.css h2 */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 15px;
+}
+
+.sidebar ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 15px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1.1rem;
+    /* Consistent with login.css buttons/labels */
+}
+
+.sidebar ul li a:hover {
+    background-color: #34495e;
+    /* Slightly lighter dark blue-gray */
+    transform: translateX(5px);
+}
+
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f8f9fa;
+    /* Lighter gray */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.header h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 2.2rem;
+    /* Consistent with login.css h2 */
+    font-weight: 700;
+    /* Consistent with login.css h2 */
+}
+
+.user-info span {
+    font-size: 1.1rem;
+    /* Consistent with login.css labels */
+    color: #6c757d;
+}
+
+
+.chat-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.chat-list h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f5f5f5;
+}
+
+.chat-button {
+    padding: 5px 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.chat-button:hover {
+    background: #0056b3;
+}
+
+.chat-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+}
+
+.sent {
+    align-self: flex-end;
+}
+
+.received {
+    align-self: flex-start;
+}
+
+.message-bubble {
+    background-color: #e9ecef;
+    padding: 10px 15px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.sent .message-bubble {
+    background-color: #0084ff;
+    color: white;
+}
+
+.message-bubble p {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.message-bubble small {
+    font-size: 0.7em;
+    color: #666;
+    text-align: right;
+    display: block;
+    margin-top: 5px;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.chat-input textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.chat-input button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.sent {
+    align-self: flex-end;
+}
+
+.received {
+    align-self: flex-start;
+}
+
+.message-bubble {
+    background-color: #e9ecef;
+    padding: 10px 15px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.sent .message-bubble {
+    background-color: #0084ff;
+    color: white;
+}
