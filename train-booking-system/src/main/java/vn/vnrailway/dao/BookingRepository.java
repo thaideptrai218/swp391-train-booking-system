@@ -20,4 +20,5 @@ public interface BookingRepository {
     boolean update(Booking booking) throws SQLException; // Typically for status updates
     boolean deleteById(int bookingId) throws SQLException; // Use with caution, often bookings are cancelled not deleted
     CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException;
+    List<String> findTicketCodesByBookingCode(String bookingCode) throws SQLException;
 }

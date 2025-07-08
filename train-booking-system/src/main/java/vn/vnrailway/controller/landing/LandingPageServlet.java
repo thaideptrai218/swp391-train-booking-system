@@ -93,7 +93,7 @@ public class LandingPageServlet extends HttpServlet {
             request.setAttribute("featuredRouteErrorMessage", featuredRouteErrorMessage);
         }
 
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/landing/landing-page.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/public/landing/landing-page.jsp");
         dispatcher.forward(request, response);
     }
 

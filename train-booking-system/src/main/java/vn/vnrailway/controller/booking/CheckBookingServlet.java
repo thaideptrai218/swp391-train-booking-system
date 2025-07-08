@@ -59,7 +59,8 @@ public class CheckBookingServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại hoặc email.");
             } else {
                 try {
-                    CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode, phoneNumber, email);
+                    CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode,
+                            phoneNumber, email);
                     if (checkBookingDTO != null) {
                         request.setAttribute("checkBookingDTO", checkBookingDTO);
                     } else {
@@ -72,7 +73,7 @@ public class CheckBookingServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/WEB-INF/jsp/check-booking/check-booking.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/public/check-booking/check-booking.jsp").forward(request, response);
     }
 
     @Override

@@ -1,5 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %> <%@ taglib
-prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" pageEncoding="UTF-8" %> <%@ taglib prefix="c"
+uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!-- Font Awesome CDN -->
 <link
@@ -23,29 +23,44 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <p><strong>Vai Trò:</strong> <c:out value="${loggedInUser.role}" /></p>
   </c:if>
   <c:if test="${empty loggedInUser}">
-    <p>User information not available.</p>
+    <p>Thông tin người dùng không có sẵn.</p>
   </c:if>
 
   <!-- Add other sidebar links/content here as needed -->
   <h3><i class="fas fa-cogs"></i> Chức Năng</h3>
   <ul>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/trips">
-        <i class="fas fa-route"></i> Quản Lý Chuyến Đi
+      <a href="${pageContext.request.contextPath}/managerDashboard">
+        <i class="fas fa-chart-line"></i> Xem Số Liệu Thống Kê
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/trains-seats">
-        <i class="fas fa-building"></i> Quản Lý Ga Tàu và Ghế Ngồi
+      <a href="${pageContext.request.contextPath}/manageStations">
+        <i class="fas fa-map-signs"></i> Quản Lý Ga Tàu
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/schedules-pricing">
+      <a href="${pageContext.request.contextPath}/manageRoutes">
+        <i class="fas fa-route"></i> Quản Lý Tuyến Đường
+      </a>
+    </li>
+    <li>
+      <a href="${pageContext.request.contextPath}/manageTrips">
+        <i class="fas fa-train"></i> Quản Lý Chuyến Đi
+      </a>
+    </li>
+    <li>
+      <a href="${pageContext.request.contextPath}/manage-trains-seats">
+        <i class="fas fa-building"></i> Quản Lý Tàu và Ghế
+      </a>
+    </li>
+    <li>
+      <a href="${pageContext.request.contextPath}/managePrice">
         <i class="fas fa-dollar-sign"></i> Quản Lý Giá cả
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manager/home">
+      <a href="${pageContext.request.contextPath}/manageStaffs">
         <i class="fas fa-users-cog"></i> Quản Lý Nhân Viên
       </a>
     </li>

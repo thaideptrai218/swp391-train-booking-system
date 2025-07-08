@@ -1,0 +1,419 @@
+/* General Styles */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7f6; /* Lighter background for the page */
+  color: #333;
+}
+
+/* Controls Container - for search, "Add New Trip" button, and Filter/Sort Form */
+.controls-container {
+  display: flex;
+  justify-content: space-between; /* Puts search/filter on left, add button on right */
+  align-items: center; /* Vertically align items in the middle */
+  margin-bottom: 25px;
+  flex-wrap: nowrap; /* Prevent wrapping to keep search and add button on one line */
+  gap: 20px;
+}
+
+/* Search Container specific styles */
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between search input and search button */
+  flex-grow: 1; /* Search container takes up available flexible space */
+  min-width: 250px; /* Minimum width for the search container */
+}
+
+.search-container input[type="text"] {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9em; /* Match filter/sort form inputs */
+  flex-grow: 1; /* Input field takes available space within search-container */
+  background-color: #f8f9fa; /* Match filter/sort form inputs */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.search-container input[type="text"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.action-search {
+  /* Style for the new search button */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 10px 15px;
+  background-color: #007bff; /* Blue for search */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9em; /* Match filter/sort form button */
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+.action-search:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+.action-search .fas {
+  margin-right: 3px;
+}
+
+/* "Add New Trip" Button - ensure it doesn't shrink */
+.action-add {
+  flex-shrink: 0; /* Prevent the button from shrinking */
+  display: inline-flex; /* For icon and text alignment */
+  align-items: center; /* Align icon and text if button has icon */
+  gap: 0.5em; /* Space between icon and text */
+  padding: 10px 15px; /* Adjusted to match search button height, original was 12px 20px */
+  background-color: #28a745; /* Green - consistent */
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.action-add:hover {
+  background-color: #218838; /* Darker green */
+  transform: translateY(-1px);
+}
+
+/* Filter and Sort Form */
+.filter-sort-form {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 20px;
+  background-color: #ffffff; /* White background for the form */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-grow: 1;
+  /* max-width: 80%; /* Consider removing or adjusting if it causes layout issues */
+}
+.filter-sort-form div {
+  display: flex;
+  flex-direction: column;
+}
+.filter-sort-form label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 0.85em;
+  color: #555;
+}
+.filter-sort-form input[type="text"],
+.filter-sort-form select {
+  padding: 10px;
+  border: 1px solid #ced4da; /* Softer border color */
+  border-radius: 5px;
+  font-size: 0.9em;
+  background-color: #f8f9fa; /* Light background for inputs */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.filter-sort-form input[type="text"]:focus,
+.filter-sort-form select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+.filter-sort-form button {
+  padding: 10px 18px;
+  background-color: #007bff; /* Blue - consistent */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+  height: auto; /* Adjust height to content */
+  align-self: flex-end; /* Ensure it aligns with the bottom of taller inputs if any */
+}
+.filter-sort-form button:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+th,
+td {
+  border: 1px solid #e0e0e0; /* Lighter border for table cells */
+  padding: 12px 15px; /* Increased padding */
+  text-align: left;
+  vertical-align: middle;
+  font-size: 0.9em;
+}
+th {
+  background-color: #6c757d; /* A more neutral, modern header color */
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85em;
+}
+tr:nth-child(even) {
+  background-color: #f8f9fa; /* Subtle striping */
+}
+tr:hover {
+  background-color: #e9ecef; /* Slightly more pronounced hover */
+}
+
+/* Table Action Buttons (Edit, Delete) */
+.table-actions a {
+  margin-right: 8px;
+  text-decoration: none;
+  padding: 6px 12px; /* Slightly adjusted padding */
+  border-radius: 5px;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+  display: inline-block; /* Ensures proper padding and margin */
+}
+.table-actions a:last-child {
+  margin-right: 0;
+}
+
+.action-edit {
+  background-color: #ffc107; /* Yellow - consistent */
+  color: #212529; /* Darker text for better contrast on yellow */
+}
+.action-edit:hover {
+  background-color: #e0a800; /* Darker yellow */
+  transform: translateY(-1px);
+}
+
+.action-delete {
+  background-color: #dc3545; /* Red - consistent */
+  color: white;
+}
+.action-delete:hover {
+  background-color: #c82333; /* Darker red */
+  transform: translateY(-1px);
+}
+
+/* Messages */
+.message {
+  /* Common styles for all messages */
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+.error-message {
+  /* Specific styles for error messages */
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+.success-message {
+  /* Specific styles for success messages */
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 768px) {
+  .controls-container {
+    flex-direction: column;
+    align-items: stretch; /* Make items full width on small screens */
+  }
+  .controls-container .action-add {
+    margin-bottom: 15px; /* Add margin back when stacked */
+    margin-right: 0;
+    text-align: center;
+  }
+  .filter-sort-form {
+    max-width: 100%; /* Allow form to take full width */
+  }
+  .filter-sort-form button {
+    width: 100%; /* Make button full width in stacked form */
+    margin-top: 10px;
+  }
+  .filter-sort-form div {
+    width: calc(50% - 8px); /* Two items per row, accounting for gap */
+  }
+  .filter-sort-form div:last-of-type {
+    /* If an odd number of filter items, last one takes full width */
+    /* width: 100%; */ /* Or adjust as needed */
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-sort-form div {
+    width: 100%; /* Each filter item takes full width */
+  }
+}
+
+/* Styles moved from manageTrips.jsp inline style block */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+.dashboard-container {
+  display: flex;
+}
+.main-content {
+  flex-grow: 1;
+  padding: 25px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin: 20px;
+}
+.dashboard-header h1 {
+  color: #343a40;
+  margin-bottom: 25px;
+  font-weight: 400;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 15px;
+  font-size: 1.8em;
+}
+/* .message class is already defined above, merging is not strictly necessary but good practice. For now, we'll keep the one from JSP if it's more specific or intended to override.
+   However, the existing .message style is more generic. The one from JSP is also generic. Let's assume the one from JSP is the desired one if different.
+   Actually, they are very similar. The one from JSP:
+   .message { padding: 12px 18px; margin-bottom: 20px; border-radius: 5px; font-size: 0.95em; }
+   The one in CSS file:
+   .message { padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-weight: 500; }
+   Let's use the more specific one from the JSP for now, or ensure they are harmonized.
+   For simplicity of this step, I will just append. The user can refine later.
+*/
+.message {
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-size: 0.95em;
+} /* From JSP */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+} /* From JSP, same as above */
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+} /* From JSP, same as above */
+.info-message {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+} /* From JSP */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.table-container th,
+.table-container td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+.table-container th {
+  background-color: #f0f2f5;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+.table-container tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.table-container tbody tr:hover {
+  background-color: #e9ecef;
+}
+.table-actions a,
+.table-actions button {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.85em;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+}
+.table-actions a.action-view-more {
+  background-color: #17a2b8;
+}
+.table-actions a.action-view-more:hover {
+  background-color: #138496;
+}
+.table-actions .action-delete {
+  background-color: #dc3545;
+}
+.table-actions .action-delete:hover {
+  background-color: #c82333;
+}
+.table-actions .fas {
+  margin-right: 5px;
+}
+td form {
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.form-control-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+  border: 1px solid #ced4da;
+}
+.sort-indicator {
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+th a {
+  text-decoration: none;
+  color: inherit;
+}
+th a:hover {
+  text-decoration: underline;
+}
+.btn-update-multiplier {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  border-radius: 0.2rem;
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+}
+.btn-update-multiplier:hover {
+  background-color: #0056b3;
+  border-color: #0052cc;
+}
+.btn-update-multiplier .fas {
+  margin-right: 3px;
+}

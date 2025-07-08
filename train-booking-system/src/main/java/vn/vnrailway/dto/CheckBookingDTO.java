@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckBookingDTO {
+    private String bookingCode;
     private String userFullName;
     private String userEmail;
     private String userIDCardNumber;

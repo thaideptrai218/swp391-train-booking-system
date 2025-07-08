@@ -1,0 +1,189 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+.navbar {
+  background-color: #042c57;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 30px;
+  align-items: center;
+  height: 80px;
+}
+
+.navbar a {
+  color: white;
+  margin: 27px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.logo {
+  height: 100px; /* Ưu tiên dùng height để giữ tỉ lệ ảnh */
+  width: auto;  /* Giữ tỉ lệ ảnh đúng, không bị méo */
+  object-fit: contain;
+}
+
+.auth a {
+  margin-left: 10px;
+  padding: 5px 10px;
+}
+
+.register {
+  background-color: #007bff;
+  color: white;
+  border-radius: 20px;
+}
+
+
+.main-content {
+  display: flex;
+  justify-content: center;
+  /* align-items: flex-start; */
+  gap: 30px;
+  padding: 20px;
+  margin: 20px;
+}
+
+.check-info {
+  margin: 40px auto 20px auto;
+  /* text-align: center; */
+}
+
+.form-checking {
+  text-align: start;
+}
+
+.check-info table {
+  margin: 0 auto;
+  /* Canh giữa bảng */
+}
+
+.et-main-label {
+  background: url("../assets/images/label_bg.png") right bottom no-repeat
+    #0082c4;
+  padding: 5px 40px 5px 10px;
+  margin-left: 5px;
+  color: #fff;
+  font-family: Verdana;
+}
+
+.check-info input,
+.check-info button {
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.route-info {
+  background-color: #d9edf7;
+  text-align: left;
+  font-weight: bold;
+}
+
+.booking-summary h3 {
+  margin-top: 30px;
+  color: #333;
+}
+
+.booking-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white;
+}
+
+.booking-summary th,
+.booking-summary td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.booking-summary th {
+  background-color: #007bff;
+  color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+.footer {
+  background-color: #003b65;
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.footer-top {
+  background-color: #0082c4;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.footer-top a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 50px;
+}
+
+.footer-social {
+  background-color: #3c2172;
+  padding: 15px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-social p {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.social-icons a img {
+  width: 40px;
+  margin: 0 8px;
+  border-radius: 50%;
+}
+
+.footer-bottom {
+  background-color: #003b65;
+  padding: 20px 10px;
+}
+
+.footer-logo {
+  width: 14%;
+  margin-bottom: 10px;
+}
+
+.slogan {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #aaa;
+  width: 80%;
+  margin: 10px auto;
+}
+
+.footer-bottom p {
+  margin: 5px 0;
+  color: #ccc;
+  font-size: 14px;
+}

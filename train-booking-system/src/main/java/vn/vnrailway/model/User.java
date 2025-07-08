@@ -124,10 +124,17 @@ public class User implements Serializable {
     }
 
     public void setRole(String role) {
-        if (role == null || role.equals("Customer") || role.equals("Staff") || role.equals("Admin")) {
-            this.role = role;
+        if (role != null) {
+            String trimmedRole = role.trim();
+            if (trimmedRole.equalsIgnoreCase("Customer") || trimmedRole.equalsIgnoreCase("Staff") || trimmedRole.equalsIgnoreCase("Admin") || trimmedRole.equalsIgnoreCase("Guest") || trimmedRole.equalsIgnoreCase("Manager")) {
+                this.role = trimmedRole;
+            } else {
+                // Log the issue instead of throwing an exception to prevent the page from crashing.
+                System.err.println("Warning: Invalid role found in database: '" + role + "'. Setting role to null for this user.");
+                this.role = null;
+            }
         } else {
-            throw new IllegalArgumentException("Role must be 'Customer', 'Staff', or 'Admin'");
+            this.role = null;
         }
     }
 
@@ -210,6 +217,7 @@ public class User implements Serializable {
                 ", idCardNumber='" + idCardNumber + '\'' +
                 ", role='" + role + '\'' +
                 ", isActive=" + isActive +
+                ", isGuestAccount=" + isGuestAccount + // Added
                 ", createdAt=" + createdAt +
                 ", lastLogin=" + lastLogin +
                 ", isGuestAccount=" + isGuestAccount +

@@ -228,8 +228,10 @@ public class BookingRepositoryImpl implements BookingRepository {
     }
 
     @Override
-    public CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email) throws SQLException {
+    public CheckBookingDTO findBookingDetailsByCode(String bookingCode, String phoneNumber, String email)
+            throws SQLException {
         String sql = "SELECT \r\n" +
+                "    TK.TicketCode,\r\n" + //
                 "    P.FullName AS PassengerFullName,\r\n" + //
                 "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
                 "    PT.TypeName AS PassengerType,\r\n" + //
@@ -259,7 +261,8 @@ public class BookingRepositoryImpl implements BookingRepository {
                 "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
                 "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID\r\n" + //
                 "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID\r\n" + //
-                "WHERE (B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode = ? AND u.Email = ?);";
+                "WHERE B.BookingCode = ? AND (u.PhoneNumber = ? OR u.Email = ?)";
+
 
         CheckBookingDTO checkBookingDTO = null;
         List<InfoPassengerDTO> passengers = new ArrayList<>();
@@ -268,12 +271,12 @@ public class BookingRepositoryImpl implements BookingRepository {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bookingCode);
             ps.setString(2, phoneNumber);
-            ps.setString(3, bookingCode);
-            ps.setString(4, email);
+            ps.setString(3, email);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     if (checkBookingDTO == null) {
                         checkBookingDTO = new CheckBookingDTO();
+                        checkBookingDTO.setBookingCode(bookingCode);
                         checkBookingDTO.setUserFullName(rs.getString("FullName"));
                         checkBookingDTO.setUserEmail(rs.getString("Email"));
                         checkBookingDTO.setUserIDCardNumber(rs.getString("IDCardNumber"));
@@ -281,6 +284,7 @@ public class BookingRepositoryImpl implements BookingRepository {
                     }
 
                     InfoPassengerDTO passenger = new InfoPassengerDTO();
+                    passenger.setTicketCode(rs.getString("TicketCode"));
                     passenger.setPassengerFullName(rs.getString("PassengerFullName"));
                     passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
                     passenger.setPassengerType(rs.getString("PassengerType"));
@@ -308,6 +312,22 @@ public class BookingRepositoryImpl implements BookingRepository {
         return checkBookingDTO;
     }
 
+    @Override
+    public List<String> findTicketCodesByBookingCode(String bookingCode) throws SQLException {
+        List<String> ticketCodes = new ArrayList<>();
+        String sql = "SELECT T.TicketCode FROM Tickets T JOIN Bookings B ON T.BookingID = B.BookingID WHERE B.BookingCode = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bookingCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ticketCodes.add(rs.getString("TicketCode"));
+                }
+            }
+        }
+        return ticketCodes;
+    }
+
     // Main method for testing
     public static void main(String[] args) {
         BookingRepository bookingRepository = new BookingRepositoryImpl();
@@ -330,7 +350,8 @@ public class BookingRepositoryImpl implements BookingRepository {
             // () -> System.out.println("Booking with ID " + testBookingId + " not
             // found."));
 
-            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode("BK588C13461874490F905DD43C808A3ECA", "0912345678", "customer.an@example.com");
+            CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(
+                    "VNR1750245599712", "0987300269", "customer.an@example.com");
             if (checkBookingDTO != null) {
                 System.out.println("Booking details found:");
                 System.out.println("User Full Name: " + checkBookingDTO.getUserFullName());

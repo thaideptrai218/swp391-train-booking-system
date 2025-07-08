@@ -11,17 +11,126 @@ html {
     box-sizing: inherit;
 }
 
+/* Define CSS Variables */
+:root {
+    --font-primary: "Inter", sans-serif; /* From existing body style */
+    --font-secondary: "Sora", sans-serif; /* For profile dropdown */
+
+    --color-text-default: #333; /* From existing body style */
+    --color-white: #fff;
+    --color-black: #000;
+
+    --color-primary: #007bff; /* For navbar elements, profile icon */
+    --color-primary-dark: #0056b3; /* Hover for primary elements */
+
+    --color-accent-cyan: #4daac8; /* For .btn in header */
+    --color-accent-cyan-dark: #357a94; /* Hover for .btn in header */
+
+    --border-radius-main: 22px; /* For .btn in header */
+}
+
 body {
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-primary); /* Use variable */
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
-    color: #333;
+    color: var(--color-text-default); /* Use variable */
     line-height: 1.6;
 }
 
+.nav-profile-icon {
+    font-size: 1.2em; /* Adjust size for a better fit within the circle */
+    text-decoration: none;
+    color: #fff; /* White icon color */
+    background-color: var(--color-primary); /* Blue background for the circle */
+    width: 36px; /* Fixed width for a circle */
+    height: 36px; /* Fixed height for a circle */
+    border-radius: 50%; /* Makes it a circle */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0; /* Remove padding if fixed size is used */
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 0 2px #fff; /* White border around the circle */
+}
+
+.nav-profile-icon:hover {
+    background-color: var(--color-primary-dark); /* Darker blue on hover */
+    box-shadow: 0 0 0 2px #ddd; /* Slightly darker border on hover */
+}
+
+/* Profile Dropdown Styles */
+.profile-dropdown-container {
+    position: relative;
+    display: inline-block; /* Or 'block' if it's a direct child of ul */
+}
+
+.profile-dropdown-menu {
+    display: none; /* Hidden by default, shown by JS */
+    position: absolute;
+    top: 100%; /* Position below the icon */
+    right: 0; /* Align to the right of the container */
+    background-color: #2c2c2c; /* Dark background like the image */
+    color: #e4e6eb; /* Light text color */
+    min-width: 280px; /* Adjust as needed */
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1001; /* Ensure it's above other nav items */
+    padding: 8px 0;
+    margin-top: 8px; /* Small gap between icon and dropdown */
+}
+
+.profile-dropdown-menu .dropdown-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4b4c4e; /* Separator */
+    margin-bottom: 8px;
+}
+
+.profile-dropdown-menu .dropdown-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.profile-dropdown-menu .dropdown-username {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.profile-dropdown-menu .dropdown-item {
+    display: flex; /* Use flex for icon and text alignment */
+    align-items: center;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #e4e6eb; /* Light text color */
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.profile-dropdown-menu .dropdown-item:hover {
+    background-color: #3a3b3c; /* Hover effect */
+}
+
+.profile-dropdown-menu .dropdown-item .arrow-right {
+    margin-left: auto; /* Pushes arrow to the right */
+    font-size: 0.8em;
+    color: #a0a3a7;
+}
+
+.profile-dropdown-menu .logout-item {
+    border-top: 1px solid #4b4c4e; /* Separator above logout */
+    margin-top: 8px;
+    padding-top: 12px; /* More padding for logout */
+}
+
 .container {
-    max-width: 1200px; /* Adjust as needed */
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -74,13 +183,281 @@ a:hover {
     background-color: #0056b3;
 }
 
-/* Message styling */
-.error-message {
-    color: #dc3545; /* Red color for errors */
-    font-weight: bold;
+/* ========================================= */
+/* Header Styles                           */
+/* ========================================= */
+.navbar {
+    background-color: transparent;
+    color: var(--color-white);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    font-family: var(--font-primary);
 }
 
-.success-message {
-    color: #28a745; /* Green color for success */
+.navbar .container {
+    /* Specific override for navbar's container */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.logo-block-link {
+    text-decoration: none;
+}
+
+.logo-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 250px;
+    height: 150px;
+}
+
+.logo-block .logo {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.navbar nav {
+    /* Future styles for nav if needed */
+}
+
+.navbar .nav-list {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar .nav-list li a {
+    text-decoration: none;
+    color: var(--color-white);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 150%;
+    padding: 5px 0;
+    display: block;
+}
+
+.navbar .nav-list li.btn {
+    border-radius: var(--border-radius-main);
+    background: var(--color-accent-cyan);
+    transition: background-color 0.2s ease;
+}
+
+.navbar .nav-list li.btn a {
+    padding: 12px 32px;
+    color: var(--color-white);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.navbar .nav-list li.btn:hover {
+    background: var(--color-accent-cyan-dark);
+}
+
+/* Profile Dropdown Styles */
+.nav-profile-icon {
+    font-size: 1.2em;
+    text-decoration: none;
+    color: var(--color-white);
+    background-color: var(--color-primary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 0 2px var(--color-white);
+    cursor: pointer;
+}
+
+.nav-profile-icon:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 2px #ddd;
+}
+
+.profile-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #2c2c2c;
+    color: #e4e6eb;
+    min-width: 280px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1001;
+    padding: 8px 0;
+    margin-top: 8px;
+    font-family: var(--font-secondary);
+}
+
+.profile-dropdown-menu .dropdown-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4b4c4e;
+    margin-bottom: 8px;
+}
+
+.profile-dropdown-menu .dropdown-username {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.profile-dropdown-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #e4e6eb;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.profile-dropdown-menu .dropdown-item:hover {
+    background-color: #3a3b3c;
+}
+
+.profile-dropdown-menu .dropdown-item .arrow-right {
+    margin-left: auto;
+    font-size: 0.8em;
+    color: #a0a3a7;
+}
+
+.profile-dropdown-menu .logout-item {
+    border-top: 1px solid #4b4c4e;
+    margin-top: 8px;
+    padding-top: 12px;
+}
+
+/* ========================================= */
+/* Footer Styles                           */
+/* ========================================= */
+.footer {
+    background-color: #003b65;
+    color: var(--color-white);
+    text-align: center;
+    font-family: var(--font-primary);
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.footer-top {
+    background-color: #0082c4;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-top a {
+    color: var(--color-white);
+    text-decoration: none;
     font-weight: bold;
+    padding: 5px 10px;
+}
+
+.footer-social {
+    background-color: #3c2172;
+    padding: 15px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-social p {
+    margin: 0;
+    font-size: 18px;
+    color: var(--color-white);
+}
+
+.social-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.social-icons a img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.social-icons a:hover img {
+    transform: scale(1.1);
+}
+
+.footer-bottom {
+    background-color: #003b65;
+    padding: 20px 10px;
+}
+
+.footer-bottom .footer-logo {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.footer-bottom .slogan {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-white);
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.footer-bottom hr {
+    border: none;
+    border-top: 1px solid #aaa;
+    width: 80%;
+    margin: 15px auto;
+}
+
+.footer-bottom p {
+    margin: 8px 0;
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.footer-bottom p.copyright {
+    margin-top: 15px;
+    /* Message styling */
+    .error-message {
+        color: #dc3545; /* Red color for errors */
+        font-weight: bold;
+    }
+
+    .success-message {
+        color: #28a745; /* Green color for success */
+        font-weight: bold;
+    }
 }

@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/authentication/login.jsp").forward(request, response);
     }
 
     /**
@@ -75,6 +75,11 @@ public class LoginServlet extends HttpServlet {
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+            if (!user.isActive()) {
+                request.setAttribute("errorMessage", "Tài khoản của bạn đã bị khóa do vi phạm chính sách, xin vui lòng liên hệ với email admin@vnr.com để được hỗ trợ thêm!");
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/login.jsp").forward(request, response);
+                return;
+            }
             if (HashPassword.checkPassword(password, user.getPasswordHash())) {
                 HttpSession session = request.getSession(true); // Ensure session is created if not existing
                 session.setAttribute("loggedInUser", user);
@@ -125,16 +130,16 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/landing");
                         break;
                     default:
-                        response.sendRedirect(request.getContextPath() + "/login.jsp");
+                        response.sendRedirect(request.getContextPath() + "/WEB-INF/jsp/authentication/login.jsp");
                         break;
                 }
             } else {
                 request.setAttribute("errorMessage", "Tài khoản hoặc mật khẩu không đúng, vui lòng nhập lại!");
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/authentication/login.jsp").forward(request, response);
             }
         } else {
             request.setAttribute("errorMessage", "Tài khoản hoặc mật khẩu không đúng, vui lòng nhập lại!");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/authentication/login.jsp").forward(request, response);
         }
     }
 

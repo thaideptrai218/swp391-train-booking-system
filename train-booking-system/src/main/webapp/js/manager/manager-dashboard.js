@@ -18,7 +18,7 @@ function createPieChart(canvasId, chartLabel, labels, data, titleText) {
           "rgba(75, 192, 192, 0.7)",
           "rgba(153, 102, 255, 0.7)",
           "rgba(255, 159, 64, 0.7)",
-          "rgba(201, 203, 207, 0.7)", // Added more colors
+          "rgba(201, 203, 207, 0.7)",
           "rgba(255, 87, 34, 0.7)",
           "rgba(0, 150, 136, 0.7)",
           "rgba(121, 85, 72, 0.7)",
@@ -57,6 +57,8 @@ function createPieChart(canvasId, chartLabel, labels, data, titleText) {
     },
   });
 }
+
+// createBarChart function removed as it's no longer used.
 
 document.addEventListener('DOMContentLoaded', function () {
   // Best Sellers Chart
@@ -106,4 +108,204 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Error processing data for popularDestinationStationsChart:", e, "Labels:", popularDestinationStationsCanvas.dataset.labels, "Values:", popularDestinationStationsCanvas.dataset.values);
     }
   }
+  // Removed initializations for weeklyBookingChart, monthlyBookingChart, yearlyBookingChart
+
+  // Sales by Month/Year Chart
+  // Data is now expected to be in global variable salesByMonthYearDataForChart
+  console.log("Attempting to render Sales by Month/Year Chart. Raw global data (salesByMonthYearDataForChart):", salesByMonthYearDataForChart);
+  if (typeof salesByMonthYearDataForChart !== 'undefined' && salesByMonthYearDataForChart !== null) {
+    console.log("Sales by Month/Year data is defined and not null. Length:", salesByMonthYearDataForChart.length);
+    if (salesByMonthYearDataForChart.length > 0) {
+      console.log("Calling createSalesByMonthChart with data:", salesByMonthYearDataForChart);
+      createSalesByMonthChart(salesByMonthYearDataForChart);
+    } else {
+      console.log("No data for Sales by Month/Year chart (global data array is empty).");
+    }
+  } else {
+    console.log("Global variable salesByMonthYearDataForChart is undefined or null.");
+    // Check if the canvas exists, if so, it means the JSP part for "no data" message should be shown
+    const salesByMonthYearCanvas = document.getElementById('salesByMonthYearChart');
+    if (!salesByMonthYearCanvas) {
+        // This case should ideally not happen if JSP structure is consistent
+        // console.error("Canvas for Sales by Month/Year chart not found and no global data.");
+    }
+  }
+
+  // Sales by Week Chart
+  // Data is now expected to be in global variable salesByWeekDataForChart
+  console.log("Attempting to render Sales by Week Chart. Raw global data (salesByWeekDataForChart):", salesByWeekDataForChart);
+  if (typeof salesByWeekDataForChart !== 'undefined' && salesByWeekDataForChart !== null) {
+    console.log("Sales by Week data is defined and not null. Length:", salesByWeekDataForChart.length);
+    if (salesByWeekDataForChart.length > 0) {
+      console.log("Calling createSalesByWeekChart with data:", salesByWeekDataForChart);
+      createSalesByWeekChart(salesByWeekDataForChart);
+    } else {
+      console.log("No data for Sales by Week chart (global data array is empty).");
+    }
+  } else {
+    console.log("Global variable salesByWeekDataForChart is undefined or null.");
+    // Check if the canvas exists, if so, it means the JSP part for "no data" message should be shown
+    const salesByWeekCanvas = document.getElementById('salesByWeekChart');
+    if (!salesByWeekCanvas) {
+        // This case should ideally not happen if JSP structure is consistent
+        // console.error("Canvas for Sales by Week chart not found and no global data.");
+    }
+  }
 });
+
+function createSalesByWeekChart(salesData) {
+  const canvas = document.getElementById('salesByWeekChart');
+  if (!canvas) {
+    // console.error("Canvas with id salesByWeekChart not found.");
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+
+  // Sort data by year and week to ensure chronological order
+  salesData.sort((a, b) => {
+    if (a.year !== b.year) {
+      return a.year - b.year;
+    }
+    return a.week - b.week;
+  });
+
+  const labels = salesData.map(item => item.weekOfYear); // e.g., "2023-W25"
+  const dataValues = salesData.map(item => item.totalSales);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Doanh Thu Theo Tuần',
+        data: dataValues,
+        backgroundColor: 'rgba(75, 192, 192, 0.7)', // Teal
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Doanh Thu Bán Vé Theo Tuần'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+              }
+              return label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Tuần (Năm-WTuần)'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Tổng Doanh Thu (VND)'
+          },
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(value);
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Updated function for Sales by Month
+function createSalesByMonthChart(salesData) {
+  const canvas = document.getElementById('salesByMonthYearChart'); // Canvas ID remains the same
+  if (!canvas) {
+    // console.error("Canvas with id salesByMonthYearChart not found.");
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+
+  // Data is already sorted by month/year from servlet if SalesByMonthYearDTO is ordered
+  // salesData is expected to be an array of { "label": "Tháng M YYYY", "totalSales": X }
+  const labels = salesData.map(item => item.label);
+  const dataValues = salesData.map(item => item.totalSales);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Doanh Thu Theo Tháng',
+        data: dataValues,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)', // Blue
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Doanh Thu Bán Vé Theo Tháng' // Updated title
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+              }
+              return label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Tháng (Tháng YYYY)' // Updated x-axis title
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Tổng Doanh Thu (VND)'
+          },
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(value);
+            }
+          }
+        }
+      }
+    }
+  });
+}
