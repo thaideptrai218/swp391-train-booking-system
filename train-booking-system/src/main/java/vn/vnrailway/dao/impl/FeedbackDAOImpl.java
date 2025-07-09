@@ -41,36 +41,6 @@ public class FeedbackDAOImpl implements FeedbackDAO {
     }
 
     @Override
-    public List<Feedback> getAllFeedbacks() {
-        List<Feedback> feedbacks = new ArrayList<>();
-        String sql = "SELECT * FROM Feedback ORDER BY SubmittedAt DESC";
-        try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Feedback feedback = new Feedback();
-                feedback.setFeedbackId(rs.getInt("FeedbackID"));
-                feedback.setUserId(rs.getInt("UserID"));
-                feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
-                feedback.setFullName(rs.getString("FullName"));
-                feedback.setEmail(rs.getString("Email"));
-                feedback.setFeedbackContent(rs.getString("FeedbackContent"));
-                feedback.setTicketName(rs.getString("TicketName"));
-                feedback.setDescription(rs.getString("Description"));
-                feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
-                feedback.setStatus(rs.getString("Status"));
-                feedback.setResponse(rs.getString("Response"));
-                feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
-                feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
-                feedbacks.add(feedback);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return feedbacks;
-    }
-
-    @Override
     public List<Feedback> getPendingFeedbacks() {
         List<Feedback> feedbacks = new ArrayList<>();
         String sql = "SELECT * FROM Feedback WHERE Status = 'Pending' ORDER BY SubmittedAt DESC";
@@ -184,5 +154,55 @@ public class FeedbackDAOImpl implements FeedbackDAO {
             e.printStackTrace();
         }
         return feedbacks;
+    }
+
+    // phương thức phân trang
+    @Override
+    public List<Feedback> getFeedbacksWithPagination(int offset, int limit) {
+        List<Feedback> feedbacks = new ArrayList<>();
+        String sql = "SELECT * FROM Feedback ORDER BY SubmittedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Feedback feedback = new Feedback();
+                    feedback.setFeedbackId(rs.getInt("FeedbackID"));
+                    feedback.setUserId(rs.getInt("UserID"));
+                    feedback.setFeedbackTypeId(rs.getInt("FeedbackTypeID"));
+                    feedback.setFullName(rs.getString("FullName"));
+                    feedback.setEmail(rs.getString("Email"));
+                    feedback.setFeedbackContent(rs.getString("FeedbackContent"));
+                    feedback.setTicketName(rs.getString("TicketName"));
+                    feedback.setDescription(rs.getString("Description"));
+                    feedback.setSubmittedAt(rs.getTimestamp("SubmittedAt"));
+                    feedback.setStatus(rs.getString("Status"));
+                    feedback.setResponse(rs.getString("Response"));
+                    feedback.setRespondedAt(rs.getTimestamp("RespondedAt"));
+                    feedback.setRespondedByUserId(rs.getInt("RespondedByUserID"));
+                    feedbacks.add(feedback);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return feedbacks;
+    }
+
+    // đếm tổng số phản hồi
+    public int getTotalFeedbackCount() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM Feedback";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 }

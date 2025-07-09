@@ -1,12 +1,9 @@
 body {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
-    /* Base font size */
     margin: 0;
     background-color: #e9ecef;
-    /* Light gray background */
     color: #343a40;
-    /* Dark text */
     overflow-x: hidden;
 }
 
@@ -18,16 +15,13 @@ body {
 .sidebar {
     width: 250px;
     background-color: #2c3e50;
-    /* Dark blue-gray */
     color: #ffffff;
     padding: 20px;
     padding-top: 60px;
-    /* Adjusted for home icon */
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     position: relative;
-    /* Establish positioning context for absolute children */
     animation: slideInLeft 0.5s ease-out;
 }
 
@@ -37,7 +31,6 @@ body {
     left: 15px;
     color: #93caff;
     font-size: 1.5rem;
-    /* Keep this font-size as per user's request */
 }
 
 .home-link:hover {
@@ -49,9 +42,7 @@ body {
     margin-bottom: 30px;
     color: #ffffff;
     font-size: 2.2rem;
-    /* Consistent with login.css h2 */
     font-weight: 700;
-    /* Consistent with login.css h2 */
 }
 
 .sidebar ul {
@@ -71,12 +62,10 @@ body {
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.2s ease;
     font-size: 1.1rem;
-    /* Consistent with login.css buttons/labels */
 }
 
 .sidebar ul li a:hover {
     background-color: #34495e;
-    /* Slightly lighter dark blue-gray */
     transform: translateX(5px);
 }
 
@@ -85,7 +74,6 @@ body {
     flex-grow: 1;
     padding: 30px;
     background-color: #f8f9fa;
-    /* Lighter gray */
 }
 
 .header {
@@ -102,14 +90,11 @@ body {
     margin: 0;
     color: #2c3e50;
     font-size: 2.2rem;
-    /* Consistent with login.css h2 */
     font-weight: 700;
-    /* Consistent with login.css h2 */
 }
 
 .user-info span {
     font-size: 1.1rem;
-    /* Consistent with login.css labels */
     color: #6c757d;
 }
 

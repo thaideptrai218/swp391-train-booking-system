@@ -16,19 +16,36 @@ import vn.vnrailway.model.User;
 
 @WebServlet("/staff-message")
 public class StaffMessageServlet extends HttpServlet {
+    private static final int ITEMS_PER_PAGE = 5;
     private MessageDAO messageDAO = new MessageImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<MessageSummary> chatSummaries = messageDAO.getChatSummaries();
+        int currentPage = 1;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            currentPage = Integer.parseInt(pageParam);
+        }
+        if (currentPage < 1)
+            currentPage = 1;
+
+        int offset = (currentPage - 1) * ITEMS_PER_PAGE;
+        List<MessageSummary> chatSummaries = messageDAO.getChatSummariesWithPagination(offset, ITEMS_PER_PAGE);
+
+        int totalSummaries = messageDAO.getTotalChatSummariesCount();
+        int totalPages = (int) Math.ceil((double) totalSummaries / ITEMS_PER_PAGE);
+
         String userId = request.getParameter("userId");
         if (userId != null) {
             int uid = Integer.parseInt(userId);
             request.setAttribute("selectedUserId", uid);
             request.setAttribute("chatMessages", messageDAO.getChatMessagesByUserId(uid));
         }
+
         request.setAttribute("chatSummaries", chatSummaries);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/WEB-INF/jsp/staff/staff-message.jsp").forward(request, response);
     }
 
@@ -43,6 +60,11 @@ public class StaffMessageServlet extends HttpServlet {
             int staffId = (int) loggedInUser.getUserID();
             messageDAO.saveMessage(userId, staffId, message, "Staff");
         }
-        response.sendRedirect(request.getContextPath() + "/staff-message?userId=" + userId);
+        String pageParam = request.getParameter("page");
+        String redirectUrl = request.getContextPath() + "/staff-message?userId=" + userId;
+        if (pageParam != null && !pageParam.isEmpty()) {
+            redirectUrl += "&page=" + pageParam;
+        }
+        response.sendRedirect(redirectUrl);
     }
 }

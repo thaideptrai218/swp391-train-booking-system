@@ -11,6 +11,31 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/staff-message.css" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+                <style>
+                    .pagination {
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+
+                    .pagination a {
+                        padding: 8px 12px;
+                        margin: 0 5px;
+                        text-decoration: none;
+                        color: #0082c4;
+                        background-color: #f9f9f9;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    }
+
+                    .pagination a:hover {
+                        background-color: #ddd;
+                    }
+
+                    .pagination .active {
+                        background-color: #0082c4;
+                        color: white;
+                    }
+                </style>
             </head>
 
             <body>
@@ -59,19 +84,20 @@
                                     <tbody>
                                         <c:if test="${empty chatSummaries}">
                                             <tr>
-                                                <td colspan="8" style="text-align: center;">Không có tin nhắn nào từ
+                                                <td colspan="4" style="text-align: center;">Không có tin nhắn nào từ
                                                     khách hàng.</td>
                                             </tr>
                                         </c:if>
-                                        <c:forEach var="summary" items="${chatSummaries}">
+                                        <c:forEach var="summary" items="${chatSummaries}" varStatus="loop">
                                             <tr>
                                                 <td>${summary.fullName}</td>
                                                 <td>${summary.email}</td>
                                                 <td>${summary.lastMessage}</td>
                                                 <td>
                                                     <form action="${pageContext.request.contextPath}/staff-message"
-                                                        method="post" style="display: inline;">
+                                                        method="get" style="display: inline;">
                                                         <input type="hidden" name="userId" value="${summary.userId}" />
+                                                        <input type="hidden" name="page" value="${currentPage}" />
                                                         <button type="submit" class="chat-button">Chat</button>
                                                     </form>
                                                 </td>
@@ -79,6 +105,30 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
+
+                                <!-- Phân trang -->
+                                <div class="pagination">
+                                    <c:if test="${currentPage > 1}">
+                                        <a
+                                            href="${pageContext.request.contextPath}/staff-message?page=${currentPage - 1}">Previous</a>
+                                    </c:if>
+                                    <c:forEach begin="1" end="${totalPages}" var="page">
+                                        <c:choose>
+                                            <c:when test="${page == currentPage}">
+                                                <a href="${pageContext.request.contextPath}/staff-message?page=${page}"
+                                                    class="active">${page}</a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a
+                                                    href="${pageContext.request.contextPath}/staff-message?page=${page}">${page}</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                    <c:if test="${currentPage < totalPages}">
+                                        <a
+                                            href="${pageContext.request.contextPath}/staff-message?page=${currentPage + 1}">Next</a>
+                                    </c:if>
+                                </div>
                             </div>
 
                             <c:if test="${not empty param.userId}">
