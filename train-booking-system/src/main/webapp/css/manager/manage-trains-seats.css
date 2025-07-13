@@ -1,0 +1,260 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  display: flex;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  transition: margin-left 0.3s;
+}
+
+.train-list {
+  margin-top: 20px;
+}
+
+.train-container {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.train-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.train-header.clickable {
+  cursor: pointer;
+}
+
+.train-name {
+  font-weight: 700;
+  font-size: 1.8em;
+  color: #0056b3;
+}
+
+.train-composition-display {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 25px;
+  overflow-x: auto;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.carriage-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-right: 15px;
+  transition: all 0.3s ease;
+  position: relative;
+  background-color: #fff;
+}
+
+.carriage-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.carriage-item.active {
+  border-color: #0056b3;
+  background-color: #d1e7ff;
+}
+
+.carriage-svg-icon {
+  height: 45px;
+  width: auto;
+  margin-bottom: 8px;
+}
+
+.carriage-number-label {
+  font-size: 1em;
+  color: #495057;
+  font-weight: 600;
+}
+
+.train-head-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-right: 15px;
+}
+
+.train-head-svg-icon {
+  height: 50px;
+  width: auto;
+  margin-bottom: 8px;
+}
+
+.train-name-label {
+  font-size: 1em;
+  color: #495057;
+  font-weight: 600;
+}
+
+.coach-details {
+  background-color: #f0f8ff;
+  border: 1px solid #d1e7ff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.coach-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.coach-info h3 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #0056b3;
+}
+
+.coach-info p {
+  margin: 5px 0 0;
+  color: #6c757d;
+}
+
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 10px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.seat {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #adb5bd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.seat span {
+  color: #495057;
+}
+
+.add-seat-btn {
+  background-color: #e9ecef;
+  color: #495057;
+  font-size: 1.5em;
+}
+
+.seat:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
+}
+
+.delete-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 28px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0.8);
+}
+
+.carriage-item:hover .delete-btn,
+.seat:hover .delete-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.actions a,
+.actions button {
+  margin-left: 15px;
+  text-decoration: none;
+  color: #007bff;
+  background: none;
+  border: 2px solid #007bff;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.actions a:hover,
+.actions button:hover {
+  background-color: #007bff;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 30px;
+  border: none;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+  color: #555;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}

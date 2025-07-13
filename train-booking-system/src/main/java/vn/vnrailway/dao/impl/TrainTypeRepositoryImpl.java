@@ -46,7 +46,7 @@ public class TrainTypeRepositoryImpl implements TrainTypeRepository {
     }
 
     @Override
-    public List<TrainType> findAll() throws SQLException {
+    public List<TrainType> getAllTrainTypes() throws SQLException {
         List<TrainType> trainTypes = new ArrayList<>();
         String sql = "SELECT TrainTypeID, TypeName, Description, AverageVelocity FROM TrainTypes";
         try (Connection conn = DBContext.getConnection();

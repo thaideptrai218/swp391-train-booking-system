@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface CoachTypeRepository {
     Optional<CoachType> findById(int coachTypeId) throws SQLException;
-    List<CoachType> findAll() throws SQLException; // Optional, but good practice
-    // Add other methods like save, update, delete if needed for full CRUD
+
+    List<CoachType> getAllCoachTypes() throws SQLException;
 }

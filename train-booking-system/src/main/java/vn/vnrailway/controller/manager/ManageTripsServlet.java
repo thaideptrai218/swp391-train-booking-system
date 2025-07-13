@@ -80,7 +80,7 @@ public class ManageTripsServlet extends HttpServlet {
 
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Train> allTrains = trainRepository.findAll();
+        List<Train> allTrains = trainRepository.getAllTrains();
         List<Route> allRoutes = routeRepository.findAll();
         request.setAttribute("allTrains", allTrains);
         request.setAttribute("allRoutes", allRoutes);

@@ -61,7 +61,7 @@ public class ManagerDashboardServlet extends HttpServlet {
                         request.setAttribute("totalRevenue", totalRevenue);
                         request.setAttribute("bestSellerLocations", bestSellerLocations);
 
-                        long totalTrains = trainRepository.findAll().size();
+                        long totalTrains = trainRepository.getAllTrains().size();
                         request.setAttribute("totalTrains", totalTrains);
 
                         List<StationPopularityDTO> mostCommonOriginStations = stationRepository

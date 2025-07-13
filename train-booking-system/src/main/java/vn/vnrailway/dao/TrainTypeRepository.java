@@ -8,6 +8,5 @@ import java.util.Optional;
 public interface TrainTypeRepository {
     Optional<TrainType> findById(int id) throws SQLException;
 
-    List<TrainType> findAll() throws SQLException;
-    // Add other necessary methods like save, update, delete if needed later
+    List<TrainType> getAllTrainTypes() throws SQLException;
 }

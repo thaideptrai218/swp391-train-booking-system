@@ -34,7 +34,7 @@ public class CoachTypeRepositoryImpl implements CoachTypeRepository {
     public Optional<CoachType> findById(int coachTypeId) throws SQLException {
         String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description, IsCompartmented, DefaultCompartmentCapacity FROM CoachTypes WHERE CoachTypeID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coachTypeId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -46,18 +46,18 @@ public class CoachTypeRepositoryImpl implements CoachTypeRepository {
     }
 
     @Override
-    public List<CoachType> findAll() throws SQLException {
+    public List<CoachType> getAllCoachTypes() throws SQLException {
         List<CoachType> coachTypes = new ArrayList<>();
         String sql = "SELECT CoachTypeID, TypeName, PriceMultiplier, Description, IsCompartmented, DefaultCompartmentCapacity FROM CoachTypes";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 coachTypes.add(mapResultSetToCoachType(rs));
             }
         }
         return coachTypes;
     }
-    
+
     // Implement save, update, delete methods if/when needed
 }

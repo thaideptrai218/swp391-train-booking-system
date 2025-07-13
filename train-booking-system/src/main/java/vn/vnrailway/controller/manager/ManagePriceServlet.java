@@ -81,7 +81,7 @@ public class ManagePriceServlet extends HttpServlet {
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<TrainType> trainTypes = trainTypeRepository.findAll();
+            List<TrainType> trainTypes = trainTypeRepository.getAllTrainTypes();
             List<Route> routes = routeRepository.findAll();
             request.setAttribute("trainTypes", trainTypes);
             request.setAttribute("routes", routes);
@@ -99,7 +99,7 @@ public class ManagePriceServlet extends HttpServlet {
                 .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + id));
         request.setAttribute("pricingRule", existingRule);
         try {
-            List<TrainType> trainTypes = trainTypeRepository.findAll();
+            List<TrainType> trainTypes = trainTypeRepository.getAllTrainTypes();
             List<Route> routes = routeRepository.findAll();
             request.setAttribute("trainTypes", trainTypes);
             request.setAttribute("routes", routes);

@@ -50,7 +50,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/manage-trains-seats">
+      <a href="${pageContext.request.contextPath}/manager/manage-trains-seats">
         <i class="fas fa-building"></i> Quản Lý Tàu và Ghế
       </a>
     </li>
