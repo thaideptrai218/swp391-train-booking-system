@@ -91,6 +91,35 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
       .edit-form-hidden {
         display: none;
       }
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .pagination-container .page-link {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-container .page-link.active,
+      .pagination-container .page-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+      .pagination-container .page-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        background-color: #f9f9f9;
+        border-color: #ddd;
+      }
     </style>
   </head>
   <body>
@@ -166,7 +195,7 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
           <p>Chưa có tuyến đường nào được tạo.</p>
         </c:when>
         <c:otherwise>
-          <table class="routes-table">
+          <table class="routes-table" id="routesTable">
             <thead>
               <tr>
                 <th>ID</th>
@@ -211,6 +240,7 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
               </c:forEach>
             </tbody>
           </table>
+          <div class="pagination-container" id="pagination-container"></div>
         </c:otherwise>
       </c:choose>
 
@@ -269,39 +299,105 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
       
       document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("routeSearchInput");
-        const tableBody = document.querySelector(".routes-table tbody");
-        const allRows = tableBody ? Array.from(tableBody.querySelectorAll("tr")) : [];
-        const noResultsRowHTML = '<tr><td colspan="3" style="text-align: center;">Không tìm thấy tuyến đường nào khớp.</td></tr>';
+        const table = document.getElementById("routesTable");
+        const allRows = table ? Array.from(table.querySelectorAll("tbody tr")) : [];
+        const noResultsRow = allRows.find(row => row.querySelector("td[colspan='3']"));
+        const dataRows = allRows.filter(row => row !== noResultsRow);
+        const paginationContainer = document.getElementById("pagination-container");
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let filteredRows = dataRows;
 
-        if (searchInput && tableBody) {
-            searchInput.addEventListener("keyup", function () {
-                const searchTerm = removeDiacritics(searchInput.value.trim().toLowerCase().replace(/\s+/g, " "));
-                let visibleRows = 0;
+        function displayRows(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
 
-                // Clear current rows
-                while (tableBody.firstChild) {
-                    tableBody.removeChild(tableBody.firstChild);
-                }
+            dataRows.forEach(row => row.style.display = 'none');
 
-                // Add back matching rows
-                allRows.forEach((row) => {
-                    const idCell = row.cells[0];
-                    const nameCell = row.cells[1];
-                    if (idCell && nameCell) {
-                        const idText = removeDiacritics(idCell.textContent.toLowerCase());
-                        const nameText = removeDiacritics(nameCell.textContent.toLowerCase());
-                        if (idText.includes(searchTerm) || nameText.includes(searchTerm)) {
-                            tableBody.appendChild(row);
-                            visibleRows++;
-                        }
-                    }
-                });
+            const rowsToShow = filteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
 
-                // Show message if no rows are visible
-                if (visibleRows === 0) {
-                    tableBody.insertAdjacentHTML("beforeend", noResultsRowHTML);
+            if (noResultsRow) {
+                noResultsRow.style.display = filteredRows.length === 0 ? '' : 'none';
+            }
+        }
+
+        function setupPagination() {
+            paginationContainer.innerHTML = "";
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+
+            if (pageCount <= 1) return;
+
+            const prevLink = document.createElement('a');
+            prevLink.href = '#';
+            prevLink.innerHTML = '&laquo;';
+            prevLink.classList.add('page-link');
+            if (currentPage === 1) {
+                prevLink.classList.add('disabled');
+            }
+            prevLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    displayRows(currentPage - 1);
+                    setupPagination();
                 }
             });
+            paginationContainer.appendChild(prevLink);
+
+            for (let i = 1; i <= pageCount; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = '#';
+                pageLink.innerText = i;
+                pageLink.classList.add('page-link');
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    displayRows(i);
+                    setupPagination();
+                });
+                paginationContainer.appendChild(pageLink);
+            }
+
+            const nextLink = document.createElement('a');
+            nextLink.href = '#';
+            nextLink.innerHTML = '&raquo;';
+            nextLink.classList.add('page-link');
+            if (currentPage === pageCount) {
+                nextLink.classList.add('disabled');
+            }
+            nextLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < pageCount) {
+                    displayRows(currentPage + 1);
+                    setupPagination();
+                }
+            });
+            paginationContainer.appendChild(nextLink);
+        }
+
+        function filterAndPaginate() {
+            const searchTerm = removeDiacritics(searchInput.value.trim().toLowerCase().replace(/\s+/g, " "));
+            
+            filteredRows = dataRows.filter(row => {
+                const idCell = row.cells[0];
+                const nameCell = row.cells[1];
+                if (idCell && nameCell) {
+                    const idText = removeDiacritics(idCell.textContent.toLowerCase());
+                    const nameText = removeDiacritics(nameCell.textContent.toLowerCase());
+                    return idText.includes(searchTerm) || nameText.includes(searchTerm);
+                }
+                return false;
+            });
+
+            displayRows(1);
+            setupPagination();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("keyup", filterAndPaginate);
         }
 
         const editDepartureSelect = document.getElementById('editDepartureStationId');
@@ -345,12 +441,8 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
             }
           }
         }
-
-        // Logic for highlightRouteId (if needed in the future)
-        // const highlightRouteId = urlParams.get("highlightRouteId"); 
-        // if (highlightRouteId) {
-          // Logic to find and highlight the route in the new list format
-        // }
+        
+        filterAndPaginate();
       });
     </script>
   </body>

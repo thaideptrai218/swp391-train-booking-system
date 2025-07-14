@@ -87,11 +87,6 @@ public class ManageStationsServlet extends HttpServlet {
                             message = "Station updated successfully!";
                         }
                         break;
-                    case "delete":
-                        int deleteStationId = Integer.parseInt(request.getParameter("stationID"));
-                        stationRepository.deleteById(deleteStationId);
-                        message = "Station deleted successfully!";
-                        break;
                     default:
                         message = "Unknown command: " + command;
                         break;

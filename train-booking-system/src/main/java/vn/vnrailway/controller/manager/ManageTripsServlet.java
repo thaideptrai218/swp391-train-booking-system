@@ -135,6 +135,14 @@ public class ManageTripsServlet extends HttpServlet {
                 int routeId = Integer.parseInt(request.getParameter("routeId"));
                 LocalDateTime departureDateTime = LocalDateTime.parse(request.getParameter("departureDateTime"),
                         DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+                if (departureDateTime.isBefore(LocalDateTime.now())) {
+                    request.getSession().setAttribute("errorMessage",
+                            "Không thể chọn ngày trong quá khứ. Vui lòng chọn một ngày trong tương lai.");
+                    response.sendRedirect(request.getContextPath() + "/manageTrips?action=showAddForm");
+                    return;
+                }
+
                 // LocalDateTime arrivalDateTime =
                 // LocalDateTime.parse(request.getParameter("arrivalDateTime"),
                 // DateTimeFormatter.ISO_LOCAL_DATE_TIME); // Removed

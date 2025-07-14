@@ -63,6 +63,35 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         border: 1px solid #dee2e6;
         margin-bottom: 20px;
       }
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .pagination-container .page-link {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-container .page-link.active,
+      .pagination-container .page-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+      .pagination-container .page-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        background-color: #f9f9f9;
+        border-color: #ddd;
+      }
     </style>
   </head>
   <body>
@@ -216,7 +245,10 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         </div>
 
         <div class="table-responsive">
-          <table class="table table-striped table-bordered table-hover">
+          <table
+            class="table table-striped table-bordered table-hover"
+            id="staffsTable"
+          >
             <thead class="thead-dark">
               <tr>
                 <th>ID</th>
@@ -261,13 +293,14 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               </c:forEach>
               <c:if test="${empty staffUsers}">
                 <tr>
-                  <td colspan="7" class="text-center">
+                  <td colspan="8" class="text-center">
                     Không tìm thấy nhân viên nào.
                   </td>
                 </tr>
               </c:if>
             </tbody>
           </table>
+          <div class="pagination-container" id="pagination-container"></div>
         </div>
       </div>
     </div>
@@ -307,11 +340,18 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
       }
       document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("staffSearchInput");
-        const tableBody = document.querySelector(".table-responsive tbody");
-        const allRows = Array.from(tableBody.querySelectorAll("tr"));
-        const noStaffRowHTML =
-          '<tr><td colspan="7" class="text-center">Không có nhân viên nào khớp với tìm kiếm của bạn.</td></tr>';
-        const originalNoStaffRow = tableBody.querySelector('td[colspan="7"]');
+        const table = document.getElementById("staffsTable");
+        const allRows = Array.from(table.querySelectorAll("tbody tr"));
+        const noStaffRow = allRows.find((row) =>
+          row.querySelector("td[colspan='8']")
+        );
+        const dataRows = allRows.filter((row) => row !== noStaffRow);
+        const paginationContainer = document.getElementById(
+          "pagination-container"
+        );
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let filteredRows = dataRows;
 
         const staffFormContainer =
           document.getElementById("staffFormContainer");
@@ -367,55 +407,115 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           staffForm.reset();
         });
 
-        if (searchInput) {
-          searchInput.addEventListener("keyup", function () {
-            const searchTerm = removeDiacritics(
-              searchInput.value.trim().toLowerCase().replace(/\s+/g, " ")
-            );
-            let visibleRows = 0;
+        function displayRows(page) {
+          currentPage = page;
+          const start = (page - 1) * rowsPerPage;
+          const end = start + rowsPerPage;
 
-            while (tableBody.firstChild) {
-              tableBody.removeChild(tableBody.firstChild);
-            }
+          dataRows.forEach((row) => (row.style.display = "none"));
+          const rowsToShow = filteredRows.slice(start, end);
+          rowsToShow.forEach((row) => (row.style.display = ""));
 
-            allRows.forEach((row) => {
-              if (row.querySelector('td[colspan="7"]')) {
-                return;
-              }
+          if (noStaffRow) {
+            noStaffRow.style.display = filteredRows.length === 0 ? "" : "none";
+          }
+        }
 
-              const idCell = removeDiacritics(
-                row.cells[0].textContent.toLowerCase()
-              );
-              const nameCell = removeDiacritics(
-                row.cells[1].textContent.toLowerCase()
-              );
-              const emailCell = removeDiacritics(
-                row.cells[2].textContent.toLowerCase()
-              );
-              const phoneCell = removeDiacritics(
-                row.cells[3].textContent.toLowerCase()
-              );
-              const idCardCell = removeDiacritics(
-                row.cells[4].textContent.toLowerCase()
-              );
+        function setupPagination() {
+          paginationContainer.innerHTML = "";
+          const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
 
-              if (
-                idCell.includes(searchTerm) ||
-                nameCell.includes(searchTerm) ||
-                emailCell.includes(searchTerm) ||
-                phoneCell.includes(searchTerm) ||
-                idCardCell.includes(searchTerm)
-              ) {
-                tableBody.appendChild(row);
-                visibleRows++;
-              }
-            });
+          if (pageCount <= 1) return;
 
-            if (visibleRows === 0) {
-              tableBody.insertAdjacentHTML("beforeend", noStaffRowHTML);
+          const prevLink = document.createElement("a");
+          prevLink.href = "#";
+          prevLink.innerHTML = "&laquo;";
+          prevLink.classList.add("page-link");
+          if (currentPage === 1) {
+            prevLink.classList.add("disabled");
+          }
+          prevLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+              displayRows(currentPage - 1);
+              setupPagination();
             }
           });
+          paginationContainer.appendChild(prevLink);
+
+          for (let i = 1; i <= pageCount; i++) {
+            const pageLink = document.createElement("a");
+            pageLink.href = "#";
+            pageLink.innerText = i;
+            pageLink.classList.add("page-link");
+            if (i === currentPage) {
+              pageLink.classList.add("active");
+            }
+            pageLink.addEventListener("click", (e) => {
+              e.preventDefault();
+              displayRows(i);
+              setupPagination();
+            });
+            paginationContainer.appendChild(pageLink);
+          }
+
+          const nextLink = document.createElement("a");
+          nextLink.href = "#";
+          nextLink.innerHTML = "&raquo;";
+          nextLink.classList.add("page-link");
+          if (currentPage === pageCount) {
+            nextLink.classList.add("disabled");
+          }
+          nextLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+              displayRows(currentPage + 1);
+              setupPagination();
+            }
+          });
+          paginationContainer.appendChild(nextLink);
         }
+
+        function filterAndPaginate() {
+          const searchTerm = removeDiacritics(
+            searchInput.value.trim().toLowerCase().replace(/\s+/g, " ")
+          );
+
+          filteredRows = dataRows.filter((row) => {
+            const idCell = removeDiacritics(
+              row.cells[0].textContent.toLowerCase()
+            );
+            const nameCell = removeDiacritics(
+              row.cells[1].textContent.toLowerCase()
+            );
+            const emailCell = removeDiacritics(
+              row.cells[2].textContent.toLowerCase()
+            );
+            const phoneCell = removeDiacritics(
+              row.cells[3].textContent.toLowerCase()
+            );
+            const idCardCell = removeDiacritics(
+              row.cells[4].textContent.toLowerCase()
+            );
+
+            return (
+              idCell.includes(searchTerm) ||
+              nameCell.includes(searchTerm) ||
+              emailCell.includes(searchTerm) ||
+              phoneCell.includes(searchTerm) ||
+              idCardCell.includes(searchTerm)
+            );
+          });
+
+          displayRows(1);
+          setupPagination();
+        }
+
+        if (searchInput) {
+          searchInput.addEventListener("keyup", filterAndPaginate);
+        }
+
+        filterAndPaginate();
       });
     </script>
   </body>

@@ -21,6 +21,65 @@ prefix="c" %>
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <style>
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .pagination-container .page-link {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-container .page-link.active,
+      .pagination-container .page-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+      .pagination-container .page-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        background-color: #f9f9f9;
+        border-color: #ddd;
+      }
+      .lock-btn.locked {
+        background-color: red;
+        color: white;
+      }
+      .actions {
+        min-width: 200px;
+        display: flex;
+        gap: 5px;
+      }
+      .edit-btn,
+      .lock-btn {
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .edit-btn {
+        background-color: #ffc107;
+      }
+      .lock-btn {
+        background-color: #dc3545;
+      }
+      .lock-btn.locked {
+        background-color: #28a745;
+      }
+    </style>
   </head>
   <body>
     <jsp:include page="sidebar.jsp" />
@@ -46,60 +105,6 @@ prefix="c" %>
             <p class="message error-message">${errorMessage}</p>
           </c:if>
 
-          <!-- Form for adding/editing stations -->
-          <div
-            id="stationFormContainer"
-            class="form-section"
-            style="display: none"
-          >
-            <h2 id="formTitle"></h2>
-            <form id="stationForm" action="manageStations" method="post">
-              <input type="hidden" id="stationID" name="stationID" value="" />
-              <div class="form-group">
-                <label for="stationCode"
-                  >Mã ga: <span class="required-asterisk">*</span></label
-                >
-                <input
-                  type="text"
-                  id="stationCode"
-                  name="stationCode"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="stationName"
-                  >Tên ga: <span class="required-asterisk">*</span></label
-                >
-                <input
-                  type="text"
-                  id="stationName"
-                  name="stationName"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="address">Địa chỉ:</label>
-                <input type="text" id="address" name="address" />
-              </div>
-              <div class="form-group">
-                <label for="city">Thành phố:</label>
-                <input type="text" id="city" name="city" />
-              </div>
-              <div class="form-group">
-                <label for="region">Khu vực:</label>
-                <input type="text" id="region" name="region" />
-              </div>
-              <div class="form-group">
-                <label for="phoneNumber">Số điện thoại:</label>
-                <input type="text" id="phoneNumber" name="phoneNumber" />
-              </div>
-              <div class="form-group">
-                <button type="submit" name="command" id="submitButton"></button>
-                <button type="button" id="cancelButton">Hủy</button>
-              </div>
-            </form>
-          </div>
-
           <div class="controls-container">
             <%-- Controls container for search and add button --%>
             <div class="search-container">
@@ -108,9 +113,6 @@ prefix="c" %>
                 id="searchInput"
                 placeholder="Tìm kiếm theo ID, Mã, hoặc Tên..."
               />
-              <button id="searchBtn" class="action-search">
-                <i class="fas fa-search"></i> Tìm kiếm
-              </button>
             </div>
             <button id="showAddFormBtn" class="action-add">
               <%-- Changed class --%> <i class="fas fa-plus"></i> Thêm ga mới
@@ -119,7 +121,7 @@ prefix="c" %>
 
           <div class="table-container">
             <%-- Changed class and removed h2 --%>
-            <table>
+            <table id="stationsTable">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -143,20 +145,15 @@ prefix="c" %>
                     <td>${station.region}</td>
                     <td>${station.phoneNumber}</td>
                     <td class="actions">
-                      <button
+                      <a
+                        href="editStation?id=${station.stationID}"
                         class="edit-btn"
-                        data-id="${station.stationID}"
-                        data-code="${station.stationCode}"
-                        data-name="${station.stationName}"
-                        data-address="${station.address}"
-                        data-city="${station.city}"
-                        data-region="${station.region}"
-                        data-phone="${station.phoneNumber}"
                       >
                         <i class="fas fa-edit"></i> Sửa
-                      </button>
-                      <button class="delete-btn" data-id="${station.stationID}">
-                        <i class="fas fa-trash"></i> Xóa
+                      </a>
+                      <button class="lock-btn" data-id="${station.stationID}">
+                        <i class="fas fa-lock"></i>
+                        <span>Khóa</span>
                       </button>
                     </td>
                   </tr>
@@ -169,6 +166,7 @@ prefix="c" %>
               </tbody>
             </table>
           </div>
+          <div class="pagination-container" id="pagination-container"></div>
         </section>
         <%-- Closed content section --%>
       </div>
@@ -179,14 +177,7 @@ prefix="c" %>
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       }
       document.addEventListener("DOMContentLoaded", function () {
-        console.log("DOM Content Loaded: manageStations.jsp script started.");
-
         const searchInput = document.getElementById("searchInput");
-        const searchBtn = document.getElementById("searchBtn");
-        const stationTableRows = document.querySelectorAll(
-          ".table-container tbody tr"
-        );
-
         const stationFormContainer = document.getElementById(
           "stationFormContainer"
         );
@@ -202,104 +193,96 @@ prefix="c" %>
         const submitButton = document.getElementById("submitButton");
         const cancelButton = document.getElementById("cancelButton");
         const showAddFormBtn = document.getElementById("showAddFormBtn");
+        const table = document.getElementById("stationsTable");
+        const allRows = Array.from(table.querySelectorAll("tbody tr"));
+        const noStationsRow = allRows.find((row) =>
+          row.querySelector("td[colspan='8']")
+        );
+        const dataRows = allRows.filter((row) => row !== noStationsRow);
+        const paginationContainer = document.getElementById(
+          "pagination-container"
+        );
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let filteredRows = dataRows;
 
-        document.querySelectorAll(".edit-btn").forEach((button) => {
-          button.addEventListener("click", function () {
-            console.log("Edit button clicked. Dataset:", this.dataset);
+        function displayRows(page) {
+          currentPage = page;
+          const start = (page - 1) * rowsPerPage;
+          const end = start + rowsPerPage;
 
-            stationIDInput.value = this.dataset.id;
-            stationCodeInput.value = this.dataset.code;
-            stationNameInput.value = this.dataset.name;
-            addressInput.value =
-              this.dataset.address === "null" ? "" : this.dataset.address;
-            cityInput.value =
-              this.dataset.city === "null" ? "" : this.dataset.city;
-            regionInput.value =
-              this.dataset.region === "null" ? "" : this.dataset.region;
-            phoneNumberInput.value =
-              this.dataset.phone === "null" ? "" : this.dataset.phone;
+          dataRows.forEach((row) => (row.style.display = "none"));
 
-            formTitle.textContent = "Sửa ga";
-            submitButton.value = "edit";
-            submitButton.textContent = "Cập nhật ga";
+          const rowsToShow = filteredRows.slice(start, end);
+          rowsToShow.forEach((row) => (row.style.display = ""));
 
-            stationFormContainer.style.display = "block";
-            stationFormContainer.scrollIntoView({ behavior: "smooth" });
-            console.log("Form populated for editing.");
-          });
-        });
+          if (noStationsRow) {
+            noStationsRow.style.display =
+              filteredRows.length === 0 ? "" : "none";
+          }
+        }
 
-        showAddFormBtn.addEventListener("click", function () {
-          console.log("Add New Station button clicked.");
-          stationForm.reset();
-          stationIDInput.value = "";
+        function setupPagination() {
+          paginationContainer.innerHTML = "";
+          const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
 
-          formTitle.textContent = "Thêm ga mới";
-          submitButton.value = "add";
-          submitButton.textContent = "Thêm ga";
+          if (pageCount <= 1) return;
 
-          stationFormContainer.style.display = "block";
-          stationFormContainer.scrollIntoView({ behavior: "smooth" });
-          console.log("Form reset for new station.");
-        });
-
-        cancelButton.addEventListener("click", function () {
-          console.log("Cancel button clicked.");
-          stationFormContainer.style.display = "none";
-          stationForm.reset();
-          console.log("Form hidden and reset.");
-        });
-
-        document.querySelectorAll(".delete-btn").forEach((button) => {
-          button.addEventListener("click", function () {
-            console.log("Delete button clicked. Station ID:", this.dataset.id);
-            if (confirm("Bạn có chắc chắn muốn xóa ga này không?")) {
-              const stationId = this.dataset.id;
-              const form = document.createElement("form");
-              form.method = "post";
-              form.action = "manageStations";
-
-              const idInput = document.createElement("input");
-              idInput.type = "hidden";
-              idInput.name = "stationID";
-              idInput.value = stationId;
-              form.appendChild(idInput);
-
-              const commandInput = document.createElement("input");
-              commandInput.type = "hidden";
-              commandInput.name = "command";
-              commandInput.value = "delete";
-              form.appendChild(commandInput);
-
-              document.body.appendChild(form);
-              form.submit();
-              console.log("Delete form submitted.");
-            } else {
-              console.log("Delete cancelled.");
+          const prevLink = document.createElement("a");
+          prevLink.href = "#";
+          prevLink.innerHTML = "&laquo;";
+          prevLink.classList.add("page-link");
+          if (currentPage === 1) {
+            prevLink.classList.add("disabled");
+          }
+          prevLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+              displayRows(currentPage - 1);
+              setupPagination();
             }
           });
-        });
+          paginationContainer.appendChild(prevLink);
 
-        const tableBody = document.querySelector(".table-container tbody");
-        const allRows = Array.from(tableBody.querySelectorAll("tr"));
-        const noResultsRowHTML =
-          '<tr><td colspan="8" style="text-align: center;">Không tìm thấy ga nào khớp.</td></tr>';
+          for (let i = 1; i <= pageCount; i++) {
+            const pageLink = document.createElement("a");
+            pageLink.href = "#";
+            pageLink.innerText = i;
+            pageLink.classList.add("page-link");
+            if (i === currentPage) {
+              pageLink.classList.add("active");
+            }
+            pageLink.addEventListener("click", (e) => {
+              e.preventDefault();
+              displayRows(i);
+              setupPagination();
+            });
+            paginationContainer.appendChild(pageLink);
+          }
 
-        function filterTable() {
+          const nextLink = document.createElement("a");
+          nextLink.href = "#";
+          nextLink.innerHTML = "&raquo;";
+          nextLink.classList.add("page-link");
+          if (currentPage === pageCount) {
+            nextLink.classList.add("disabled");
+          }
+          nextLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+              displayRows(currentPage + 1);
+              setupPagination();
+            }
+          });
+          paginationContainer.appendChild(nextLink);
+        }
+
+        function filterAndPaginate() {
           const searchTerm = removeDiacritics(
             searchInput.value.toLowerCase().trim().replace(/\s+/g, " ")
           );
-          let visibleRows = 0;
 
-          while (tableBody.firstChild) {
-            tableBody.removeChild(tableBody.firstChild);
-          }
-
-          allRows.forEach((row) => {
-            if (row.querySelector('td[colspan="8"]')) {
-              return;
-            }
-
+          filteredRows = dataRows.filter((row) => {
             const idCell = removeDiacritics(
               row.cells[0].textContent.toLowerCase()
             );
@@ -309,26 +292,50 @@ prefix="c" %>
             const nameCell = removeDiacritics(
               row.cells[2].textContent.toLowerCase()
             );
-
-            if (
+            return (
               idCell.includes(searchTerm) ||
               codeCell.includes(searchTerm) ||
               nameCell.includes(searchTerm)
-            ) {
-              tableBody.appendChild(row);
-              visibleRows++;
-            }
+            );
           });
 
-          if (visibleRows === 0) {
-            tableBody.insertAdjacentHTML("beforeend", noResultsRowHTML);
-          }
+          displayRows(1);
+          setupPagination();
         }
 
-        searchBtn.addEventListener("click", filterTable);
-        searchInput.addEventListener("keyup", function (event) {
-          filterTable();
+        if (searchInput) {
+          searchInput.addEventListener("keyup", filterAndPaginate);
+        }
+
+        showAddFormBtn.addEventListener("click", function () {
+          // Redirect to an add station page or show a modal
+          // For now, let's assume it redirects
+          window.location.href = "addStation";
         });
+
+        document.querySelectorAll(".lock-btn").forEach((button) => {
+          button.addEventListener("click", function () {
+            const row = this.closest("tr");
+            const editLink = row.querySelector(".edit-btn");
+            const isLocked = this.classList.toggle("locked");
+            const icon = this.querySelector("i");
+            const text = this.querySelector("span");
+
+            if (isLocked) {
+              editLink.style.pointerEvents = "none";
+              editLink.style.opacity = "0.5";
+              icon.className = "fas fa-lock-open";
+              text.textContent = "Mở khóa";
+            } else {
+              editLink.style.pointerEvents = "auto";
+              editLink.style.opacity = "1";
+              icon.className = "fas fa-lock";
+              text.textContent = "Khóa";
+            }
+          });
+        });
+
+        filterAndPaginate();
       });
     </script>
   </body>

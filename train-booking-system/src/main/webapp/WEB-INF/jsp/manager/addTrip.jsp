@@ -159,28 +159,43 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
       }
 
       document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date();
+        now.setSeconds(0, 0);
+        now.setMilliseconds(0);
+
+        // Format the date for the 'min' attribute of the datetime-local input
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mins = String(now.getMinutes()).padStart(2, "0");
+        const minAttributeValue = `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+
         const departureInput = document.getElementById("departureDateTime");
-        // const arrivalInput = document.getElementById("arrivalDateTime"); // Removed
 
         if (departureInput) {
-          departureInput.addEventListener("change", function () {
-            // validateDateTime(); // No longer strictly needed for arrival vs departure
-            this.blur(); // Attempt to close picker
-          });
-        }
-        // if (arrivalInput) { // Removed
-        //     arrivalInput.addEventListener("change", function () {
-        //         validateDateTime();
-        //         this.blur(); // Attempt to close picker
-        //     });
-        // }
+          departureInput.setAttribute("min", minAttributeValue);
 
+          const validateDate = function () {
+            const selectedDate = new Date(this.value);
+            if (selectedDate < now) {
+              this.value = minAttributeValue; // Reset to the earliest valid datetime
+            }
+          };
+
+          // Validate on different events to ensure coverage
+          departureInput.addEventListener("input", validateDate);
+          departureInput.addEventListener("change", validateDate);
+        }
+
+        // Add a final check on form submission
         const form = document.querySelector('form[action*="insertTrip"]');
         if (form) {
           form.addEventListener("submit", function (event) {
-            // if (!validateDateTime()) { // No longer strictly needed
-            //     event.preventDefault();
-            // }
+            const selectedDate = new Date(departureInput.value);
+            if (selectedDate < now) {
+              event.preventDefault(); // Stop the form from submitting
+            }
           });
         }
       });

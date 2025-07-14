@@ -9,6 +9,37 @@
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css"/>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/manager/manageTrips.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+    <style>
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .pagination-container .page-link {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-container .page-link.active,
+      .pagination-container .page-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+      .pagination-container .page-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        background-color: #f9f9f9;
+        border-color: #ddd;
+      }
+    </style>
     <script type="text/javascript">
       function submitSort(sortField, currentSortOrder) {
         const form = document.getElementById("sortForm");
@@ -81,54 +112,110 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("tripSearchInput");
-        const searchBtn = document.getElementById("tripSearchBtn");
-        const tripTableRows = document.querySelectorAll(".table-container table tbody tr");
-        const noTripsRow = document.querySelector(".table-container table tbody tr td[colspan='6']");
+        const table = document.getElementById("tripsTable");
+        const allRows = Array.from(table.querySelectorAll("tbody tr"));
+        const noTripsRow = allRows.find(row => row.querySelector("td[colspan='6']"));
+        const dataRows = allRows.filter(row => row !== noTripsRow);
+        const paginationContainer = document.getElementById("pagination-container");
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let filteredRows = dataRows;
 
-        function filterTripsTable() {
-          const searchTerm = removeDiacritics(searchInput.value.toLowerCase().trim().replace(/\s+/g, " "));
-          let anyRowVisible = false;
+        function displayRows(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
 
-          tripTableRows.forEach(row => {
-            if (row.cells.length < 2) { 
-                return;
+            // Hide all data rows first
+            dataRows.forEach(row => row.style.display = 'none');
+
+            // Show only the rows for the current page from the filtered list
+            const rowsToShow = filteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
+
+            // Handle the "No trips found" message
+            if (noTripsRow) {
+                noTripsRow.style.display = filteredRows.length === 0 ? '' : 'none';
             }
-            const tripIdCell = removeDiacritics(row.cells[0].textContent.toLowerCase());
-            const routeNameCell = removeDiacritics(row.cells[1].textContent.toLowerCase());
+        }
 
-            if (tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm)) {
-              row.style.display = "";
-              anyRowVisible = true;
-            } else {
-              row.style.display = "none";
+        function setupPagination() {
+            paginationContainer.innerHTML = "";
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+
+            if (pageCount <= 1) return;
+
+            // Previous button
+            const prevLink = document.createElement('a');
+            prevLink.href = '#';
+            prevLink.innerHTML = '&laquo;';
+            prevLink.classList.add('page-link');
+            if (currentPage === 1) {
+                prevLink.classList.add('disabled');
             }
-          });
-
-          if (noTripsRow) {
-            const noTripsRowTR = noTripsRow.closest('tr'); // Get the parent TR
-            if (noTripsRowTR) { // Check if TR is found
-              if (anyRowVisible) {
-                noTripsRowTR.style.display = "none";
-              } else {
-                // Show "No trips found" if search term is present and no rows match,
-                // OR if search term is empty and the only row present was the "No trips found" row initially.
-                if (searchTerm !== "" || (searchTerm === "" && tripTableRows.length === 1 && tripTableRows[0] === noTripsRowTR)) {
-                   noTripsRowTR.style.display = ""; 
-                } else if (searchTerm === "" && tripTableRows.length > 1) {
-                  // If search is empty and there are actual data rows, hide "No trips found"
-                  noTripsRowTR.style.display = "none";
+            prevLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    displayRows(currentPage - 1);
+                    setupPagination();
                 }
-              }
+            });
+            paginationContainer.appendChild(prevLink);
+
+            // Page number links
+            for (let i = 1; i <= pageCount; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = '#';
+                pageLink.innerText = i;
+                pageLink.classList.add('page-link');
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    displayRows(i);
+                    setupPagination();
+                });
+                paginationContainer.appendChild(pageLink);
             }
-          }
+
+            // Next button
+            const nextLink = document.createElement('a');
+            nextLink.href = '#';
+            nextLink.innerHTML = '&raquo;';
+            nextLink.classList.add('page-link');
+            if (currentPage === pageCount) {
+                nextLink.classList.add('disabled');
+            }
+            nextLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < pageCount) {
+                    displayRows(currentPage + 1);
+                    setupPagination();
+                }
+            });
+            paginationContainer.appendChild(nextLink);
         }
 
-        if (searchBtn && searchInput) {
-            searchBtn.addEventListener("click", filterTripsTable);
-            searchInput.addEventListener("keyup", function(event) {
-                filterTripsTable();
+        function filterAndPaginate() {
+            const searchTerm = removeDiacritics(searchInput.value.toLowerCase().trim().replace(/\s+/g, " "));
+            
+            filteredRows = dataRows.filter(row => {
+                const tripIdCell = removeDiacritics(row.cells[0].textContent.toLowerCase());
+                const routeNameCell = removeDiacritics(row.cells[1].textContent.toLowerCase());
+                return tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm);
             });
+
+            displayRows(1); // Reset to first page
+            setupPagination();
         }
+
+        if (searchInput) {
+            searchInput.addEventListener("keyup", filterAndPaginate);
+        }
+
+        // Initial setup
+        filterAndPaginate();
       });
     </script>
   </head>
@@ -164,7 +251,7 @@
           </c:if>
 
           <div class="table-container">
-            <table>
+            <table id="tripsTable">
               <thead>
                 <tr>
                   <th><a href="javascript:void(0);" onclick="submitSort('tripID', '${requestScope.currentSortOrder}')">Mã chuyến đi<c:if test="${requestScope.currentSortField == 'tripID'}"><span class="sort-indicator">${requestScope.currentSortOrder == 'ASC' ? '▲' : '▼'}</span></c:if></a></th>
@@ -235,6 +322,7 @@
               </tbody>
             </table>
           </div>
+          <div class="pagination-container" id="pagination-container"></div>
         </section>
       </div>
     </div>

@@ -17,8 +17,6 @@ public interface StationRepository {
 
     boolean update(Station station) throws SQLException;
 
-    boolean deleteById(int stationId) throws SQLException;
-
     List<StationPopularityDTO> getMostCommonOriginStations(int limit) throws SQLException;
 
     List<StationPopularityDTO> getMostCommonDestinationStations(int limit) throws SQLException;
