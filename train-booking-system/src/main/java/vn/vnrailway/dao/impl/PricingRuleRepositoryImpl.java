@@ -154,4 +154,17 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void updateRuleStatus(int id, boolean isActive) {
+        String sql = "UPDATE PricingRules SET IsActive = ? WHERE RuleID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isActive);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

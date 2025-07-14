@@ -106,6 +106,57 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
     <div class="main-content">
       <div class="container">
         <h1>Quản lý quy tắc giá</h1>
+
+        <h2>Giảm Giá Ngày Lễ</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Ngày lễ</th>
+              <th>Chi tiết</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
+              <th>Giảm giá</th>
+              <th>Hoạt động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <c:if test="${empty listHolidayPrices}">
+              <tr>
+                <td colspan="6" class="no-rules">Không có dữ liệu</td>
+              </tr>
+            </c:if>
+            <c:forEach var="holiday" items="${listHolidayPrices}">
+              <tr>
+                <td><c:out value="${holiday.holidayName}" /></td>
+                <td><c:out value="${holiday.description}" /></td>
+                <td>
+                  <fmt:formatDate
+                    value="${holiday.startDate}"
+                    pattern="dd-MM-yyyy"
+                  />
+                </td>
+                <td>
+                  <fmt:formatDate
+                    value="${holiday.endDate}"
+                    pattern="dd-MM-yyyy"
+                  />
+                </td>
+                <td>
+                  <fmt:formatNumber
+                    value="${holiday.discountPercentage}"
+                    maxFractionDigits="2"
+                  />%
+                </td>
+                <td>
+                  <input type="checkbox" class="status-checkbox"
+                  data-type="holiday" data-id="${holiday.id}" ${holiday.active ?
+                  'checked' : ''}>
+                </td>
+              </tr>
+            </c:forEach>
+          </tbody>
+        </table>
+
         <a
           href="${pageContext.request.contextPath}/managePrice?action=new"
           class="add-button"
@@ -154,7 +205,11 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                     pageContext.findAttribute(\"rule\")) .getEffectiveToDate())
                     %>" pattern="dd-MM-yyyy" />
                   </td>
-                  <td>${rule.active ? 'Có' : 'Không'}</td>
+                  <td>
+                    <input type="checkbox" class="status-checkbox"
+                    data-type="rule" data-id="${rule.ruleID}" ${rule.active ?
+                    'checked' : ''}>
+                  </td>
                   <td class="actions">
                     <a
                       href="${pageContext.request.contextPath}/managePrice?action=edit&id=${rule.ruleID}"
@@ -175,5 +230,45 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         </c:if>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll(".status-checkbox");
+        checkboxes.forEach((checkbox) => {
+          checkbox.addEventListener("change", function () {
+            const id = this.dataset.id;
+            const isActive = this.checked;
+            const type = this.dataset.type;
+            let action = "";
+
+            if (type === "holiday") {
+              action = "updateHolidayStatus";
+            } else if (type === "rule") {
+              action = "updateRuleStatus";
+            }
+
+            if (action) {
+              fetch("${pageContext.request.contextPath}/managePrice", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body:
+                  "action=" + action + "&id=" + id + "&isActive=" + isActive,
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    alert("Error updating status");
+                    this.checked = !isActive; // Revert the checkbox on error
+                  }
+                })
+                .catch(() => {
+                  alert("Error updating status");
+                  this.checked = !isActive; // Revert the checkbox on error
+                });
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>

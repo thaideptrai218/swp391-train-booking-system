@@ -7,10 +7,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+import vn.vnrailway.dao.HolidayPriceRepository;
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dao.TrainTypeRepository;
+import vn.vnrailway.dao.impl.HolidayPriceRepositoryImpl;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl;
+import vn.vnrailway.model.HolidayPrice;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.TrainType;
 
@@ -29,12 +32,19 @@ public class ManagePriceServlet extends HttpServlet {
     private PricingRuleRepository pricingRuleRepository;
     private TrainTypeRepository trainTypeRepository;
     private RouteRepository routeRepository;
+    private HolidayPriceRepository holidayPriceRepository;
 
     public ManagePriceServlet() {
         super();
         this.pricingRuleRepository = new PricingRuleRepositoryImpl();
         this.trainTypeRepository = new TrainTypeRepositoryImpl();
         this.routeRepository = new RouteRepositoryImpl();
+        try {
+            this.holidayPriceRepository = new HolidayPriceRepositoryImpl();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -75,6 +85,8 @@ public class ManagePriceServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         List<PricingRule> listPricingRules = pricingRuleRepository.findAll();
         request.setAttribute("listPricingRules", listPricingRules);
+        List<HolidayPrice> listHolidayPrices = holidayPriceRepository.getAllHolidayPrices();
+        request.setAttribute("listHolidayPrices", listHolidayPrices);
         request.getRequestDispatcher("/WEB-INF/jsp/manager/managePrice.jsp").forward(request, response);
     }
 
@@ -239,6 +251,41 @@ public class ManagePriceServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list"; // Default action
+        }
+
+        try {
+            switch (action) {
+                case "updateHolidayStatus":
+                    updateHolidayStatus(request, response);
+                    break;
+                case "updateRuleStatus":
+                    updateRuleStatus(request, response);
+                    break;
+                default:
+                    doGet(request, response);
+                    break;
+            }
+        } catch (SQLException ex) {
+            throw new ServletException(ex);
+        }
+    }
+
+    private void updateHolidayStatus(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        holidayPriceRepository.updateHolidayStatus(id, isActive);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void updateRuleStatus(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        pricingRuleRepository.updateRuleStatus(id, isActive);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

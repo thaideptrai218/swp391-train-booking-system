@@ -15,7 +15,7 @@
 
         <div id="add-train-modal" class="modal">
             <div class="modal-content">
-                <span class="close" onclick="closeModal('add-train-modal')">&times;</span>
+                <span class="close" onclick="closeModal('add-train-modal')"></span>
                 <h2>Add Train</h2>
                 <form id="add-train-form" action="manage-trains-seats" method="post">
                     <input type="hidden" name="action" value="insert_train" />
@@ -57,7 +57,7 @@
 
                     <div id="edit-train-modal-${train.trainID}" class="modal">
                         <div class="modal-content">
-                            <span class="close" onclick="closeModal('edit-train-modal-${train.trainID}')">&times;</span>
+                            <span class="close" onclick="closeModal('edit-train-modal-${train.trainID}')"></span>
                             <h2>Edit Train: ${train.trainName}</h2>
                             <form id="edit-train-form-${train.trainID}" action="manage-trains-seats" method="post">
                                 <input type="hidden" name="action" value="update_train" />
@@ -84,6 +84,10 @@
                     </div>
 
                     <div class="train-composition-display" style="display: none;">
+                        <div class="train-head-item">
+                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
+                            <span class="train-name-label">${train.trainName}</span>
+                        </div>
                         <c:forEach var="coach" items="${coachesByTrain[train.trainID]}">
                             <div class="carriage-item" onclick="toggleCoachDetails('${train.trainID}', '${coach.coachID}')">
                                 <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon"/>
@@ -97,15 +101,11 @@
                             <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon" style="opacity:0.5;"/>
                             <span class="carriage-number-label">Add Coach</span>
                         </a>
-                        <div class="train-head-item">
-                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
-                            <span class="train-name-label">${train.trainName}</span>
-                        </div>
                     </div>
 
                     <div id="add-coach-modal-${train.trainID}" class="modal">
                         <div class="modal-content">
-                            <span class="close" onclick="closeModal('add-coach-modal-${train.trainID}')">&times;</span>
+                            <span class="close" onclick="closeModal('add-coach-modal-${train.trainID}')"></span>
                             <h3>Add Coach to ${train.trainName}</h3>
                             <form id="add-coach-form-${train.trainID}" action="manage-trains-seats" method="post">
                                 <input type="hidden" name="action" value="insert_coach" />
@@ -152,7 +152,7 @@
                             </div>
                             <div id="add-seat-modal-${coach.coachID}" class="modal">
                                 <div class="modal-content">
-                                    <span class="close" onclick="closeModal('add-seat-modal-${coach.coachID}')">&times;</span>
+                                    <span class="close" onclick="closeModal('add-seat-modal-${coach.coachID}')"></span>
                                     <h5>Add Seat to Coach ${coach.coachNumber}</h5>
                                     <form id="add-seat-form-${coach.coachID}" action="manage-trains-seats" method="post">
                                         <input type="hidden" name="action" value="insert_seat" />
