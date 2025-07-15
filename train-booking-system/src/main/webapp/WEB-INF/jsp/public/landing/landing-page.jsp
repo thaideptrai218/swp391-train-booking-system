@@ -342,7 +342,7 @@ uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
             href="${pageContext.request.contextPath}/searchTrip"
             class="btn btn-primary btn-book-now-footer"
             style="text-decoration: none"
-            >đặt vé</a
+            >Đặt Vé</a
           >
         </div>
       </div>

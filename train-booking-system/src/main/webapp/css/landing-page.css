@@ -781,7 +781,7 @@ table {
   font-family: var(--font-primary);
   font-size: 18px;
   color: var(--color-text-default);
-  margin-bottom: 10px;
+  margin-bottom: 25px;
   line-height: 1.6;
 }
 
@@ -791,7 +791,7 @@ table {
   padding: 15px 40px;
   font-size: 18px;
   border-radius: 25px; /* Consider var --border-radius-main or specific var */
-  margin-top: 20px;
+  margin-top: 40px;
 }
 .booking-prompt .btn-book-now-footer:hover {
   background-color: var(--color-primary-dark);
