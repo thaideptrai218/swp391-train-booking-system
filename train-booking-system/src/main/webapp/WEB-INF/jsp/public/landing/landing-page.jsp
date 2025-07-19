@@ -8,9 +8,50 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Trang Chủ</title>
       <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing-page.css" />
+      <style>
+        .toast {
+          visibility: hidden;
+          background-color: white;
+          color: #333;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          padding: 16px 24px;
+          position: fixed;
+          z-index: 9999;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          opacity: 0;
+          transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
+        }
+
+        .toast.show {
+          visibility: visible;
+          opacity: 1;
+          transition-delay: 0s;
+        }
+      </style>
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
+
+      <c:if test="${not empty sessionScope.successMessage}">
+        <div id="toast" class="toast">${sessionScope.successMessage}</div>
+        <script>
+          window.onload = () => {
+            const toast = document.getElementById("toast");
+            toast.classList.add("show");
+            setTimeout(() => {
+              toast.classList.remove("show");
+            }, 8000); // Tự ẩn sau 8 giây
+          };
+        </script>
+        <c:remove var="successMessage" scope="session" />
+      </c:if>
+
+
+
       <section class="hero" style="
         background-image: url('${pageContext.request.contextPath}/assets/images/landing/common/top_BG.png');
         background-size: cover;
@@ -64,6 +105,14 @@
                         <a href="#" class="dropdown-item">
                           <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/> -->
                           </i> Giỏ vé</a>
+
+                        <c:if test="${not empty sessionScope.loggedInUser}">
+                          <a href="${pageContext.request.contextPath}/listTicketBooking?id=${sessionScope.loggedInUser.userID}"
+                            class="dropdown-item">
+                            Tất cả vé đã đặt
+                          </a>
+                        </c:if>
+
 
                         <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout-item"><img
                             width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/exit--v1.png"

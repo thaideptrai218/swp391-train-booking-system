@@ -16,6 +16,7 @@ public class RefundTicketDTO {
     private String passengerFullName;
     private String passengerIDCard;
     private String ticketCode;
+    private int ticketID;
     private String passengerType;
     private String seatTypeName;
     private String seatNumber;
@@ -26,6 +27,7 @@ public class RefundTicketDTO {
     private double price;
     private String startStationName;
     private String endStationName;
+    private int policyID;
 
     // Thông tin hoàn vé
     private int hoursBeforeDeparture;

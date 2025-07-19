@@ -269,10 +269,10 @@ public class ConfirmRefundTicketServlet extends HttpServlet {
             session.setAttribute("email", email);
             session.setAttribute("otpTimestamp", System.currentTimeMillis());
 
-            String[] ticketCodes = request.getParameterValues("ticketCodes");
-            session.setAttribute("ticketCodes", ticketCodes);
+            String[] ticketInfos = request.getParameterValues("ticketInfo");
+            session.setAttribute("ticketInfos", ticketInfos);
 
-            request.setAttribute(messageContent, ticketCodes);
+            request.setAttribute(messageContent, ticketInfos);
             // Chuyển hướng đến trang nhập OTP
             response.sendRedirect(request.getContextPath() + "/confirmOTP");
 
