@@ -98,6 +98,12 @@ public class ManagePriceServlet extends HttpServlet {
         PricingRule existingRule = pricingRuleRepository.findById(id)
                 .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + id));
         request.setAttribute("pricingRule", existingRule);
+        // Add formatted date strings for JSP
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String applicableDateStartStr = existingRule.getApplicableDateStart() != null ? existingRule.getApplicableDateStart().format(formatter) : "";
+        String applicableDateEndStr = existingRule.getApplicableDateEnd() != null ? existingRule.getApplicableDateEnd().format(formatter) : "";
+        request.setAttribute("applicableDateStartStr", applicableDateStartStr);
+        request.setAttribute("applicableDateEndStr", applicableDateEndStr);
         try {
             List<TrainType> trainTypes = trainTypeRepository.getAllTrainTypes();
             List<Route> routes = routeRepository.findAll();
