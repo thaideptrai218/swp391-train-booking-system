@@ -240,6 +240,87 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
+    public List<InfoPassengerDTO> findListTicketBooking(String id) throws SQLException {
+        String sql = "SELECT \r\n" + //
+                "\tTK.TicketCode,\r\n" + //
+                "    P.FullName AS PassengerFullName,\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                "    PT.TypeName AS PassengerType,\r\n" + //
+                "    ST.TypeName AS SeatTypeName,\r\n" + //
+                "    S.SeatNumber AS SeatNumber,\r\n" + //
+                "    C.CoachName AS CoachName,\r\n" + //
+                "    T.TrainName AS TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                "    TK.TicketStatus,\r\n" + //
+                "    TK.Price,\r\n" + //
+                "    StartStation.StationName AS StartStationName,\r\n" + //
+                "    EndStation.StationName AS EndStationName\r\n" + //
+                "\r\n" + //
+                "FROM Tickets TK\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN Users U ON P.UserID = U.UserID\r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "WHERE U.UserID = ?\r\n" + //
+                "ORDER BY TS1.ScheduledDeparture DESC";
+
+        String updateTicket = "UPDATE TK\r\n" + //
+                "SET TicketStatus = 'Expired'\r\n" + //
+                "FROM Tickets TK\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN Users U ON P.UserID = U.UserID\r\n" + //
+                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                "WHERE DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0\r\n" + //
+                "  AND TK.TicketStatus = 'Valid'\r\n" + //
+                "  AND U.UserID = ?;";
+
+        List<InfoPassengerDTO> passengerList = new ArrayList<>();
+        try (Connection conn = DBContext.getConnection()) {
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateTicket)) {
+                updateStmt.setString(1, id);
+                updateStmt.executeUpdate(); // Không cần kết quả, chỉ cập nhật
+            }
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        InfoPassengerDTO passenger = new InfoPassengerDTO();
+                        passenger.setTicketCode(rs.getString("TicketCode"));
+                        passenger.setPassengerFullName(rs.getString("PassengerFullName"));
+                        passenger.setPassengerIDCard(rs.getString("PassengerIDCard"));
+                        passenger.setPassengerType(rs.getString("PassengerType"));
+                        passenger.setSeatTypeName(rs.getString("SeatTypeName"));
+                        passenger.setSeatNumber(rs.getString("SeatNumber"));
+                        passenger.setCoachName(rs.getString("CoachName"));
+                        passenger.setTrainName(rs.getString("TrainName"));
+                        Timestamp ts = rs.getTimestamp("ScheduledDepartureTime");
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        String formattedDateTime = sdf.format(ts); // Kết quả: "10-06-2025 08:00"
+                        passenger.setScheduledDepartureTime(formattedDateTime);
+                        passenger.setTicketStatus(rs.getString("TicketStatus"));
+                        passenger.setPrice(rs.getDouble("Price"));
+                        passenger.setStartStationName(rs.getString("StartStationName"));
+                        passenger.setEndStationName(rs.getString("EndStationName"));
+
+                        passengerList.add(passenger);
+                    }
+
+                }
+            }
+        }
+        return passengerList; // No ticket found with the given code
+    }
+
     public InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException {
         String sql = "SELECT \r\n" + //
                 "    TK.TicketCode,\r\n" + //
@@ -325,6 +406,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    P.FullName AS PassengerFullName,\r\n" + //
                 "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
                 "    TK.TicketCode,\r\n" + //
+                "    TK.TicketID,\r\n" + //
                 "    PT.TypeName AS PassengerType,\r\n" + //
                 "    ST.TypeName AS SeatTypeName,\r\n" + //
                 "    S.SeatNumber,\r\n" + //
@@ -336,6 +418,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    StartStation.StationName AS StartStationName,\r\n" + //
                 "    EndStation.StationName AS EndStationName,\r\n" + //
                 "    \r\n" + //
+                "    CP.PolicyID,\r\n" + //
                 "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
                 "\r\n" + //
                 "    -- Thông tin hoàn vé\r\n" + //
@@ -443,6 +526,8 @@ public class TicketRepositoryImpl implements TicketRepository {
                     refundTicketDTO.setPassengerFullName(rs.getString("PassengerFullName"));
                     refundTicketDTO.setPassengerIDCard(rs.getString("PassengerIDCard"));
                     refundTicketDTO.setTicketCode(rs.getString("TicketCode"));
+                    refundTicketDTO.setTicketID(rs.getInt("TicketID"));
+                    refundTicketDTO.setTicketID(rs.getInt("TicketID"));
                     refundTicketDTO.setPassengerType(rs.getString("PassengerType"));
                     refundTicketDTO.setSeatTypeName(rs.getString("SeatTypeName"));
                     refundTicketDTO.setSeatNumber(rs.getString("SeatNumber"));
@@ -457,6 +542,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                     refundTicketDTO.setPrice(rs.getDouble("Price"));
                     refundTicketDTO.setStartStationName(rs.getString("StartStationName"));
                     refundTicketDTO.setEndStationName(rs.getString("EndStationName"));
+                    refundTicketDTO.setPolicyID(rs.getInt("PolicyID"));
                     refundTicketDTO.setHoursBeforeDeparture(rs.getInt("HoursBeforeDeparture"));
                     refundTicketDTO.setRefundable(rs.getBoolean("IsRefundable"));
                     refundTicketDTO.setRefundPolicy(rs.getString("RefundPolicy"));
@@ -477,37 +563,34 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     }
 
-    public void insertTempRefundRequests(String ticketCode) {
-        String findTicketIdSQL = "SELECT TicketID FROM Tickets WHERE TicketCode = ?";
-        String insertSQL = "INSERT INTO TempRefundRequests (TicketID) VALUES (?)";
+    public void insertTempRefundRequests(String ticketInfo) {
+        String insertSQL = "INSERT INTO TempRefundRequests (TicketID, AppliedPolicyID, FeeAmount, ActualRefundAmount)\r\n"
+                + //
+                "VALUES (?, ?, ?, ?);";
         String updateTicketStatusSQL = "UPDATE Tickets SET TicketStatus = 'Processing', IsRefundable = 0 WHERE TicketID = ?;";
+
+        String[] parts = ticketInfo.split("\\|");
+        String ticketCode = parts[0];
+        int ticketID = Integer.parseInt(parts[1]);
+        int policyID = Integer.parseInt(parts[2]);
+        double feeAmount = Double.parseDouble(parts[3]);
+        double actualRefundAmount = Double.parseDouble(parts[4]);
 
         try (Connection conn = DBContext.getConnection()) {
             conn.setAutoCommit(false); // dùng transaction
 
-            int ticketId = -1;
-
-            // Lấy TicketID từ ticketCode
-            try (PreparedStatement psFind = conn.prepareStatement(findTicketIdSQL)) {
-                psFind.setString(1, ticketCode);
-                try (ResultSet rs = psFind.executeQuery()) {
-                    if (rs.next()) {
-                        ticketId = rs.getInt("TicketID");
-                    } else {
-                        throw new SQLException("Không tìm thấy ticketCode: " + ticketCode);
-                    }
-                }
-            }
-
             // Chèn vào bảng TempRefundRequests
             try (PreparedStatement psInsert = conn.prepareStatement(insertSQL)) {
-                psInsert.setInt(1, ticketId);
+                psInsert.setInt(1, ticketID);
+                psInsert.setInt(2, policyID);
+                psInsert.setDouble(3, feeAmount);
+                psInsert.setDouble(4, actualRefundAmount);
                 psInsert.executeUpdate();
             }
 
             // Cập nhật TicketStatus thành 'Processing'
             try (PreparedStatement psUpdate = conn.prepareStatement(updateTicketStatusSQL)) {
-                psUpdate.setInt(1, ticketId);
+                psUpdate.setInt(1, ticketID);
                 psUpdate.executeUpdate();
             }
 
@@ -521,48 +604,81 @@ public class TicketRepositoryImpl implements TicketRepository {
     public List<RefundRequestDTO> getAllPendingRefundRequests() throws SQLException {
         List<RefundRequestDTO> list = new ArrayList<>();
 
-        String sql = "SELECT TR.RefundID, TR.RequestedAt, TK.TicketCode, TK.TicketStatus, TK.Price AS OriginalTicketPrice, "
-                +
-                "P.FullName AS PassengerFullName, P.IDCardNumber AS PassengerIDCard, PT.TypeName AS PassengerType, " +
-                "ST.TypeName AS SeatTypeName, S.SeatNumber, C.CoachName, T.TrainName, TS1.ScheduledDeparture AS ScheduledDepartureTime, "
-                +
-                "DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) AS HoursBeforeDeparture, " +
-                "StartStation.StationName AS StartStationName, EndStation.StationName AS EndStationName, " +
-                "U.FullName AS UserFullName, U.Email, U.IDCardNumber AS UserIDCard, U.PhoneNumber, " +
-                "ISNULL(CP.IsRefundable, 0) AS IsRefundable, ISNULL(CP.PolicyName, N'Không áp dụng') AS RefundPolicy, "
-                +
-                "CASE WHEN CP.IsRefundable = 1 THEN " +
-                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0) "
-                +
-                "    ELSE CP.FixedFeeAmount END ELSE 0 END AS RefundFee, " +
-                "CASE WHEN CP.IsRefundable = 1 THEN " +
-                "    CASE WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0) "
-                +
-                "    ELSE TK.Price - CP.FixedFeeAmount END ELSE 0 END AS RefundAmount, " +
-                "CASE WHEN DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé' " +
-                "WHEN CP.PolicyName IS NULL THEN N'Tàu đã đi không trả vé' " +
-                "WHEN CP.IsRefundable = 0 THEN N'Tàu đã đi không trả vé' ELSE N'Được hoàn vé' END AS RefundStatus " +
-                "FROM TempRefundRequests TR " +
-                "JOIN Tickets TK ON TR.TicketID = TK.TicketID " +
-                "JOIN Bookings B ON TK.BookingID = B.BookingID " +
-                "JOIN Users U ON B.UserID = U.UserID " +
-                "JOIN Passengers P ON TK.PassengerID = P.PassengerID " +
-                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID " +
-                "JOIN Seats S ON TK.SeatID = S.SeatID " +
-                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID " +
-                "JOIN Coaches C ON S.CoachID = C.CoachID " +
-                "JOIN Trains T ON C.TrainID = T.TrainID " +
-                "JOIN Trips TRIP ON TK.TripID = TRIP.TripID " +
-                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TRIP.TripID " +
-                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TRIP.TripID " +
-                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID " +
-                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID " +
-                "LEFT JOIN CancellationPolicies CP ON DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= 0 " +
-                "AND DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min " +
-                "AND (CP.HoursBeforeDeparture_Max IS NULL OR DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max) "
-                +
-                "AND CP.IsActive = 1 " +
-                "ORDER BY TR.RequestedAt DESC";
+        String sql = "SELECT \r\n" + //
+                "    TR.RefundID,\r\n" + //
+                "    TR.RequestedAt,\r\n" + //
+                "\tTR.TicketID,\r\n" + //
+                "\tTR.AppliedPolicyID,\r\n" + //
+                "\tU.userID,\r\n" + //
+                "\tB.BookingID,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin vé\r\n" + //
+                "    TK.TicketCode,\r\n" + //
+                "    TK.TicketStatus,\r\n" + //
+                "    TK.Price AS OriginalTicketPrice,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin hành khách\r\n" + //
+                "    P.FullName AS PassengerFullName,\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                "    PT.TypeName AS PassengerType,\r\n" + //
+                "\r\n" + //
+                "    -- Chỗ ngồi\r\n" + //
+                "    ST.TypeName AS SeatTypeName,\r\n" + //
+                "    S.SeatNumber,\r\n" + //
+                "    C.CoachName,\r\n" + //
+                "\r\n" + //
+                "    -- Tàu và chuyến\r\n" + //
+                "    T.TrainName,\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin tuyến\r\n" + //
+                "    StartStation.StationName AS StartStationName,\r\n" + //
+                "    EndStation.StationName AS EndStationName,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin người đặt\r\n" + //
+                "    U.FullName AS UserFullName,\r\n" + //
+                "    U.Email,\r\n" + //
+                "    U.IDCardNumber AS UserIDCard,\r\n" + //
+                "    U.PhoneNumber,\r\n" + //
+                "\r\n" + //
+                "    -- Chính sách hoàn vé\r\n" + //
+                "    ISNULL(CP.IsRefundable, 0) AS IsRefundable,\r\n" + //
+                "    ISNULL(CP.PolicyName, N'Không áp dụng') AS RefundPolicy,\r\n" + //
+                "\r\n" + //
+                "    -- Tính phí hoàn vé\r\n" + //
+                "    TR.FeeAmount AS RefundFee,\r\n" + //
+                "\r\n" + //
+                "    -- Tính số tiền được hoàn lại\r\n" + //
+                "    TR.ActualRefundAmount AS RefundAmount\r\n" + //
+                "\r\n" + //
+                "FROM TempRefundRequests TR\r\n" + //
+                "JOIN Tickets TK ON TR.TicketID = TK.TicketID\r\n" + //
+                "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
+                "JOIN Users U ON B.UserID = U.UserID\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TRIP ON TK.TripID = TRIP.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TRIP.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TRIP.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "-- JOIN chính sách hoàn vé theo thời gian còn lại\r\n" + //
+                "LEFT JOIN CancellationPolicies CP ON\r\n" + //
+                "    DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= 0 AND\r\n" + //
+                "    DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
+                "    (\r\n" + //
+                "        CP.HoursBeforeDeparture_Max IS NULL OR \r\n" + //
+                "        DATEDIFF(HOUR, TR.RequestedAt, TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
+                "    )\r\n" + //
+                "    AND CP.IsActive = 1 \r\n" + //
+                "\t\r\n" + //
+                "\r\n" + //
+                "ORDER BY TR.RequestedAt DESC;";
 
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
@@ -573,6 +689,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 dto.setRefundID(rs.getInt("RefundID"));
                 dto.setRequestedAt(rs.getTimestamp("RequestedAt").toLocalDateTime());
                 dto.setTicketCode(rs.getString("TicketCode"));
+                dto.setTicketID(rs.getInt("TicketID"));
                 dto.setTicketStatus(rs.getString("TicketStatus"));
                 dto.setOriginalPrice(rs.getDouble("OriginalTicketPrice"));
                 dto.setPassengerFullName(rs.getString("PassengerFullName"));
@@ -592,7 +709,9 @@ public class TicketRepositoryImpl implements TicketRepository {
                 dto.setRefundPolicy(rs.getString("RefundPolicy"));
                 dto.setRefundFee(rs.getDouble("RefundFee"));
                 dto.setRefundAmount(rs.getDouble("RefundAmount"));
-                dto.setRefundStatus(rs.getString("RefundStatus"));
+                dto.setPolicyID(rs.getInt("AppliedPolicyID"));
+                dto.setUserID(rs.getInt("UserID"));
+                dto.setBookingID(rs.getInt("BookingID"));
 
                 list.add(dto);
             }
@@ -605,20 +724,62 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     }
 
-    public void rejectRefundTicket(String ticketCode) throws SQLException {
-        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'RejectedRefund' WHERE TicketCode = ?;";
-        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID = (SELECT TicketID FROM Tickets WHERE TicketCode = ?)";
+    public void rejectRefundTicket(String ticketInfo, String note) throws SQLException {
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'RejectedRefund' WHERE TicketID = ?;";
+        String updateRefunds = "INSERT INTO Refunds (\r\n" + //
+                "    TicketID,\r\n" + //
+                "    BookingID,\r\n" + //
+                "    AppliedPolicyID,\r\n" + //
+                "    OriginalTicketPrice,\r\n" + //
+                "    FeeAmount,\r\n" + //
+                "    ActualRefundAmount,\r\n" + //
+                "    RequestedAt,\r\n" + //
+                "    Status,\r\n" + //
+                "    RefundMethod,\r\n" + //
+                "    Notes,\r\n" + //
+                "    RequestedByUserID,\r\n" + //
+                "    ProcessedByUserID\r\n" + //
+                ")\r\n" + //
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
+
+        String[] parts = ticketInfo.split("\\|");
+        int ticketID = Integer.parseInt(parts[0]);
+        int policyID = Integer.parseInt(parts[1]);
+        double originalPrice = Double.parseDouble(parts[2]);
+        double refundFee = Double.parseDouble(parts[3]);
+        double refundAmount = Double.parseDouble(parts[4]);
+        String requestedAt = parts[5];
+        int userIDByRequest = Integer.parseInt(parts[6]);
+        int userIDByProcessing = Integer.parseInt(parts[7]);
+        int bookingID = Integer.parseInt(parts[8]);
 
         try (Connection conn = DBContext.getConnection()) {
             conn.setAutoCommit(false); // dùng transaction
 
             try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
-                ps.setString(1, ticketCode);
+                ps.setInt(1, ticketID);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(updateRefunds)) {
+                ps.setInt(1, ticketID);
+                ps.setInt(2, bookingID);
+                ps.setInt(3, policyID);
+                ps.setDouble(4, originalPrice);
+                ps.setDouble(5, refundFee);
+                ps.setDouble(6, refundAmount);
+                ps.setTimestamp(7, Timestamp.valueOf(requestedAt));
+                ps.setString(8, "Rejected");
+                ps.setString(9, "Bank Transfer"); // Hoặc phương thức hoàn tiền khác
+                ps.setString(10, note);
+                ps.setInt(11, userIDByRequest);
+                ps.setInt(12, userIDByProcessing);
                 ps.executeUpdate();
             }
 
             try (PreparedStatement ps = conn.prepareStatement(deleteTempRefundSql)) {
-                ps.setString(1, ticketCode);
+                ps.setInt(1, ticketID);
                 ps.executeUpdate();
             }
 
@@ -629,20 +790,62 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
-    public void approveRefundTicket(String ticketCode) throws SQLException {
-        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Refunded' WHERE TicketCode = ?;";
-        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID = (SELECT TicketID FROM Tickets WHERE TicketCode = ?)";
+    public void approveRefundTicket(String ticketInfo, String note) throws SQLException {
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Refunded' WHERE TicketID = ?;";
+        String updateRefunds = "INSERT INTO Refunds (\r\n" + //
+                "    TicketID,\r\n" + //
+                "    BookingID,\r\n" + //
+                "    AppliedPolicyID,\r\n" + //
+                "    OriginalTicketPrice,\r\n" + //
+                "    FeeAmount,\r\n" + //
+                "    ActualRefundAmount,\r\n" + //
+                "    RequestedAt,\r\n" + //
+                "    Status,\r\n" + //
+                "    RefundMethod,\r\n" + //
+                "    Notes,\r\n" + //
+                "    RequestedByUserID,\r\n" + //
+                "    ProcessedByUserID\r\n" + //
+                ")\r\n" + //
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
+
+        String[] parts = ticketInfo.split("\\|");
+        int ticketID = Integer.parseInt(parts[0]);
+        int policyID = Integer.parseInt(parts[1]);
+        double originalPrice = Double.parseDouble(parts[2]);
+        double refundFee = Double.parseDouble(parts[3]);
+        double refundAmount = Double.parseDouble(parts[4]);
+        String requestedAt = parts[5];
+        int userIDByRequest = Integer.parseInt(parts[6]);
+        int userIDByProcessing = Integer.parseInt(parts[7]);
+        int bookingID = Integer.parseInt(parts[8]);
 
         try (Connection conn = DBContext.getConnection()) {
             conn.setAutoCommit(false); // dùng transaction
 
             try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
-                ps.setString(1, ticketCode);
+                ps.setInt(1, ticketID);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(updateRefunds)) {
+                ps.setInt(1, ticketID);
+                ps.setInt(2, bookingID);
+                ps.setInt(3, policyID);
+                ps.setDouble(4, originalPrice);
+                ps.setDouble(5, refundFee);
+                ps.setDouble(6, refundAmount);
+                ps.setString(7, requestedAt);
+                ps.setString(8, "Approved");
+                ps.setString(9, "Bank Transfer"); // Hoặc phương thức hoàn tiền khác
+                ps.setString(10, note);
+                ps.setInt(11, userIDByRequest);
+                ps.setInt(12, userIDByProcessing);
                 ps.executeUpdate();
             }
 
             try (PreparedStatement ps = conn.prepareStatement(deleteTempRefundSql)) {
-                ps.setString(1, ticketCode);
+                ps.setInt(1, ticketID);
                 ps.executeUpdate();
             }
 
@@ -673,17 +876,6 @@ public class TicketRepositoryImpl implements TicketRepository {
         // } catch (SQLException e) {
         // e.printStackTrace();
         // }
-
-        try {
-            List<RefundRequestDTO> refundRequestDTO = ticketRepository.getAllPendingRefundRequests();
-            if (refundRequestDTO != null) {
-                System.out.println("CheckInforRefundTicketDTO: " + refundRequestDTO);
-            } else {
-                System.out.println("No booking found with the given details.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace(); // Log the error
-        }
 
     }
 

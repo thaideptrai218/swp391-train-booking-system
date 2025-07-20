@@ -117,7 +117,7 @@
                     </tr>
                     <tr>
                       <td style="text-align: start;">${infoPassenger.passengerFullName}<br>
-                      Mã vé: ${infoPassenger.ticketCode}</td>
+                        Mã vé: ${infoPassenger.ticketCode}</td>
                       <td>${infoPassenger.passengerIDCard}</td>
                       <td>${infoPassenger.passengerType}</td>
                       <td>${infoPassenger.seatNumber}</td>
@@ -139,7 +139,10 @@
                               <c:when test="${infoPassenger.ticketStatus == 'Processing'}">
                                 <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
                               </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'Cancelled'}">
+                              <c:when test="${infoPassenger.ticketStatus == 'Refunded'}">
+                                <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                              </c:when>
+                              <c:when test="${infoPassenger.ticketStatus == 'RejectedRefund'}">
                                 <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
                               </c:when>
                               <c:when test="${infoPassenger.ticketStatus == 'Expired'}">

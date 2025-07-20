@@ -64,6 +64,13 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <i class="fas fa-users-cog"></i> Quản Lý Nhân Viên
       </a>
     </li>
+
+<li>
+      <a href="${pageContext.request.contextPath}/manageCancellationPolicies">
+        <i class="fas fa-users-cog"></i> Quản Lý Chính Sách Hủy Vé
+      </a>
+    </li>
+
     <li>
       <a href="${pageContext.request.contextPath}/manageHolidays">
         <i class="fas fa-calendar-alt"></i> Quản Lý Ngày Lễ

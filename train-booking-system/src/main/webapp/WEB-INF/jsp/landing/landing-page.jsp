@@ -8,52 +8,11 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Trang Chủ</title>
       <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing-page.css" />
-      <style>
-        .toast {
-          visibility: hidden;
-          background-color: white;
-          color: #333;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          padding: 16px 24px;
-          position: fixed;
-          z-index: 9999;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          opacity: 0;
-          transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
-        }
-
-        .toast.show {
-          visibility: visible;
-          opacity: 1;
-          transition-delay: 0s;
-        }
-      </style>
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
-
-      <c:if test="${not empty sessionScope.successMessage}">
-        <div id="toast" class="toast">${sessionScope.successMessage}</div>
-        <script>
-          window.onload = () => {
-            const toast = document.getElementById("toast");
-            toast.classList.add("show");
-            setTimeout(() => {
-              toast.classList.remove("show");
-            }, 8000); // Tự ẩn sau 8 giây
-          };
-        </script>
-        <c:remove var="successMessage" scope="session" />
-      </c:if>
-
-
-
       <section class="hero" style="
-        background-image: url('${pageContext.request.contextPath}/assets/images/landing/common/top_BG.png');
+        background-image: url('${pageContext.request.contextPath}/assets/images/landing/top_BG.png');
         background-size: cover;
         background-position: center;
       ">
@@ -61,8 +20,7 @@
           <div class="container">
             <a href="${pageContext.request.contextPath}/landing" class="logo-block-link">
               <div class="logo-block">
-                <img src="${pageContext.request.contextPath}/assets/images/landing/common/logo.svg" alt="Logo"
-                  class="logo" />
+                <img src="${pageContext.request.contextPath}/assets/images/landing/logo.svg" alt="Logo" class="logo" />
               </div>
             </a>
             <nav>
@@ -106,14 +64,6 @@
                           <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/> -->
                           </i> Giỏ vé</a>
 
-                        <c:if test="${not empty sessionScope.loggedInUser}">
-                          <a href="${pageContext.request.contextPath}/listTicketBooking?id=${sessionScope.loggedInUser.userID}"
-                            class="dropdown-item">
-                            Tất cả vé đã đặt
-                          </a>
-                        </c:if>
-
-
                         <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout-item"><img
                             width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/exit--v1.png"
                             alt="exit--v1" />
@@ -142,7 +92,7 @@
             <div class="actions">
               <a href="${pageContext.request.contextPath}/train-info" class="btn btn-primary">Tìm hiểu thêm</a>
               <button class="btn btn-secondary">
-                <img src="${pageContext.request.contextPath}/assets/images/landing/common/phone.png" alt="Phone"
+                <img src="${pageContext.request.contextPath}/assets/images/landing/phone.png" alt="Phone"
                   class="phone-icon" />0983868888
               </button>
             </div>
@@ -199,8 +149,7 @@
               </div>
               <h3 class="sub-heading">Bản đồ hành trình</h3>
               <div class="map-placeholder">
-                <img src="${pageContext.request.contextPath}/assets/images/landing/common/map.jpg"
-                  alt="Bản đồ hành trình" />
+                <img src="${pageContext.request.contextPath}/assets/images/landing/map.jpg" alt="Bản đồ hành trình" />
               </div>
             </div>
           </div>
@@ -214,7 +163,7 @@
               được thư giãn ngắm nhìn Việt Nam với khung cảnh thiên nhiên và cuộc
               sống thường ngày bình dị qua ô cửa con tàu
             </p>
-            <img class="img1" src="${pageContext.request.contextPath}/assets/images/landing/common/img1.jpeg" />
+            <img class="img1" src="${pageContext.request.contextPath}/assets/images/landing/img1.jpeg" />
           </div>
 
           <div class="hot-locations">
@@ -262,7 +211,6 @@
               </div>
             </div>
           </div>
-
 
           <!-- Featured Routes Section -->
           <div class="featured-routes-section">

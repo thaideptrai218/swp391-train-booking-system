@@ -49,11 +49,11 @@ public class ConfirmOTPServlet extends HttpServlet {
 
         if (storedOTP.equals(inputOTP)) {
             session.setAttribute("otpVerified", true);
-            String[] ticketCodes = (String[]) session.getAttribute("ticketCodes");
-            for (String ticketCode : ticketCodes) {
+            String[] ticketInfos = (String[]) session.getAttribute("ticketInfos");
+            for (String ticketInfo : ticketInfos) {
 
                 try {
-                    ticketRepository.insertTempRefundRequests(ticketCode);
+                    ticketRepository.insertTempRefundRequests(ticketInfo);
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
