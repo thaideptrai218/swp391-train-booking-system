@@ -6,7 +6,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Quản lý quy tắc giá</title>
+    <title>Quản lý ngày lễ</title>
     <%-- Add your CSS links here --%>
     <link
       rel="stylesheet"
@@ -134,64 +134,68 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
     <%@ include file="sidebar.jsp" %>
     <div class="main-content">
       <div class="container">
-        <h1>Quản lý quy tắc giá</h1>
+        <h1>Quản lý ngày lễ</h1>
 
         <a
-          href="${pageContext.request.contextPath}/managePrice?action=new"
+          href="${pageContext.request.contextPath}/manageHolidays?action=new"
           class="add-button"
-          >Thêm quy tắc mới</a
+          >Thêm ngày lễ mới</a
         >
 
-        <c:if test="${empty listPricingRules}">
-          <p class="no-rules">Không tìm thấy quy tắc giá nào.</p>
+        <c:if test="${empty listHolidays}">
+          <p class="no-rules">Không tìm thấy ngày lễ nào.</p>
         </c:if>
 
-        <c:if test="${not empty listPricingRules}">
-          <table id="pricingRulesTable">
+        <c:if test="${not empty listHolidays}">
+          <table id="holidaysTable">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Tên</th>
-                <th>Giá cơ bản/Km</th>
-                <th>Hiệu lực đến</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Hệ số</th>
                 <th>Hoạt động</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
-              <c:forEach var="rule" items="${listPricingRules}">
+              <c:forEach var="holiday" items="${listHolidays}">
                 <tr>
-                  <td>${rule.ruleID}</td>
-                  <td><c:out value="${rule.ruleName}" /></td>
+                  <td>${holiday.id}</td>
+                  <td><c:out value="${holiday.holidayName}" /></td>
+                  <td>
+                    <fmt:formatDate value="<%=
+                    DateUtils.toDate(((vn.vnrailway.model.HolidayPrice)
+                    pageContext.findAttribute(\"holiday\")).getStartDate()) %>"
+                    pattern="dd-MM-yyyy" />
+                  </td>
+                  <td>
+                    <fmt:formatDate value="<%=
+                    DateUtils.toDate(((vn.vnrailway.model.HolidayPrice)
+                    pageContext.findAttribute(\"holiday\")).getEndDate()) %>"
+                    pattern="dd-MM-yyyy" />
+                  </td>
                   <td>
                     <fmt:formatNumber
-                      value="${rule.basePricePerKm}"
-                      type="currency"
-                      currencySymbol="₫"
-                      maxFractionDigits="0"
+                      value="${holiday.discountPercentage}"
+                      maxFractionDigits="2"
                     />
                   </td>
                   <td>
-                    <fmt:formatDate value="<%= DateUtils.toDate(
-                    ((vn.vnrailway.model.PricingRule)
-                    pageContext.findAttribute(\"rule\")) .getEffectiveToDate())
-                    %>" pattern="dd-MM-yyyy" />
-                  </td>
-                  <td>
                     <input type="checkbox" class="status-checkbox"
-                    data-type="rule" data-id="${rule.ruleID}" ${rule.active ?
-                    'checked' : ''}>
+                    data-id="${holiday.id}" ${holiday.active ? 'checked' : ''}>
                   </td>
                   <td class="actions">
                     <a
-                      href="${pageContext.request.contextPath}/managePrice?action=edit&id=${rule.ruleID}"
+                      href="${pageContext.request.contextPath}/manageHolidays?action=edit&id=${holiday.id}"
                       class="edit"
                       >Sửa</a
                     >
                     <a
-                      href="${pageContext.request.contextPath}/managePrice?action=delete&id=${rule.ruleID}"
+                      href="${pageContext.request.contextPath}/manageHolidays?action=delete&id=${holiday.id}"
                       class="delete"
-                      onclick="return confirm('Bạn có chắc chắn muốn xóa quy tắc này không?');"
+                      onclick="return confirm('Bạn có chắc chắn muốn xóa ngày lễ này không?');"
                       >Xóa</a
                     >
                   </td>
@@ -201,7 +205,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
           </table>
           <div
             class="pagination-container"
-            id="rules-pagination-container"
+            id="holidays-pagination-container"
           ></div>
         </c:if>
       </div>
@@ -213,33 +217,25 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
           checkbox.addEventListener("change", function () {
             const id = this.dataset.id;
             const isActive = this.checked;
-            const type = this.dataset.type;
-            let action = "";
 
-            if (type === "rule") {
-              action = "updateRuleStatus";
-            }
-
-            if (action) {
-              fetch("${pageContext.request.contextPath}/managePrice", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body:
-                  "action=" + action + "&id=" + id + "&isActive=" + isActive,
-              })
-                .then((response) => {
-                  if (!response.ok) {
-                    alert("Error updating status");
-                    this.checked = !isActive; // Revert the checkbox on error
-                  }
-                })
-                .catch(() => {
+            fetch("${pageContext.request.contextPath}/manageHolidays", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body:
+                "action=updateHolidayStatus&id=" + id + "&isActive=" + isActive,
+            })
+              .then((response) => {
+                if (!response.ok) {
                   alert("Error updating status");
                   this.checked = !isActive; // Revert the checkbox on error
-                });
-            }
+                }
+              })
+              .catch(() => {
+                alert("Error updating status");
+                this.checked = !isActive; // Revert the checkbox on error
+              });
           });
         });
 
@@ -330,8 +326,8 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         }
 
         setupPaginationForTable(
-          "pricingRulesTable",
-          "rules-pagination-container"
+          "holidaysTable",
+          "holidays-pagination-container"
         );
       });
     </script>

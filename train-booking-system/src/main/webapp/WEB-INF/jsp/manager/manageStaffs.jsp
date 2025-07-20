@@ -192,7 +192,31 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                 />
               </div>
             </div>
-            <div class="form-group" id="passwordFieldContainer">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="gender">Giới tính:</label>
+                <select id="gender" name="gender" class="form-control">
+                  <option value="">Chọn giới tính</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="address">Địa chỉ:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="address"
+                  name="address"
+                />
+              </div>
+            </div>
+            <div
+              class="form-group"
+              id="passwordFieldContainer"
+              style="display: none"
+            >
               <label for="password">Mật khẩu:</label>
               <input
                 type="password"
@@ -269,6 +293,8 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                   data-email="${user.email}"
                   data-phone-number="${user.phoneNumber}"
                   data-id-card-number="${user.idCardNumber}"
+                  data-gender="${user.gender}"
+                  data-address="${user.address}"
                   data-is-active="${user.active}"
                 >
                   <td><c:out value="${user.userID}"></c:out></td>
@@ -283,10 +309,13 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                       <i class="fas fa-edit"></i> Sửa
                     </button>
                     <button
-                      class="btn btn-sm btn-danger"
-                      onclick="deleteStaff('${user.userID}')"
+                      class="btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'}"
+                      onclick="toggleStaffStatus('${user.userID}', '${user.active}')"
                     >
-                      <i class="fas fa-trash"></i> Xóa
+                      <i
+                        class="fas ${user.active ? 'fa-lock' : 'fa-lock-open'}"
+                      ></i>
+                      ${user.active ? 'Khóa' : 'Mở khóa'}
                     </button>
                   </td>
                 </tr>
@@ -312,8 +341,11 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <!-- Custom JS for sidebar is already included in sidebar.jsp -->
 
     <script>
-      function deleteStaff(userId) {
-        if (confirm("Bạn có chắc chắn muốn xóa nhân viên này không?")) {
+      function toggleStaffStatus(userId, isActive) {
+        const message = isActive
+          ? "Bạn có chắc chắn muốn khóa nhân viên này không?"
+          : "Bạn có chắc chắn muốn mở khóa nhân viên này không?";
+        if (confirm(message)) {
           const form = document.createElement("form");
           form.method = "post";
           form.action = "${pageContext.request.contextPath}/manageStaffs";
@@ -321,7 +353,7 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           const actionInput = document.createElement("input");
           actionInput.type = "hidden";
           actionInput.name = "action";
-          actionInput.value = "delete";
+          actionInput.value = "toggleStatus";
           form.appendChild(actionInput);
 
           const idInput = document.createElement("input");
@@ -363,6 +395,8 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         const email = document.getElementById("email");
         const phoneNumber = document.getElementById("phoneNumber");
         const idCardNumber = document.getElementById("idCardNumber");
+        const gender = document.getElementById("gender");
+        const address = document.getElementById("address");
         const passwordFieldContainer = document.getElementById(
           "passwordFieldContainer"
         );
@@ -376,8 +410,8 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           formTitle.textContent = "Thêm nhân viên mới";
           formAction.value = "add";
           userID.value = "";
-          passwordFieldContainer.style.display = "block";
-          passwordInput.required = true;
+          passwordFieldContainer.style.display = "none";
+          passwordInput.required = false;
           staffFormContainer.style.display = "block";
           staffFormContainer.scrollIntoView({ behavior: "smooth" });
         });
@@ -385,6 +419,10 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         document.querySelectorAll(".edit-btn").forEach((button) => {
           button.addEventListener("click", function () {
             const row = this.closest("tr");
+            if (row.dataset.isActive === "false") {
+              alert("Không thể sửa thông tin nhân viên đã bị khóa.");
+              return;
+            }
             formTitle.textContent = "Sửa thông tin nhân viên";
             formAction.value = "update";
             userID.value = row.dataset.userId;
@@ -392,6 +430,8 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             email.value = row.dataset.email;
             phoneNumber.value = row.dataset.phoneNumber;
             idCardNumber.value = row.dataset.idCardNumber;
+            gender.value = row.dataset.gender;
+            address.value = row.dataset.address;
             isActive.checked = row.dataset.isActive === "true";
 
             passwordFieldContainer.style.display = "none";

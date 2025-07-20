@@ -22,8 +22,6 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
         rule.setRouteID(rs.getObject("RouteID", Integer.class));
         rule.setBasePricePerKm(rs.getBigDecimal("BasePricePerKm"));
         rule.setForRoundTrip(rs.getBoolean("IsForRoundTrip"));
-        rule.setApplicableDateStart(rs.getObject("ApplicableDateStart", LocalDate.class));
-        rule.setApplicableDateEnd(rs.getObject("ApplicableDateEnd", LocalDate.class));
         rule.setEffectiveFromDate(rs.getObject("EffectiveFromDate", LocalDate.class));
         rule.setEffectiveToDate(rs.getObject("EffectiveToDate", LocalDate.class));
         rule.setActive(rs.getBoolean("IsActive"));
@@ -78,7 +76,7 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public PricingRule save(PricingRule pricingRule) throws SQLException {
-        String sql = "INSERT INTO PricingRules (RuleName, Description, TrainTypeID, RouteID, BasePricePerKm, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, EffectiveFromDate, EffectiveToDate, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO PricingRules (RuleName, Description, TrainTypeID, RouteID, BasePricePerKm, IsForRoundTrip, EffectiveFromDate, EffectiveToDate, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -88,11 +86,9 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
             ps.setObject(4, pricingRule.getRouteID(), Types.INTEGER);
             ps.setBigDecimal(5, pricingRule.getBasePricePerKm());
             ps.setBoolean(6, pricingRule.isForRoundTrip());
-            ps.setObject(7, pricingRule.getApplicableDateStart());
-            ps.setObject(8, pricingRule.getApplicableDateEnd());
-            ps.setObject(9, pricingRule.getEffectiveFromDate());
-            ps.setObject(10, pricingRule.getEffectiveToDate());
-            ps.setBoolean(11, pricingRule.isActive());
+            ps.setObject(7, pricingRule.getEffectiveFromDate());
+            ps.setObject(8, pricingRule.getEffectiveToDate());
+            ps.setBoolean(9, pricingRule.isActive());
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 0) {
@@ -111,7 +107,7 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public boolean update(PricingRule pricingRule) throws SQLException {
-        String sql = "UPDATE PricingRules SET RuleName = ?, Description = ?, TrainTypeID = ?, RouteID = ?, BasePricePerKm = ?, IsForRoundTrip = ?, ApplicableDateStart = ?, ApplicableDateEnd = ?, EffectiveFromDate = ?, EffectiveToDate = ?, IsActive = ? WHERE RuleID = ?";
+        String sql = "UPDATE PricingRules SET RuleName = ?, Description = ?, TrainTypeID = ?, RouteID = ?, BasePricePerKm = ?, IsForRoundTrip = ?, EffectiveFromDate = ?, EffectiveToDate = ?, IsActive = ? WHERE RuleID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, pricingRule.getRuleName());
@@ -120,12 +116,10 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
             ps.setObject(4, pricingRule.getRouteID(), Types.INTEGER);
             ps.setBigDecimal(5, pricingRule.getBasePricePerKm());
             ps.setBoolean(6, pricingRule.isForRoundTrip());
-            ps.setObject(7, pricingRule.getApplicableDateStart());
-            ps.setObject(8, pricingRule.getApplicableDateEnd());
-            ps.setObject(9, pricingRule.getEffectiveFromDate());
-            ps.setObject(10, pricingRule.getEffectiveToDate());
-            ps.setBoolean(11, pricingRule.isActive());
-            ps.setInt(12, pricingRule.getRuleID());
+            ps.setObject(7, pricingRule.getEffectiveFromDate());
+            ps.setObject(8, pricingRule.getEffectiveToDate());
+            ps.setBoolean(9, pricingRule.isActive());
+            ps.setInt(10, pricingRule.getRuleID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;

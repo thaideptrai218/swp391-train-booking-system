@@ -1,20 +1,20 @@
 package vn.vnrailway.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class HolidayPrice {
     private int id;
     private String holidayName;
     private String description;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private float discountPercentage;
     private boolean isActive;
 
     public HolidayPrice() {
     }
 
-    public HolidayPrice(int id, String holidayName, String description, Date startDate, Date endDate,
+    public HolidayPrice(int id, String holidayName, String description, LocalDate startDate, LocalDate endDate,
             float discountPercentage, boolean isActive) {
         this.id = id;
         this.holidayName = holidayName;
@@ -22,6 +22,16 @@ public class HolidayPrice {
         this.startDate = startDate;
         this.endDate = endDate;
         this.discountPercentage = discountPercentage;
+        this.isActive = isActive;
+    }
+
+    public HolidayPrice(int id, String holidayName, LocalDate startDate, LocalDate endDate, float coefficient,
+            boolean isActive) {
+        this.id = id;
+        this.holidayName = holidayName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.discountPercentage = coefficient;
         this.isActive = isActive;
     }
 
@@ -49,19 +59,19 @@ public class HolidayPrice {
         this.description = description;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

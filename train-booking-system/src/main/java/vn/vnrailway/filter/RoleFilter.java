@@ -39,7 +39,9 @@ public class RoleFilter implements Filter {
                 path.equals("/login") || path.equals("/register") || path.equals("/logout") ||
                 path.equals("/forgot-password") || path.equals("/verify-otp") || path.equals("/reset-password") ||
                 path.equals("/forgotpassword") || path.equals("/newpassword") || path.equals("/enterotp") ||
-                path.equals("/changepassword") || path.equals("/checkBooking") ||
+                path.equals("/changepassword") || path.equals("/checkBooking") || path.equals("/checkTicket")
+                || path.equals("/refundTicket") || path.equals("/confirmRefundTicket") || path.equals("/confirmOTP")
+                || path.equals("/refundProcessing") || path.equals("/checkRefundTicket") ||
                 path.equals("/searchTrip") || path.equals("/searchTripBackground") ||
                 path.equals("/storeRoute") || path.equals("/getCoachSeatsWithPrice") ||
                 path.equals("/all-locations") || path.equals("/landing") || path.equals("/terms") ||
@@ -47,7 +49,7 @@ public class RoleFilter implements Filter {
 
                 // Trip & train info related public paths
                 path.startsWith("/trip/") || path.startsWith("/train-info/") || path.startsWith("/check-booking/")
-                || path.startsWith("/api") || path.startsWith("/ticketPayment") ||
+                || path.startsWith("/api") || path.startsWith("/ticketPayment") || path.startsWith("/payment/") ||
                 path.equals("/WEB-INF/jsp/common/unauthorized.jsp")) {
             chain.doFilter(request, response);
             return;
@@ -74,42 +76,62 @@ public class RoleFilter implements Filter {
 
         switch (role) {
             case "admin":
-                if (path.startsWith("/admin/") || path.equals("/admin-dashboard") || isCommonPage(path)) {
+                if (path.startsWith("/admin/") ||
+                        path.equals("/admin-dashboard") ||
+                        path.equals("/addUser") ||
+                        path.equals("/adminLayout") ||
+                        path.equals("/auditLog") ||
+                        path.equals("/dashboard") ||
+                        path.equals("/editUser") ||
+                        path.equals("/userManagement") ||
+                        isCommonPage(path)) {
                     authorized = true;
                 }
                 break;
             case "manager":
-                if (path.equals("/managerDashboard") || path.startsWith("/manager/") ||
-                        path.equals("/manageTrips") ||
-                        path.equals("/manageRoutes") ||
-                        path.equals("/manageStations") ||
+                if (path.startsWith("/manager/") ||
+                        path.equals("/managerDashboard") ||
+                        path.equals("/addPriceRule") ||
+                        path.equals("/addRoute") ||
+                        path.equals("/addStation") ||
+                        path.equals("/addTrip") ||
+                        path.equals("/editPriceRule") ||
+                        path.equals("/editStation") ||
                         path.equals("/managePrice") ||
+                        path.equals("/manageRoutes") ||
                         path.equals("/manageStaffs") ||
+                        path.equals("/manageStations") ||
+                        path.equals("/manageTrainsSeats") ||
+                        path.equals("/manageTrips") ||
                         path.equals("/routeDetail") ||
+                        path.equals("/sidebar") ||
+                        path.equals("/train_form") ||
                         path.equals("/tripDetail") ||
-                        path.equals("/manage-trains-seats") ||
-                        path.equals("/managerStaff") ||
                         isCommonPage(path)) {
                     authorized = true;
                 }
                 break;
             case "staff":
-                 if (path.equals("/staff-dashboard") || path.startsWith("/staff/") || isCommonPage(path)) {
+                if (path.startsWith("/staff/") ||
+                        path.equals("/staff-dashboard") ||
+                        path.equals("/feedback-list") ||
+                        path.equals("/refund-requests") ||
+                        isCommonPage(path)) {
                     authorized = true;
                 }
                 break;
             case "customer":
-                if (path.startsWith("/customer/") || path.equals("/changepassword")
-                        || path.equals("/change-password") ||
-                        path.equals("/checkBooking") ||
-                        path.equals("/checkTicket") ||
-                        path.equals("/refundTicket") ||
-                        path.equals("/landing") || isCommonPage(path)) {
+                if (path.startsWith("/customer/") ||
+                        path.equals("/customer-profile") ||
+                        path.equals("/edit-profile") ||
+                        path.equals("/feedback") ||
+                        path.equals("/changepassword") ||
+                        path.equals("/change-password") ||
+                        isCommonPage(path)) {
                     authorized = true;
                 }
                 break;
             default:
-                // For unknown roles, authorized remains false
                 break;
         }
 
@@ -138,7 +160,15 @@ public class RoleFilter implements Filter {
                 path.startsWith(contextPath + "/js/") ||
                 path.startsWith(contextPath + "/assets/") ||
                 path.startsWith(contextPath + "/public/") ||
-                path.startsWith(contextPath + "/authentication/"); // Covers servlets like /authentication/someAction
+                path.startsWith(contextPath + "/authentication/") || // Covers servlets like /authentication/someAction
+                path.startsWith(contextPath + "/payment/") ||
+                path.equals(contextPath + "/checkBooking") ||
+                path.equals(contextPath + "/checkTicket") ||
+                path.equals(contextPath + "/refundTicket") ||
+                path.equals(contextPath + "/confirmRefundTicket") ||
+                path.equals(contextPath + "/confirmOTP") ||
+                path.equals(contextPath + "/refundProcessing") ||
+                path.equals(contextPath + "/checkRefundTicket");
     }
 
     private boolean isCommonPage(String path) {

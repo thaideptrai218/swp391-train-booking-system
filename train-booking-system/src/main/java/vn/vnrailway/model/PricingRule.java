@@ -17,8 +17,6 @@ public class PricingRule {
     private Integer routeID;
     private BigDecimal basePricePerKm;
     private boolean isForRoundTrip;
-    private LocalDate applicableDateStart;
-    private LocalDate applicableDateEnd;
     private LocalDate effectiveFromDate;
     private LocalDate effectiveToDate;
     private boolean isActive;
