@@ -15,7 +15,7 @@ import java.util.Optional;
 public class SeatTypeRepositoryImpl implements SeatTypeRepository {
 
     @Override
-    public List<SeatType> findAll() throws SQLException {
+    public List<SeatType> getAllSeatTypes() throws SQLException {
         List<SeatType> seatTypes = new ArrayList<>();
         // Using Java model field names as column names: seatTypeID, typeName
         String sql = "SELECT seatTypeID, typeName, description FROM SeatTypes";

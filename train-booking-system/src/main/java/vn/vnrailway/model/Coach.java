@@ -17,4 +17,19 @@ public class Coach {
     // private CoachType coachType; // Object
     private int capacity;
     private int positionInTrain; // Vị trí toa trong đoàn tàu
+
+    public Coach(int trainID, int coachNumber, String coachName, int coachTypeID) {
+        this.trainID = trainID;
+        this.coachNumber = coachNumber;
+        this.coachName = coachName;
+        this.coachTypeID = coachTypeID;
+    }
+
+    public Coach(int id, int trainID, int coachNumber, String coachName, int coachTypeID) {
+        this.coachID = id;
+        this.trainID = trainID;
+        this.coachNumber = coachNumber;
+        this.coachName = coachName;
+        this.coachTypeID = coachTypeID;
+    }
 }

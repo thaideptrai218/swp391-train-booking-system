@@ -102,6 +102,11 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
           Lỗi: Đầu vào không hợp lệ. Vui lòng kiểm tra lại dữ liệu của bạn và thử lại.
         </p>
       </c:if>
+      
+      <c:if test="${not empty errorMessage}">
+        <p class="error-message">${errorMessage}</p>
+      </c:if>
+
 
       <form
         action="${pageContext.request.contextPath}/managePrice?action=update"
@@ -164,33 +169,26 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
           </select>
         </div>
 
-        <div class="form-group full-width">
-          <label for="applicableDateStart">Ngày bắt đầu áp dụng:</label>
-          <input type="date" id="applicableDateStart" name="applicableDateStart" value="${pricingRule.applicableDateStart}" />
-          <label for="applicableDateEnd" style="margin-left: 20px;">Ngày kết thúc áp dụng:</label>
-          <input type="date" id="applicableDateEnd" name="applicableDateEnd" value="${pricingRule.applicableDateEnd}" />
-        </div>
-
         <%
           PricingRule pricingRule = (PricingRule) request.getAttribute("pricingRule");
-          Date effectiveFromDate = DateUtils.toDate(pricingRule.getEffectiveFromDate());
-          Date effectiveToDate = DateUtils.toDate(pricingRule.getEffectiveToDate());
+          Date applicableDateStart = DateUtils.toDate(pricingRule.getEffectiveFromDate());
+          Date applicableDateEnd = DateUtils.toDate(pricingRule.getEffectiveToDate());
         %>
         <div class="form-group full-width">
-          <label for="effectiveFromDate">Ngày bắt đầu hiệu lực:</label>
+          <label for="applicableDateStart">Ngày bắt đầu áp dụng:</label>
           <input
             type="date"
-            id="effectiveFromDate"
-            name="effectiveFromDate"
-            value="<fmt:formatDate value="<%= effectiveFromDate %>" pattern="yyyy-MM-dd" />"
+            id="applicableDateStart"
+            name="applicableDateStart"
+            value="<fmt:formatDate value="<%= applicableDateStart %>" pattern="yyyy-MM-dd" />"
             required
           />
-          <label for="effectiveToDate" style="margin-left: 20px;">Ngày kết thúc hiệu lực (Tùy chọn):</label>
+          <label for="applicableDateEnd" style="margin-left: 20px;">Ngày kết thúc áp dụng (Tùy chọn):</label>
           <input
             type="date"
-            id="effectiveToDate"
-            name="effectiveToDate"
-            value="<fmt:formatDate value="<%= effectiveToDate %>" pattern="yyyy-MM-dd" />"
+            id="applicableDateEnd"
+            name="applicableDateEnd"
+            value="<fmt:formatDate value="<%= applicableDateEnd %>" pattern="yyyy-MM-dd" />"
           />
         </div>
 
@@ -213,50 +211,52 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const form = document.querySelector('form');
-        const applicableDateStartInput = document.getElementById('applicableDateStart');
-        const applicableDateEndInput = document.getElementById('applicableDateEnd');
-        const effectiveFromDateInput = document.getElementById('effectiveFromDate');
-        const effectiveToDateInput = document.getElementById('effectiveToDate');
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        const applicableDateStartInput = document.getElementById("applicableDateStart");
+        const applicableDateEndInput = document.getElementById("applicableDateEnd");
 
-        function setMinDates() {
-          if (applicableDateStartInput.value) {
-            applicableDateEndInput.min = applicableDateStartInput.value;
-          }
-          if (effectiveFromDateInput.value) {
-            effectiveToDateInput.min = effectiveFromDateInput.value;
-          }
+        // Set min on page load if applicableDateStart has a value
+        if (applicableDateStartInput.value) {
+          applicableDateEndInput.min = applicableDateStartInput.value;
         }
 
-        applicableDateStartInput.addEventListener('change', function () {
+        applicableDateStartInput.addEventListener("change", function () {
           applicableDateEndInput.min = this.value;
+          if (applicableDateEndInput.value && applicableDateEndInput.value < this.value) {
+            applicableDateEndInput.value = this.value;
+          }
         });
 
-        effectiveFromDateInput.addEventListener('change', function () {
-          effectiveToDateInput.min = this.value;
-        });
-
-        form.addEventListener('submit', function (event) {
+        form.addEventListener("submit", function (event) {
+          const ruleName = document.getElementById("ruleName").value.trim();
+          const description = document
+            .getElementById("description")
+            .value.trim();
+          const basePricePerKm = document
+            .getElementById("basePricePerKm")
+            .value.trim();
           const applicableDateStart = applicableDateStartInput.value;
           const applicableDateEnd = applicableDateEndInput.value;
-          const effectiveFromDate = effectiveFromDateInput.value;
-          const effectiveToDate = effectiveToDateInput.value;
 
-          if (applicableDateStart && applicableDateEnd && new Date(applicableDateEnd) < new Date(applicableDateStart)) {
-            alert('Ngày kết thúc áp dụng không thể sớm hơn ngày bắt đầu áp dụng.');
+          if (
+            !ruleName ||
+            !description ||
+            !basePricePerKm ||
+            !applicableDateStart ||
+            !applicableDateEnd
+          ) {
+            alert("Các trường không được để trống.");
             event.preventDefault();
             return;
           }
 
-          if (effectiveFromDate && effectiveToDate && new Date(effectiveToDate) < new Date(effectiveFromDate)) {
-            alert('Ngày kết thúc hiệu lực không thể sớm hơn ngày bắt đầu hiệu lực.');
+          if (applicableDateEnd && applicableDateEnd < applicableDateStart) {
+            alert("Ngày kết thúc áp dụng không thể sớm hơn Ngày bắt đầu áp dụng.");
             event.preventDefault();
             return;
           }
         });
-
-        setMinDates();
       });
     </script>
   </body>

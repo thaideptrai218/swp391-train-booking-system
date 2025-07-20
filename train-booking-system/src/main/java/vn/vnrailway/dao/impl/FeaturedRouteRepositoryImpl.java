@@ -67,6 +67,16 @@ public class FeaturedRouteRepositoryImpl implements FeaturedRouteRepository {
         return routes;
     }
 
+    @Override
+    public void deleteByRouteId(int routeId) throws SQLException {
+        String sql = "DELETE FROM FeaturedRoutes WHERE RouteID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, routeId);
+            ps.executeUpdate();
+        }
+    }
+
     // Optional: Implement save and findById if needed later
     /*
      * @Override

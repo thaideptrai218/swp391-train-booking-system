@@ -64,7 +64,8 @@ public class TripDetailServlet extends HttpServlet {
                     if (firstStation.getScheduledDepartureDate() != null
                             && firstStation.getScheduledDepartureTime() != null) {
                         LocalDateTime previousDepartureDateTime = LocalDateTime
-                                .of(firstStation.getScheduledDepartureDate(), firstStation.getScheduledDepartureTime());
+                                .of(firstStation.getScheduledDepartureDate(),
+                                        firstStation.getScheduledDepartureTime());
                         BigDecimal previousEstimateTimeHours = firstStation.getEstimateTime() != null
                                 ? firstStation.getEstimateTime()
                                 : BigDecimal.ZERO;

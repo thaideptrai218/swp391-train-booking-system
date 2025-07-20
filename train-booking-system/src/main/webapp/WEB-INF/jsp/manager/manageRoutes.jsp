@@ -91,6 +91,35 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
       .edit-form-hidden {
         display: none;
       }
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .pagination-container .page-link {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-container .page-link.active,
+      .pagination-container .page-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+      .pagination-container .page-link.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        background-color: #f9f9f9;
+        border-color: #ddd;
+      }
     </style>
   </head>
   <body>
@@ -149,44 +178,14 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
         </div>
       </c:if>
 
-      <!-- Add New Route Form -->
-      <div class="container">
-        <h2><i class="fas fa-plus-circle"></i> Thêm Tuyến Đường Mới</h2>
-        <form
-          action="${pageContext.request.contextPath}/manageRoutes"
-          method="post"
-        >
-          <input type="hidden" name="action" value="addRoute" />
-          <div class="form-group">
-            <label for="departureStationId">Điểm Đi:</label>
-            <select name="departureStationId" id="departureStationId" required>
-              <option value="">-- Chọn Điểm Đi --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
-              </c:forEach>
-            </select>
+      <!-- Toolbar -->
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div class="search-container" style="flex-grow: 1; margin-right: 20px;">
+              <input type="text" id="routeSearchInput" placeholder="Tìm kiếm theo ID hoặc Tên Tuyến Đường..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
           </div>
-          <div class="form-group">
-            <label for="arrivalStationId">Điểm Đến:</label>
-            <select name="arrivalStationId" id="arrivalStationId" required>
-              <option value="">-- Chọn Điểm Đến --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
-              </c:forEach>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="description">Mô Tả:</label>
-            <textarea id="description" name="description"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Lưu Tuyến Đường
-          </button>
-        </form>
+          <a href="${pageContext.request.contextPath}/manager/addRoute" class="btn btn-primary">
+              <i class="fas fa-plus-circle"></i> Thêm Tuyến Đường Mới
+          </a>
       </div>
 
       <!-- List of Routes -->
@@ -196,19 +195,19 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
           <p>Chưa có tuyến đường nào được tạo.</p>
         </c:when>
         <c:otherwise>
-          <table class="routes-table">
+          <table class="routes-table" id="routesTable">
             <thead>
               <tr>
-                <th>Tên Tuyến Đường (ID)</th>
+                <th>ID</th>
+                <th>Tên Tuyến Đường</th>
                 <th>Hành Động</th>
               </tr>
             </thead>
             <tbody>
               <c:forEach items="${allRoutes}" var="route">
                 <tr>
-                  <td>
-                    <c:out value="${route.routeName}" /> (ID: ${route.routeID})
-                  </td>
+                  <td><c:out value="${route.routeID}" /></td>
+                  <td><c:out value="${route.routeName}" /></td>
                   <td>
                     <a
                       href="${pageContext.request.contextPath}/manager/routeDetail?routeId=${route.routeID}"
@@ -241,6 +240,7 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
               </c:forEach>
             </tbody>
           </table>
+          <div class="pagination-container" id="pagination-container"></div>
         </c:otherwise>
       </c:choose>
 
@@ -293,9 +293,113 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
     <!-- End Main Content -->
 
     <script>
+      function removeDiacritics(str) {
+          return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      }
+      
       document.addEventListener("DOMContentLoaded", function () {
-        const addDepartureSelect = document.getElementById('departureStationId');
-        const addArrivalSelect = document.getElementById('arrivalStationId');
+        const searchInput = document.getElementById("routeSearchInput");
+        const table = document.getElementById("routesTable");
+        const allRows = table ? Array.from(table.querySelectorAll("tbody tr")) : [];
+        const noResultsRow = allRows.find(row => row.querySelector("td[colspan='3']"));
+        const dataRows = allRows.filter(row => row !== noResultsRow);
+        const paginationContainer = document.getElementById("pagination-container");
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let filteredRows = dataRows;
+
+        function displayRows(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            dataRows.forEach(row => row.style.display = 'none');
+
+            const rowsToShow = filteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
+
+            if (noResultsRow) {
+                noResultsRow.style.display = filteredRows.length === 0 ? '' : 'none';
+            }
+        }
+
+        function setupPagination() {
+            paginationContainer.innerHTML = "";
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+
+            if (pageCount <= 1) return;
+
+            const prevLink = document.createElement('a');
+            prevLink.href = '#';
+            prevLink.innerHTML = '&laquo;';
+            prevLink.classList.add('page-link');
+            if (currentPage === 1) {
+                prevLink.classList.add('disabled');
+            }
+            prevLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    displayRows(currentPage - 1);
+                    setupPagination();
+                }
+            });
+            paginationContainer.appendChild(prevLink);
+
+            for (let i = 1; i <= pageCount; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = '#';
+                pageLink.innerText = i;
+                pageLink.classList.add('page-link');
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    displayRows(i);
+                    setupPagination();
+                });
+                paginationContainer.appendChild(pageLink);
+            }
+
+            const nextLink = document.createElement('a');
+            nextLink.href = '#';
+            nextLink.innerHTML = '&raquo;';
+            nextLink.classList.add('page-link');
+            if (currentPage === pageCount) {
+                nextLink.classList.add('disabled');
+            }
+            nextLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < pageCount) {
+                    displayRows(currentPage + 1);
+                    setupPagination();
+                }
+            });
+            paginationContainer.appendChild(nextLink);
+        }
+
+        function filterAndPaginate() {
+            const searchTerm = removeDiacritics(searchInput.value.trim().toLowerCase().replace(/\s+/g, " "));
+            
+            filteredRows = dataRows.filter(row => {
+                const idCell = row.cells[0];
+                const nameCell = row.cells[1];
+                if (idCell && nameCell) {
+                    const idText = removeDiacritics(idCell.textContent.toLowerCase());
+                    const nameText = removeDiacritics(nameCell.textContent.toLowerCase());
+                    return idText.includes(searchTerm) || nameText.includes(searchTerm);
+                }
+                return false;
+            });
+
+            displayRows(1);
+            setupPagination();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("keyup", filterAndPaginate);
+        }
+
         const editDepartureSelect = document.getElementById('editDepartureStationId');
         const editArrivalSelect = document.getElementById('editArrivalStationId');
 
@@ -309,18 +413,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
                     option.style.display = '';
                 }
             }
-        }
-
-        if (addDepartureSelect && addArrivalSelect) {
-            addDepartureSelect.addEventListener('change', function() {
-                updateStationOptions(this, addArrivalSelect);
-            });
-            addArrivalSelect.addEventListener('change', function() {
-                updateStationOptions(this, addDepartureSelect);
-            });
-            // Initial sync for add form (if needed, though usually starts empty)
-            // updateStationOptions(addDepartureSelect, addArrivalSelect);
-            // updateStationOptions(addArrivalSelect, addDepartureSelect);
         }
 
         if (editDepartureSelect && editArrivalSelect) {
@@ -349,12 +441,8 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
             }
           }
         }
-
-        // Logic for highlightRouteId (if needed in the future)
-        // const highlightRouteId = urlParams.get("highlightRouteId"); 
-        // if (highlightRouteId) {
-          // Logic to find and highlight the route in the new list format
-        // }
+        
+        filterAndPaginate();
       });
     </script>
   </body>

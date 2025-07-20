@@ -129,19 +129,6 @@ public class StationRepositoryImpl implements StationRepository {
         }
     }
 
-    @Override
-    public boolean deleteById(int stationId) throws SQLException {
-        String sql = "DELETE FROM Stations WHERE StationID = ?";
-        try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, stationId);
-
-            int affectedRows = ps.executeUpdate();
-            return affectedRows > 0;
-        }
-    }
-
     // Main method for testing
     public static void main(String[] args) {
         StationRepository stationRepository = new StationRepositoryImpl();
@@ -184,12 +171,6 @@ public class StationRepositoryImpl implements StationRepository {
              * stationRepository.findById(savedStation.getStationID());
              * updatedStationOpt.ifPresent(s ->
              * System.out.println("Updated station details: " + s));
-             * 
-             * // Example of deleting the station
-             * System.out.println("\nTesting delete station ID: " +
-             * savedStation.getStationID());
-             * boolean deleted = stationRepository.deleteById(savedStation.getStationID());
-             * System.out.println("Delete successful: " + deleted);
              * }
              */
 

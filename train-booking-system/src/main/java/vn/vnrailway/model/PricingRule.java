@@ -19,7 +19,5 @@ public class PricingRule {
     private boolean isForRoundTrip;
     private LocalDate applicableDateStart;
     private LocalDate applicableDateEnd;
-    private LocalDate effectiveFromDate;
-    private LocalDate effectiveToDate;
     private boolean isActive;
 }

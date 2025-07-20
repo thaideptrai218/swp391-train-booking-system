@@ -103,6 +103,10 @@ prefix="c" %>
         </p>
       </c:if>
 
+      <c:if test="${not empty errorMessage}">
+        <p class="error-message">${errorMessage}</p>
+      </c:if>
+
       <form
         action="${pageContext.request.contextPath}/managePrice?action=insert"
         method="post"
@@ -163,25 +167,12 @@ prefix="c" %>
             type="date"
             id="applicableDateStart"
             name="applicableDateStart"
-          />
-          <label for="applicableDateEnd" style="margin-left: 20px"
-            >Ngày kết thúc áp dụng:</label
-          >
-          <input type="date" id="applicableDateEnd" name="applicableDateEnd" />
-        </div>
-
-        <div class="form-group full-width">
-          <label for="effectiveFromDate">Ngày bắt đầu hiệu lực:</label>
-          <input
-            type="date"
-            id="effectiveFromDate"
-            name="effectiveFromDate"
             required
           />
-          <label for="effectiveToDate" style="margin-left: 20px"
-            >Ngày kết thúc hiệu lực (Tùy chọn):</label
+          <label for="applicableDateEnd" style="margin-left: 20px"
+            >Ngày kết thúc áp dụng (Tùy chọn):</label
           >
-          <input type="date" id="effectiveToDate" name="effectiveToDate" />
+          <input type="date" id="applicableDateEnd" name="applicableDateEnd" />
         </div>
 
         <div class="form-group full-width">
@@ -210,69 +201,43 @@ prefix="c" %>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector("form");
-        const applicableDateStartInput = document.getElementById(
-          "applicableDateStart"
-        );
-        const applicableDateEndInput =
-          document.getElementById("applicableDateEnd");
-        const effectiveFromDateInput =
-          document.getElementById("effectiveFromDate");
-        const effectiveToDateInput = document.getElementById("effectiveToDate");
-
-        function setMinDates() {
-          if (applicableDateStartInput.value) {
-            applicableDateEndInput.min = applicableDateStartInput.value;
-          }
-          if (effectiveFromDateInput.value) {
-            effectiveToDateInput.min = effectiveFromDateInput.value;
-          }
-        }
+        const applicableDateStartInput = document.getElementById("applicableDateStart");
+        const applicableDateEndInput = document.getElementById("applicableDateEnd");
 
         applicableDateStartInput.addEventListener("change", function () {
           applicableDateEndInput.min = this.value;
-        });
-
-        effectiveFromDateInput.addEventListener("change", function () {
-          effectiveToDateInput.min = this.value;
+          if (applicableDateEndInput.value && applicableDateEndInput.value < this.value) {
+            applicableDateEndInput.value = this.value;
+          }
         });
 
         form.addEventListener("submit", function (event) {
+          const ruleName = document.getElementById("ruleName").value.trim();
+          const description = document
+            .getElementById("description")
+            .value.trim();
+          const basePricePerKm = document
+            .getElementById("basePricePerKm")
+            .value.trim();
           const applicableDateStart = applicableDateStartInput.value;
           const applicableDateEnd = applicableDateEndInput.value;
-          const effectiveFromDate = effectiveFromDateInput.value;
-          const effectiveToDate = effectiveToDateInput.value;
 
           if (
-            applicableDateStart &&
-            applicableDateEnd &&
-            new Date(applicableDateEnd) < new Date(applicableDateStart)
+            !ruleName ||
+            !description ||
+            !basePricePerKm ||
+            !applicableDateStart ||
+            !applicableDateEnd
           ) {
-            alert(
-              "Ngày kết thúc áp dụng không thể sớm hơn ngày bắt đầu áp dụng."
-            );
+            alert("Các trường không được để trống.");
             event.preventDefault();
             return;
           }
 
-          if (
-            effectiveFromDate &&
-            effectiveToDate &&
-            new Date(effectiveToDate) < new Date(effectiveFromDate)
-          ) {
-            alert(
-              "Ngày kết thúc hiệu lực không thể sớm hơn ngày bắt đầu hiệu lực."
-            );
+          if (applicableDateEnd && applicableDateEnd < applicableDateStart) {
+            alert("Ngày kết thúc áp dụng không thể sớm hơn Ngày bắt đầu áp dụng.");
             event.preventDefault();
             return;
-          }
-        });
-
-        setMinDates();
-
-        form.addEventListener("submit", function (event) {
-          const basePriceInput = document.getElementById("basePricePerKm");
-          if (basePriceInput.value) {
-            basePriceInput.value = parseFloat(basePriceInput.value).toString();
           }
         });
       });

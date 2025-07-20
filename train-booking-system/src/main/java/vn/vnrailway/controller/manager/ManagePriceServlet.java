@@ -81,7 +81,7 @@ public class ManagePriceServlet extends HttpServlet {
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<TrainType> trainTypes = trainTypeRepository.findAll();
+            List<TrainType> trainTypes = trainTypeRepository.getAllTrainTypes();
             List<Route> routes = routeRepository.findAll();
             request.setAttribute("trainTypes", trainTypes);
             request.setAttribute("routes", routes);
@@ -99,7 +99,7 @@ public class ManagePriceServlet extends HttpServlet {
                 .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + id));
         request.setAttribute("pricingRule", existingRule);
         try {
-            List<TrainType> trainTypes = trainTypeRepository.findAll();
+            List<TrainType> trainTypes = trainTypeRepository.getAllTrainTypes();
             List<Route> routes = routeRepository.findAll();
             request.setAttribute("trainTypes", trainTypes);
             request.setAttribute("routes", routes);
@@ -111,86 +111,86 @@ public class ManagePriceServlet extends HttpServlet {
     }
 
     private void insertPricingRule(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
-        try {
-            String ruleName = request.getParameter("ruleName");
-            String description = request.getParameter("description");
-            Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
-            Integer routeID = getNullableIntParameter(request, "routeID");
-            BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
-            if (basePricePerKm != null) {
-                basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
-            }
-            boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
-            LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
-            LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
-            LocalDate effectiveFromDate = getNullableLocalDateParameter(request, "effectiveFromDate");
-            LocalDate effectiveToDate = getNullableLocalDateParameter(request, "effectiveToDate");
-            boolean isActive = "true".equals(request.getParameter("isActive"));
+            throws SQLException, IOException, ServletException {
+        String ruleName = request.getParameter("ruleName");
+        String description = request.getParameter("description");
+        Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
+        Integer routeID = getNullableIntParameter(request, "routeID");
+        BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
+        boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
+        LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
+        LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
+        boolean isActive = "true".equals(request.getParameter("isActive"));
 
-            if ((applicableDateStart != null && applicableDateEnd != null
-                    && applicableDateEnd.isBefore(applicableDateStart)) ||
-                    (effectiveFromDate != null && effectiveToDate != null
-                            && effectiveToDate.isBefore(effectiveFromDate))) {
-                response.sendRedirect(request.getContextPath() + "/managePrice?action=new&error=invalidDateRange");
-                return;
-            }
+        if (ruleName == null || ruleName.trim().isEmpty() ||
+                description == null || description.trim().isEmpty() ||
+                basePricePerKm == null ||
+                applicableDateStart == null || applicableDateEnd == null) {
 
-            PricingRule newRule = new PricingRule(0, ruleName, description, trainTypeID, routeID, basePricePerKm,
-                    isForRoundTrip, applicableDateStart,
-                    applicableDateEnd, effectiveFromDate, effectiveToDate, isActive);
-            pricingRuleRepository.save(newRule);
-            response.sendRedirect(request.getContextPath() + "/managePrice");
-        } catch (NumberFormatException | DateTimeParseException e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/managePrice?action=new&error=invalidInput");
+            request.setAttribute("errorMessage", "Các trường không được để trống.");
+            showNewForm(request, response);
+            return;
         }
+
+        if (applicableDateEnd.isBefore(applicableDateStart)) {
+            request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
+            showNewForm(request, response);
+            return;
+        }
+
+        if (basePricePerKm != null) {
+            basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
+        }
+
+        PricingRule newRule = new PricingRule(0, ruleName, description, trainTypeID, routeID, basePricePerKm,
+                isForRoundTrip, applicableDateStart, applicableDateEnd, isActive);
+        pricingRuleRepository.save(newRule);
+        response.sendRedirect(request.getContextPath() + "/managePrice");
     }
 
     private void updatePricingRule(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
-        try {
-            int ruleID = Integer.parseInt(request.getParameter("ruleID"));
-            String ruleName = request.getParameter("ruleName");
-            String description = request.getParameter("description");
-            Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
-            Integer routeID = getNullableIntParameter(request, "routeID");
-            BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
+        int ruleID = Integer.parseInt(request.getParameter("ruleID"));
+        String ruleName = request.getParameter("ruleName");
+        String description = request.getParameter("description");
+        Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
+        Integer routeID = getNullableIntParameter(request, "routeID");
+        BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
+        boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
+        LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
+        LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
+        boolean isActive = "true".equals(request.getParameter("isActive"));
 
-            PricingRule existingRule = pricingRuleRepository.findById(ruleID)
-                    .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + ruleID));
+        if (ruleName == null || ruleName.trim().isEmpty() ||
+                description == null || description.trim().isEmpty() ||
+                basePricePerKm == null ||
+                applicableDateStart == null || applicableDateEnd == null) {
 
-            if (basePricePerKm != null && (!basePricePerKm.equals(existingRule.getBasePricePerKm()))) {
-                basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
-            } else {
-                basePricePerKm = existingRule.getBasePricePerKm();
-            }
-            boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
-            LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
-            LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
-            LocalDate effectiveFromDate = getNullableLocalDateParameter(request, "effectiveFromDate");
-            LocalDate effectiveToDate = getNullableLocalDateParameter(request, "effectiveToDate");
-            boolean isActive = "true".equals(request.getParameter("isActive"));
-
-            if ((applicableDateStart != null && applicableDateEnd != null
-                    && applicableDateEnd.isBefore(applicableDateStart)) ||
-                    (effectiveFromDate != null && effectiveToDate != null
-                            && effectiveToDate.isBefore(effectiveFromDate))) {
-                response.sendRedirect(
-                        request.getContextPath() + "/managePrice?action=edit&id=" + ruleID + "&error=invalidDateRange");
-                return;
-            }
-
-            PricingRule ruleToUpdate = new PricingRule(ruleID, ruleName, description, trainTypeID, routeID,
-                    basePricePerKm, isForRoundTrip,
-                    applicableDateStart, applicableDateEnd, effectiveFromDate, effectiveToDate, isActive);
-            pricingRuleRepository.update(ruleToUpdate);
-            response.sendRedirect(request.getContextPath() + "/managePrice");
-        } catch (NumberFormatException | DateTimeParseException e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/managePrice?action=edit&id="
-                    + request.getParameter("ruleID") + "&error=invalidInput");
+            request.setAttribute("errorMessage", "Các trường không được để trống.");
+            showEditForm(request, response);
+            return;
         }
+
+        if (applicableDateEnd.isBefore(applicableDateStart)) {
+            request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
+            showEditForm(request, response);
+            return;
+        }
+
+        PricingRule existingRule = pricingRuleRepository.findById(ruleID)
+                .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + ruleID));
+
+        if (basePricePerKm != null && (!basePricePerKm.equals(existingRule.getBasePricePerKm()))) {
+            basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
+        } else {
+            basePricePerKm = existingRule.getBasePricePerKm();
+        }
+
+        PricingRule ruleToUpdate = new PricingRule(ruleID, ruleName, description, trainTypeID, routeID,
+                basePricePerKm, isForRoundTrip,
+                applicableDateStart, applicableDateEnd, isActive);
+        pricingRuleRepository.update(ruleToUpdate);
+        response.sendRedirect(request.getContextPath() + "/managePrice");
     }
 
     private void deletePricingRule(HttpServletRequest request, HttpServletResponse response)
@@ -239,6 +239,30 @@ public class ManagePriceServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list"; // Default action
+        }
+
+        try {
+            switch (action) {
+                case "updateRuleStatus":
+                    updateRuleStatus(request, response);
+                    break;
+                default:
+                    doGet(request, response);
+                    break;
+            }
+        } catch (SQLException ex) {
+            throw new ServletException(ex);
+        }
+    }
+
+    private void updateRuleStatus(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        pricingRuleRepository.updateRuleStatus(id, isActive);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

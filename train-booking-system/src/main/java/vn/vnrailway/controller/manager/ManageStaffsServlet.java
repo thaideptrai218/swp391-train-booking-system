@@ -57,6 +57,7 @@ public class ManageStaffsServlet extends HttpServlet {
                     userMap.put("phoneNumber", user.getPhoneNumber());
                     userMap.put("idCardNumber", user.getIdCardNumber());
                     userMap.put("address", user.getAddress());
+                    userMap.put("gender", user.getGender());
                     userMap.put("role", user.getRole());
                     userMap.put("isActive", user.isActive());
 
@@ -80,6 +81,7 @@ public class ManageStaffsServlet extends HttpServlet {
                     appendJsonField(jsonBuilder, "phoneNumber", userMap.get("phoneNumber"), false);
                     appendJsonField(jsonBuilder, "idCardNumber", userMap.get("idCardNumber"), false);
                     appendJsonField(jsonBuilder, "address", userMap.get("address"), false);
+                    appendJsonField(jsonBuilder, "gender", userMap.get("gender"), false);
                     appendJsonField(jsonBuilder, "role", userMap.get("role"), false);
                     appendJsonField(jsonBuilder, "isActive", userMap.get("isActive"), false);
                     appendJsonField(jsonBuilder, "createdAt", userMap.get("createdAt"), false);
@@ -148,32 +150,52 @@ public class ManageStaffsServlet extends HttpServlet {
                         String email = request.getParameter("email");
                         String phoneNumber = request.getParameter("phoneNumber");
                         String idCardNumber = request.getParameter("idCardNumber");
-                        String password = request.getParameter("password");
-                        String role = request.getParameter("role"); // Read role
+                        String gender = request.getParameter("gender");
+                        String address = request.getParameter("address");
+                        String password = "$2a$12$5OBlf1SKswIKDbBjnObsjOy.Hmbv4FEI/QElq34Te6/GW4ytkhs2u"; // bcrypt hash for 'staff12345678'
                         boolean isActive = request.getParameter("isActive") != null;
+
+                        // Map Vietnamese gender values to English for DB
+                        if ("Nam".equalsIgnoreCase(gender)) {
+                            gender = "Male";
+                        } else if ("Nữ".equalsIgnoreCase(gender)) {
+                            gender = "Female";
+                        } else if ("Khác".equalsIgnoreCase(gender)) {
+                            gender = "Other";
+                        }
 
                         User newUser = new User();
                         newUser.setFullName(fullName);
                         newUser.setEmail(email);
                         newUser.setPhoneNumber(phoneNumber);
                         newUser.setIdCardNumber(idCardNumber);
-                        newUser.setPasswordHash(password); // Hash the password before saving
-                        newUser.setRole(role); // Set role from request
+                        newUser.setGender(gender);
+                        newUser.setAddress(address);
+                        newUser.setPasswordHash(password); // Already hashed password
+                        newUser.setRole("Staff"); // Set role from request
                         newUser.setActive(isActive);
 
                         userRepository.save(newUser);
                         request.getSession().setAttribute("successMessage", "Staff member added successfully.");
                         break;
-                    case "edit":
+                    case "update":
                         int userIDToEdit = Integer.parseInt(request.getParameter("userID"));
                         String fullNameEdit = request.getParameter("fullName");
                         String emailEdit = request.getParameter("email");
                         String phoneNumberEdit = request.getParameter("phoneNumber");
                         String idCardNumberEdit = request.getParameter("idCardNumber");
-                        // String passwordEdit = request.getParameter("password"); // Password editing
-                        // removed for managers
-                        String roleEdit = request.getParameter("role"); // Read role
+                        String genderEdit = request.getParameter("gender");
+                        String addressEdit = request.getParameter("address");
                         boolean isActiveEdit = request.getParameter("isActive") != null;
+
+                        // Map Vietnamese gender values to English for DB
+                        if ("Nam".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Male";
+                        } else if ("Nữ".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Female";
+                        } else if ("Khác".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Other";
+                        }
 
                         Optional<User> userToUpdateOptional = userRepository.findById(userIDToEdit);
                         if (userToUpdateOptional.isPresent()) {
@@ -182,12 +204,8 @@ public class ManageStaffsServlet extends HttpServlet {
                             userToUpdate.setEmail(emailEdit);
                             userToUpdate.setPhoneNumber(phoneNumberEdit);
                             userToUpdate.setIdCardNumber(idCardNumberEdit);
-                            // Password update logic removed for existing staff by manager
-                            // if (passwordEdit != null && !passwordEdit.isEmpty()) {
-                            // userToUpdate.setPasswordHash(passwordEdit); // Hash the password before
-                            // saving
-                            // }
-                            userToUpdate.setRole(roleEdit); // Set role from request
+                            userToUpdate.setGender(genderEdit);
+                            userToUpdate.setAddress(addressEdit);
                             userToUpdate.setActive(isActiveEdit);
                             boolean updated = userRepository.update(userToUpdate);
                             if (updated) {
@@ -202,6 +220,20 @@ public class ManageStaffsServlet extends HttpServlet {
                                     "Failed to update staff member. User with ID " + userIDToEdit + " not found.");
                         }
                         break;
+                    case "toggleStatus":
+                        int userIDToToggle = Integer.parseInt(request.getParameter("userID"));
+                        Optional<User> userToToggleOptional = userRepository.findById(userIDToToggle);
+                        if (userToToggleOptional.isPresent()) {
+                            User userToToggle = userToToggleOptional.get();
+                            userToToggle.setActive(!userToToggle.isActive());
+                            userRepository.update(userToToggle);
+                            request.getSession().setAttribute("successMessage",
+                                    "Staff member status updated successfully.");
+                        } else {
+                            request.getSession().setAttribute("errorMessage",
+                                    "Failed to toggle staff member status. User not found.");
+                        }
+                        break;
                     case "delete":
                         int userID = Integer.parseInt(request.getParameter("userID"));
                         userRepository.deleteById(userID);
@@ -212,9 +244,14 @@ public class ManageStaffsServlet extends HttpServlet {
                         break;
                 }
             } catch (SQLException e) {
-                e.printStackTrace(); // Log the error
-                request.getSession().setAttribute("errorMessage",
-                        "Database error performing staff action: " + e.getMessage());
+                if (e.getMessage().contains("UQ_Users_Email")) {
+                    request.getSession().setAttribute("errorMessage", "The email address '"
+                            + request.getParameter("email") + "' is already in use. Please choose a different email.");
+                } else {
+                    e.printStackTrace(); // Log the error
+                    request.getSession().setAttribute("errorMessage",
+                            "Database error performing staff action: " + e.getMessage());
+                }
             } catch (NumberFormatException e) {
                 e.printStackTrace(); // Log the error
                 request.getSession().setAttribute("errorMessage", "Invalid user ID format for action: " + mainAction);

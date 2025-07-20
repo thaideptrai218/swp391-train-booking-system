@@ -90,7 +90,7 @@ public class GetCoachSeatsServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             System.err.println("Error in GetCoachSeatsServlet (IllegalArgument): " + e.getMessage());
         } catch (SQLException e) {
-            errorMessage = "Database error occurred while fetching seat information.";
+            errorMessage = "Database error: " + e.getMessage();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             System.err.println("Error in GetCoachSeatsServlet (SQLException): " + e.getMessage());
             e.printStackTrace();

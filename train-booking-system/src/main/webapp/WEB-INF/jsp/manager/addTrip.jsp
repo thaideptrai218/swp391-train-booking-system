@@ -158,29 +158,85 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         return true;
       }
 
+      function toggleHolidayFields() {
+        var isHoliday =
+          document.getElementById("isHolidayTrip").value === "true";
+        var holidaySelectGroup = document.getElementById("holidaySelectGroup");
+        var holidayId = document.getElementById("holidayId");
+        var multiplierInput = document.getElementById("basePriceMultiplier");
+        if (isHoliday) {
+          holidaySelectGroup.style.display = "";
+          multiplierInput.readOnly = true;
+          if (holidayId.value) {
+            var selected = holidayId.options[holidayId.selectedIndex];
+            var discount = selected.getAttribute("data-discount");
+            if (discount && !isNaN(discount)) {
+              multiplierInput.value = (parseFloat(discount) / 100).toFixed(2);
+            }
+          }
+        } else {
+          holidaySelectGroup.style.display = "none";
+          multiplierInput.value = "1.00";
+          multiplierInput.readOnly = true;
+          holidayId.value = "";
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date();
+        now.setSeconds(0, 0);
+        now.setMilliseconds(0);
+
+        // Format the date for the 'min' attribute of the datetime-local input
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mins = String(now.getMinutes()).padStart(2, "0");
+        const minAttributeValue = `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+
         const departureInput = document.getElementById("departureDateTime");
-        // const arrivalInput = document.getElementById("arrivalDateTime"); // Removed
 
         if (departureInput) {
-          departureInput.addEventListener("change", function () {
-            // validateDateTime(); // No longer strictly needed for arrival vs departure
-            this.blur(); // Attempt to close picker
-          });
-        }
-        // if (arrivalInput) { // Removed
-        //     arrivalInput.addEventListener("change", function () {
-        //         validateDateTime();
-        //         this.blur(); // Attempt to close picker
-        //     });
-        // }
+          departureInput.setAttribute("min", minAttributeValue);
 
+          const validateDate = function () {
+            const selectedDate = new Date(this.value);
+            if (selectedDate < now) {
+              this.value = minAttributeValue; // Reset to the earliest valid datetime
+            }
+          };
+
+          // Validate on different events to ensure coverage
+          departureInput.addEventListener("input", validateDate);
+          departureInput.addEventListener("change", validateDate);
+        }
+
+        // Add a final check on form submission
         const form = document.querySelector('form[action*="insertTrip"]');
         if (form) {
           form.addEventListener("submit", function (event) {
-            // if (!validateDateTime()) { // No longer strictly needed
-            //     event.preventDefault();
-            // }
+            const selectedDate = new Date(departureInput.value);
+            if (selectedDate < now) {
+              event.preventDefault(); // Stop the form from submitting
+            }
+          });
+        }
+
+        document
+          .getElementById("isHolidayTrip")
+          .addEventListener("change", toggleHolidayFields);
+        var holidayId = document.getElementById("holidayId");
+        var multiplierInput = document.getElementById("basePriceMultiplier");
+        if (holidayId) {
+          holidayId.addEventListener("change", function () {
+            var selected = this.options[this.selectedIndex];
+            var discount = selected.getAttribute("data-discount");
+            if (discount && !isNaN(discount)) {
+              multiplierInput.value = (parseFloat(discount) / 100).toFixed(2);
+            } else {
+              multiplierInput.value = "1.00";
+            }
           });
         }
       });
@@ -254,17 +310,35 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                   name="isHolidayTrip"
                   id="isHolidayTrip"
                   class="form-control"
-                  onchange="toggleMultiplierEditability()"
+                  onchange="toggleHolidayFields()"
+                  required
                 >
                   <option value="false">Không</option>
                   <option value="true">Có</option>
                 </select>
               </div>
 
+              <div
+                class="form-group"
+                id="holidaySelectGroup"
+                style="display: none"
+              >
+                <label for="holidayId">Chọn ngày lễ:</label>
+                <select name="holidayId" id="holidayId" class="form-control">
+                  <option value="">-- Chọn ngày lễ --</option>
+                  <c:forEach var="holiday" items="${requestScope.allHolidays}">
+                    <option
+                      value="${holiday.id}"
+                      data-discount="${holiday.discountPercentage}"
+                    >
+                      ${holiday.holidayName}
+                    </option>
+                  </c:forEach>
+                </select>
+              </div>
+
               <div class="form-group">
-                <label for="basePriceMultiplier"
-                  >Hệ Số Tiền (nếu là chuyến lễ):</label
-                >
+                <label for="basePriceMultiplier">Hệ Số Tiền:</label>
                 <input
                   type="number"
                   id="basePriceMultiplier"
@@ -274,6 +348,7 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                   step="0.01"
                   min="0"
                   readonly
+                  required
                 />
               </div>
 

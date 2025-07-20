@@ -13,4 +13,10 @@ public class Train {
     private int trainTypeID; // FK
     // private TrainType trainType; // Object
     private boolean isActive;
+
+    public Train(String trainName, String typeCode) {
+        this.trainName = trainName;
+        this.trainTypeID = Integer.parseInt(typeCode);
+        this.isActive = true;
+    }
 }

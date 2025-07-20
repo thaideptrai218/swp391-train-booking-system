@@ -16,4 +16,18 @@ public class Seat {
     private int seatTypeID; // FK
     // private SeatType seatType; // Object
     private boolean isEnabled;
+
+    public Seat(int coachId, String typeCode, String seatNumber) {
+        this.coachID = coachId;
+        this.seatTypeID = Integer.parseInt(typeCode);
+        this.seatName = seatNumber;
+        this.isEnabled = true;
+    }
+
+    public Seat(int id, int coachId, String typeCode, String seatNumber) {
+        this.seatID = id;
+        this.coachID = coachId;
+        this.seatTypeID = Integer.parseInt(typeCode);
+        this.seatName = seatNumber;
+    }
 }

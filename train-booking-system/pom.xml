@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.vnrailway</groupId>
@@ -16,16 +15,25 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- <maven.compiler.source>21</maven.compiler.source> --> <!-- Covered by <release> in plugin -->
-    <!-- <maven.compiler.target>21</maven.compiler.target> --> <!-- Covered by <release> in plugin -->
+    <lombok.version>1.18.32</lombok.version>
+    <!-- <maven.compiler.source>21</maven.compiler.source> -->    <!-- Covered by <release> in
+    plugin -->
+    <!-- <maven.compiler.target>21</maven.compiler.target> -->    <!-- Covered by <release> in
+    plugin -->
   </properties>
 
   <dependencies>
     <!-- Jackson Databind for JSON processing -->
     <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.15.2</version> <!-- Using a recent stable version -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.2</version>      <!-- Using a recent stable version -->
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.15.2</version>
+
     </dependency>
 
     <dependency>
@@ -60,13 +68,13 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.32</version> <!-- Updated to a newer Lombok version for Java 17 compatibility -->
+      <version>1.18.32</version>      <!-- Updated to a newer Lombok version for Java 17 compatibility -->
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <version>11.2.3.jre17</version> <!-- Using a confirmed JRE 17 specific version -->
+      <version>11.2.3.jre17</version>      <!-- Using a confirmed JRE 17 specific version -->
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.mindrot/jbcrypt -->
     <dependency>
@@ -105,7 +113,7 @@
 
   <build>
     <finalName>train-booking-system</finalName>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to
+    <pluginManagement>      <!-- lock down plugins versions to avoid using Maven defaults (may be moved to
       parent pom) -->
       <plugins>
         <plugin>
@@ -138,39 +146,37 @@
       </plugins>
     </pluginManagement>
     <plugins>
-        <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.11.0</version> <!-- Using a widely adopted stable version for Java 17 -->
-            <configuration>
-                <source>17</source> <!-- Reverting to source/target for Java 17 -->
-                <target>17</target> <!-- Reverting to source/target for Java 17 -->
-                <fork>true</fork>
-                <annotationProcessorPaths>
-                    <path>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                        <version>1.18.32</version> <!-- Ensure this version matches the dependency -->
-                    </path>
-                    <!-- other annotation processors -->
-                </annotationProcessorPaths>
-            </configuration>
-        </plugin>
-        <plugin>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>3.4.0</version>
-            <configuration>
-                <failOnMissingWebXml>false</failOnMissingWebXml> <!-- Useful if web.xml is minimal or using annotations -->
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.tomcat.maven</groupId>
-            <artifactId>tomcat7-maven-plugin</artifactId>
-            <version>2.2</version>
-            <configuration>
-                <port>8080</port>
-                <path>/train-booking-system</path>
-            </configuration>
-        </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.tomcat.maven</groupId>
+        <artifactId>tomcat7-maven-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <port>8080</port>
+          <path>/train-booking-system</path>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
