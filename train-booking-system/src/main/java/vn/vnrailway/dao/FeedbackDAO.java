@@ -6,8 +6,6 @@ import java.util.List;
 public interface FeedbackDAO {
     void saveFeedback(Feedback feedback);
 
-    List<Feedback> getAllFeedbacks();
-
     List<Feedback> getPendingFeedbacks();
 
     void updateFeedback(Feedback feedback);
@@ -15,4 +13,8 @@ public interface FeedbackDAO {
     Feedback getFeedbackById(int feedbackId);
 
     List<Feedback> getFeedbacksByUserId(Integer userId);
+
+    List<Feedback> getFeedbacksWithPagination(int offset, int limit);
+
+    int getTotalFeedbackCount();
 }

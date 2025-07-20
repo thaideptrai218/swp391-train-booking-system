@@ -91,90 +91,6 @@
                             </c:if>
 
                             <c:if test="${not empty checkInforRefundTicketDTO}">
-                                <!-- <h3 style="color: red">Danh sách vé</h3>
-                                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
-                                    <thead>
-                                        <tr style="background-color: #e8f0fe; text-align: center;">
-                                            <th>#</th>
-                                            <th>Họ tên</th>
-                                            <th>Thông tin vé</th>
-                                            <th>Thành tiền (VND)</th>
-                                            <th>Loại trả vé</th>
-                                            <th>Lệ phí trả vé</th>
-                                            <th>Tiền trả lại</th>
-                                            <th>Thông tin vé trả</th>
-                                            <th>Chọn vé trả</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="p" items="${checkInforRefundTicketDTO.refundTicketDTOs}"
-                                            varStatus="i">
-                                            <tr style="background-color: #f0f8ff;">
-                                                <td colspan="9" style="font-weight: bold; padding: 8px;">
-                                                    ${p.startStationName} - ${p.endStationName}
-                                                    ${p.scheduledDepartureTime}
-                                                </td>
-                                            </tr>
-                                            <tr style="border-top: 1px solid #ccc;">
-                                                <td style="text-align: start;">${i.index + 1}</td>
-                                                <td style="text-align: start;">
-                                                    <b>${p.passengerFullName}</b><br />
-                                                    ${p.passengerType}<br />
-                                                    Số giấy tờ: ${p.passengerIDCard}
-                                                </td>
-                                                <td style="text-align: start;">
-                                                    ${p.trainName}<br />
-                                                    Toa: ${p.coachName} – Ghế số: ${p.seatNumber}<br />
-                                                    ${p.seatTypeName}<br />
-                                                    Mã vé: ${p.ticketCode}
-                                                </td>
-                                                <td style="text-align: right;">
-                                                    <fmt:formatNumber value="${p.price}" type="number"
-                                                        groupingUsed="true" />đ
-                                                </td>
-                                                <td style="text-align: center;">${p.refundPolicy}</td>
-                                                <td style="text-align: right;">
-                                                    <fmt:formatNumber value="${p.refundFee}" type="number"
-                                                        groupingUsed="true" />đ
-                                                </td>
-                                                <td style="text-align: right;">
-                                                    <fmt:formatNumber value="${p.refundAmount}" type="number"
-                                                        groupingUsed="true" />đ
-                                                </td>
-                                                <td style="text-align: center;">${p.refundStatus}</td>
-                                                <td style="text-align: center;">
-                                                    <c:if test="${p.refundable}">
-                                                        <input type="checkbox" name="ticketCodes"
-                                                            value="${p.ticketCode}" />
-                                                    </c:if>
-                                                    <c:if test="${not p.refundable}">
-                                                        <span style="color: gray;">Không thể trả</span>
-                                                    </c:if>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-
-                                <h3 style="color: red; margin-top: 20px;">Thông tin người đặt vé</h3>
-                                <div class="booking-info-grid">
-                                    <div class="form-row">
-                                        <label>Họ và tên</label>
-                                        <input type="text" value="${checkInforRefundTicketDTO.userFullName}" readonly />
-                                        <label>Email</label>
-                                        <input type="text" value="${checkInforRefundTicketDTO.userEmail}" readonly />
-                                    </div>
-                                    <div class="form-row">
-                                        <label>Số CMND</label>
-                                        <input type="text" value="${checkInforRefundTicketDTO.userIDCardNumber}"
-                                            readonly />
-                                        <label>Số điện thoại</label>
-                                        <input type="text" value="${checkInforRefundTicketDTO.userPhoneNumber}"
-                                            readonly />
-                                    </div>
-                                </div> -->
-
-
                                 <form id="continueForm" method="post" action="confirmRefundTicket">
                                     <input type="hidden" name="bookingCode" value="${bookingCode}" />
                                     <input type="hidden" name="phoneNumber"
@@ -234,8 +150,8 @@
                                                     <td style="text-align: center;">${p.refundStatus}</td>
                                                     <td style="text-align: center;">
                                                         <c:if test="${p.refundable}">
-                                                            <input type="checkbox" name="ticketCodes"
-                                                                value="${p.ticketCode}" />
+                                                            <input type="checkbox" name="ticketInfo"
+                                                                value="${p.ticketCode}|${p.ticketID}|${p.policyID}|${p.refundFee}|${p.refundAmount}"/>
                                                         </c:if>
                                                         <c:if test="${not p.refundable}">
                                                             <span style="color: gray;">Không thể trả</span>

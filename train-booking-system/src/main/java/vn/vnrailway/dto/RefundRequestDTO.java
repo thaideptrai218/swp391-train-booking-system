@@ -14,6 +14,9 @@ import lombok.AllArgsConstructor;
 public class RefundRequestDTO {
     private int refundID;
     private String ticketCode;
+    private int ticketID;
+    private int userID;
+    private int BookingID;
     private String passengerFullName;
     private String passengerIDCard;
     private String passengerType;
@@ -23,9 +26,10 @@ public class RefundRequestDTO {
     private String trainName;
     private String startStation;
     private String endStation;
+    private int policyID;
     private LocalDateTime scheduledDeparture;
     private double originalPrice;
-    private double refundFee;
+    private double refundFee; // feeamount
     private double refundAmount;
     private String refundPolicy;
     private String ticketStatus;

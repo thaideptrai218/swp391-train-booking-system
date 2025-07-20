@@ -1,4 +1,4 @@
- const checkboxes = document.querySelectorAll('input[name="ticketCodes"]');
+ const checkboxes = document.querySelectorAll('input[name="ticketInfo"]');
     const continueBtn = document.getElementById('continueBtn');
 
     checkboxes.forEach(cb => {

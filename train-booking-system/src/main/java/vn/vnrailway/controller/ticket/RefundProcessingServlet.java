@@ -61,8 +61,9 @@ public class RefundProcessingServlet extends HttpServlet {
         // Handle the booking check logic here
         // For now, just forward to the same JSP
         String action = request.getParameter("action");
-        String ticketCode = request.getParameter("ticketCode");
+        String ticketInfo = request.getParameter("ticketInfo");
         String email = request.getParameter("email");
+        String note = request.getParameter("note");
 
         try {
             Properties props = new Properties();
@@ -111,7 +112,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 try {
-                    ticketRepository.approveRefundTicket(ticketCode);
+                    ticketRepository.approveRefundTicket(ticketInfo, note);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -120,7 +121,7 @@ public class RefundProcessingServlet extends HttpServlet {
                 }
             } else if ("reject".equals(action)) {
                 try {
-                    ticketRepository.rejectRefundTicket(ticketCode);
+                    ticketRepository.rejectRefundTicket(ticketInfo, note);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -135,7 +136,11 @@ public class RefundProcessingServlet extends HttpServlet {
         }
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args, HttpServletRequest request, HttpServletResponse response) {
+        String ticketInfo = request.getParameter("ticketInfo");
+        String[] parts = ticketInfo.split("\\|");
+        for (String part : parts) {
+            System.out.println(part);
+        }
     }
 }
