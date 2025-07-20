@@ -153,7 +153,8 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                 <th>ID</th>
                 <th>Tên</th>
                 <th>Giá cơ bản/Km</th>
-                <th>Hiệu lực đến</th>
+                <th>Ngày bắt đầu áp dụng</th>
+                <th>Ngày kết thúc áp dụng</th>
                 <th>Hoạt động</th>
                 <th>Hành động</th>
               </tr>
@@ -172,10 +173,12 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                     />
                   </td>
                   <td>
-                    <fmt:formatDate value="<%= DateUtils.toDate(
-                    ((vn.vnrailway.model.PricingRule)
-                    pageContext.findAttribute(\"rule\")) .getEffectiveToDate())
-                    %>" pattern="dd-MM-yyyy" />
+                    <% java.util.Date applicableDateStart = vn.vnrailway.utils.DateUtils.toDate(((vn.vnrailway.model.PricingRule)pageContext.findAttribute("rule")).getApplicableDateStart()); %>
+                    <fmt:formatDate value="<%= applicableDateStart %>" pattern="dd-MM-yyyy" />
+                  </td>
+                  <td>
+                    <% java.util.Date applicableDateEnd = vn.vnrailway.utils.DateUtils.toDate(((vn.vnrailway.model.PricingRule)pageContext.findAttribute("rule")).getApplicableDateEnd()); %>
+                    <fmt:formatDate value="<%= applicableDateEnd %>" pattern="dd-MM-yyyy" />
                   </td>
                   <td>
                     <input type="checkbox" class="status-checkbox"

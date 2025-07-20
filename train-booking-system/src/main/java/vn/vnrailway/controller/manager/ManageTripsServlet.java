@@ -33,6 +33,9 @@ import vn.vnrailway.model.TripStation; // Added
 import java.math.RoundingMode; // Added
 import java.util.Comparator; // Added
 import java.util.Optional; // Added
+import vn.vnrailway.dao.HolidayPriceRepository;
+import vn.vnrailway.dao.impl.HolidayPriceRepositoryImpl;
+import vn.vnrailway.model.HolidayPrice;
 
 @WebServlet("/manageTrips")
 public class ManageTripsServlet extends HttpServlet {
@@ -42,6 +45,7 @@ public class ManageTripsServlet extends HttpServlet {
     private TrainRepository trainRepository;
     private TripStationRepository tripStationRepository; // Added
     private TrainTypeRepository trainTypeRepository; // Added
+    private HolidayPriceRepository holidayPriceRepository;
 
     @Override
     public void init() throws ServletException {
@@ -51,6 +55,11 @@ public class ManageTripsServlet extends HttpServlet {
         trainRepository = new TrainRepositoryImpl();
         tripStationRepository = new TripStationRepositoryImpl(); // Added
         trainTypeRepository = new TrainTypeRepositoryImpl(); // Added
+        try {
+            holidayPriceRepository = new HolidayPriceRepositoryImpl();
+        } catch (Exception e) {
+            throw new ServletException("Failed to initialize HolidayPriceRepository", e);
+        }
     }
 
     @Override
@@ -82,8 +91,10 @@ public class ManageTripsServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Train> allTrains = trainRepository.getAllTrains();
         List<Route> allRoutes = routeRepository.findAll();
+        List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("allTrains", allTrains);
         request.setAttribute("allRoutes", allRoutes);
+        request.setAttribute("allHolidays", allHolidays);
         request.getRequestDispatcher("/WEB-INF/jsp/manager/addTrip.jsp").forward(request, response);
     }
 
@@ -108,7 +119,9 @@ public class ManageTripsServlet extends HttpServlet {
         }
 
         List<ManageTripViewDTO> listTrips = tripRepository.findAllForManagerView(searchTerm, sortField, sortOrder);
+        List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
+        request.setAttribute("allHolidays", allHolidays);
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("currentSortField", sortField);
         request.setAttribute("currentSortOrder", sortOrder);
@@ -143,12 +156,20 @@ public class ManageTripsServlet extends HttpServlet {
                     return;
                 }
 
-                // LocalDateTime arrivalDateTime =
-                // LocalDateTime.parse(request.getParameter("arrivalDateTime"),
-                // DateTimeFormatter.ISO_LOCAL_DATE_TIME); // Removed
-                boolean isHolidayTrip = Boolean.parseBoolean(request.getParameter("isHolidayTrip"));
+                String holidayIdStr = request.getParameter("holidayId");
+                boolean isHolidayTrip = false;
+                BigDecimal basePriceMultiplier = BigDecimal.ONE;
+                if (holidayIdStr != null && !holidayIdStr.isEmpty()) {
+                    try {
+                        int holidayId = Integer.parseInt(holidayIdStr);
+                        HolidayPrice holiday = holidayPriceRepository.getHolidayPriceById(holidayId);
+                        if (holiday != null) {
+                            isHolidayTrip = true;
+                            basePriceMultiplier = new BigDecimal(holiday.getDiscountPercentage()).divide(new BigDecimal("100"));
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
                 String tripStatus = request.getParameter("tripStatus");
-                BigDecimal basePriceMultiplier = new BigDecimal(request.getParameter("basePriceMultiplier"));
 
                 Trip newTrip = new Trip();
                 newTrip.setTrainID(trainId);
@@ -232,39 +253,52 @@ public class ManageTripsServlet extends HttpServlet {
                     List<RouteStationDetailDTO> routeStations = routeRepository
                             .findStationDetailsByRouteId(savedTrip.getRouteID());
 
-                    RouteStationDetailDTO lastStation = routeStations.stream()
-                            .max(Comparator.comparing(RouteStationDetailDTO::getSequenceNumber))
-                            .orElse(null);
+                    // Calculate scheduled times for all stations
+                    LocalDateTime previousDepartureDateTime = newTrip.getDepartureDateTime();
+                    BigDecimal previousEstimateTimeHours = BigDecimal.ZERO;
+                    BigDecimal averageVelocity = null;
+                    int trainTypeId = trainRepository.findById(trainId).get().getTrainTypeID();
+                    TrainType trainType = trainTypeRepository.findById(trainTypeId).get();
+                    averageVelocity = trainType.getAverageVelocity();
 
-                    for (RouteStationDetailDTO rsDetail : routeStations) {
+                    for (int i = 0; i < routeStations.size(); i++) {
+                        RouteStationDetailDTO rsDetail = routeStations.get(i);
+                        BigDecimal currentEstimateTimeHours = rsDetail.getDistanceFromStart() != null ?
+                                rsDetail.getDistanceFromStart().divide(averageVelocity, 4, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+                        int defaultStopTimeMinutes = rsDetail.getDefaultStopTime();
+                        if (defaultStopTimeMinutes < 0) defaultStopTimeMinutes = 0;
+
+                        LocalDateTime arrivalAtCurrentStation;
+                        LocalDateTime departureFromCurrentStation;
+
+                        if (i == 0) {
+                            arrivalAtCurrentStation = newTrip.getDepartureDateTime();
+                            departureFromCurrentStation = newTrip.getDepartureDateTime();
+                        } else {
+                            BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours.subtract(previousEstimateTimeHours);
+                            long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
+                            arrivalAtCurrentStation = previousDepartureDateTime.plusSeconds(travelTimeSeconds);
+                            departureFromCurrentStation = arrivalAtCurrentStation.plusMinutes(defaultStopTimeMinutes);
+                        }
+                        if (i == routeStations.size() - 1) {
+                            departureFromCurrentStation = arrivalAtCurrentStation;
+                        }
+
                         TripStation newTripStation = new TripStation();
                         newTripStation.setTripID(savedTrip.getTripID());
                         newTripStation.setStationID(rsDetail.getStationID());
                         newTripStation.setSequenceNumber(rsDetail.getSequenceNumber());
-
-                        // Set scheduled times
-                        if (rsDetail.getSequenceNumber() == 1) { // First station
-                            newTripStation.setScheduledArrival(newTrip.getDepartureDateTime());
-                            newTripStation.setScheduledDeparture(newTrip.getDepartureDateTime());
-                        } else if (lastStation != null && rsDetail.getStationID() == lastStation.getStationID()) { // Last
-                                                                                                                   // station
-                            newTripStation.setScheduledArrival(null); // Or calculate based on distance
-                            newTripStation.setScheduledDeparture(newTrip.getArrivalDateTime());
-                        } else {
-                            // For subsequent stations, these will be calculated/set later or remain null
-                            // initially
-                            newTripStation.setScheduledArrival(null);
-                            newTripStation.setScheduledDeparture(null);
-                        }
-
-                        // Actual times will be null when creating
+                        newTripStation.setScheduledArrival(arrivalAtCurrentStation);
+                        newTripStation.setScheduledDeparture(departureFromCurrentStation);
                         newTripStation.setActualArrival(null);
                         newTripStation.setActualDeparture(null);
-
                         tripStationRepository.save(newTripStation);
+
+                        previousDepartureDateTime = departureFromCurrentStation;
+                        previousEstimateTimeHours = currentEstimateTimeHours;
                     }
                     request.getSession().setAttribute("successMessage",
-                            "Trip and default station schedule added successfully!");
+                            "Trip and station schedule added successfully!");
                 } else {
                     request.getSession().setAttribute("errorMessage",
                             "Trip added, but failed to get Trip ID to create station schedule.");
@@ -278,15 +312,16 @@ public class ManageTripsServlet extends HttpServlet {
         } else if ("updateHolidayStatus".equals(action)) {
             try {
                 int tripId = Integer.parseInt(request.getParameter("tripId"));
-                boolean isHoliday = Boolean.parseBoolean(request.getParameter("isHolidayTrip"));
-
-                tripRepository.updateTripHolidayStatus(tripId, isHoliday);
-                String message = "Holiday status updated for Trip ID: " + tripId;
-
-                if (!isHoliday) {
-                    tripRepository.updateTripBasePriceMultiplier(tripId, new BigDecimal("1.0"));
-                    message += " and Base Price Multiplier reset to 1.0.";
+                int isHolidayTripInt = Integer.parseInt(request.getParameter("isHolidayTrip"));
+                boolean isHoliday = isHolidayTripInt == 1;
+                String multiplierStr = request.getParameter("basePriceMultiplier");
+                BigDecimal multiplier = BigDecimal.ONE;
+                if (isHoliday && multiplierStr != null && !multiplierStr.isEmpty()) {
+                    multiplier = new BigDecimal(multiplierStr);
                 }
+                tripRepository.updateTripHolidayStatus(tripId, isHoliday);
+                tripRepository.updateTripBasePriceMultiplier(tripId, multiplier);
+                String message = "Holiday status and multiplier updated for Trip ID: " + tripId;
                 request.getSession().setAttribute("successMessage", message);
             } catch (Exception e) {
                 request.getSession().setAttribute("errorMessage", "Error updating holiday status: " + e.getMessage());

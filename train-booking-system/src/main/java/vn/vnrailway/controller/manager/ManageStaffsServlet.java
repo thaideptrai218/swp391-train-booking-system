@@ -152,8 +152,17 @@ public class ManageStaffsServlet extends HttpServlet {
                         String idCardNumber = request.getParameter("idCardNumber");
                         String gender = request.getParameter("gender");
                         String address = request.getParameter("address");
-                        String password = "12345678"; // Default password
+                        String password = "$2a$12$5OBlf1SKswIKDbBjnObsjOy.Hmbv4FEI/QElq34Te6/GW4ytkhs2u"; // bcrypt hash for 'staff12345678'
                         boolean isActive = request.getParameter("isActive") != null;
+
+                        // Map Vietnamese gender values to English for DB
+                        if ("Nam".equalsIgnoreCase(gender)) {
+                            gender = "Male";
+                        } else if ("Nữ".equalsIgnoreCase(gender)) {
+                            gender = "Female";
+                        } else if ("Khác".equalsIgnoreCase(gender)) {
+                            gender = "Other";
+                        }
 
                         User newUser = new User();
                         newUser.setFullName(fullName);
@@ -162,7 +171,7 @@ public class ManageStaffsServlet extends HttpServlet {
                         newUser.setIdCardNumber(idCardNumber);
                         newUser.setGender(gender);
                         newUser.setAddress(address);
-                        newUser.setPasswordHash(password); // Hash the password before saving
+                        newUser.setPasswordHash(password); // Already hashed password
                         newUser.setRole("Staff"); // Set role from request
                         newUser.setActive(isActive);
 
@@ -178,6 +187,15 @@ public class ManageStaffsServlet extends HttpServlet {
                         String genderEdit = request.getParameter("gender");
                         String addressEdit = request.getParameter("address");
                         boolean isActiveEdit = request.getParameter("isActive") != null;
+
+                        // Map Vietnamese gender values to English for DB
+                        if ("Nam".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Male";
+                        } else if ("Nữ".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Female";
+                        } else if ("Khác".equalsIgnoreCase(genderEdit)) {
+                            genderEdit = "Other";
+                        }
 
                         Optional<User> userToUpdateOptional = userRepository.findById(userIDToEdit);
                         if (userToUpdateOptional.isPresent()) {

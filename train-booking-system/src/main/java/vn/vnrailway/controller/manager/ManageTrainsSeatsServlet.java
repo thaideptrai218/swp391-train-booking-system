@@ -137,8 +137,11 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
         String trainCode = request.getParameter("trainCode");
         String typeCode = request.getParameter("typeCode");
         int coachNumber = Integer.parseInt(request.getParameter("coachNumber"));
+        String coachName = request.getParameter("coachName");
         Train train = trainRepository.getTrainByTrainCode(trainCode);
-        Coach newCoach = new Coach(train.getTrainID(), typeCode, coachNumber);
+        Coach newCoach = new Coach(train.getTrainID(), coachNumber, coachName, Integer.parseInt(typeCode));
+        newCoach.setPositionInTrain(coachNumber); // Ensure unique position in train
+        newCoach.setCapacity(0); // Default capacity, adjust if needed
         coachRepository.addCoach(newCoach);
     }
 
@@ -165,8 +168,9 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
         String trainCode = request.getParameter("trainCode");
         String typeCode = request.getParameter("typeCode");
         int coachNumber = Integer.parseInt(request.getParameter("coachNumber"));
+        String coachName = request.getParameter("coachName");
         Train train = trainRepository.getTrainByTrainCode(trainCode);
-        Coach coach = new Coach(id, train.getTrainID(), typeCode, coachNumber);
+        Coach coach = new Coach(id, train.getTrainID(), coachNumber, coachName, Integer.parseInt(typeCode));
         coachRepository.updateCoach(coach);
     }
 

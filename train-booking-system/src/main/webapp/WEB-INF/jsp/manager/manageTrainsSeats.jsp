@@ -11,7 +11,7 @@
     <div class="main-content">
         <h1>Manage Trains, Coaches, and Seats</h1>
 
-        <a href="javascript:void(0);" onclick="openModal('add-train-modal')" class="actions">Add New Train</a>
+        <a href="javascript:void(0);" onclick="openModal('add-train-modal')" class="actions btn-primary-add">Add New Train</a>
 
         <div id="add-train-modal" class="modal">
             <div class="modal-content">
@@ -21,7 +21,7 @@
                     <input type="hidden" name="action" value="insert_train" />
                     <table>
                         <tr>
-                            <th>Train Code:</th>
+                            <th>Train Name:</th>
                             <td><input type="text" name="trainCode" required /></td>
                         </tr>
                         <tr>
@@ -35,14 +35,14 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2"><input type="submit" value="Save" /></td>
+                            <td colspan="2"><input type="submit" value="Save" class="btn-primary-add" /></td>
                         </tr>
                     </table>
                 </form>
             </div>
         </div>
 
-        <div class="train-list">
+        <div class="train-list" id="trainList">
             <c:forEach var="train" items="${listTrain}">
                 <div class="train-container" data-train-id="${train.trainID}">
                     <div class="train-header clickable">
@@ -110,11 +110,9 @@
                             <form id="add-coach-form-${train.trainID}" action="manage-trains-seats" method="post">
                                 <input type="hidden" name="action" value="insert_coach" />
                                 <input type="hidden" name="trainCode" value="${train.trainName}" />
+                                <input type="hidden" name="coachNumber" id="nextCoachNumber_${train.trainID}" />
+                                <input type="hidden" name="coachName" id="autoCoachName_${train.trainID}" />
                                 <table>
-                                    <tr>
-                                        <th>Coach Number:</th>
-                                        <td><input type="number" name="coachNumber" required /></td>
-                                    </tr>
                                     <tr>
                                         <th>Coach Type:</th>
                                         <td>
@@ -184,7 +182,109 @@
                 </div>
             </c:forEach>
         </div>
+        <div class="pagination-container" id="pagination-container"></div>
     </div>
     <script src="${pageContext.request.contextPath}/js/manager/manage-trains-seats.js"></script>
+    <style>
+      .btn-primary-add {
+        background: linear-gradient(90deg, #007bff 0%, #0056b3 100%) !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 24px !important;
+        padding: 12px 28px !important;
+        font-size: 1.15em !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.13) !important;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s !important;
+        display: inline-block !important;
+        margin-bottom: 18px !important;
+        margin-top: 8px !important;
+        letter-spacing: 0.5px;
+      }
+      .btn-primary-add:hover {
+        background: linear-gradient(90deg, #0056b3 0%, #007bff 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.18) !important;
+        text-decoration: none !important;
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const trainList = document.getElementById('trainList');
+        const trainContainers = Array.from(trainList.querySelectorAll('.train-container'));
+        const paginationContainer = document.getElementById('pagination-container');
+        const trainsPerPage = 5;
+        let currentPage = 1;
+        function displayTrains(page) {
+          currentPage = page;
+          const start = (page - 1) * trainsPerPage;
+          const end = start + trainsPerPage;
+          trainContainers.forEach((container, idx) => {
+            container.style.display = (idx >= start && idx < end) ? '' : 'none';
+          });
+        }
+        function setupPagination() {
+          paginationContainer.innerHTML = '';
+          const pageCount = Math.ceil(trainContainers.length / trainsPerPage);
+          if (pageCount <= 1) return;
+          // Previous button
+          const prevLink = document.createElement('a');
+          prevLink.href = '#';
+          prevLink.innerHTML = '&laquo;';
+          prevLink.classList.add('page-link');
+          if (currentPage === 1) prevLink.classList.add('disabled');
+          prevLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+              displayTrains(currentPage - 1);
+              setupPagination();
+            }
+          });
+          paginationContainer.appendChild(prevLink);
+          // Page numbers
+          for (let i = 1; i <= pageCount; i++) {
+            const pageLink = document.createElement('a');
+            pageLink.href = '#';
+            pageLink.innerText = i;
+            pageLink.classList.add('page-link');
+            if (i === currentPage) pageLink.classList.add('active');
+            pageLink.addEventListener('click', function(e) {
+              e.preventDefault();
+              displayTrains(i);
+              setupPagination();
+            });
+            paginationContainer.appendChild(pageLink);
+          }
+          // Next button
+          const nextLink = document.createElement('a');
+          nextLink.href = '#';
+          nextLink.innerHTML = '&raquo;';
+          nextLink.classList.add('page-link');
+          if (currentPage === pageCount) nextLink.classList.add('disabled');
+          nextLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+              displayTrains(currentPage + 1);
+              setupPagination();
+            }
+          });
+          paginationContainer.appendChild(nextLink);
+        }
+        // Initial setup
+        displayTrains(1);
+        setupPagination();
+
+        // Auto-set next coach number and coach name on modal open
+        document.querySelectorAll('a[onclick^="openModal(\'add-coach-modal-"]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var trainId = btn.getAttribute('onclick').match(/add-coach-modal-(\d+)/)[1];
+            var coachCount = document.querySelectorAll('.train-container[data-train-id="' + trainId + '"] .carriage-item').length - 1; // exclude add button
+            var nextNumber = coachCount + 1;
+            document.getElementById('nextCoachNumber_' + trainId).value = nextNumber;
+            document.getElementById('autoCoachName_' + trainId).value = 'Toa ' + nextNumber;
+          });
+        });
+      });
+    </script>
 </body>
 </html>

@@ -271,37 +271,36 @@
                         <td><c:out value="${trip.routeName}" /></td>
                         <td>
                           <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">
-                            <input type="hidden" name="action" value="updateHolidayStatus" /> 
+                            <input type="hidden" name="action" value="updateHolidayStatus" />
                             <input type="hidden" name="tripId" value="${trip.tripID}" />
-                            <select name="isHolidayTrip" id="isHolidayTrip_${trip.tripID}" class="form-control-sm" onchange="handleHolidayChange(this, '${trip.tripID}')">
-                              <option value="true" ${trip.holidayTrip ? 'selected' : ''}>Có</option>
-                              <option value="false" ${!trip.holidayTrip ? 'selected' : ''}>Không</option>
+                            <input type="hidden" name="isHolidayTrip" id="isHolidayTrip_${trip.tripID}" value="${trip.holidayTrip ? 1 : 0}" />
+                            <input type="hidden" name="basePriceMultiplier" id="basePriceMultiplier_${trip.tripID}" value="${trip.basePriceMultiplier}" />
+                            <select id="holidayYesNo_${trip.tripID}" class="form-control-sm holiday-yesno-select" data-trip-id="${trip.tripID}">
+                              <option value="0" ${!trip.holidayTrip ? 'selected' : ''}>Không</option>
+                              <option value="1" ${trip.holidayTrip ? 'selected' : ''}>Có</option>
                             </select>
+                            <select id="holidaySelect_${trip.tripID}" class="form-control-sm holiday-select" data-trip-id="${trip.tripID}" style="display: ${trip.holidayTrip ? 'inline-block' : 'none'};">
+                              <option value="">-- Chọn ngày lễ --</option>
+                              <c:forEach var="holiday" items="${allHolidays}">
+                                <option value="${holiday.discountPercentage}" ${trip.basePriceMultiplier == (holiday.discountPercentage / 100) ? 'selected' : ''}>${holiday.holidayName}</option>
+                              </c:forEach>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Lưu</button>
                           </form>
                         </td>
                         <td>
-                           <input type="number" id="basePriceMultiplierDisplay_${trip.tripID}" class="form-control-sm" 
-                                  value="${trip.basePriceMultiplier}" 
-                                  step="0.01" min="0" 
-                                  ${!trip.holidayTrip ? 'readonly' : ''} style="width: 80px;"/>
-                           <c:set var="buttonDisplayStyleValue" value="${trip.holidayTrip ? 'inline-flex' : 'none'}" />
-                           <button type="button" id="saveMultiplierBtn_${trip.tripID}" class="btn-update-multiplier" 
-                                   onclick="submitMultiplierForm('${trip.tripID}')" 
-                                   style="display: buttonDisplayStyleValue;">
-                               <i class="fas fa-save"></i> Lưu
-                           </button>
-
+                          <input type="number" id="basePriceMultiplierDisplay_${trip.tripID}" class="form-control-sm" value="${trip.basePriceMultiplier}" step="0.01" min="0" readonly style="width: 80px;"/>
                         </td>
                         <td>
                           <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">
-                              <input type="hidden" name="action" value="updateTripStatus" />
-                              <input type="hidden" name="tripId" value="${trip.tripID}" />
-                              <select name="tripStatus" class="form-control-sm" onchange="this.form.submit()">
-                                  <option value="Scheduled" ${trip.tripStatus == 'Scheduled' ? 'selected' : ''}>Lên Lịch</option>
-                                  <option value="In Progress" ${trip.tripStatus == 'In Progress' ? 'selected' : ''}>Đang Diễn Ra</option>
-                                  <option value="Completed" ${trip.tripStatus == 'Completed' ? 'selected' : ''}>Đã Hoàn Thành</option>
-                                  <option value="Cancelled" ${trip.tripStatus == 'Cancelled' ? 'selected' : ''}>Hủy Chuyến</option>
-                              </select>
+                            <input type="hidden" name="action" value="updateTripStatus" />
+                            <input type="hidden" name="tripId" value="${trip.tripID}" />
+                            <select name="tripStatus" class="form-control-sm" onchange="this.form.submit()">
+                              <option value="Scheduled" ${trip.tripStatus == 'Scheduled' ? 'selected' : ''}>Lên Lịch</option>
+                              <option value="In Progress" ${trip.tripStatus == 'In Progress' ? 'selected' : ''}>Đang Diễn Ra</option>
+                              <option value="Completed" ${trip.tripStatus == 'Completed' ? 'selected' : ''}>Đã Hoàn Thành</option>
+                              <option value="Cancelled" ${trip.tripStatus == 'Cancelled' ? 'selected' : ''}>Hủy Chuyến</option>
+                            </select>
                           </form>
                         </td>
                         <td class="table-actions">
@@ -326,5 +325,51 @@
         </section>
       </div>
     </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.holiday-yesno-select').forEach(function(yesnoSelect) {
+          yesnoSelect.addEventListener('change', function() {
+            var tripId = this.dataset.tripId;
+            var holidaySelect = document.getElementById('holidaySelect_' + tripId);
+            var multiplierInput = document.getElementById('basePriceMultiplierDisplay_' + tripId);
+            var hiddenMultiplier = document.getElementById('basePriceMultiplier_' + tripId);
+            var hiddenIsHoliday = document.getElementById('isHolidayTrip_' + tripId);
+            if (this.value === '1') {
+              holidaySelect.style.display = 'inline-block';
+              hiddenIsHoliday.value = 1;
+              // If a holiday is already selected, trigger change to set multiplier
+              if (holidaySelect.value) {
+                var event = new Event('change');
+                holidaySelect.dispatchEvent(event);
+              }
+            } else {
+              holidaySelect.style.display = 'none';
+              multiplierInput.value = '1.00';
+              hiddenMultiplier.value = '1.00';
+              hiddenIsHoliday.value = 0;
+            }
+          });
+        });
+        document.querySelectorAll('.holiday-select').forEach(function(select) {
+          select.addEventListener('change', function() {
+            var tripId = this.dataset.tripId;
+            var discount = this.value;
+            var multiplierInput = document.getElementById('basePriceMultiplierDisplay_' + tripId);
+            var hiddenMultiplier = document.getElementById('basePriceMultiplier_' + tripId);
+            var hiddenIsHoliday = document.getElementById('isHolidayTrip_' + tripId);
+            if (discount && !isNaN(discount)) {
+              var multiplier = (parseFloat(discount) / 100).toFixed(2);
+              multiplierInput.value = multiplier;
+              hiddenMultiplier.value = multiplier;
+              hiddenIsHoliday.value = 1;
+            } else {
+              multiplierInput.value = '1.00';
+              hiddenMultiplier.value = '1.00';
+              hiddenIsHoliday.value = 0;
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>

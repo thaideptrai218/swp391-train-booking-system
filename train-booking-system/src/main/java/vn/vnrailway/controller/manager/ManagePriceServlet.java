@@ -118,21 +118,21 @@ public class ManagePriceServlet extends HttpServlet {
         Integer routeID = getNullableIntParameter(request, "routeID");
         BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
         boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
-        LocalDate effectiveFromDate = getNullableLocalDateParameter(request, "effectiveFromDate");
-        LocalDate effectiveToDate = getNullableLocalDateParameter(request, "effectiveToDate");
+        LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
+        LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
         boolean isActive = "true".equals(request.getParameter("isActive"));
 
         if (ruleName == null || ruleName.trim().isEmpty() ||
                 description == null || description.trim().isEmpty() ||
                 basePricePerKm == null ||
-                effectiveFromDate == null || effectiveToDate == null) {
+                applicableDateStart == null || applicableDateEnd == null) {
 
             request.setAttribute("errorMessage", "Các trường không được để trống.");
             showNewForm(request, response);
             return;
         }
 
-        if (effectiveToDate.isBefore(effectiveFromDate)) {
+        if (applicableDateEnd.isBefore(applicableDateStart)) {
             request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
             showNewForm(request, response);
             return;
@@ -143,7 +143,7 @@ public class ManagePriceServlet extends HttpServlet {
         }
 
         PricingRule newRule = new PricingRule(0, ruleName, description, trainTypeID, routeID, basePricePerKm,
-                isForRoundTrip, effectiveFromDate, effectiveToDate, isActive);
+                isForRoundTrip, applicableDateStart, applicableDateEnd, isActive);
         pricingRuleRepository.save(newRule);
         response.sendRedirect(request.getContextPath() + "/managePrice");
     }
@@ -157,21 +157,21 @@ public class ManagePriceServlet extends HttpServlet {
         Integer routeID = getNullableIntParameter(request, "routeID");
         BigDecimal basePricePerKm = getNullableBigDecimalParameter(request, "basePricePerKm");
         boolean isForRoundTrip = "1".equals(request.getParameter("isForRoundTrip"));
-        LocalDate effectiveFromDate = getNullableLocalDateParameter(request, "effectiveFromDate");
-        LocalDate effectiveToDate = getNullableLocalDateParameter(request, "effectiveToDate");
+        LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
+        LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
         boolean isActive = "true".equals(request.getParameter("isActive"));
 
         if (ruleName == null || ruleName.trim().isEmpty() ||
                 description == null || description.trim().isEmpty() ||
                 basePricePerKm == null ||
-                effectiveFromDate == null || effectiveToDate == null) {
+                applicableDateStart == null || applicableDateEnd == null) {
 
             request.setAttribute("errorMessage", "Các trường không được để trống.");
             showEditForm(request, response);
             return;
         }
 
-        if (effectiveToDate.isBefore(effectiveFromDate)) {
+        if (applicableDateEnd.isBefore(applicableDateStart)) {
             request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
             showEditForm(request, response);
             return;
@@ -188,7 +188,7 @@ public class ManagePriceServlet extends HttpServlet {
 
         PricingRule ruleToUpdate = new PricingRule(ruleID, ruleName, description, trainTypeID, routeID,
                 basePricePerKm, isForRoundTrip,
-                effectiveFromDate, effectiveToDate, isActive);
+                applicableDateStart, applicableDateEnd, isActive);
         pricingRuleRepository.update(ruleToUpdate);
         response.sendRedirect(request.getContextPath() + "/managePrice");
     }

@@ -18,16 +18,18 @@ public class Coach {
     private int capacity;
     private int positionInTrain; // Vị trí toa trong đoàn tàu
 
-    public Coach(int trainID, String typeCode, int coachNumber) {
+    public Coach(int trainID, int coachNumber, String coachName, int coachTypeID) {
         this.trainID = trainID;
-        this.coachTypeID = Integer.parseInt(typeCode);
         this.coachNumber = coachNumber;
+        this.coachName = coachName;
+        this.coachTypeID = coachTypeID;
     }
 
-    public Coach(int id, int trainID, String typeCode, int coachNumber) {
+    public Coach(int id, int trainID, int coachNumber, String coachName, int coachTypeID) {
         this.coachID = id;
         this.trainID = trainID;
-        this.coachTypeID = Integer.parseInt(typeCode);
         this.coachNumber = coachNumber;
+        this.coachName = coachName;
+        this.coachTypeID = coachTypeID;
     }
 }

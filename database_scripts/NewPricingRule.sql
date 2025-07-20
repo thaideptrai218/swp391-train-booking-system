@@ -21,9 +21,6 @@ BEGIN
         -- === Control ===
         Priority INT NOT NULL DEFAULT 0,    -- Higher number = higher priority. Crucial for overrides.
         IsActive BIT NOT NULL DEFAULT 1,
-        EffectiveFromDate DATE NOT NULL DEFAULT GETDATE(), -- When this rule definition itself becomes active
-        EffectiveToDate DATE NULL,                         -- When this rule definition expires
-
         -- Foreign Keys
         CONSTRAINT FK_SR_PricingRules_TrainType FOREIGN KEY (TrainTypeID) REFERENCES dbo.TrainTypes(TrainTypeID),
         CONSTRAINT FK_SR_PricingRules_Route FOREIGN KEY (RouteID) REFERENCES dbo.Routes(RouteID)

@@ -248,6 +248,9 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               Hủy
             </button>
           </form>
+          <div id="staffFormWarning" class="alert alert-warning" style="display:none;" role="alert">
+            Vui lòng nhập đầy đủ Họ và tên, Email, Số điện thoại, và Số CCCD. (Giới tính và Địa chỉ có thể để trống)
+          </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -404,6 +407,8 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         const isActive = document.getElementById("isActive");
         const showAddFormBtn = document.getElementById("showAddFormBtn");
         const cancelButton = document.getElementById("cancelButton");
+        const warningDiv = document.getElementById('staffFormWarning');
+
 
         showAddFormBtn.addEventListener("click", function () {
           staffForm.reset();
@@ -430,7 +435,12 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             email.value = row.dataset.email;
             phoneNumber.value = row.dataset.phoneNumber;
             idCardNumber.value = row.dataset.idCardNumber;
-            gender.value = row.dataset.gender;
+            // Map gender from English to Vietnamese for display
+            let genderValue = row.dataset.gender;
+            if (genderValue === "Male") genderValue = "Nam";
+            else if (genderValue === "Female") genderValue = "Nữ";
+            else if (genderValue === "Other") genderValue = "Khác";
+            gender.value = genderValue;
             address.value = row.dataset.address;
             isActive.checked = row.dataset.isActive === "true";
 
@@ -556,6 +566,25 @@ Library --%> <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         }
 
         filterAndPaginate();
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var staffForm = document.getElementById('staffForm');
+        var warningDiv = document.getElementById('staffFormWarning');
+        staffForm.addEventListener('submit', function(e) {
+          var fullName = document.getElementById('fullName').value.trim();
+          var email = document.getElementById('email').value.trim();
+          var phoneNumber = document.getElementById('phoneNumber').value.trim();
+          var idCardNumber = document.getElementById('idCardNumber').value.trim();
+          if (!fullName || !email || !phoneNumber || !idCardNumber) {
+            e.preventDefault();
+            warningDiv.style.display = '';
+            setTimeout(function() {
+              warningDiv.style.display = 'none';
+            }, 8000);
+            return false;
+          }
+        });
       });
     </script>
   </body>

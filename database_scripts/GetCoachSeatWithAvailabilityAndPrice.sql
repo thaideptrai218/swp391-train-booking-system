@@ -67,13 +67,11 @@ BEGIN
     WHERE
         PR.IsActive = 1
         -- Check if the rule definition itself is currently active
-        AND @BookingDateTime_Input >= PR.EffectiveFromDate
-        AND @BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.EffectiveToDate), DATEADD(day, 1, '9999-12-30')) -- Inclusive of EffectiveToDate
-
+        -- REMOVE: AND @BookingDateTime_Input >= PR.EffectiveFromDate
+        -- REMOVE: AND @BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.EffectiveToDate), DATEADD(day, 1, '9999-12-30'))
         -- Check if the @BookingDateTime_Input falls within the rule's specific applicable date range (for seasonal/event pricing)
         AND (@BookingDateTime_Input >= ISNULL(PR.ApplicableDateStart, @BookingDateTime_Input))
         AND (@BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.ApplicableDateEnd), DATEADD(day, 1, @BookingDateTime_Input)))
-
         -- Match on context parameters (NULL in rule means "applies to all")
         AND (PR.TrainTypeID IS NULL OR PR.TrainTypeID = @TrainTypeID_Input)
         AND (PR.RouteID IS NULL OR PR.RouteID = @RouteID_Input)
@@ -239,25 +237,25 @@ GO
 PRINT 'Inserting Basic Dataset for PricingRules (Simpler Still)...';
 DELETE FROM dbo.PricingRules; -- Clear existing simplified rules
 SET IDENTITY_INSERT dbo.PricingRules ON;
-INSERT INTO dbo.PricingRules (RuleID, RuleName, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, EffectiveFromDate, IsActive) VALUES
+INSERT INTO dbo.PricingRules (RuleID, RuleName, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, IsActive) VALUES
 -- General Defaults (Lowest Priority)
-(1, 'Default One-Way',            10.00, NULL, NULL, 0,    NULL,         NULL,         0, '2023-01-01', 1), -- Base per km
-(2, 'Default Round-Trip',          9.00, NULL, NULL, 1,    NULL,         NULL,         0, '2023-01-01', 1), -- Slightly cheaper for round trip
+(1, 'Default One-Way',            10.00, NULL, NULL, 0,    NULL,         NULL,         0, 1), -- Base per km
+(2, 'Default Round-Trip',          9.00, NULL, NULL, 1,    NULL,         NULL,         0, 1), -- Slightly cheaper for round trip
 
 -- TrainType Specific
-(3, 'Express Train One-Way',      15.00, 2,    NULL, 0,    NULL,         NULL,         10, '2023-01-01', 1), -- TrainTypeID 2 = Express
-(4, 'Express Train Round-Trip',   13.50, 2,    NULL, 1,    NULL,         NULL,         10, '2023-01-01', 1),
-(5, 'Standard Train One-Way',      8.00, 1,    NULL, 0,    NULL,         NULL,         10, '2023-01-01', 1), -- TrainTypeID 1 = Standard
+(3, 'Express Train One-Way',      15.00, 2,    NULL, 0,    NULL,         NULL,         10, 1), -- TrainTypeID 2 = Express
+(4, 'Express Train Round-Trip',   13.50, 2,    NULL, 1,    NULL,         NULL,         10, 1),
+(5, 'Standard Train One-Way',      8.00, 1,    NULL, 0,    NULL,         NULL,         10, 1), -- TrainTypeID 1 = Standard
 
 -- Route Specific
-(6, 'North-South Summer One-Way', 12.00, NULL, 1,    0,    '2024-06-01', '2024-08-31', 20, '2023-01-01', 1), -- RouteID 1, during summer
-(7, 'Hanoi-DN Express Route OW',  18.00, NULL, 2,    0,    NULL,         NULL,         20, '2023-01-01', 1), -- RouteID 2
+(6, 'North-South Summer One-Way', 12.00, NULL, 1,    0,    '2024-06-01', '2024-08-31', 20, 1), -- RouteID 1, during summer
+(7, 'Hanoi-DN Express Route OW',  18.00, NULL, 2,    0,    NULL,         NULL,         20, 1), -- RouteID 2
 
 -- Combination: TrainType and Route Specific
-(8, 'Express on North-South OW',  16.00, 2,    1,    0,    NULL,         NULL,         30, '2023-01-01', 1),
+(8, 'Express on North-South OW',  16.00, 2,    1,    0,    NULL,         NULL,         30, 1),
 
 -- Most Specific: TrainType, Route, Dates
-(9, 'Express on N-S Summer OW',   17.50, 2,    1,    0,    '2024-06-01', '2024-08-31', 40, '2023-01-01', 1);
+(9, 'Express on N-S Summer OW',   17.50, 2,    1,    0,    '2024-06-01', '2024-08-31', 40, 1);
 SET IDENTITY_INSERT dbo.PricingRules OFF;
 GO
 
