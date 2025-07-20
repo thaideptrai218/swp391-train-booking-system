@@ -1,177 +1,294 @@
 package vn.vnrailway.filter;
 
 import java.io.IOException;
+import java.util.*;
+import java.util.regex.Pattern;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.vnrailway.model.User;
 
+/**
+ * Modern Role-Based Access Control Filter
+ * 
+ * Features:
+ * - Pattern-based URL matching for better maintainability
+ * - Exclusive role-based permissions (each role has specific access)
+ * - Clear separation of public, authenticated, and role-specific resources
+ * - Configurable access rules
+ * - Better error handling and logging
+ */
 public class RoleFilter implements Filter {
-
+    
+    // Available roles in the system (for reference and validation)
+    private static final Set<String> VALID_ROLES = Set.of(
+        "CUSTOMER", "STAFF", "MANAGER", "ADMIN"
+    );
+    
+    // Public resources accessible without authentication
+    private static final Set<String> PUBLIC_EXACT_PATHS = Set.of(
+        "/", "/index.jsp", "/login", "/register", "/logout",
+        "/forgot-password", "/verify-otp", "/reset-password",
+        "/forgotpassword", "/newpassword", "/enterotp",
+        "/checkBooking", "/checkTicket", "/refundTicket",
+        "/confirmRefundTicket", "/confirmOTP", "/refundProcessing",
+        "/checkRefundTicket", "/searchTrip", "/searchTripBackground",
+        "/storeRoute", "/getCoachSeatsWithPrice", "/all-locations",
+        "/landing", "/terms", "/ticketPayment"
+    );
+    
+    // Public path patterns (using regex for flexibility)
+    private static final Set<Pattern> PUBLIC_PATH_PATTERNS = Set.of(
+        Pattern.compile("^/css/.*"),
+        Pattern.compile("^/js/.*"),
+        Pattern.compile("^/assets/.*"),
+        Pattern.compile("^/images/.*"),
+        Pattern.compile("^/public/.*"),
+        Pattern.compile("^/authentication/.*"),
+        Pattern.compile("^/api/stations/.*"),
+        Pattern.compile("^/api/trip/.*"),
+        Pattern.compile("^/api/seat/getCoachSeats.*"),
+        Pattern.compile("^/trip/.*"),
+        Pattern.compile("^/train-info/.*"),
+        Pattern.compile("^/check-booking/.*"),
+        Pattern.compile("^/payment/.*")
+    );
+    
+    // Role-specific access patterns
+    private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(
+        "ADMIN", Set.of(
+            Pattern.compile("^/admin/.*"),
+            Pattern.compile("^/admin-dashboard$"),
+            Pattern.compile("^/(addUser|editUser|userManagement|auditLog)$")
+        ),
+        "MANAGER", Set.of(
+            Pattern.compile("^/manager/.*"),
+            Pattern.compile("^/managerDashboard$"),
+            Pattern.compile("^/(addPriceRule|addRoute|addStation|addTrip)$"),
+            Pattern.compile("^/(editPriceRule|editStation|routeDetail|tripDetail)$"),
+            Pattern.compile("^/manage(Price|Routes|Staffs|Stations|TrainsSeats|Trips)$"),
+            Pattern.compile("^/(sidebar|train_form)$")
+        ),
+        "STAFF", Set.of(
+            Pattern.compile("^/staff/.*"),
+            Pattern.compile("^/staff-dashboard$"),
+            Pattern.compile("^/(feedback-list|refund-requests)$"),
+            Pattern.compile("^/(customer-info|staff-message)$"),
+            Pattern.compile("^/api/booking/.*"),
+            Pattern.compile("^/api/payment/.*")
+        ),
+        "CUSTOMER", Set.of(
+            Pattern.compile("^/customer/.*"),
+            Pattern.compile("^/(customer-profile|edit-profile|feedback)$"),
+            Pattern.compile("^/(customerprofile|editprofile|customer-support)$"),
+            Pattern.compile("^/(listTicketBooking|submitFeedback)$"),
+            Pattern.compile("^/api/booking/initiate.*")
+        )
+    );
+    
+    // Common authenticated user paths (accessible to all logged-in users)
+    private static final Set<Pattern> AUTHENTICATED_PATTERNS = Set.of(
+        Pattern.compile("^/(profile|update-profile|changepassword|change-password)$"),
+        Pattern.compile("^/api/user/.*")
+    );
+    
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // Initialization code, if needed
+        // Log filter initialization
+        System.out.println("RoleFilter initialized with " + VALID_ROLES.size() + " roles: " + VALID_ROLES);
     }
-
+    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        HttpSession session = httpRequest.getSession(false);
-
-        String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
-
-        // Allow access to static resources and public pages
-        if (path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/assets/") ||
-                path.startsWith("/public/") || path.startsWith("/authentication/") || // Allows servlets mapped under
-                                                                                      // /authentication/
-
-                path.equals("/index.jsp") || // Assuming index.jsp is at the root and public
-
-                path.equals("/login") || path.equals("/register") || path.equals("/logout") ||
-                path.equals("/forgot-password") || path.equals("/verify-otp") || path.equals("/reset-password") ||
-                path.equals("/forgotpassword") || path.equals("/newpassword") || path.equals("/enterotp") ||
-                path.equals("/changepassword") || path.equals("/checkBooking") || path.equals("/checkTicket")
-                || path.equals("/refundTicket") || path.equals("/confirmRefundTicket") || path.equals("/confirmOTP")
-                || path.equals("/refundProcessing") || path.equals("/checkRefundTicket") ||
-                path.equals("/searchTrip") || path.equals("/searchTripBackground") ||
-                path.equals("/storeRoute") || path.equals("/getCoachSeatsWithPrice") ||
-                path.equals("/all-locations") || path.equals("/landing") || path.equals("/terms") ||
-                path.equals("/api/stations/all") ||
-
-                // Trip & train info related public paths
-                path.startsWith("/trip/") || path.startsWith("/train-info/") || path.startsWith("/check-booking/")
-                || path.startsWith("/api") || path.startsWith("/ticketPayment") || path.startsWith("/payment/") ||
-                path.equals("/WEB-INF/jsp/common/unauthorized.jsp")) {
+        
+        String requestPath = getRequestPath(httpRequest);
+        
+        // Check if this is a public resource
+        if (isPublicResource(requestPath)) {
             chain.doFilter(request, response);
             return;
         }
-
-        User user = (session != null) ? (User) session.getAttribute("loggedInUser") : null; // Changed "user" to
-                                                                                            // "loggedInUser"
-
+        
+        // Get user from session
+        User user = getUserFromSession(httpRequest);
+        
+        // Check if user authentication is required
         if (user == null) {
-            // No user logged in, redirect to login page for any protected resource
-            if (!isPublicPage(path, httpRequest.getContextPath())) { // Check if it's not already a public page attempt
-                httpResponse.sendRedirect(httpRequest.getContextPath() + "/login"); // Redirect to /login servlet
-                return;
-            }
-            // If it was an attempt to access a public page but somehow missed the initial
-            // check, let it pass (should not happen with current logic)
-            chain.doFilter(request, response);
+            handleUnauthenticatedAccess(httpRequest, httpResponse, requestPath);
             return;
         }
-
-        String role = user.getRole() != null ? user.getRole().toLowerCase() : ""; // Use empty string for null role
-
-        boolean authorized = false;
-
-        switch (role) {
-            case "admin":
-                if (path.startsWith("/admin/") ||
-                        path.equals("/admin-dashboard") ||
-                        path.equals("/addUser") ||
-                        path.equals("/adminLayout") ||
-                        path.equals("/auditLog") ||
-                        path.equals("/dashboard") ||
-                        path.equals("/editUser") ||
-                        path.equals("/userManagement") ||
-                        isCommonPage(path)) {
-                    authorized = true;
-                }
-                break;
-            case "manager":
-                if (path.startsWith("/manager/") ||
-                        path.equals("/managerDashboard") ||
-                        path.equals("/addPriceRule") ||
-                        path.equals("/addRoute") ||
-                        path.equals("/addStation") ||
-                        path.equals("/addTrip") ||
-                        path.equals("/editPriceRule") ||
-                        path.equals("/editStation") ||
-                        path.equals("/managePrice") ||
-                        path.equals("/manageRoutes") ||
-                        path.equals("/manageStaffs") ||
-                        path.equals("/manageStations") ||
-                        path.equals("/manageTrainsSeats") ||
-                        path.equals("/manageTrips") ||
-                        path.equals("/routeDetail") ||
-                        path.equals("/sidebar") ||
-                        path.equals("/train_form") ||
-                        path.equals("/tripDetail") ||
-                        isCommonPage(path)) {
-                    authorized = true;
-                }
-                break;
-            case "staff":
-                if (path.startsWith("/staff/") ||
-                        path.equals("/staff-dashboard") ||
-                        path.equals("/feedback-list") ||
-                        path.equals("/refund-requests") ||
-                        isCommonPage(path)) {
-                    authorized = true;
-                }
-                break;
-            case "customer":
-                if (path.startsWith("/customer/") ||
-                        path.equals("/customer-profile") ||
-                        path.equals("/edit-profile") ||
-                        path.equals("/feedback") ||
-                        path.equals("/changepassword") ||
-                        path.equals("/change-password") ||
-                        isCommonPage(path)) {
-                    authorized = true;
-                }
-                break;
-            default:
-                break;
-        }
-
-        if (authorized) {
+        
+        // Check role-based authorization
+        if (isAuthorized(user, requestPath)) {
             chain.doFilter(request, response);
         } else {
-            // Unauthorized access attempt
-            request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp").forward(request, response);
+            handleUnauthorizedAccess(httpRequest, httpResponse, user, requestPath);
         }
     }
-
-    // Helper method to check if a path is one of the explicitly public-facing pages
-    private boolean isPublicPage(String path, String contextPath) {
-        // Check for servlet paths that handle public functionality
-        // JSPs like login.jsp, register.jsp are in WEB-INF and accessed via these
-        // servlets
-        return path.equals("/index.jsp") || // Assuming index.jsp is at the root and public
-                path.equals(contextPath + "/login") ||
-                path.equals(contextPath + "/register") ||
-                path.equals(contextPath + "/logout") ||
-                path.equals(contextPath + "/forgotpassword") || // Ensure these match servlet mappings
-                path.equals(contextPath + "/enterotp") ||
-                path.equals(contextPath + "/newpassword") ||
-                path.equals(contextPath + "/changepassword") ||
-                path.startsWith(contextPath + "/css/") ||
-                path.startsWith(contextPath + "/js/") ||
-                path.startsWith(contextPath + "/assets/") ||
-                path.startsWith(contextPath + "/public/") ||
-                path.startsWith(contextPath + "/authentication/") || // Covers servlets like /authentication/someAction
-                path.startsWith(contextPath + "/payment/") ||
-                path.equals(contextPath + "/checkBooking") ||
-                path.equals(contextPath + "/checkTicket") ||
-                path.equals(contextPath + "/refundTicket") ||
-                path.equals(contextPath + "/confirmRefundTicket") ||
-                path.equals(contextPath + "/confirmOTP") ||
-                path.equals(contextPath + "/refundProcessing") ||
-                path.equals(contextPath + "/checkRefundTicket");
+    
+    /**
+     * Extract the request path without context path
+     */
+    private String getRequestPath(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        String requestURI = request.getRequestURI();
+        return requestURI.substring(contextPath.length());
     }
-
-    private boolean isCommonPage(String path) {
-        return path.equals("/profile") || path.equals("/update-profile");
+    
+    /**
+     * Check if the resource is publicly accessible
+     */
+    private boolean isPublicResource(String path) {
+        // Check exact matches first (most common case)
+        if (PUBLIC_EXACT_PATHS.contains(path)) {
+            return true;
+        }
+        
+        // Check pattern matches
+        return PUBLIC_PATH_PATTERNS.stream()
+                .anyMatch(pattern -> pattern.matcher(path).matches());
+    }
+    
+    /**
+     * Get user from HTTP session
+     */
+    private User getUserFromSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        return (User) session.getAttribute("loggedInUser");
+    }
+    
+    /**
+     * Check if user is authorized to access the given path
+     */
+    private boolean isAuthorized(User user, String path) {
+        String userRole = normalizeRole(user.getRole());
+        
+        // Check if it's a common authenticated path
+        if (isAuthenticatedPath(path)) {
+            return true;
+        }
+        
+        // Check role-specific access with hierarchy
+        return hasRoleAccess(userRole, path);
+    }
+    
+    /**
+     * Check if path is accessible to any authenticated user
+     */
+    private boolean isAuthenticatedPath(String path) {
+        return AUTHENTICATED_PATTERNS.stream()
+                .anyMatch(pattern -> pattern.matcher(path).matches());
+    }
+    
+    /**
+     * Check if user role has access to the path (exclusive role-based access)
+     */
+    private boolean hasRoleAccess(String userRole, String path) {
+        // Check access for the user's specific role only (no hierarchy)
+        Set<Pattern> patterns = ROLE_PATTERNS.get(userRole);
+        if (patterns == null) {
+            return false;
+        }
+        
+        return patterns.stream().anyMatch(p -> p.matcher(path).matches());
+    }
+    
+    /**
+     * Normalize role string to uppercase for consistent comparison
+     */
+    private String normalizeRole(String role) {
+        return (role != null) ? role.trim().toUpperCase() : "";
+    }
+    
+    /**
+     * Handle access attempt by unauthenticated user
+     */
+    private void handleUnauthenticatedAccess(HttpServletRequest request, 
+                                           HttpServletResponse response, 
+                                           String path) throws IOException {
+        // Log the access attempt
+        String clientIP = getClientIP(request);
+        System.out.println("Unauthenticated access attempt to: " + path + " from IP: " + clientIP);
+        
+        // Store the originally requested URL for redirect after login
+        HttpSession session = request.getSession(true);
+        session.setAttribute("originalRequestURL", request.getRequestURL().toString());
+        
+        // Redirect to login page
+        response.sendRedirect(request.getContextPath() + "/login");
+    }
+    
+    /**
+     * Handle unauthorized access by authenticated user
+     */
+    private void handleUnauthorizedAccess(HttpServletRequest request, 
+                                        HttpServletResponse response, 
+                                        User user, 
+                                        String path) throws ServletException, IOException {
+        // Log the unauthorized access attempt
+        String clientIP = getClientIP(request);
+        System.out.println("Unauthorized access attempt by user: " + user.getEmail() + 
+                          " (role: " + user.getRole() + ") to: " + path + " from IP: " + clientIP);
+        
+        // Set error attributes for the unauthorized page
+        request.setAttribute("errorMessage", "You don't have permission to access this resource.");
+        request.setAttribute("userRole", user.getRole());
+        request.setAttribute("requestedPath", path);
+        
+        // Forward to unauthorized page
+        request.getRequestDispatcher("/WEB-INF/jsp/common/unauthorized.jsp")
+               .forward(request, response);
+    }
+    
+    /**
+     * Get client IP address, considering proxy headers
+     */
+    private String getClientIP(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        String xRealIP = request.getHeader("X-Real-IP");
+        if (xRealIP != null && !xRealIP.isEmpty()) {
+            return xRealIP;
+        }
+        
+        return request.getRemoteAddr();
+    }
+    
+    @Override
+    public void destroy() {
+        // Cleanup resources if needed
+        System.out.println("RoleFilter destroyed");
+    }
+    
+    /**
+     * Utility method to add new public path pattern (for testing or dynamic configuration)
+     */
+    public static boolean isPublicPath(String path) {
+        RoleFilter filter = new RoleFilter();
+        return filter.isPublicResource(path);
+    }
+    
+    /**
+     * Utility method to check role access (for testing)
+     */
+    public static boolean checkRoleAccess(String role, String path) {
+        RoleFilter filter = new RoleFilter();
+        return filter.hasRoleAccess(filter.normalizeRole(role), path);
     }
 }
