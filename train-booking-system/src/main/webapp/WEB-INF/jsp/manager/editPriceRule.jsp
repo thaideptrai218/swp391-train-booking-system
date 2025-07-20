@@ -169,18 +169,13 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
           </select>
         </div>
 
-        <%
-          PricingRule pricingRule = (PricingRule) request.getAttribute("pricingRule");
-          Date applicableDateStart = DateUtils.toDate(pricingRule.getEffectiveFromDate());
-          Date applicableDateEnd = DateUtils.toDate(pricingRule.getEffectiveToDate());
-        %>
         <div class="form-group full-width">
           <label for="applicableDateStart">Ngày bắt đầu áp dụng:</label>
           <input
             type="date"
             id="applicableDateStart"
             name="applicableDateStart"
-            value="<fmt:formatDate value="<%= applicableDateStart %>" pattern="yyyy-MM-dd" />"
+            value="${applicableDateStartStr}"
             required
           />
           <label for="applicableDateEnd" style="margin-left: 20px;">Ngày kết thúc áp dụng (Tùy chọn):</label>
@@ -188,7 +183,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
             type="date"
             id="applicableDateEnd"
             name="applicableDateEnd"
-            value="<fmt:formatDate value="<%= applicableDateEnd %>" pattern="yyyy-MM-dd" />"
+            value="${applicableDateEndStr}"
           />
         </div>
 
