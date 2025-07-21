@@ -102,9 +102,8 @@
                           <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/> -->
                           </i> Mua thẻ VIP</a>
 
-                        <a href="#" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/> -->
-                          </i> Giỏ vé</a>
+                        <a href="${pageContext.request.contextPath}/changepassword" class="dropdown-item">
+                          </i> Thay đổi Mật khẩu</a>
 
                         <c:if test="${not empty sessionScope.loggedInUser}">
                           <a href="${pageContext.request.contextPath}/listTicketBooking?id=${sessionScope.loggedInUser.userID}"
