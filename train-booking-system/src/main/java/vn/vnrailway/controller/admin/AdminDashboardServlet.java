@@ -31,7 +31,7 @@ public class AdminDashboardServlet extends HttpServlet {
             request.setAttribute("user", user);
         }
 
-        DashboardDAO dashboardDAO = new DashboardDAO();
+        DashboardDAO dashboardDAO = new vn.vnrailway.dao.impl.DashboardDAOImpl();
 
         // Lấy các thống kê
         int totalAccounts = dashboardDAO.getTotalUsers();

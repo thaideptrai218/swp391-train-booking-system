@@ -32,11 +32,26 @@
             gap: 10px;
             margin-top: 10px;
         }
-        .btn-toggle {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
+        .btn-toggle, .btn-secondary {
+            padding: 8px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+        .btn-toggle:hover, .btn-secondary:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+        }
+        .btn-toggle {
+            background-color: #6c757d;
+        }
+        .btn-toggle:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
@@ -69,9 +84,9 @@
                     <div class="filter-form">
                         <c:if test="${viewMode == 'overview'}">
                             <a href="?viewMode=details" class="btn-toggle">Chi tiết</a>
-                            <a href="?viewMode=overview&year=${selectedYear - 1}" class="btn btn-secondary">< Năm trước</a>
+                            <a href="?viewMode=overview&year=${selectedYear - 1}" class="btn-secondary">< Năm trước</a>
                             <span>Năm ${selectedYear}</span>
-                            <a href="?viewMode=overview&year=${selectedYear + 1}" class="btn btn-secondary">Năm sau ></a>
+                            <a href="?viewMode=overview&year=${selectedYear + 1}" class="btn-secondary">Năm sau ></a>
                         </c:if>
                         <c:if test="${viewMode == 'details'}">
                             <a href="?viewMode=overview" class="btn-toggle">Tổng quan</a>
@@ -79,8 +94,8 @@
                                 <input type="hidden" name="viewMode" value="details">
                                 <select name="trendDays" onchange="this.form.submit()">
                                     <option value="7" ${selectedTrendDays == 7 ? 'selected' : ''}>7 ngày qua</option>
-                                    <option value="14" ${selectedTrendDays == 14 ? 'selected' : ''}>2 tuần qua</option>
-                                    <option value="21" ${selectedTrendDays == 21 ? 'selected' : ''}>3 tuần qua</option>
+                                    <option value="30" ${selectedTrendDays == 30 ? 'selected' : ''}>30 ngày qua</option>
+                                    <option value="180" ${selectedTrendDays == 180 ? 'selected' : ''}>Nửa năm qua</option>
                                 </select>
                             </form>
                         </c:if>
