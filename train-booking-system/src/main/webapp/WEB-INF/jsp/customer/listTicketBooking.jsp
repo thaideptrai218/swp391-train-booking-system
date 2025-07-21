@@ -53,66 +53,70 @@
 
                             <c:if test="${not empty infoPassenger}">
                                 <h3 style="color: red">Thông tin vé:</h3>
-                                <table border="1" cellpadding="5" cellspacing="0">
+
+
+
+                                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
                                     <thead>
-                                        <tr style="background-color: #5e5e5e50">
-                                            <th>Hành khách</th>
-                                            <th>CMND</th>
-                                            <th>Loại</th>
-                                            <th>Ghế</th>
-                                            <th>Loại ghế</th>
-                                            <th>Toa</th>
-                                            <th>Tàu</th>
-                                            <th>Giá</th>
+                                        <tr style="background-color: #e8f0fe; text-align: center;">
+                                            <th>#</th>
+                                            <th>Họ tên</th>
+                                            <th>Thông tin vé</th>
+                                            <th>Thành tiền (VND)</th>
                                             <th>Trạng thái</th>
                                         </tr>
                                     </thead>
-
-                                    <c:forEach var="i" items="${infoPassenger}">
-                                        <tbody>
-                                            <tr>
-                                                <td colspan="9" style="font-weight: bold">
-                                                    ${i.startStationName} - ${i.endStationName}
-                                                    ${i.scheduledDepartureTime}
+                                    <tbody>
+                                        <c:forEach var="info" items="${infoPassenger}"
+                                            varStatus="i">
+                                            <tr style="background-color: #f0f8ff;">
+                                                <td colspan="9" style="font-weight: bold; padding: 8px;">
+                                                    ${info.startStationName} - ${info.endStationName}
+                                                    ${info.scheduledDepartureTime}
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td style="text-align: start;">${i.passengerFullName}<br>
-                                                    Mã vé: ${i.ticketCode}</td>
-                                                <td>${i.passengerIDCard}</td>
-                                                <td>${i.passengerType}</td>
-                                                <td>${i.seatNumber}</td>
-                                                <td>${i.seatTypeName}</td>
-                                                <td>${i.coachName}</td>
-                                                <td>${i.trainName}</td>
-                                                <td>
-                                                    <fmt:formatNumber value="${i.price}" type="number"
+                                            <tr style="border-top: 1px solid #ccc;">
+                                                <td style="text-align: start;">${i.index + 1}</td>
+                                                <td style="text-align: start;">
+                                                    <b>${info.passengerFullName}</b><br />
+                                                    ${info.passengerType}<br />
+                                                    Số giấy tờ: ${info.passengerIDCard}
+                                                </td>
+                                                <td style="text-align: start;">
+                                                    ${info.trainName}<br />
+                                                    Toa: ${info.coachName} – Ghế số: ${info.seatNumber}<br />
+                                                    ${info.seatTypeName}<br />
+                                                    Mã vé: ${info.ticketCode}
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    <fmt:formatNumber value="${info.price}" type="number"
                                                         groupingUsed="true" />đ
                                                 </td>
-                                                <td>
+                                                
+                                                <td style="text-align: center;">
                                                     <c:choose>
-                                                        <c:when test="${i.ticketStatus == 'Valid'}">
+                                                        <c:when test="${info.ticketStatus == 'Valid'}">
                                                             <span style="color: #28a745; font-weight: bold;">Hợp
                                                                 lệ</span> <!-- xanh lá đẹp -->
                                                         </c:when>
-                                                        <c:when test="${i.ticketStatus == 'Used'}">
+                                                        <c:when test="${info.ticketStatus == 'Used'}">
                                                             <span style="color: #007bff; font-weight: bold;">Đã sử
                                                                 dụng</span>
                                                             <!-- xanh dương tươi -->
                                                         </c:when>
-                                                        <c:when test="${i.ticketStatus == 'Processing'}">
+                                                        <c:when test="${info.ticketStatus == 'Processing'}">
                                                             <span style="color: #fd7e14; font-weight: bold;">Đang xử
                                                                 lý</span> <!-- cam nổi bật -->
                                                         </c:when>
-                                                        <c:when test="${i.ticketStatus == 'Refunded'}">
+                                                        <c:when test="${info.ticketStatus == 'Refunded'}">
                                                             <span style="color: #dc3545; font-weight: bold;">Đã
                                                                 hủy</span> <!-- đỏ đậm -->
                                                         </c:when>
-                                                        <c:when test="${i.ticketStatus == 'RejectedRefund'}">
+                                                        <c:when test="${info.ticketStatus == 'RejectedRefund'}">
                                                             <span style="color: #dc3545; font-weight: bold;">Đã
                                                                 hủy</span> <!-- đỏ đậm -->
                                                         </c:when>
-                                                        <c:when test="${i.ticketStatus == 'Expired'}">
+                                                        <c:when test="${info.ticketStatus == 'Expired'}">
                                                             <span style="color: #6c757d; font-weight: bold;">Đã hết
                                                                 hạn</span>
                                                             <!-- xám trung tính -->
@@ -124,9 +128,9 @@
                                                     </c:choose>
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </c:forEach>
-                                </table>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>  
                             </c:if>
                         </div>
                     </section>
