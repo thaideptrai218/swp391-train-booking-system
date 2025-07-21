@@ -11,6 +11,91 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/reset.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/trip/ticket-payment.css"> <%-- New CSS file --%>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Enhanced styles for improved UX */
+        .expired-hold-row {
+            background-color: #fff5f5;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .expired-hold-row .seat-hold-timer.expired {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .info-notice.warning-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px;
+            color: #856404;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85em;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .form-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-wrapper input.error, 
+        .input-wrapper select.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .input-wrapper input.valid, 
+        .input-wrapper select.valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .passenger-name-type-cell input, 
+        .passenger-name-type-cell select {
+            margin-bottom: 8px;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .passenger-name-type-cell input.error, 
+        .passenger-name-type-cell select.error {
+            border-color: #dc3545;
+        }
+        
+        .passenger-name-type-cell input.valid, 
+        .passenger-name-type-cell select.valid {
+            border-color: #28a745;
+        }
+        
+        .delete-passenger-button {
+            transition: all 0.3s ease;
+        }
+        
+        .delete-passenger-button:hover {
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .passenger-info-section table {
+                font-size: 0.9em;
+            }
+            
+            .passenger-name-type-cell {
+                min-width: 200px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="payment-container">

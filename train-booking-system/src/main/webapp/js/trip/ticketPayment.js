@@ -82,6 +82,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (element) {
             element.textContent = message;
             element.style.display = "block";
+            
+            // Add error styling to associated input
+            const input = findAssociatedInput(element);
+            if (input) {
+                input.classList.add("error");
+                input.classList.remove("valid");
+            }
         }
     }
 
@@ -89,13 +96,59 @@ document.addEventListener("DOMContentLoaded", function () {
         if (element) {
             element.textContent = "";
             element.style.display = "none";
+            
+            // Add valid styling to associated input
+            const input = findAssociatedInput(element);
+            if (input && input.value && input.value.trim()) {
+                input.classList.add("valid");
+                input.classList.remove("error");
+            } else if (input) {
+                input.classList.remove("error", "valid");
+            }
         }
+    }
+
+    function findAssociatedInput(errorElement) {
+        if (!errorElement) return null;
+        
+        // For passenger table rows
+        const row = errorElement.closest("tr");
+        if (row) {
+            if (errorElement.classList.contains("fullNameError")) {
+                return row.querySelector(".passenger-fullName");
+            }
+            if (errorElement.classList.contains("passengerTypeError")) {
+                return row.querySelector(".passenger-type-selector");
+            }
+            if (errorElement.classList.contains("idCardNumberError")) {
+                return row.querySelector(".passenger-idCardNumber");
+            }
+            if (errorElement.classList.contains("dateOfBirthError")) {
+                return row.querySelector(".passenger-dateOfBirth");
+            }
+        }
+        
+        // For customer fields
+        const errorId = errorElement.id;
+        if (errorId) {
+            const inputId = errorId.replace("Error", "");
+            return document.getElementById(inputId);
+        }
+        
+        return null;
     }
 
     function clearAllErrors() {
         document
             .querySelectorAll(".error-message")
             .forEach((span) => clearError(span));
+        
+        // Also clear all input styling
+        document
+            .querySelectorAll("input.error, select.error, input.valid, select.valid")
+            .forEach((input) => {
+                input.classList.remove("error", "valid");
+            });
     }
 
     function displayGeneralError(message, isError = true) {
@@ -104,6 +157,141 @@ document.addEventListener("DOMContentLoaded", function () {
             generalErrorMessage.style.color = isError ? "red" : "green";
             generalErrorMessage.style.display = message ? "block" : "none";
         }
+    }
+
+    // Real-time validation for passenger fields
+    function validateFieldRealTime(field, isBlur = false) {
+        if (!field) return;
+        
+        const row = field.closest("tr");
+        if (!row) return;
+        
+        if (field.classList.contains("passenger-fullName")) {
+            const errorSpan = row.querySelector(".fullNameError");
+            const value = field.value ? field.value.trim() : "";
+            if (!value && isBlur) {
+                displayError(errorSpan, "Vui lòng nhập họ tên.");
+            } else if (value.length > 0 && value.length < 2) {
+                displayError(errorSpan, "Họ tên phải có ít nhất 2 ký tự.");
+            } else if (value.length > 100) {
+                displayError(errorSpan, "Họ tên không được quá 100 ký tự.");
+            } else if (value) {
+                clearError(errorSpan);
+            }
+        }
+        
+        if (field.classList.contains("passenger-idCardNumber")) {
+            const errorSpan = row.querySelector(".idCardNumberError");
+            const value = field.value ? field.value.trim() : "";
+            
+            if (field.style.display !== "none" && isBlur && !value) {
+                displayError(errorSpan, "Vui lòng nhập số CMND/CCCD.");
+            } else if (value && !/^\d{9,12}$/.test(value)) {
+                displayError(errorSpan, "Số CMND/CCCD không hợp lệ (9-12 số).");
+            } else if (value && /^\d{9,12}$/.test(value)) {
+                // Check for duplicate ID numbers
+                const duplicateError = checkForDuplicateId(value, row);
+                if (duplicateError) {
+                    displayError(errorSpan, duplicateError);
+                } else {
+                    clearError(errorSpan);
+                }
+            }
+        }
+        
+        if (field.classList.contains("passenger-type-selector")) {
+            const errorSpan = row.querySelector(".passengerTypeError");
+            if (!field.value && isBlur) {
+                displayError(errorSpan, "Vui lòng chọn đối tượng.");
+            } else if (field.value) {
+                clearError(errorSpan);
+            }
+        }
+    }
+
+    // Check for duplicate ID numbers across all passengers (excluding customer ID - customers can book for themselves)
+    function checkForDuplicateId(idValue, currentRow) {
+        if (!idValue || idValue.length === 0) return null;
+        
+        const allIdInputs = passengerDetailsBody.querySelectorAll(".passenger-idCardNumber");
+        const currentRowIndex = Array.from(passengerDetailsBody.querySelectorAll("tr")).indexOf(currentRow);
+        
+        let duplicateCount = 0;
+        let duplicateRowNumbers = [];
+        
+        allIdInputs.forEach((input, index) => {
+            if (input.style.display !== "none" && input.value && input.value.trim() === idValue) {
+                duplicateCount++;
+                const row = input.closest("tr");
+                const rowIndex = Array.from(passengerDetailsBody.querySelectorAll("tr")).indexOf(row);
+                if (rowIndex !== currentRowIndex) {
+                    duplicateRowNumbers.push(rowIndex);
+                }
+            }
+        });
+        
+        if (duplicateCount > 1) {
+            return `Số CMND/CCCD này đã được sử dụng cho hành khách khác.`;
+        }
+        
+        // Note: We allow customer ID to match passenger ID (customer booking for themselves)
+        return null;
+    }
+
+    // Validate all ID fields for duplicates
+    function validateAllIdFields() {
+        let hasError = false;
+        const idInputs = passengerDetailsBody.querySelectorAll(".passenger-idCardNumber");
+        
+        // Clear previous duplicate errors
+        idInputs.forEach(input => {
+            const row = input.closest("tr");
+            const errorSpan = row.querySelector(".idCardNumberError");
+            if (errorSpan && errorSpan.textContent.includes("đã được sử dụng")) {
+                clearError(errorSpan);
+            }
+        });
+        
+        // Check each ID field for duplicates
+        idInputs.forEach(input => {
+            if (input.style.display !== "none" && input.value && input.value.trim()) {
+                const row = input.closest("tr");
+                const errorSpan = row.querySelector(".idCardNumberError");
+                const duplicateError = checkForDuplicateId(input.value.trim(), row);
+                
+                if (duplicateError) {
+                    displayError(errorSpan, duplicateError);
+                    hasError = true;
+                }
+            }
+        });
+        
+        return !hasError;
+    }
+
+    // Real-time validation for customer fields
+    function validateCustomerField(field, errorSpanId, requiredMessage, pattern, patternMessage) {
+        if (!field) return;
+        
+        const errorSpan = document.getElementById(errorSpanId);
+        const value = field.value ? field.value.trim() : "";
+        
+        clearError(errorSpan);
+        
+        if (!value && requiredMessage) {
+            displayError(errorSpan, requiredMessage);
+            return false;
+        }
+        
+        if (value && pattern && !pattern.test(value)) {
+            displayError(errorSpan, patternMessage);
+            return false;
+        }
+        
+        // Note: We allow customer ID to match passenger ID (customer booking for themselves)
+        // No additional validation needed here
+        
+        return true;
     }
 
     // --- API FUNCTIONS ---
@@ -191,6 +379,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- UI RENDERING AND UPDATES ---
     function renderPassengerRows() {
         if (!passengerDetailsBody || !passengerRowTemplate) return;
+        
+        // Store current form data before clearing
+        const currentFormData = preserveCurrentFormData();
+        
         passengerDetailsBody.innerHTML = "";
 
         if (shoppingCart.length === 0) {
@@ -208,6 +400,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 .cloneNode(true)
                 .querySelector("tr");
             newRow.dataset.cartItemIndex = index;
+            newRow.dataset.seatId = cartItem.seatID;
+            newRow.dataset.tripId = cartItem.tripId;
 
             const inputsAndSelects = newRow.querySelectorAll("input, select");
             inputsAndSelects.forEach((el) => {
@@ -311,6 +505,82 @@ document.addEventListener("DOMContentLoaded", function () {
 
             passengerDetailsBody.appendChild(newRow);
         });
+        
+        // Restore form data after rendering
+        restoreFormData(currentFormData);
+    }
+
+    // Store form data before re-rendering
+    function preserveCurrentFormData() {
+        const formData = {};
+        const rows = passengerDetailsBody.querySelectorAll("tr:not(#no-passengers-row)");
+        
+        rows.forEach((row) => {
+            const seatId = row.dataset.seatId;
+            const tripId = row.dataset.tripId;
+            if (!seatId || !tripId) return;
+            
+            const key = `${tripId}_${seatId}`;
+            const fullNameInput = row.querySelector(".passenger-fullName");
+            const passengerTypeSelect = row.querySelector(".passenger-type-selector");
+            const idCardInput = row.querySelector(".passenger-idCardNumber");
+            const dobInput = row.querySelector(".passenger-dateOfBirth");
+            
+            if (fullNameInput || passengerTypeSelect || idCardInput || dobInput) {
+                formData[key] = {
+                    fullName: fullNameInput?.value || "",
+                    passengerType: passengerTypeSelect?.value || "",
+                    idCardNumber: idCardInput?.value || "",
+                    dateOfBirth: dobInput?.value || ""
+                };
+            }
+        });
+        
+        return formData;
+    }
+
+    // Restore form data after re-rendering
+    function restoreFormData(formData) {
+        if (!formData || Object.keys(formData).length === 0) return;
+        
+        const rows = passengerDetailsBody.querySelectorAll("tr:not(#no-passengers-row)");
+        
+        rows.forEach((row) => {
+            const seatId = row.dataset.seatId;
+            const tripId = row.dataset.tripId;
+            if (!seatId || !tripId) return;
+            
+            const key = `${tripId}_${seatId}`;
+            const savedData = formData[key];
+            if (!savedData) return;
+            
+            const fullNameInput = row.querySelector(".passenger-fullName");
+            const passengerTypeSelect = row.querySelector(".passenger-type-selector");
+            const idCardInput = row.querySelector(".passenger-idCardNumber");
+            const dobInput = row.querySelector(".passenger-dateOfBirth");
+            
+            if (fullNameInput && savedData.fullName) {
+                fullNameInput.value = savedData.fullName;
+            }
+            
+            if (passengerTypeSelect && savedData.passengerType) {
+                passengerTypeSelect.value = savedData.passengerType;
+                // Trigger change event to update pricing and field visibility
+                const changeEvent = new Event('change', { bubbles: true });
+                passengerTypeSelect.dispatchEvent(changeEvent);
+            }
+            
+            if (idCardInput && savedData.idCardNumber) {
+                idCardInput.value = savedData.idCardNumber;
+            }
+            
+            if (dobInput && savedData.dateOfBirth) {
+                dobInput.value = savedData.dateOfBirth;
+                // Trigger change event for validation
+                const changeEvent = new Event('change', { bubbles: true });
+                dobInput.dispatchEvent(changeEvent);
+            }
+        });
     }
 
     function updateTotalPaymentAndPassengerCount() {
@@ -356,15 +626,34 @@ document.addEventListener("DOMContentLoaded", function () {
         if (paymentForm) {
             paymentForm.addEventListener("submit", handleFormSubmission);
         }
+        
+        // Enhanced passenger form validation
         passengerDetailsBody.addEventListener("change", function (event) {
             const target = event.target;
             if (target.classList.contains("passenger-type-selector")) {
                 handlePassengerTypeChange(target);
             }
         });
+        
+        passengerDetailsBody.addEventListener("input", function (event) {
+            const target = event.target;
+            validateFieldRealTime(target);
+        });
+        
+        passengerDetailsBody.addEventListener("blur", function (event) {
+            const target = event.target;
+            validateFieldRealTime(target, true);
+        }, true);
+        
         customerEmailConfirmInput?.addEventListener("input", () =>
             validateEmailConfirmation(true)
         );
+        
+        // Add real-time validation for customer fields
+        customerFullNameInput?.addEventListener("blur", () => validateCustomerField(customerFullNameInput, "customerFullNameError", "Vui lòng nhập họ tên người đặt vé."));
+        customerEmailInput?.addEventListener("blur", () => validateCustomerField(customerEmailInput, "customerEmailError", "Vui lòng nhập email.", /\S+@\S+\.\S+/, "Email không hợp lệ."));
+        customerPhoneInput?.addEventListener("blur", () => validateCustomerField(customerPhoneInput, "customerPhoneError", "Vui lòng nhập số điện thoại.", /^\d{10,11}$/, "Số điện thoại không hợp lệ (10-11 số)."));
+        customerIDCardInput?.addEventListener("blur", () => validateCustomerField(customerIDCardInput, "customerIDCardError", null, /^\d{9,12}$/, "Số CMND/CCCD không hợp lệ (9-12 số)."));
 
         if (clearAllSeatsBtn) {
             // Moved event listener setup here
@@ -617,20 +906,61 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function startIndividualSeatTimer(cartItem, timerSpan) {
-        if (cartItem.holdExpiresAt) {
-            const expiresAtDate = new Date(cartItem.holdExpiresAt);
+        if (!cartItem.holdExpiresAt) return;
+        
+        const expiresAtDate = new Date(cartItem.holdExpiresAt);
+        const seatKey = `${cartItem.tripId}_${cartItem.seatID}`;
+        
+        function updateTimer() {
             const now = new Date();
             const timeLeftMs = expiresAtDate.getTime() - now.getTime();
+            
             if (timeLeftMs > 0) {
                 const minutes = Math.floor(timeLeftMs / 60000);
                 const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-                timerSpan.textContent = `(Giữ đến ${minutes}:${String(
-                    seconds
-                ).padStart(2, "0")})`;
+                timerSpan.textContent = `(Giữ đến ${minutes}:${String(seconds).padStart(2, "0")})`;
+                timerSpan.className = "seat-hold-timer";
             } else {
-                timerSpan.textContent = "(Đã hết hạn giữ)";
+                timerSpan.innerHTML = `<i class="fas fa-clock icon-expired-hold" style="color: #ff6b6b;"></i> Đã hết hạn giữ`;
+                timerSpan.className = "seat-hold-timer expired";
+                
+                // Show expired holds notice
+                const expiredNotice = document.getElementById("expired-holds-notice");
+                if (expiredNotice) {
+                    expiredNotice.style.display = "block";
+                }
+                
+                // Mark the row as expired
+                const row = timerSpan.closest("tr");
+                if (row) {
+                    row.classList.add("expired-hold-row");
+                    const deleteButton = row.querySelector(".delete-passenger-button");
+                    if (deleteButton) {
+                        deleteButton.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i> Hủy vé hết hạn';
+                        deleteButton.style.backgroundColor = "#ff6b6b";
+                        deleteButton.style.color = "white";
+                    }
+                }
+                
+                clearInterval(window.seatTimers?.[seatKey]);
+                if (window.seatTimers) delete window.seatTimers[seatKey];
+                return;
             }
         }
+        
+        // Initialize timer storage
+        if (!window.seatTimers) window.seatTimers = {};
+        
+        // Clear existing timer if any
+        if (window.seatTimers[seatKey]) {
+            clearInterval(window.seatTimers[seatKey]);
+        }
+        
+        // Initial update
+        updateTimer();
+        
+        // Set interval for updates
+        window.seatTimers[seatKey] = setInterval(updateTimer, 1000);
     }
 
     // --- FORM VALIDATION & SUBMISSION ---
@@ -641,6 +971,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const passengerRows = passengerDetailsBody.querySelectorAll(
             "tr:not(#no-passengers-row)"
         );
+        
+        // Enhanced passenger validation
         passengerRows.forEach((row) => {
             if (!row.querySelector(".passenger-fullName")) return;
 
@@ -668,10 +1000,22 @@ document.addEventListener("DOMContentLoaded", function () {
             clearError(idErrorSpan);
             clearError(dobErrorSpan);
 
-            if (!fullNameInput.value.trim()) {
+            // Enhanced name validation
+            const fullNameValue = fullNameInput.value ? fullNameInput.value.trim() : "";
+            if (!fullNameValue) {
                 displayError(fullNameErrorSpan, "Vui lòng nhập họ tên.");
                 isValid = false;
+            } else if (fullNameValue.length < 2) {
+                displayError(fullNameErrorSpan, "Họ tên phải có ít nhất 2 ký tự.");
+                isValid = false;
+            } else if (fullNameValue.length > 100) {
+                displayError(fullNameErrorSpan, "Họ tên không được quá 100 ký tự.");
+                isValid = false;
+            } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(fullNameValue)) {
+                displayError(fullNameErrorSpan, "Họ tên chỉ được chứa chữ cái và khoảng trắng.");
+                isValid = false;
             }
+            
             if (!passengerTypeSelect.value) {
                 displayError(
                     passengerTypeErrorSpan,
@@ -681,10 +1025,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (!isChildType) {
-                if (!idCardInput.value.trim()) {
+                const idValue = idCardInput.value ? idCardInput.value.trim() : "";
+                if (!idValue) {
                     displayError(idErrorSpan, "Vui lòng nhập số CMND/CCCD.");
                     isValid = false;
-                } else if (!/^\d{9,12}$/.test(idCardInput.value.trim())) {
+                } else if (!/^\d{9,12}$/.test(idValue)) {
                     displayError(
                         idErrorSpan,
                         "Số CMND/CCCD không hợp lệ (9-12 số)."
@@ -726,18 +1071,29 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+        // Check for duplicate ID numbers
+        if (!validateAllIdFields()) {
+            isValid = false;
+        }
+
+        // Enhanced customer validation
         const fieldsToValidate = [
             {
                 input: customerFullNameInput,
                 errorId: "customerFullNameError",
                 msg: "Vui lòng nhập họ tên người đặt vé.",
+                minLength: 2,
+                maxLength: 100,
+                pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                patternMsg: "Họ tên chỉ được chứa chữ cái và khoảng trắng.",
             },
             {
                 input: customerEmailInput,
                 errorId: "customerEmailError",
                 msg: "Vui lòng nhập email.",
-                pattern: /\S+@\S+\.\S+/,
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 patternMsg: "Email không hợp lệ.",
+                maxLength: 254,
             },
             {
                 input: customerEmailConfirmInput,
@@ -748,8 +1104,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 input: customerPhoneInput,
                 errorId: "customerPhoneError",
                 msg: "Vui lòng nhập số điện thoại.",
-                pattern: /^\d{10,11}$/,
-                patternMsg: "Số điện thoại không hợp lệ (10-11 số).",
+                pattern: /^0\d{9,10}$/,
+                patternMsg: "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và có 10-11 số).",
             },
             {
                 input: customerIDCardInput,
@@ -763,43 +1119,61 @@ document.addEventListener("DOMContentLoaded", function () {
         fieldsToValidate.forEach((field) => {
             const errorSpan = document.getElementById(field.errorId);
             clearError(errorSpan);
-            if (!field.optional && !field.input.value.trim()) {
+            const value = field.input && field.input.value ? field.input.value.trim() : "";
+            
+            if (!field.optional && !value) {
                 displayError(errorSpan, field.msg);
                 isValid = false;
-            } else if (
-                field.pattern &&
-                field.input.value.trim() &&
-                !field.pattern.test(field.input.value.trim())
-            ) {
-                displayError(errorSpan, field.patternMsg);
-                isValid = false;
+            } else if (value) {
+                if (field.minLength && value.length < field.minLength) {
+                    displayError(errorSpan, `${field.input.placeholder || 'Trường này'} phải có ít nhất ${field.minLength} ký tự.`);
+                    isValid = false;
+                } else if (field.maxLength && value.length > field.maxLength) {
+                    displayError(errorSpan, `${field.input.placeholder || 'Trường này'} không được quá ${field.maxLength} ký tự.`);
+                    isValid = false;
+                } else if (field.pattern && !field.pattern.test(value)) {
+                    displayError(errorSpan, field.patternMsg);
+                    isValid = false;
+                }
             }
         });
 
+        // Email confirmation validation
         const emailConfirmErrorSpan = document.getElementById(
             "customerEmailConfirmError"
         );
         clearError(emailConfirmErrorSpan);
-        if (!customerEmailConfirmInput.value.trim()) {
+        const emailValue = customerEmailInput && customerEmailInput.value ? customerEmailInput.value.trim() : "";
+        const emailConfirmValue = customerEmailConfirmInput && customerEmailConfirmInput.value ? customerEmailConfirmInput.value.trim() : "";
+        
+        if (!emailConfirmValue) {
             displayError(emailConfirmErrorSpan, "Vui lòng nhập lại email.");
             isValid = false;
-        } else if (
-            customerEmailInput.value.trim() !==
-            customerEmailConfirmInput.value.trim()
-        ) {
+        } else if (emailValue !== emailConfirmValue) {
             displayError(emailConfirmErrorSpan, "Email nhập lại không khớp.");
             isValid = false;
         }
 
+        // Terms agreement validation
         const agreeTermsErrorSpan = document.getElementById("agreeTermsError");
         clearError(agreeTermsErrorSpan);
-        if (!agreeTermsCheckbox.checked) {
+        if (!agreeTermsCheckbox || !agreeTermsCheckbox.checked) {
             displayError(
                 agreeTermsErrorSpan,
                 "Bạn phải đồng ý với điều khoản."
             );
             isValid = false;
         }
+
+        // Check for expired seat holds
+        const expiredRows = passengerDetailsBody.querySelectorAll(".expired-hold-row");
+        if (expiredRows.length > 0) {
+            displayGeneralError("Có vé đã hết hạn giữ. Vui lòng xóa các vé hết hạn trước khi thanh toán.");
+            isValid = false;
+        }
+
+        // Note: We allow customer ID to match passenger ID (customer can book for themselves)
+        // This validation has been removed to allow self-booking
 
         return isValid;
     }
