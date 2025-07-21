@@ -25,12 +25,6 @@ public class EditUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (action != null && action.equals("delete")) {
-            doPost(request, response);
-            return;
-        }
-        
         int userId = Integer.parseInt(request.getParameter("userId"));
         try {
             Optional<User> userOpt = userRepository.findById(userId);
@@ -50,60 +44,73 @@ public class EditUserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (action != null && action.equals("delete")) {
-            int userId = Integer.parseInt(request.getParameter("userId"));
+        int userId = Integer.parseInt(request.getParameter("userId"));
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String phoneNumber = request.getParameter("phoneNumber");
+        String role = request.getParameter("role");
+        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+        String reason = request.getParameter("reason");
+
+        // Server-side validation
+        boolean isValid = true;
+        if (fullName == null || !fullName.matches("^[a-zA-Z\\sÀ-ỹ]+$")) {
+            request.setAttribute("errorMessage", "Họ và tên không hợp lệ.");
+            isValid = false;
+        }
+        if (email == null || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            request.setAttribute("errorMessage", "Email không hợp lệ.");
+            isValid = false;
+        }
+        if (phoneNumber == null || !phoneNumber.matches("^0\\d{9,10}$")) {
+            request.setAttribute("errorMessage", "Số điện thoại không hợp lệ.");
+            isValid = false;
+        }
+
+        if (!isValid) {
             try {
                 Optional<User> userOpt = userRepository.findById(userId);
-                if (!userOpt.isPresent()) {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-                    return;
+                if (userOpt.isPresent()) {
+                    request.setAttribute("user", userOpt.get());
                 }
-                User existingUser = userOpt.get();
-                userRepository.lockById(userId); // Perform a soft delete by locking the account
-                String newValue = String.format("Xóa tài khoản với ID: %d, tên: %s, email: %s, sđt: %s, role: %s",
-                        existingUser.getUserID(), existingUser.getFullName(), existingUser.getEmail(), existingUser.getPhoneNumber(), existingUser.getRole());
-                logFieldChange(request, existingUser.getEmail(), "User", "Locked", newValue);
-                response.sendRedirect(request.getContextPath() + "/admin/userManagement");
             } catch (SQLException e) {
                 e.printStackTrace();
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting user");
             }
-        } else {
-            int userId = Integer.parseInt(request.getParameter("userId"));
-            String fullName = request.getParameter("fullName");
-            String email = request.getParameter("email");
-            String phoneNumber = request.getParameter("phoneNumber");
-            String role = request.getParameter("role");
-            boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+            request.getRequestDispatcher("/WEB-INF/jsp/admin/editUser.jsp").forward(request, response);
+            return;
+        }
 
-            try {
-                Optional<User> userOpt = userRepository.findById(userId);
-                if (!userOpt.isPresent()) {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-                    return;
-                }
-
-                User existingUser = userOpt.get();
-                
-                logFieldChange(request, existingUser.getEmail(), "FullName", existingUser.getFullName(), fullName);
-                logFieldChange(request, existingUser.getEmail(), "Email", existingUser.getEmail(), email);
-                logFieldChange(request, existingUser.getEmail(), "PhoneNumber", existingUser.getPhoneNumber(), phoneNumber);
-                logFieldChange(request, existingUser.getEmail(), "Role", existingUser.getRole(), role);
-                logFieldChange(request, existingUser.getEmail(), "IsActive", String.valueOf(existingUser.isActive()), String.valueOf(isActive));
-
-                existingUser.setFullName(fullName);
-                existingUser.setEmail(email);
-                existingUser.setPhoneNumber(phoneNumber);
-                existingUser.setRole(role);
-                existingUser.setActive(isActive);
-
-                userRepository.update(existingUser);
-                response.sendRedirect(request.getContextPath() + "/admin/userManagement");
-            } catch (SQLException e) {
-                e.printStackTrace();
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error updating user");
+        try {
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (!userOpt.isPresent()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+                return;
             }
+
+            User existingUser = userOpt.get();
+            
+            logFieldChange(request, existingUser.getEmail(), "FullName", existingUser.getFullName(), fullName);
+            logFieldChange(request, existingUser.getEmail(), "Email", existingUser.getEmail(), email);
+            logFieldChange(request, existingUser.getEmail(), "PhoneNumber", existingUser.getPhoneNumber(), phoneNumber);
+            logFieldChange(request, existingUser.getEmail(), "Role", existingUser.getRole(), role);
+
+            String newIsActiveValue = String.valueOf(isActive);
+            if (!isActive && reason != null && !reason.isEmpty()) {
+                newIsActiveValue += " (Reason: " + reason + ")";
+            }
+            logFieldChange(request, existingUser.getEmail(), "IsActive", String.valueOf(existingUser.isActive()), newIsActiveValue);
+
+            existingUser.setFullName(fullName);
+            existingUser.setEmail(email);
+            existingUser.setPhoneNumber(phoneNumber);
+            existingUser.setRole(role);
+            existingUser.setActive(isActive);
+
+            userRepository.update(existingUser);
+            response.sendRedirect(request.getContextPath() + "/admin/userManagement");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error updating user");
         }
     }
 

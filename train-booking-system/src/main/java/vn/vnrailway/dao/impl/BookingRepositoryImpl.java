@@ -328,6 +328,22 @@ public class BookingRepositoryImpl implements BookingRepository {
         return ticketCodes;
     }
 
+    @Override
+    public List<String> findBookingCodesByEmail(String email) throws SQLException {
+        List<String> bookingCodes = new ArrayList<>();
+        String sql = "SELECT b.BookingCode FROM Bookings b JOIN Users u ON b.UserID = u.UserID WHERE u.Email = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    bookingCodes.add(rs.getString("BookingCode"));
+                }
+            }
+        }
+        return bookingCodes;
+    }
+
     // Main method for testing
     public static void main(String[] args) {
         BookingRepository bookingRepository = new BookingRepositoryImpl();

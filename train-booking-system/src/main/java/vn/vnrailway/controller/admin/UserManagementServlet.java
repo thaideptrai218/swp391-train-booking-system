@@ -37,9 +37,31 @@ public class UserManagementServlet extends HttpServlet {
             request.setAttribute("user", user);
         }
 
+        String searchTerm = request.getParameter("searchTerm");
+        if (searchTerm != null) {
+            searchTerm = searchTerm.trim();
+        }
+        String role = request.getParameter("role");
+        String status = request.getParameter("status");
+
+        int page = 1;
+        int recordsPerPage = 20;
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+
         try {
-            List<User> users = userRepository.findAll();
+            List<User> users = userRepository.searchAndFilterUsers(searchTerm, role, status, (page - 1) * recordsPerPage, recordsPerPage);
+            int noOfRecords = userRepository.countFilteredUsers(searchTerm, role, status);
+            int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
+
             request.setAttribute("users", users);
+            request.setAttribute("noOfPages", noOfPages);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("searchTerm", searchTerm);
+            request.setAttribute("selectedRole", role);
+            request.setAttribute("selectedStatus", status);
+
             request.getRequestDispatcher("/WEB-INF/jsp/admin/userManagement.jsp").forward(request, response);
         } catch (SQLException e) {
             e.printStackTrace();

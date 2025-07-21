@@ -33,6 +33,47 @@ public class AddUserServlet extends HttpServlet {
         String phoneNumber = request.getParameter("phoneNumber");
         String role = request.getParameter("role");
 
+        // Server-side validation
+        boolean isValid = true;
+        if (fullName == null || !fullName.matches("^[a-zA-Z\\sÀ-ỹ]+$")) {
+            request.setAttribute("errorMessage", "Họ và tên không hợp lệ.");
+            isValid = false;
+        }
+        if (email == null || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            request.setAttribute("errorMessage", "Email không hợp lệ.");
+            isValid = false;
+        }
+        if (phoneNumber == null || !phoneNumber.matches("^0\\d{9,10}$")) {
+            request.setAttribute("errorMessage", "Số điện thoại không hợp lệ.");
+            isValid = false;
+        }
+        if (password == null || password.length() < 8) {
+            request.setAttribute("errorMessage", "Mật khẩu phải có ít nhất 8 ký tự.");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            request.getRequestDispatcher("/WEB-INF/jsp/admin/addUser.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            if (userRepository.findByEmail(email).isPresent()) {
+                request.setAttribute("errorMessage", "Email đã tồn tại.");
+                request.getRequestDispatcher("/WEB-INF/jsp/admin/addUser.jsp").forward(request, response);
+                return;
+            }
+            if (userRepository.findByPhone(phoneNumber).isPresent()) {
+                request.setAttribute("errorMessage", "Số điện thoại đã tồn tại.");
+                request.getRequestDispatcher("/WEB-INF/jsp/admin/addUser.jsp").forward(request, response);
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error checking user existence");
+            return;
+        }
+
         User newUser = new User();
         newUser.setPasswordHash(vn.vnrailway.utils.HashPassword.hashPassword(password));
         newUser.setFullName(fullName);
@@ -49,7 +90,8 @@ public class AddUserServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/userManagement");
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error adding user");
+            request.setAttribute("errorMessage", "Error adding user: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/jsp/admin/addUser.jsp").forward(request, response);
         }
     }
 

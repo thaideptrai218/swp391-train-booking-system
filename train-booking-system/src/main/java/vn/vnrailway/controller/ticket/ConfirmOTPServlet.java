@@ -61,7 +61,7 @@ public class ConfirmOTPServlet extends HttpServlet {
 
             }
 
-            session.setAttribute("successMessage", "Xác nhận mã OTP thành công. Vui lòng chờ xử lý hoàn tiền trong vòng 24 giờ.");
+            session.setAttribute("refundSuccessMessage", "Xác nhận mã OTP thành công. Vui lòng chờ xử lý hoàn tiền trong vòng 24 giờ.");
             response.sendRedirect(request.getContextPath());
         } else {
             request.setAttribute("message", "Mã OTP không chính xác.");

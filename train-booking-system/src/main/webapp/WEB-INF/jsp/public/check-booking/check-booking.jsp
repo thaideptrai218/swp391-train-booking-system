@@ -76,6 +76,7 @@
                     </tr>
                     <tr>
                       <td><button type="submit"><strong>Xác Nhận</strong></button></td>
+                      <td><a href="${pageContext.request.contextPath}/forgotbookingcode" style="margin-left: 10px;">Quên mã đặt chỗ?</a></td>
                     </tr>
                   </tbody>
                 </table>

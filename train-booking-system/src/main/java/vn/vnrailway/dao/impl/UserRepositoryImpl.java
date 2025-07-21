@@ -96,6 +96,137 @@ public class UserRepositoryImpl implements UserRepository {
         return users;
     }
 
+    public List<User> findWithPagination(int offset, int limit) throws SQLException {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM Users ORDER BY UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        }
+        return users;
+    }
+
+    public int countAll() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Users";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    public List<User> searchAndFilterUsers(String searchTerm, String role, String status, int offset, int limit) throws SQLException {
+        List<User> users = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM Users WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append(" AND (");
+
+            // FullName search logic
+            String[] searchWords = searchTerm.split("\\s+");
+            sql.append("(");
+            for (int i = 0; i < searchWords.length; i++) {
+                if (i > 0) {
+                    sql.append(" AND ");
+                }
+                sql.append("FullName LIKE ?");
+                params.add("%" + searchWords[i] + "%");
+            }
+            sql.append(")");
+
+            // OR Email OR PhoneNumber
+            sql.append(" OR Email LIKE ? OR PhoneNumber LIKE ?)");
+            params.add("%" + searchTerm + "%");
+            params.add("%" + searchTerm + "%");
+        }
+        
+        if (role != null && !role.isEmpty() && !role.equals("all")) {
+            sql.append(" AND Role = ?");
+            params.add(role);
+        }
+
+        if (status != null && !status.isEmpty() && !status.equals("all")) {
+            sql.append(" AND IsActive = ?");
+            params.add("active".equals(status));
+        }
+
+        sql.append(" ORDER BY UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(limit);
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        }
+        return users;
+    }
+
+    public int countFilteredUsers(String searchTerm, String role, String status) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Users WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append(" AND (");
+
+            // FullName search logic
+            String[] searchWords = searchTerm.split("\\s+");
+            sql.append("(");
+            for (int i = 0; i < searchWords.length; i++) {
+                if (i > 0) {
+                    sql.append(" AND ");
+                }
+                sql.append("FullName LIKE ?");
+                params.add("%" + searchWords[i] + "%");
+            }
+            sql.append(")");
+
+            // OR Email OR PhoneNumber
+            sql.append(" OR Email LIKE ? OR PhoneNumber LIKE ?)");
+            params.add("%" + searchTerm + "%");
+            params.add("%" + searchTerm + "%");
+        }
+
+        if (role != null && !role.isEmpty() && !role.equals("all")) {
+            sql.append(" AND Role = ?");
+            params.add(role);
+        }
+
+        if (status != null && !status.isEmpty() && !status.equals("all")) {
+            sql.append(" AND IsActive = ?");
+            params.add("active".equals(status));
+        }
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
     @Override
     public List<User> findByRole(String role) throws SQLException {
         List<User> users = new ArrayList<>();
@@ -116,7 +247,7 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) throws SQLException {
         String sql = "INSERT INTO Users (FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
@@ -157,13 +288,7 @@ public class UserRepositoryImpl implements UserRepository {
                 if (generatedKeys.next()) {
                     user.setUserID(generatedKeys.getInt(1));
                 } else {
-                    // This might happen if UserID is not an identity column or not configured to
-                    // return.
-                    // Or if the DB doesn't support RETURN_GENERATED_KEYS in this way for this
-                    // table.
-                    // For now, we assume it should return an ID.
-                    System.err.println(
-                            "Creating user succeeded, but no ID was obtained. UserID might not be auto-generated or not configured to be returned.");
+                    throw new SQLException("Creating user failed, no ID obtained.");
                 }
             }
         }
@@ -381,13 +506,38 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<Object[]> getLogsByPage(int page, int pageSize) throws SQLException {
+    public List<Object[]> getLogsByPage(int page, int pageSize, String searchTerm, String action, String startDate, String endDate) throws SQLException {
         List<Object[]> auditLogs = new ArrayList<>();
-        String sql = "SELECT LogId, EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime FROM dbo.AuditLogs ORDER BY LogId ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        StringBuilder sql = new StringBuilder("SELECT LogId, EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime FROM dbo.AuditLogs WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append(" AND TargetEmail LIKE ?");
+            params.add("%" + searchTerm + "%");
+        }
+
+        if (action != null && !action.isEmpty() && !action.equals("all")) {
+            sql.append(" AND Action = ?");
+            params.add(action);
+        }
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND LogTime >= ?");
+            params.add(startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND LogTime <= ?");
+            params.add(endDate);
+        }
+
+        sql.append(" ORDER BY LogId ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add((page - 1) * pageSize);
+        params.add(pageSize);
+
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, (page - 1) * pageSize);
-            ps.setInt(2, pageSize);
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Object[] log = new Object[7];
@@ -406,13 +556,37 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public int getTotalLogCount() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM dbo.AuditLogs";
+    public int getTotalLogCount(String searchTerm, String action, String startDate, String endDate) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM dbo.AuditLogs WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append(" AND TargetEmail LIKE ?");
+            params.add("%" + searchTerm + "%");
+        }
+
+        if (action != null && !action.isEmpty() && !action.equals("all")) {
+            sql.append(" AND Action = ?");
+            params.add(action);
+        }
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND LogTime >= ?");
+            params.add(startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND LogTime <= ?");
+            params.add(endDate);
+        }
+
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         }
         return 0;

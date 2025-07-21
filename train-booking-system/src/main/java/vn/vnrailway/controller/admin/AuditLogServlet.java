@@ -33,14 +33,26 @@ public class AuditLogServlet extends HttpServlet {
             page = Integer.parseInt(request.getParameter("page"));
         }
 
+        String searchTerm = request.getParameter("searchTerm");
+        if (searchTerm != null) {
+            searchTerm = searchTerm.trim();
+        }
+        String action = request.getParameter("action");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+
         try {
-            List<Object[]> auditLogs = userRepository.getLogsByPage(page, pageSize);
-            int totalLogs = userRepository.getTotalLogCount();
+            List<Object[]> auditLogs = userRepository.getLogsByPage(page, pageSize, searchTerm, action, startDate, endDate);
+            int totalLogs = userRepository.getTotalLogCount(searchTerm, action, startDate, endDate);
             int totalPages = (int) Math.ceil((double) totalLogs / pageSize);
 
             request.setAttribute("auditLogs", auditLogs);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
+            request.setAttribute("searchTerm", searchTerm);
+            request.setAttribute("selectedAction", action);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
             request.getRequestDispatcher("/WEB-INF/jsp/admin/auditLog.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new ServletException("Database error while retrieving audit logs", e);

@@ -34,28 +34,62 @@ public class AdminDashboardServlet extends HttpServlet {
         DashboardDAO dashboardDAO = new DashboardDAO();
 
         // Lấy các thống kê
-        int totalUsers = dashboardDAO.getTotalUsers();
-        double avgUsersPerMonth = dashboardDAO.getAverageUsersPerMonth();
-        double avgUsersPerYear = dashboardDAO.getAverageUsersPerYear();
+        int totalAccounts = dashboardDAO.getTotalUsers();
+        int customerAccounts = dashboardDAO.getUserCountByRole("Customer");
+        int guestAccounts = dashboardDAO.getUserCountByRole("Guest");
 
         // Set attributes
-        request.setAttribute("totalUsers", totalUsers);
-        request.setAttribute("avgUsersPerMonth", String.format("%.2f", avgUsersPerMonth));
-        request.setAttribute("avgUsersPerYear", String.format("%.2f", avgUsersPerYear));
+        request.setAttribute("totalAccounts", totalAccounts);
+        request.setAttribute("customerAccounts", customerAccounts);
+        request.setAttribute("guestAccounts", guestAccounts);
 
         // Lấy dữ liệu cho biểu đồ
-        String yearParam = request.getParameter("year");
-        int year = (yearParam != null) ? Integer.parseInt(yearParam) : Calendar.getInstance().get(Calendar.YEAR);
+        Map<String, Integer> genderDistribution = dashboardDAO.getGenderDistribution();
+        Map<String, Integer> ageGroupDistribution = dashboardDAO.getAgeGroupDistribution();
+        Map<String, Integer> activeStatusDistribution = dashboardDAO.getActiveStatusDistribution();
+        
+        String loginRatioDaysParam = request.getParameter("loginRatioDays");
+        int loginRatioDays = (loginRatioDaysParam != null && !loginRatioDaysParam.isEmpty()) ? Integer.parseInt(loginRatioDaysParam) : 7; // Default to 7 days
+        Map<String, Integer> loginRatio = dashboardDAO.getLoginRatio(loginRatioDays);
+        
+        String viewMode = request.getParameter("viewMode");
+        if (viewMode == null || viewMode.isEmpty()) {
+            viewMode = "overview"; // Default view
+        }
 
-        Map<String, Integer> trends = dashboardDAO.getMonthlyUserRegistrations(year);
-        List<Integer> registrationYears = dashboardDAO.getRegistrationYears();
+        Map<String, Integer> trends;
+        List<Integer> registrationYears = null;
+        int selectedYear = 0;
+        int selectedTrendDays = 0;
+
+        if ("details".equals(viewMode)) {
+            String trendDaysParam = request.getParameter("trendDays");
+            selectedTrendDays = (trendDaysParam != null && !trendDaysParam.isEmpty()) ? Integer.parseInt(trendDaysParam) : 7;
+            trends = dashboardDAO.getDailyUserRegistrations(selectedTrendDays);
+        } else { // "overview"
+            String yearParam = request.getParameter("year");
+            selectedYear = (yearParam != null) ? Integer.parseInt(yearParam) : Calendar.getInstance().get(Calendar.YEAR);
+            trends = dashboardDAO.getMonthlyUserRegistrations(selectedYear);
+            registrationYears = dashboardDAO.getRegistrationYears();
+        }
 
         // Chuyển Map thành JSON string
         Gson gson = new Gson();
+        request.setAttribute("genderDistribution", gson.toJson(genderDistribution));
+        request.setAttribute("ageGroupDistribution", gson.toJson(ageGroupDistribution));
+        request.setAttribute("activeStatusDistribution", gson.toJson(activeStatusDistribution));
+        request.setAttribute("loginRatio", gson.toJson(loginRatio));
+        request.setAttribute("selectedLoginRatioDays", loginRatioDays);
+        
         String trendDataJson = gson.toJson(trends);
         request.setAttribute("userChart", trendDataJson);
-        request.setAttribute("selectedYear", year);
-        request.setAttribute("registrationYears", registrationYears);
+        request.setAttribute("viewMode", viewMode);
+        if ("details".equals(viewMode)) {
+            request.setAttribute("selectedTrendDays", selectedTrendDays);
+        } else {
+            request.setAttribute("selectedYear", selectedYear);
+            request.setAttribute("registrationYears", registrationYears);
+        }
 
         // Forward to dashboard
         request.getRequestDispatcher("/WEB-INF/jsp/admin/dashboard.jsp")

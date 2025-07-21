@@ -31,9 +31,9 @@
                 <li>
                   <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
                 </li>
-                <li><a href="#">Kiểm tra vé</a></li>
-                <li><a href="#">Trả vé</a></li>
-                <li><a href="#">Hotline</a></li>
+                <li><a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a></li>
+                <li><a href="${pageContext.request.contextPath}/refundTicket">Trả vé</a></li>
+                <li><a href="#" onclick="copyHotline(event)">Hotline</a></li>
                 <c:choose>
                   <c:when
                     test="${not empty sessionScope.loggedInUser and sessionScope.loggedInUser.role == 'Customer'}">
@@ -45,23 +45,18 @@
                           <span class="dropdown-username">${sessionScope.loggedInUser.fullName}</span>
                         </div>
                         <a href="${pageContext.request.contextPath}/customerprofile" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/about-us-male.png" alt="about-us-male"/> -->
                           </i> Tài Khoản</a>
 
                         <a href="${pageContext.request.contextPath}/feedback" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/users-settings.png" alt="users-settings"/> -->
                           </i> Góp ý</a>
 
                         <a href="${pageContext.request.contextPath}/customer-support" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/online-support.png" alt="online-support"/> -->
                           </i> Trợ giúp và hỗ trợ</a>
 
                         <a href="#" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/> -->
                           </i> Mua thẻ VIP</a>
 
                         <a href="#" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/why-us-female.png" alt="why-us-female"/> -->
                           </i> Giỏ vé</a>
 
                         <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout-item"><img
@@ -91,7 +86,7 @@
 
             <div class="actions">
               <a href="${pageContext.request.contextPath}/train-info" class="btn btn-primary">Tìm hiểu thêm</a>
-              <button class="btn btn-secondary">
+              <button class="btn btn-secondary" onclick="copyHotline(event)">
                 <img src="${pageContext.request.contextPath}/assets/images/landing/phone.png" alt="Phone"
                   class="phone-icon" />0983868888
               </button>
@@ -274,7 +269,7 @@
           <div class="container">
             <h2>Đặt vé ngay tại đây</h2>
             <p>Tận hưởng trải nghiệm dịch vụ tốt nhất và đến nơi mà bạn mơ ước</p>
-            <p>Liên hệ ngay: 0963868888</p>
+            <p>Liên hệ ngay: <a href="#" onclick="copyHotline(event)" style="text-decoration: none; color: inherit;">0983868888</a></p>
             <a href="${pageContext.request.contextPath}/searchTrip" class="btn btn-primary btn-book-now-footer"
               style="text-decoration: none">đặt vé</a>
           </div>
@@ -369,7 +364,26 @@
 
       <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
       <script src="${pageContext.request.contextPath}/js/script.js"></script>
+      <script>
+        function copyHotline(event) {
+          event.preventDefault();
+          const hotline = "0983868888";
+          navigator.clipboard.writeText(hotline).then(function() {
+            showToast("Đã sao chép số điện thoại vào clipboard");
+          }, function(err) {
+            console.error('Could not copy text: ', err);
+          });
+        }
 
+        function showToast(message) {
+          const toast = document.getElementById("toast");
+          toast.textContent = message;
+          toast.className = "toast show";
+          setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+      </script>
+
+      <div id="toast" class="toast"></div>
       <div id="stationModal" class="modal">
         <div class="modal-content">
           <div class="modal-header">

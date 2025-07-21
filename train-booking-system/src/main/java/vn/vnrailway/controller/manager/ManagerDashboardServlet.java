@@ -8,7 +8,7 @@ import java.util.stream.Collectors; // Added for JSON serialization
 // Removed: SimpleDateFormat, Calendar, Date, Map, Collectors
 
 import jakarta.servlet.ServletException;
-import vn.vnrailway.dao.DashboardDAO; // Added
+// import vn.vnrailway.dao.DashboardDAO; // Added
 import vn.vnrailway.dao.StationRepository;
 import vn.vnrailway.dao.TicketRepository;
 import vn.vnrailway.dao.TrainRepository;
@@ -46,14 +46,14 @@ public class ManagerDashboardServlet extends HttpServlet {
                 TripRepository tripRepository = new TripRepositoryImpl();
                 StationRepository stationRepository = new StationRepositoryImpl();
                 TrainRepository trainRepository = new TrainRepositoryImpl();
-                DashboardDAO dashboardDAO = new DashboardDAO(); // Added
+                // DashboardDAO dashboardDAO = new DashboardDAO(); // Added
                 int statsLimit = 5;
 
                 try {
                         // Existing stats
                         long totalTicketsSold = ticketRepository.getTotalTicketsSold(); // Consider using
                                                                                         // dashboardDAO.getTotalBookings()
-                        double totalRevenue = dashboardDAO.getTotalRevenue(); // Using dashboardDAO for revenue
+                        double totalRevenue = ticketRepository.getTotalRevenue(); // Using ticketRepository for revenue
                         List<BestSellerLocationDTO> bestSellerLocations = tripRepository
                                         .getBestSellerLocations(statsLimit);
 

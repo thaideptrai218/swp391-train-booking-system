@@ -11,25 +11,25 @@
       <style>
         .toast {
           visibility: hidden;
-          background-color: white;
-          color: #333;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          padding: 16px 24px;
+          background-color: rgba(0, 0, 0, 0.8);
+          color: white;
+          text-align: center;
+          border-radius: 5px;
+          padding: 12px 24px;
           position: fixed;
           z-index: 9999;
-          top: 20px;
           left: 50%;
-          transform: translateX(-50%);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          top: 50%;
+          transform: translate(-50%, -50%);
           opacity: 0;
-          transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
+          transition: opacity 0.3s, visibility 0.3s;
+          font-size: 16px;
+          white-space: nowrap;
         }
 
         .toast.show {
           visibility: visible;
           opacity: 1;
-          transition-delay: 0s;
         }
       </style>
     </head>
@@ -73,9 +73,9 @@
                 <li>
                   <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
                 </li>
-                <li><a href="#">Kiểm tra vé</a></li>
-                <li><a href="#">Trả vé</a></li>
-                <li><a href="#">Hotline</a></li>
+                <li><a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a></li>
+                <li><a href="${pageContext.request.contextPath}/refundTicket">Trả vé</a></li>
+                <li><a href="#" onclick="copyHotline(event)">Hotline</a></li>
                 <c:choose>
                   <c:when
                     test="${not empty sessionScope.loggedInUser and sessionScope.loggedInUser.role == 'Customer'}">
@@ -141,7 +141,7 @@
 
             <div class="actions">
               <a href="${pageContext.request.contextPath}/train-info" class="btn btn-primary">Tìm hiểu thêm</a>
-              <button class="btn btn-secondary">
+              <button class="btn btn-secondary" onclick="copyHotline(event)">
                 <img src="${pageContext.request.contextPath}/assets/images/landing/common/phone.png" alt="Phone"
                   class="phone-icon" />0983868888
               </button>
@@ -326,7 +326,7 @@
           <div class="container">
             <h2>Đặt vé ngay tại đây</h2>
             <p>Tận hưởng trải nghiệm dịch vụ tốt nhất và đến nơi mà bạn mơ ước</p>
-            <p>Liên hệ ngay: 0963868888</p>
+            <p>Liên hệ ngay: <a href="#" onclick="copyHotline(event)" style="text-decoration: none; color: inherit;">0983868888</a></p>
             <a href="${pageContext.request.contextPath}/searchTrip" class="btn btn-primary btn-book-now-footer"
               style="text-decoration: none">đặt vé</a>
           </div>
@@ -421,7 +421,33 @@
 
       <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
       <script src="${pageContext.request.contextPath}/js/script.js"></script>
+      <script>
+        function copyHotline(event) {
+          event.preventDefault();
+          const hotline = "0983868888";
+          navigator.clipboard.writeText(hotline).then(function() {
+            showToast("Đã sao chép số điện thoại vào clipboard");
+          }, function(err) {
+            console.error('Could not copy text: ', err);
+          });
+        }
 
+        function showToast(message) {
+            let toast = document.getElementById("toast");
+            if (!toast) {
+                const toastDiv = document.createElement('div');
+                toastDiv.id = 'toast';
+                toastDiv.className = 'toast';
+                document.body.appendChild(toastDiv);
+                toast = toastDiv;
+            }
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(function(){ toast.classList.remove("show"); }, 3000);
+        }
+      </script>
+
+      <div id="toast" class="toast"></div>
       <div id="stationModal" class="modal">
         <div class="modal-content">
           <div class="modal-header">

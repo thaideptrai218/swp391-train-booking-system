@@ -40,7 +40,7 @@ public class RoleFilter implements Filter {
         "/confirmRefundTicket", "/confirmOTP", "/refundProcessing",
         "/checkRefundTicket", "/searchTrip", "/searchTripBackground",
         "/storeRoute", "/getCoachSeatsWithPrice", "/all-locations",
-        "/landing", "/terms", "/ticketPayment"
+        "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode"
     );
     
     // Public path patterns (using regex for flexibility)
@@ -53,11 +53,14 @@ public class RoleFilter implements Filter {
         Pattern.compile("^/authentication/.*"),
         Pattern.compile("^/api/stations/.*"),
         Pattern.compile("^/api/trip/.*"),
+        Pattern.compile("^/api/seats/.*"),
+        Pattern.compile("^/api/booking/initiate.*"),
         Pattern.compile("^/api/seat/getCoachSeats.*"),
         Pattern.compile("^/trip/.*"),
         Pattern.compile("^/train-info/.*"),
         Pattern.compile("^/check-booking/.*"),
-        Pattern.compile("^/payment/.*")
+        Pattern.compile("^/payment/.*"),
+        Pattern.compile("^/api/payment/.*")
     );
     
     // Role-specific access patterns

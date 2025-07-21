@@ -8,7 +8,7 @@
             <head>
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <title>Hỗ trợ Khách hàng</title>
+                <title>Kiểm tra hoàn vé</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/staff-message.css" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -115,7 +115,7 @@
 
                     <main class="main-content">
                         <header class="header">
-                            <h1>Hỗ trợ Khách hàng</h1>
+                            <h1>Kiểm tra hoàn vé</h1>
                             <div class="user-info">
                                 <span>Đăng nhập với tư cách: Người dùng nhân viên</span>
                             </div>

@@ -55,7 +55,7 @@ public class HoldSeatApiServlet extends HttpServlet {
                 return;
             }
 
-            HttpSession httpSession = request.getSession();
+            HttpSession httpSession = request.getSession(true);
             String sessionId = httpSession.getId();
             Integer userId = (Integer) httpSession.getAttribute("userId"); // Assuming userId is stored in session upon login
 

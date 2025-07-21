@@ -54,13 +54,7 @@ public class InitiateBookingApiServlet extends HttpServlet {
                 return;
             }
 
-            HttpSession httpSession = request.getSession(false);
-            if (httpSession == null) {
-                JsonUtils.toJson(ApiResponse.error("No active session found. Please select seats again."),
-                        response.getWriter());
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+            HttpSession httpSession = request.getSession(true);
             String sessionId = httpSession.getId();
 
             conn = DBContext.getConnection();
