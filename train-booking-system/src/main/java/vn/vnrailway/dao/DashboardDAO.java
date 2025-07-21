@@ -1,5 +1,6 @@
 package vn.vnrailway.dao;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,22 @@ public class DashboardDAO {
     }
 
     public List<Integer> getRegistrationYears() {
+        return null;
+    }
+
+    public Map<String, Integer> getRefundRequestStatus() throws SQLException {
+        return null;
+    }
+
+    public Map<String, Integer> getRefundRequestsOverTime(int days) throws SQLException {
+        return null;
+    }
+
+    public Map<String, Integer> getFeedbackStatus() throws SQLException {
+        return null;
+    }
+
+    public Map<String, Integer> getFeedbackByTopic() throws SQLException {
         return null;
     }
 }
