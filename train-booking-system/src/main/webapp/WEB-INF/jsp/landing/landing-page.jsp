@@ -56,8 +56,8 @@
                         <a href="#" class="dropdown-item">
                           </i> Mua thẻ VIP</a>
 
-                        <a href="#" class="dropdown-item">
-                          </i> Giỏ vé</a>
+                        <a href="${pageContext.request.contextPath}/changepassword" class="dropdown-item">
+                          </i> Thay đổi Mật khẩu</a>
 
                         <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout-item"><img
                             width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/exit--v1.png"
