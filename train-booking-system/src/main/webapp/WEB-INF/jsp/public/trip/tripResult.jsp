@@ -33,7 +33,9 @@ uri="jakarta.tags.core" %> <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
       <aside class="sidebar">
         <div class="shopping-cart-placeholder">
           <h3><i class="fas fa-shopping-cart"></i> Giỏ hàng</h3>
-          <p>(Chưa có vé nào)</p>
+          <div class="shopping-cart-content">
+            <p class="cart-empty-initial">Giỏ hàng trống - Chọn vé để bắt đầu đặt mua</p>
+          </div>
         </div>
         <div class="mini-search-placeholder">
           <h3><i class="fas fa-search"></i> Tìm kiếm lại</h3>
