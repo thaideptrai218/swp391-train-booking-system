@@ -10,6 +10,7 @@
       <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing-page.css" />
       <style>
         .toast {
+          height: 30px;
           visibility: hidden;
           background-color: rgba(0, 0, 0, 0.8);
           color: white;
