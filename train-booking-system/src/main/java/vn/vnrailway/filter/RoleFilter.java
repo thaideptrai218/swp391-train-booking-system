@@ -69,9 +69,11 @@ public class RoleFilter implements Filter {
             "MANAGER", Set.of(
                     Pattern.compile("^/manager/.*"),
                     Pattern.compile("^/managerDashboard$"),
+                    Pattern.compile("^/(manageHolidays|addHoliday|editHoliday|holidayPriceSelector|)$"),
                     Pattern.compile("^/(addPriceRule|addRoute|addStation|addTrip)$"),
                     Pattern.compile("^/(editPriceRule|editStation|routeDetail|tripDetail)$"),
                     Pattern.compile("^/manage(Price|Routes|Staffs|Stations|TrainsSeats|Trips)$"),
+                    Pattern.compile("^/(manageCancellationPolicies|createPolicy|updatePolicy)$"),
                     Pattern.compile("^/(sidebar|train_form)$")),
             "STAFF", Set.of(
                     Pattern.compile("^/staff/.*"),
