@@ -36,6 +36,15 @@ import java.util.Optional; // Added
 import vn.vnrailway.dao.HolidayPriceRepository;
 import vn.vnrailway.dao.impl.HolidayPriceRepositoryImpl;
 import vn.vnrailway.model.HolidayPrice;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
 
 @WebServlet("/manageTrips")
 public class ManageTripsServlet extends HttpServlet {
@@ -366,6 +375,77 @@ public class ManageTripsServlet extends HttpServlet {
                 String newStatus = request.getParameter("tripStatus");
                 if (newStatus != null && !newStatus.trim().isEmpty()) {
                     tripRepository.updateTripStatus(tripId, newStatus);
+                    // Nếu trạng thái là Hủy chuyến thì gửi email hoàn tiền cho khách
+                    if ("Hủy chuyến".equalsIgnoreCase(newStatus) || "Cancelled".equalsIgnoreCase(newStatus)) {
+                        // Lấy danh sách vé theo TripID
+                        vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                        vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
+                        vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
+                        java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(tripId);
+                        java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
+                        for (vn.vnrailway.model.Ticket ticket : tickets) {
+                            bookingIds.add(ticket.getBookingID());
+                        }
+                        java.util.Set<String> sentEmails = new java.util.HashSet<>();
+                        for (Integer bookingId : bookingIds) {
+                            java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository.findById(bookingId);
+                            if (bookingOpt.isPresent()) {
+                                vn.vnrailway.model.Booking booking = bookingOpt.get();
+                                int userId = booking.getUserID();
+                                java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository.findById(userId);
+                                if (userOpt.isPresent()) {
+                                    vn.vnrailway.model.User user = userOpt.get();
+                                    String email = user.getEmail();
+                                    if (email != null && !email.isEmpty() && !sentEmails.contains(email)) {
+                                        // Gửi email hoàn tiền
+                                        try {
+                                            java.util.Properties props = new java.util.Properties();
+                                            props.put("mail.smtp.host", "smtp.gmail.com");
+                                            props.put("mail.smtp.port", "587");
+                                            props.put("mail.smtp.auth", "true");
+                                            props.put("mail.smtp.starttls.enable", "true");
+                                            final String EMAIL_FROM = "assasinhp619@gmail.com";
+                                            final String EMAIL_PASSWORD = "slos bctt epxv osla";
+                                            Session mailSession = Session.getInstance(props, new Authenticator() {
+                                                @Override
+                                                protected PasswordAuthentication getPasswordAuthentication() {
+                                                    return new PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
+                                                }
+                                            });
+                                            Message mimeMessage = new MimeMessage(mailSession);
+                                            mimeMessage.setFrom(new InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
+                                            mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+                                            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+                                            mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+                                            mimeMessage.setSubject(MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                            String messageContent = """
+                                                <html>
+                                                <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
+                                                    <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
+                                                        <h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>
+                                                        <p>Xin chào,</p>
+                                                        <p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>
+                                                        <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
+                                                        <p>Xin cảm ơn!</p>
+                                                        <br/>
+                                                        <p>Trân trọng,</p>
+                                                        <p><strong>Đội ngũ Vetaure</strong></p>
+                                                    </div>
+                                                </body>
+                                                </html>
+                                            """;
+                                            mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
+                                            Transport.send(mimeMessage);
+                                            sentEmails.add(email);
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                            // Có thể log lỗi gửi email ở đây nếu cần
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     request.getSession().setAttribute("successMessage", "Trip status updated for Trip ID: " + tripId);
                 } else {
                     request.getSession().setAttribute("errorMessage", "Trip status cannot be empty.");

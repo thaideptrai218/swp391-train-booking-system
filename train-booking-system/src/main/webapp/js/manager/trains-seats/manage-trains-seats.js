@@ -73,6 +73,26 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('autoCoachName_' + trainId).value = 'Toa ' + nextNumber;
     });
   });
+
+  // Toggle hiển thị coach khi click vào train-header (chỉ 1 train mở, scroll mượt)
+  document.querySelectorAll('.train-header').forEach(function(header) {
+    header.addEventListener('click', function() {
+      var container = header.closest('.train-container');
+      var composition = container.querySelector('.train-composition-display');
+      if (composition) {
+        // Ẩn tất cả các train-composition khác
+        document.querySelectorAll('.train-composition-display').forEach(function(other) {
+          if (other !== composition) other.style.display = 'none';
+        });
+        // Toggle coach của train này
+        composition.style.display = (composition.style.display === 'none' || composition.style.display === '') ? 'flex' : 'none';
+        // Scroll ngang mượt nếu hiển thị
+        if (composition.style.display === 'flex') {
+          composition.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+      }
+    });
+  });
 });
 
 function openModal(modalId) {

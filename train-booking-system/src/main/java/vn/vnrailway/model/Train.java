@@ -13,10 +13,22 @@ public class Train {
     private int trainTypeID; // FK
     // private TrainType trainType; // Object
     private boolean isActive;
+    private boolean isLocked;
 
     public Train(String trainName, String typeCode) {
         this.trainName = trainName;
         this.trainTypeID = Integer.parseInt(typeCode);
         this.isActive = true;
+        this.isLocked = false;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+    public void setLocked(boolean locked) {
+        this.isLocked = locked;
+    }
+    public boolean getIsLocked() {
+        return isLocked;
     }
 }

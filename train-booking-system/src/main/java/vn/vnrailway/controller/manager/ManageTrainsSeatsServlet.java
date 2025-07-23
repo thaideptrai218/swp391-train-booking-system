@@ -67,6 +67,16 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             } else if ("delete_seat".equals(action)) {
                 deleteSeat(request, response);
                 return;
+            } else if ("lock_train".equals(action)) {
+                int trainId = Integer.parseInt(request.getParameter("trainId"));
+                trainRepository.updateTrainLocked(trainId, true);
+                response.sendRedirect("manage-trains-seats");
+                return;
+            } else if ("unlock_train".equals(action)) {
+                int trainId = Integer.parseInt(request.getParameter("trainId"));
+                trainRepository.updateTrainLocked(trainId, false);
+                response.sendRedirect("manage-trains-seats");
+                return;
             }
 
             List<Train> listTrain = trainRepository.getAllTrains();

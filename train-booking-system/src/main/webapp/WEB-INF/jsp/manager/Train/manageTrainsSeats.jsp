@@ -49,10 +49,19 @@
                     <div class="train-header clickable">
                         <span class="train-name">${train.trainName}</span>
                         <div class="actions">
-                            <a href="javascript:void(0);" onclick="openModal('edit-train-modal-${train.trainID}')">Edit</a>
-                            <a href="manage-trains-seats?action=delete_train&trainCode=${train.trainName}" onclick="return confirm('Are you sure you want to delete this train?');">
-                                <i class="fas fa-times-circle"></i>
-                            </a>
+                            <a href="javascript:void(0);" onclick="openModal('edit-train-modal-${train.trainID}')" <c:if test="${train.isLocked}">style="pointer-events:none;opacity:0.5;"</c:if>>Edit</a>
+                            <c:choose>
+                                <c:when test="${train.isLocked}">
+                                    <a href="manage-trains-seats?action=unlock_train&trainId=${train.trainID}" class="lock-btn" title="Mở khóa">
+                                        <i class="fas fa-lock-open"></i>
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="manage-trains-seats?action=lock_train&trainId=${train.trainID}" class="lock-btn" title="Khóa">
+                                        <i class="fas fa-lock"></i>
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
 
@@ -84,21 +93,26 @@
                         </div>
                     </div>
 
-                    <div class="train-composition-display" style="display: none;">
+                    <c:set var="compositionStyleString" value="display: none;" />
+                    <c:if test="${train.isLocked}">
+                      <c:set var="compositionStyleString" value="display: none; pointer-events:none; opacity:0.5" />
+                    </c:if>
+                    <div class="train-composition-display" style="${compositionStyleString}">
                         <div class="train-head-item">
                             <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
                             <span class="train-name-label">${train.trainName}</span>
+                            <c:if test="${train.isLocked}"><span style='color:#ff9800;font-weight:bold;'>(Đã khóa)</span></c:if>
                         </div>
                         <c:forEach var="coach" items="${coachesByTrain[train.trainID]}">
-                            <div class="carriage-item" onclick="toggleCoachDetails('${train.trainID}', '${coach.coachID}')">
+                            <div class="carriage-item" onclick="<c:if test='${!train.isLocked}'>toggleCoachDetails('${train.trainID}', '${coach.coachID}')</c:if>" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                                 <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon"/>
                                 <span class="carriage-number-label">Toa ${coach.coachNumber}</span>
-                                <a href="manage-trains-seats?action=delete_coach&id=${coach.coachID}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this coach?');">
+                                <a href="manage-trains-seats?action=delete_coach&id=${coach.coachID}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this coach?');" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                                     <i class="fas fa-times"></i>
                                 </a>
                             </div>
                         </c:forEach>
-                        <a href="javascript:void(0);" onclick="openModal('add-coach-modal-${train.trainID}')" class="carriage-item">
+                        <a href="javascript:void(0);" onclick="openModal('add-coach-modal-${train.trainID}')" class="carriage-item" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                             <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon" style="opacity:0.5;"/>
                             <span class="carriage-number-label">Add Coach</span>
                         </a>
@@ -133,21 +147,25 @@
                     </div>
 
                     <c:forEach var="coach" items="${coachesByTrain[train.trainID]}">
-                        <div id="coach-details-${train.trainID}-${coach.coachID}" class="coach-details" style="display:none;">
+                        <c:set var="coachDetailsStyleString" value="display:none;" />
+                        <c:if test="${train.isLocked}">
+                          <c:set var="coachDetailsStyleString" value="display:none; pointer-events:none; opacity:0.5" />
+                        </c:if>
+                        <div id="coach-details-${train.trainID}-${coach.coachID}" class="coach-details" style="${coachDetailsStyleString}">
                             <div class="coach-info">
                                 <h3>Toa ${coach.coachNumber} - ${coach.coachName}</h3>
                                 <p>${coach.coachName}</p>
                             </div>
                             <div class="seat-grid">
                                 <c:forEach var="seat" items="${seatsByCoach[coach.coachID]}">
-                                    <div class="seat">
+                                    <div class="seat" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                                         <span>${seat.seatName}</span>
-                                        <a href="manage-trains-seats?action=delete_seat&id=${seat.seatID}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this seat?');">
+                                        <a href="manage-trains-seats?action=delete_seat&id=${seat.seatID}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this seat?');" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                                             <i class="fas fa-times"></i>
                                         </a>
                                     </div>
                                 </c:forEach>
-                                <a href="javascript:void(0);" onclick="openModal('add-seat-modal-${coach.coachID}')" class="seat add-seat-btn">+</a>
+                                <a href="javascript:void(0);" onclick="openModal('add-seat-modal-${coach.coachID}')" class="seat add-seat-btn" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>+</a>
                             </div>
                             <div id="add-seat-modal-${coach.coachID}" class="modal">
                                 <div class="modal-content">
@@ -159,12 +177,12 @@
                                         <table>
                                             <tr>
                                                 <th>Seat Number:</th>
-                                                <td><input type="text" name="seatNumber" required /></td>
+                                                <td><input type="text" name="seatNumber" required <c:if test='${train.isLocked}'>disabled</c:if>/></td>
                                             </tr>
                                             <tr>
                                                 <th>Seat Type:</th>
                                                 <td>
-                                                    <select name="typeCode">
+                                                    <select name="typeCode" <c:if test='${train.isLocked}'>disabled</c:if>>
                                                         <c:forEach var="seatType" items="${listSeatType}">
                                                             <option value="${seatType.seatTypeID}">${seatType.typeName}</option>
                                                         </c:forEach>
@@ -172,7 +190,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td colspan="2"><input type="submit" value="Add Seat" /></td>
+                                                <td colspan="2"><input type="submit" value="Add Seat" <c:if test='${train.isLocked}'>disabled</c:if>/></td>
                                             </tr>
                                         </table>
                                     </form>

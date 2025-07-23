@@ -54,35 +54,34 @@ body {
 
 .train-composition-display {
   display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: flex-end;
+  gap: 32px;
   padding: 32px 32px 16px 32px;
   overflow-x: auto;
-  background: #f4f8fd;
+  background: linear-gradient(90deg, #f4f8fd 60%, #e3eafc 100%);
   border-bottom: 1px solid #e3eafc;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 4px 24px rgba(0, 123, 255, 0.07);
+  transition: all 0.3s;
 }
-
 .carriage-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  cursor: pointer;
-  border: 2px solid #e3eafc;
-  border-radius: 12px;
-  padding: 14px 20px;
-  margin-right: 18px;
-  transition: all 0.3s cubic-bezier(.4,2,.6,1);
-  position: relative;
+  min-width: 120px;
+  margin: 0;
   background: #fff;
-  min-width: 90px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.10);
+  border: 2px solid #e3eafc;
+  transition: box-shadow 0.2s, border 0.2s, background 0.2s;
+  position: relative;
 }
 .carriage-item:hover {
-  transform: translateY(-7px) scale(1.04);
-  box-shadow: 0 10px 24px rgba(0, 123, 255, 0.13);
-  border-color: #007bff;
   background: #eaf4ff;
+  border-color: #007bff;
+  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.18);
+  transform: translateY(-6px) scale(1.04);
+  z-index: 2;
 }
 .carriage-item.active {
   border-color: #0056b3;
@@ -102,11 +101,27 @@ body {
 }
 
 .train-head-item {
+  min-width: 120px;
+  margin: 0;
+  background: #f7faff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.10);
+  border: 2px solid #e3eafc;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  margin-right: 18px;
+  justify-content: center;
+  padding: 10px 0 0 0;
+}
+@media (max-width: 900px) {
+  .train-composition-display {
+    gap: 12px;
+    padding: 16px 8px 8px 8px;
+  }
+  .carriage-item, .train-head-item {
+    min-width: 80px;
+    font-size: 0.95em;
+  }
 }
 
 .train-head-svg-icon {
@@ -394,4 +409,14 @@ form[id^="edit-train-form"] input[type="submit"]:hover {
   color: #fff !important;
   box-shadow: 0 4px 16px rgba(0, 123, 255, 0.18) !important;
   text-decoration: none !important;
+}
+
+.lock-btn {
+  color: #ff9800;
+  margin-left: 10px;
+  font-size: 1.3em;
+  transition: color 0.2s;
+}
+.lock-btn:hover {
+  color: #d84315;
 }

@@ -35,8 +35,8 @@ public class TicketRepositoryImpl implements TicketRepository {
         ticket.setTicketStatus(rs.getString("TicketStatus"));
         ticket.setCoachNameSnapshot(rs.getString("CoachNameSnapshot"));
         ticket.setSeatNameSnapshot(rs.getString("SeatNameSnapshot"));
-        ticket.setPassengerName(rs.getString("PassengerName"));
-        ticket.setPassengerIDCardNumber(rs.getString("PassengerIDCardNumber"));
+        ticket.setPassengerName(rs.getString("PassengerNameSnapshot"));
+        ticket.setPassengerIDCardNumber(rs.getString("PassengerIDCardNumberSnapshot"));
         ticket.setFareComponentDetails(rs.getString("FareComponentDetails"));
 
         int parentTicketIdVal = rs.getInt("ParentTicketID");
