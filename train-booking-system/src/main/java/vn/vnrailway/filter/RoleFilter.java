@@ -39,7 +39,7 @@ public class RoleFilter implements Filter {
             "/confirmRefundTicket", "/confirmOTP", "/refundProcessing",
             "/checkRefundTicket", "/searchTrip", "/searchTripBackground",
             "/storeRoute", "/getCoachSeatsWithPrice", "/all-locations",
-            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode");
+            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode", "/tripInfomation");
 
     // Public path patterns (using regex for flexibility)
     private static final Set<Pattern> PUBLIC_PATH_PATTERNS = Set.of(
@@ -91,8 +91,7 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/(customer-profile|edit-profile|feedback)$"),
                     Pattern.compile("^/(customerprofile|editprofile|customer-support)$"),
                     Pattern.compile("^/(listTicketBooking|submitFeedback)$"),
-                    Pattern.compile("^/api/booking/initiate.*"),
-                    Pattern.compile("^/tripInfomation.*")));
+                    Pattern.compile("^/api/booking/initiate.*")));
 
     // Common authenticated user paths (accessible to all logged-in users)
     private static final Set<Pattern> AUTHENTICATED_PATTERNS = Set.of(

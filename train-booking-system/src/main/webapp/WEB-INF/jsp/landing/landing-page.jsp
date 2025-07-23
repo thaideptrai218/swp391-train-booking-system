@@ -31,6 +31,11 @@
                 <li>
                   <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
                 </li>
+                <li>
+                    <a href="${pageContext.request.contextPath}/tripInfomation"
+                        >Thông tin chuyến tàu</a
+                    >
+                </li>
                 <li><a href="${pageContext.request.contextPath}/checkTicket">Kiểm tra vé</a></li>
                 <li><a href="${pageContext.request.contextPath}/refundTicket">Trả vé</a></li>
                 <li><a href="#" onclick="copyHotline(event)">Hotline</a></li>
