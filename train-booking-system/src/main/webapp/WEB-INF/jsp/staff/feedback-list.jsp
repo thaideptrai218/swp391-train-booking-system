@@ -102,10 +102,12 @@
                                 <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
                                 </li>
                                 <li><a href="#">Quản lý đặt chỗ</a></li>
-                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
+                                </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các vé đã hoàn</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">Danh sách các
+                                        vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>

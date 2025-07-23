@@ -49,5 +49,5 @@ public interface TicketRepository {
     void approveRefundTicket(String ticketInfo) throws SQLException;
 
     List<InfoPassengerDTO> findListTicketBooking(String id) throws SQLException;
-    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests() throws SQLException;
+    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests(String userID) throws SQLException;
 }

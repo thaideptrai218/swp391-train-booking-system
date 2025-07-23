@@ -857,7 +857,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
-    public List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests() throws SQLException {
+    public List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests(String userID) throws SQLException {
         List<ConfirmRefundRequestDTO> list = new ArrayList<>();
 
         String sql = "SELECT \r\n" + //
@@ -936,12 +936,13 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "\r\n" + //
                 "-- JOIN chính sách hoàn vé theo thời gian còn lại\r\n" + //
                 "LEFT JOIN CancellationPolicies CP ON RF.AppliedPolicyID = CP.PolicyID\r\n" + //
-                "WHERE RF.isConfirmed = 0\r\n" + //
+                "WHERE RF.isConfirmed = 0 AND RF.ProcessedByUserID = ?\r\n" + //
                 "    \r\n" + //
                 "ORDER BY RF.ProcessedAt DESC;";
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 ConfirmRefundRequestDTO dto = new ConfirmRefundRequestDTO();
@@ -999,7 +1000,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
         List<ConfirmRefundRequestDTO> confirmedRequests;
         try {
-            confirmedRequests = ticketRepository.getAllConfirmedRefundRequests();
+            confirmedRequests = ticketRepository.getAllConfirmedRefundRequests("15");
             for (ConfirmRefundRequestDTO request : confirmedRequests) {
                 System.out.println(request);
             }

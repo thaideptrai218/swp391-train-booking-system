@@ -22,10 +22,11 @@ public class CheckConfirmRefundRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+                String userID = request.getParameter("userID");
 
         List<ConfirmRefundRequestDTO> confirmRefundRequests;
         try {
-            confirmRefundRequests = ticketRepository.getAllConfirmedRefundRequests();
+            confirmRefundRequests = ticketRepository.getAllConfirmedRefundRequests(userID);
             if (confirmRefundRequests == null || confirmRefundRequests.isEmpty()) {
                 request.setAttribute("message", "Không có yêu cầu hoàn vé nào.");
                 request.getRequestDispatcher("/WEB-INF/jsp/staff/listOfRefundTickets.jsp").forward(request, response);

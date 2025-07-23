@@ -271,7 +271,7 @@
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">Danh sách các
                                         vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
@@ -371,16 +371,20 @@
                                                     <small>SĐT: ${req.staffPhoneNumber}</small><br />
                                                     <small>CMND: ${req.staffIDCard}</small>
                                                 </td>
-                                                <td>
-                                                    <input type="text" name="note" placeholder="Nhập ghi chú..." />
-                                                </td>
-                                                <td>
-                                                    <input type="file" name="image" accept="image/*" />
-                                                </td>
-                                                <td>
-                                                    <button type="submit" name="saveBtn"
-                                                        value="${req.refundID}">Lưu</button>
-                                                </td>
+                                                <form action="">
+                                                    <input type="hidden" name="refundID" value="${req.refundID}" />
+                                                    <td>
+                                                        <input type="text" name="note" placeholder="Nhập ghi chú..." />
+                                                    </td>
+                                                    <td>
+                                                        <input type="file" name="image" accept="image/*" />
+                                                    </td>
+                                                    <td>
+                                                        <button type="submit" name="saveBtn"
+                                                            value="${req.refundID}">Lưu</button>
+                                                    </td>
+                                                </form>
+
                                             </tr>
                                         </c:forEach>
                                     </tbody>
