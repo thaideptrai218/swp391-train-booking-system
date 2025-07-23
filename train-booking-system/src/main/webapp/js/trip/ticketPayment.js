@@ -45,7 +45,33 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTotalPaymentAndPassengerCount();
         startPaymentTimer();
         setupEventListeners();
+        autoPopulateCustomerInfo(); // Auto-populate customer info for logged-in users
         checkCartAndRedirectIfEmpty(); // Check on initial load as well
+    }
+    
+    // Auto-populate customer information for logged-in users
+    function autoPopulateCustomerInfo() {
+        if (typeof loggedInUser !== 'undefined' && loggedInUser) {
+            // Populate full name if available
+            if (loggedInUser.fullName && loggedInUser.fullName.trim() !== '') {
+                customerFullNameInput.value = loggedInUser.fullName.trim();
+            }
+            
+            // Populate email (main field only, leave confirmation empty for user to type)
+            if (loggedInUser.email && loggedInUser.email.trim() !== '') {
+                customerEmailInput.value = loggedInUser.email.trim();
+            }
+            
+            // Populate phone number if available
+            if (loggedInUser.phoneNumber && loggedInUser.phoneNumber.trim() !== '') {
+                customerPhoneInput.value = loggedInUser.phoneNumber.trim();
+            }
+            
+            // Populate ID card number if available
+            if (loggedInUser.idCardNumber && loggedInUser.idCardNumber.trim() !== '') {
+                customerIDCardInput.value = loggedInUser.idCardNumber.trim();
+            }
+        }
     }
 
     // --- UTILITY FUNCTIONS ---

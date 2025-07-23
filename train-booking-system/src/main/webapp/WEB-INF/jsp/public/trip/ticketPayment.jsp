@@ -224,7 +224,7 @@
             <section class="terms-agreement">
                 <input type="checkbox" id="agreeTerms" name="agreeTerms" required aria-describedby="agreeTermsError">
                 <label for="agreeTerms">
-                    <i class="fas fa-check-square"></i> Tôi đã đọc, hiểu rõ và đồng ý với các 
+                    Tôi đã đọc, hiểu rõ và đồng ý với các 
                     <a href="${pageContext.request.contextPath}/termsAndConditions.jsp" target="_blank" rel="noopener noreferrer">điều khoản và điều kiện</a> 
                     mua vé trực tuyến của Đường sắt Việt Nam.
                 </label>
@@ -290,6 +290,16 @@
             } catch (e) {
                 console.error("Error parsing passengerTypesJson:", e, "Raw JSON: ", '${passengerTypesJson}');
             }
+        </c:if>
+        
+        // Auto-populate customer information for logged-in users
+        <c:if test="${not empty loggedInUser}">
+            var loggedInUser = {
+                fullName: "${loggedInUser.fullName}",
+                email: "${loggedInUser.email}",
+                phoneNumber: "${loggedInUser.phoneNumber}",
+                idCardNumber: "${loggedInUser.idCardNumber}"
+            };
         </c:if>
     </script>
     <script src="${pageContext.request.contextPath}/js/trip/ticketPayment.js"></script>
