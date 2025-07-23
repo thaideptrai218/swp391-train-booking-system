@@ -58,7 +58,10 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/train-info/.*"),
             Pattern.compile("^/check-booking/.*"),
             Pattern.compile("^/payment/.*"),
-            Pattern.compile("^/api/payment/.*"));
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/vip/.*"),
+            Pattern.compile("^/vip/.*"));
 
     // Role-specific access patterns
     private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(

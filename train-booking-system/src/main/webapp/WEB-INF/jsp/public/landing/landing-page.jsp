@@ -99,9 +99,8 @@
                           <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/online-support.png" alt="online-support"/> -->
                           </i> Trợ giúp và hỗ trợ</a>
 
-                        <a href="#" class="dropdown-item">
-                          <!-- <img width="24" height="24" src="https://img.icons8.com/fluency-systems-regular/24/computer-support.png" alt="computer-support"/> -->
-                          </i> Mua thẻ VIP</a>
+                        <a href="${pageContext.request.contextPath}/vip/purchase" class="dropdown-item">
+                          <i class="fas fa-crown"></i> Mua thẻ VIP</a>
 
                         <a href="${pageContext.request.contextPath}/changepassword" class="dropdown-item">
                           </i> Thay đổi Mật khẩu</a>
