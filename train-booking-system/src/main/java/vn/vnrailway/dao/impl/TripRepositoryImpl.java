@@ -37,6 +37,8 @@ public class TripRepositoryImpl implements TripRepository {
         trip.setHolidayTrip(rs.getBoolean("IsHolidayTrip"));
         trip.setTripStatus(rs.getString("TripStatus"));
         trip.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier"));
+        // Bổ sung lấy isLocked
+        try { trip.setLocked(rs.getBoolean("IsLocked")); } catch (SQLException ignore) {}
         return trip;
     }
 
@@ -59,7 +61,7 @@ public class TripRepositoryImpl implements TripRepository {
 
     @Override
     public Optional<Trip> findById(int tripId) throws SQLException {
-        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier FROM Trips WHERE TripID = ?";
+        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier, IsLocked FROM Trips WHERE TripID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tripId);
@@ -75,7 +77,7 @@ public class TripRepositoryImpl implements TripRepository {
     @Override
     public List<Trip> findAll() throws SQLException {
         List<Trip> trips = new ArrayList<>();
-        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier FROM Trips";
+        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier, IsLocked FROM Trips";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -89,7 +91,7 @@ public class TripRepositoryImpl implements TripRepository {
     @Override
     public List<Trip> findByTrainId(int trainId) throws SQLException {
         List<Trip> trips = new ArrayList<>();
-        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier FROM Trips WHERE TrainID = ?";
+        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier, IsLocked FROM Trips WHERE TrainID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, trainId);
@@ -105,7 +107,7 @@ public class TripRepositoryImpl implements TripRepository {
     @Override
     public List<Trip> findByRouteId(int routeId) throws SQLException {
         List<Trip> trips = new ArrayList<>();
-        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier FROM Trips WHERE RouteID = ?";
+        String sql = "SELECT TripID, TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier, IsLocked FROM Trips WHERE RouteID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, routeId);
@@ -120,7 +122,7 @@ public class TripRepositoryImpl implements TripRepository {
 
     @Override
     public Trip save(Trip trip) throws SQLException {
-        String sql = "INSERT INTO Trips (TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Trips (TrainID, RouteID, DepartureDateTime, ArrivalDateTime, IsHolidayTrip, TripStatus, BasePriceMultiplier, IsLocked) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -130,11 +132,12 @@ public class TripRepositoryImpl implements TripRepository {
             if (trip.getArrivalDateTime() != null) {
                 ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
             } else {
-                ps.setNull(4, Types.TIMESTAMP); // This should not happen if DB column is NOT NULL
+                ps.setNull(4, Types.TIMESTAMP);
             }
             ps.setBoolean(5, trip.isHolidayTrip());
             ps.setString(6, trip.getTripStatus());
             ps.setBigDecimal(7, trip.getBasePriceMultiplier());
+            ps.setBoolean(8, trip.isLocked());
 
             int affectedRows = ps.executeUpdate();
 
@@ -156,7 +159,7 @@ public class TripRepositoryImpl implements TripRepository {
 
     @Override
     public boolean update(Trip trip) throws SQLException {
-        String sql = "UPDATE Trips SET TrainID = ?, RouteID = ?, DepartureDateTime = ?, ArrivalDateTime = ?, IsHolidayTrip = ?, TripStatus = ?, BasePriceMultiplier = ? WHERE TripID = ?";
+        String sql = "UPDATE Trips SET TrainID = ?, RouteID = ?, DepartureDateTime = ?, ArrivalDateTime = ?, IsHolidayTrip = ?, TripStatus = ?, BasePriceMultiplier = ?, IsLocked = ? WHERE TripID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -166,13 +169,26 @@ public class TripRepositoryImpl implements TripRepository {
             if (trip.getArrivalDateTime() != null) {
                 ps.setTimestamp(4, Timestamp.valueOf(trip.getArrivalDateTime()));
             } else {
-                ps.setNull(4, Types.TIMESTAMP); // This should not happen if DB column is NOT NULL
+                ps.setNull(4, Types.TIMESTAMP);
             }
             ps.setBoolean(5, trip.isHolidayTrip());
             ps.setString(6, trip.getTripStatus());
             ps.setBigDecimal(7, trip.getBasePriceMultiplier());
-            ps.setInt(8, trip.getTripID());
+            ps.setBoolean(8, trip.isLocked());
+            ps.setInt(9, trip.getTripID());
 
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean updateTripLocked(int tripId, boolean isLocked) throws SQLException {
+        String sql = "UPDATE Trips SET IsLocked = ? WHERE TripID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isLocked);
+            ps.setInt(2, tripId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
@@ -428,7 +444,7 @@ public class TripRepositoryImpl implements TripRepository {
         List<Object> params = new ArrayList<>();
 
         StringBuilder sqlBuilder = new StringBuilder("SELECT ");
-        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier ");
+        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier, t.IsLocked ");
         sqlBuilder.append("FROM Trips t ");
         sqlBuilder.append("JOIN Routes r ON t.RouteID = r.RouteID ");
 
@@ -473,6 +489,7 @@ public class TripRepositoryImpl implements TripRepository {
                     dto.setTripStatus(rs.getString("TripStatus"));
                     dto.setRouteID(rs.getInt("RouteID"));
                     dto.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier"));
+                    dto.setLocked(rs.getBoolean("IsLocked"));
                     // trainName, departureDateTime, arrivalDateTime, trainID are no longer part of
                     // the DTO's active fields
                     // or are not selected by the current query for this view.

@@ -58,7 +58,7 @@
                 <c:choose>
                   <c:when test="${not empty listTrips}">
                     <c:forEach var="trip" items="${listTrips}">
-                      <tr>
+                      <tr class="${trip.locked ? 'locked-row' : ''}">
                         <td>${trip.tripID}</td>
                         <td><c:out value="${trip.routeName}" /></td>
                         <td>
@@ -67,27 +67,27 @@
                             <input type="hidden" name="tripId" value="${trip.tripID}" />
                             <input type="hidden" name="isHolidayTrip" id="isHolidayTrip_${trip.tripID}" value="${trip.holidayTrip ? 1 : 0}" />
                             <input type="hidden" name="basePriceMultiplier" id="basePriceMultiplier_${trip.tripID}" value="${trip.basePriceMultiplier}" />
-                            <select id="holidayYesNo_${trip.tripID}" class="form-control-sm holiday-yesno-select" data-trip-id="${trip.tripID}">
+                            <select id="holidayYesNo_${trip.tripID}" class="form-control-sm holiday-yesno-select" data-trip-id="${trip.tripID}" ${trip.locked ? 'disabled' : ''}>
                               <option value="0" ${!trip.holidayTrip ? 'selected' : ''}>Không</option>
                               <option value="1" ${trip.holidayTrip ? 'selected' : ''}>Có</option>
                             </select>
-                            <select id="holidaySelect_${trip.tripID}" class="form-control-sm holiday-select" data-trip-id="${trip.tripID}" style="display: '${trip.holidayTrip ? 'inline-block' : 'none'};'">
+                            <select id="holidaySelect_${trip.tripID}" class="form-control-sm holiday-select" data-trip-id="${trip.tripID}" style="display: '${trip.holidayTrip ? 'inline-block' : 'none'};'" ${trip.locked ? 'disabled' : ''}>
                               <option value="">-- Chọn ngày lễ --</option>
                               <c:forEach var="holiday" items="${allHolidays}">
                                 <option value="${holiday.discountPercentage}" ${trip.basePriceMultiplier == (holiday.discountPercentage / 100) ? 'selected' : ''}>${holiday.holidayName}</option>
                               </c:forEach>
                             </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Lưu</button>
+                            <button type="submit" class="btn btn-primary btn-sm" ${trip.locked ? 'disabled' : ''}>Lưu</button>
                           </form>
                         </td>
                         <td>
-                          <input type="number" id="basePriceMultiplierDisplay_${trip.tripID}" class="form-control-sm" value="${trip.basePriceMultiplier}" step="0.01" min="0" readonly style="width: 80px;"/>
+                          <input type="number" id="basePriceMultiplierDisplay_${trip.tripID}" class="form-control-sm" value="${trip.basePriceMultiplier}" step="0.01" min="0" readonly style="width: 80px;" ${trip.locked ? 'disabled' : ''}/>
                         </td>
                         <td>
                           <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">
                             <input type="hidden" name="action" value="updateTripStatus" />
                             <input type="hidden" name="tripId" value="${trip.tripID}" />
-                            <select name="tripStatus" class="form-control-sm" onchange="this.form.submit()">
+                            <select name="tripStatus" class="form-control-sm" onchange="this.form.submit()" ${trip.locked ? 'disabled' : ''}>
                               <option value="Scheduled" ${trip.tripStatus == 'Scheduled' ? 'selected' : ''}>Lên Lịch</option>
                               <option value="In Progress" ${trip.tripStatus == 'In Progress' ? 'selected' : ''}>Đang Diễn Ra</option>
                               <option value="Completed" ${trip.tripStatus == 'Completed' ? 'selected' : ''}>Đã Hoàn Thành</option>
@@ -96,12 +96,21 @@
                           </form>
                         </td>
                         <td class="table-actions">
-                          <a href="${pageContext.request.contextPath}/tripDetail?tripId=${trip.tripID}" class="action-view-more" title="Xem chi tiết"><i class="fas fa-eye"></i> Xem thêm</a>
-                          <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-block; margin-left: 8px;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyến đi này không?');">
-                            <input type="hidden" name="action" value="deleteTrip" />
+                          <a href="${pageContext.request.contextPath}/tripDetail?tripId=${trip.tripID}" class="action-view-more${trip.locked ? ' disabled-link' : ''}" title="Xem chi tiết" ${trip.locked ? 'tabindex="-1"' : ''}><i class="fas fa-eye"></i> Xem thêm</a>
+                          <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-block; margin-left: 8px; pointer-events:auto; opacity:1;">
+                            <input type="hidden" name="action" value="${trip.locked ? 'unlockTrip' : 'lockTrip'}" />
                             <input type="hidden" name="tripId" value="${trip.tripID}" />
-                            <button type="submit" class="action-delete" title="Xóa chuyến đi"><i class="fas fa-trash-alt"></i> Xóa</button>
+                            <button type="submit" class="lock-btn${trip.locked ? ' locked' : ''}" style="pointer-events:auto; opacity:1;">
+                              <i class="fas ${trip.locked ? 'fa-lock-open' : 'fa-lock'}"></i> <span>${trip.locked ? 'Mở khóa' : 'Khóa'}</span>
+                            </button>
                           </form>
+                          <c:if test="${trip.tripStatus == 'Cancelled'}">
+                            <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-block; margin-left: 8px;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyến đi này không?');">
+                              <input type="hidden" name="action" value="deleteTrip" />
+                              <input type="hidden" name="tripId" value="${trip.tripID}" />
+                              <button type="submit" class="action-delete" title="Xóa chuyến đi" ${trip.locked ? 'disabled' : ''}><i class="fas fa-trash-alt"></i> Xóa</button>
+                            </form>
+                          </c:if>
                         </td>
                       </tr>
                     </c:forEach>

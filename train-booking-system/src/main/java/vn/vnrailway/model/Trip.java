@@ -20,4 +20,5 @@ public class Trip {
     private boolean isHolidayTrip;
     private String tripStatus; // "Scheduled", "In Progress", etc. (Có thể dùng Enum)
     private BigDecimal basePriceMultiplier;
+    private boolean isLocked;
 }

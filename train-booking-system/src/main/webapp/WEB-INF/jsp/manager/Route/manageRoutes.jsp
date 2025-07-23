@@ -121,18 +121,7 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
                     >
                       <i class="fas fa-edit"></i> Sửa
                     </a>
-                    <form
-                      action="${pageContext.request.contextPath}/manageRoutes"
-                      method="post"
-                      style="display: inline"
-                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa tuyến đường này và tất cả các trạm của nó không?');"
-                    >
-                      <input type="hidden" name="action" value="deleteRoute" />
-                      <input type="hidden" name="routeId" value="${route.routeID}" />
-                      <button type="submit" class="btn-link action-link" style="border: none; background: none; padding: 0; cursor: pointer; color: #dc3545;">
-                        <i class="fas fa-trash"></i> Xóa
-                      </button>
-                    </form>
+                    <!-- Đã loại bỏ button Xóa ở đây -->
                   </td>
                 </tr>
               </c:forEach>

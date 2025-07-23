@@ -70,6 +70,7 @@ function removeDiacritics(str) {
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("tripSearchInput");
   const table = document.getElementById("tripsTable");
+  const tbody = table.querySelector("tbody");
   const allRows = Array.from(table.querySelectorAll("tbody tr"));
   const noTripsRow = allRows.find(row => row.querySelector("td[colspan='6']"));
   const dataRows = allRows.filter(row => row !== noTripsRow);
@@ -150,13 +151,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function filterAndPaginate() {
       const searchTerm = removeDiacritics(searchInput.value.toLowerCase().trim().replace(/\s+/g, " "));
-      
       filteredRows = dataRows.filter(row => {
           const tripIdCell = removeDiacritics(row.cells[0].textContent.toLowerCase());
           const routeNameCell = removeDiacritics(row.cells[1].textContent.toLowerCase());
           return tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm);
       });
-
       displayRows(1);
       setupPagination();
   }

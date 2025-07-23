@@ -12,23 +12,28 @@ import java.util.Optional;
 
 public class StationRepositoryImpl implements StationRepository {
 
+    private Station mapResultSetToStation(ResultSet rs) throws SQLException {
+        Station station = new Station();
+        station.setStationID(rs.getInt("StationID"));
+        station.setStationCode(rs.getString("StationCode"));
+        station.setStationName(rs.getString("StationName"));
+        station.setAddress(rs.getString("Address"));
+        station.setCity(rs.getString("City"));
+        station.setRegion(rs.getString("Region"));
+        station.setPhoneNumber(rs.getString("PhoneNumber"));
+        try { station.setLocked(rs.getBoolean("IsLocked")); } catch (SQLException ignore) {}
+        return station;
+    }
+
     @Override
     public Optional<Station> findById(int stationId) throws SQLException {
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber FROM Stations WHERE StationID = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked FROM Stations WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stationId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Station station = new Station();
-                    station.setStationID(rs.getInt("StationID"));
-                    station.setStationCode(rs.getString("StationCode"));
-                    station.setStationName(rs.getString("StationName"));
-                    station.setAddress(rs.getString("Address"));
-                    station.setCity(rs.getString("City"));
-                    station.setRegion(rs.getString("Region"));
-                    station.setPhoneNumber(rs.getString("PhoneNumber"));
-                    return Optional.of(station);
+                    return Optional.of(mapResultSetToStation(rs));
                 }
             }
         }
@@ -61,20 +66,12 @@ public class StationRepositoryImpl implements StationRepository {
     @Override
     public List<Station> findAll() throws SQLException {
         List<Station> stations = new ArrayList<>();
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber FROM Stations";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked FROM Stations";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Station station = new Station();
-                station.setStationID(rs.getInt("StationID"));
-                station.setStationCode(rs.getString("StationCode"));
-                station.setStationName(rs.getString("StationName"));
-                station.setAddress(rs.getString("Address"));
-                station.setCity(rs.getString("City"));
-                station.setRegion(rs.getString("Region"));
-                station.setPhoneNumber(rs.getString("PhoneNumber"));
-                stations.add(station);
+                stations.add(mapResultSetToStation(rs));
             }
         }
         return stations;
@@ -82,7 +79,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public Station save(Station station) throws SQLException {
-        String sql = "INSERT INTO Stations (StationCode, StationName, Address, City, Region, PhoneNumber) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Stations (StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -92,6 +89,7 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setString(4, station.getCity());
             ps.setString(5, station.getRegion());
             ps.setString(6, station.getPhoneNumber());
+            ps.setBoolean(7, station.isLocked());
 
             int affectedRows = ps.executeUpdate();
 
@@ -112,7 +110,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public boolean update(Station station) throws SQLException {
-        String sql = "UPDATE Stations SET StationCode = ?, StationName = ?, Address = ?, City = ?, Region = ?, PhoneNumber = ? WHERE StationID = ?";
+        String sql = "UPDATE Stations SET StationCode = ?, StationName = ?, Address = ?, City = ?, Region = ?, PhoneNumber = ?, IsLocked = ? WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -122,8 +120,21 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setString(4, station.getCity());
             ps.setString(5, station.getRegion());
             ps.setString(6, station.getPhoneNumber());
-            ps.setInt(7, station.getStationID());
+            ps.setBoolean(7, station.isLocked());
+            ps.setInt(8, station.getStationID());
 
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean updateStationLocked(int stationId, boolean isLocked) throws SQLException {
+        String sql = "UPDATE Stations SET IsLocked = ? WHERE StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isLocked);
+            ps.setInt(2, stationId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }

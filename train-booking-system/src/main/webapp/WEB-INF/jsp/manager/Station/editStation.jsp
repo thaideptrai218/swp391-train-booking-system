@@ -15,7 +15,7 @@ prefix="c" %>
     <link rel="stylesheet" href="<c:url value='/css/manager/sidebar.css'/>" />
     <link
       rel="stylesheet"
-      href="<c:url value='/css/manager/manageStations.css'/>"
+      href="<c:url value='/css/manager/stations/manageStations.css'/>"
     />
   </head>
   <body>
@@ -35,57 +35,27 @@ prefix="c" %>
               value="${station.stationID}"
             />
             <div class="form-group">
-              <label for="stationName"
-                >Tên ga: <span class="required-asterisk">*</span></label
-              >
-              <input
-                type="text"
-                id="stationName"
-                name="stationName"
-                value="${station.stationName}"
-                required
-              />
+              <label for="stationName">Tên ga: <span class="required-asterisk">*</span></label>
+              <input type="text" id="stationName" name="stationName" value="${station.stationName}" required class="form-control" />
             </div>
             <div class="form-group">
               <label for="address">Địa chỉ:</label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value="${station.address}"
-              />
+              <input type="text" id="address" name="address" value="${station.address}" class="form-control" />
             </div>
             <div class="form-group">
               <label for="city">Thành phố:</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value="${station.city}"
-              />
+              <input type="text" id="city" name="city" value="${station.city}" class="form-control" />
             </div>
             <div class="form-group">
               <label for="region">Khu vực:</label>
-              <input
-                type="text"
-                id="region"
-                name="region"
-                value="${station.region}"
-              />
+              <input type="text" id="region" name="region" value="${station.region}" class="form-control" />
             </div>
             <div class="form-group">
               <label for="phoneNumber">Số điện thoại:</label>
-              <input
-                type="text"
-                id="phoneNumber"
-                name="phoneNumber"
-                value="${station.phoneNumber}"
-              />
+              <input type="text" id="phoneNumber" name="phoneNumber" value="${station.phoneNumber}" class="form-control" />
             </div>
             <div class="form-group">
-              <button type="submit" name="command" value="edit">
-                Cập nhật ga
-              </button>
+              <button type="submit" name="command" value="edit" class="btn btn-primary">Cập nhật ga</button>
               <a href="manageStations" class="cancel-button">Hủy</a>
             </div>
           </form>

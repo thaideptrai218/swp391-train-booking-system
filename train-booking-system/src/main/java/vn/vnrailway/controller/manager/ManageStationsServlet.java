@@ -47,6 +47,11 @@ public class ManageStationsServlet extends HttpServlet {
         try {
             if (command == null) {
                 message = "No command specified.";
+            } else if ("lockStation".equals(command) || "unlockStation".equals(command)) {
+                int stationId = Integer.parseInt(request.getParameter("stationID"));
+                boolean isLocked = "lockStation".equals(command);
+                stationRepository.updateStationLocked(stationId, isLocked);
+                message = isLocked ? "Ga đã được khóa." : "Ga đã được mở khóa.";
             } else {
                 switch (command) {
                     case "add":

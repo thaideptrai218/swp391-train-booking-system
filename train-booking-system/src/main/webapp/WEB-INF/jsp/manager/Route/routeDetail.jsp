@@ -99,11 +99,7 @@
                     <h2><c:out value="${currentRoute.routeName}" /> (ID: ${currentRoute.routeID})</h2>
                     <div class="route-actions">
                         <a href="${pageContext.request.contextPath}/manageRoutes?action=editRoute&routeId=${currentRoute.routeID}#editRouteForm" class="btn btn-warning"><i class="fas fa-edit"></i> Sửa</a>
-                        <form action="${pageContext.request.contextPath}/manageRoutes" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tuyến đường này và tất cả các trạm của nó không?');">
-                            <input type="hidden" name="action" value="deleteRoute">
-                            <input type="hidden" name="routeId" value="${currentRoute.routeID}">
-                            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Xóa</button>
-                        </form>
+                        <!-- Đã loại bỏ button Xóa ở đây -->
                     </div>
                 </div>
                 <p><strong>Mô tả:</strong> <c:out value="${currentRoute.description}" /></p>

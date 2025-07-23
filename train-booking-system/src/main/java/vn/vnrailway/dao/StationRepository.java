@@ -17,6 +17,8 @@ public interface StationRepository {
 
     boolean update(Station station) throws SQLException;
 
+    boolean updateStationLocked(int stationId, boolean isLocked) throws SQLException;
+
     List<StationPopularityDTO> getMostCommonOriginStations(int limit) throws SQLException;
 
     List<StationPopularityDTO> getMostCommonDestinationStations(int limit) throws SQLException;

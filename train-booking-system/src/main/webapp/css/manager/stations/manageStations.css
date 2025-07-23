@@ -411,3 +411,14 @@ body {
 .lock-btn.locked {
   background-color: #28a745;
 }
+.locked-row {
+  background-color: #f1f3f4 !important;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.disabled-link {
+  pointer-events: none !important;
+  opacity: 0.5 !important;
+  filter: grayscale(0.5);
+  cursor: not-allowed !important;
+}

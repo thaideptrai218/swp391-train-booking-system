@@ -398,6 +398,18 @@ public class ManageTripsServlet extends HttpServlet {
                 e.printStackTrace();
             }
             response.sendRedirect(request.getContextPath() + "/manageTrips");
+        } else if ("lockTrip".equals(action) || "unlockTrip".equals(action)) {
+            try {
+                int tripId = Integer.parseInt(request.getParameter("tripId"));
+                boolean isLocked = "lockTrip".equals(action);
+                tripRepository.updateTripLocked(tripId, isLocked);
+                String msg = isLocked ? "Chuyến đi đã được khóa." : "Chuyến đi đã được mở khóa.";
+                request.getSession().setAttribute("successMessage", msg);
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage", "Lỗi khi cập nhật trạng thái khóa: " + e.getMessage());
+                e.printStackTrace();
+            }
+            response.sendRedirect(request.getContextPath() + "/manageTrips");
         } else {
             doGet(request, response);
         }

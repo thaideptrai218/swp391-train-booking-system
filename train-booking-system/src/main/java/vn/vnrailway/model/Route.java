@@ -11,4 +11,5 @@ public class Route {
     private int routeID;
     private String routeName;
     private String description; // Có thể null
+    private boolean isLocked;
 }

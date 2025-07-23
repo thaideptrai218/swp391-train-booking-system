@@ -71,7 +71,7 @@ prefix="c" %>
               </thead>
               <tbody>
                 <c:forEach var="station" items="${stations}">
-                  <tr>
+                  <tr class="${station.locked ? 'locked-row' : ''}">
                     <td>${station.stationID}</td>
                     <td>${station.stationName}</td>
                     <td>${station.address}</td>
@@ -79,16 +79,16 @@ prefix="c" %>
                     <td>${station.region}</td>
                     <td>${station.phoneNumber}</td>
                     <td class="actions">
-                      <a
-                        href="editStation?id=${station.stationID}"
-                        class="edit-btn"
-                      >
+                      <a href="editStation?id=${station.stationID}" class="edit-btn${station.locked ? ' disabled-link' : ''}" ${station.locked ? 'tabindex="-1"' : ''}>
                         <i class="fas fa-edit"></i> Sửa
                       </a>
-                      <button class="lock-btn" data-id="${station.stationID}">
-                        <i class="fas fa-lock"></i>
-                        <span>Khóa</span>
-                      </button>
+                      <form action="manageStations" method="POST" style="display:inline-block; margin-left:8px; pointer-events:auto; opacity:1;">
+                        <input type="hidden" name="command" value="${station.locked ? 'unlockStation' : 'lockStation'}" />
+                        <input type="hidden" name="stationID" value="${station.stationID}" />
+                        <button type="submit" class="lock-btn${station.locked ? ' locked' : ''}" style="pointer-events:auto; opacity:1;">
+                          <i class="fas ${station.locked ? 'fa-lock-open' : 'fa-lock'}"></i> <span>${station.locked ? 'Mở khóa' : 'Khóa'}</span>
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 </c:forEach>

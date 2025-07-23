@@ -15,4 +15,5 @@ public class Station {
     private String city; // Có thể null
     private String region; // Có thể null
     private String phoneNumber;
+    private boolean isLocked;
 }

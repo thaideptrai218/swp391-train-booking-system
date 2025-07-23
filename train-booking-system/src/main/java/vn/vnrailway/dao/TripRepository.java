@@ -62,6 +62,8 @@ public interface TripRepository {
 
         boolean updateTripBasePriceMultiplier(int tripId, java.math.BigDecimal newMultiplier) throws SQLException;
 
+        boolean updateTripLocked(int tripId, boolean isLocked) throws SQLException;
+
         // Method to count trips associated with a route
         int countTripsByRouteId(int routeId) throws SQLException;
 
