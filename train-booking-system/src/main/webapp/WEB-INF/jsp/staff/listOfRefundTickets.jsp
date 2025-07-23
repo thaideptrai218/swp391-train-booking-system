@@ -138,6 +138,7 @@
                                         <th>Chính sách</th>
                                         <th>Chi phí</th>
                                         <th>Thời gian yêu cầu</th>
+                                        <th>Thời gian xử lý</th>
                                         <th>Người đặt vé</th>
                                         <th>Người xử lý</th>
                                     </tr>
@@ -179,6 +180,9 @@
                                             </td>
                                             <td style="text-align: center;">
                                                 ${req.requestedAt}
+                                            </td>
+                                            <td style="text-align: center;">
+                                                ${req.processedAt}
                                             </td>
                                             <td style="text-align: left;">
                                                 <b>${req.userFullName}</b><br />

@@ -48,4 +48,5 @@ public class ConfirmRefundRequestDTO {
     private String staffEmail;
     private String staffIDCard;
     private String staffPhoneNumber;
+    private boolean isConfirmed;
 }
