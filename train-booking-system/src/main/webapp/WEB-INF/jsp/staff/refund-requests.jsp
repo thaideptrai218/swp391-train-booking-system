@@ -191,7 +191,6 @@
                                                     <input type="hidden" name="ticketInfo"
                                                         value="${req.ticketID}|${req.policyID}|${req.originalPrice}|${req.refundFee}|${req.refundAmount}|${req.requestedAt}|${req.userID}|${sessionScope.loggedInUser.userID}|${req.bookingID}" />
                                                     <input type="hidden" name="email" value="${req.email}" />
-                                                    <input type="text" name="note" placeholder="Nhập chú thích..." />
                                                     <div style="margin-top: 6px;">
                                                         <button type="submit" name="action" value="approve">Chấp
                                                             nhận</button>

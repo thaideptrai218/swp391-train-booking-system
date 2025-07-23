@@ -724,7 +724,7 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     }
 
-    public void rejectRefundTicket(String ticketInfo, String note) throws SQLException {
+    public void rejectRefundTicket(String ticketInfo) throws SQLException {
         String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'RejectedRefund' WHERE TicketID = ?;";
         String updateRefunds = "INSERT INTO Refunds (\r\n" + //
                 "    TicketID,\r\n" + //
@@ -740,7 +740,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID\r\n" + //
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
@@ -772,9 +772,9 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setTimestamp(7, Timestamp.valueOf(requestedAt));
                 ps.setString(8, "Rejected");
                 ps.setString(9, "Bank Transfer"); // Hoặc phương thức hoàn tiền khác
-                ps.setString(10, note);
-                ps.setInt(11, userIDByRequest);
-                ps.setInt(12, userIDByProcessing);
+                ps.setString(10, "");
+                ps.setInt(10, userIDByRequest);
+                ps.setInt(11, userIDByProcessing);
                 ps.executeUpdate();
             }
 
@@ -790,7 +790,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
-    public void approveRefundTicket(String ticketInfo, String note) throws SQLException {
+    public void approveRefundTicket(String ticketInfo) throws SQLException {
         String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Refunded' WHERE TicketID = ?;";
         String updateRefunds = "INSERT INTO Refunds (\r\n" + //
                 "    TicketID,\r\n" + //
@@ -806,7 +806,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID\r\n" + //
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
@@ -838,7 +838,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setString(7, requestedAt);
                 ps.setString(8, "Approved");
                 ps.setString(9, "Bank Transfer"); // Hoặc phương thức hoàn tiền khác
-                ps.setString(10, note);
+                ps.setString(10, "");
                 ps.setInt(11, userIDByRequest);
                 ps.setInt(12, userIDByProcessing);
                 ps.executeUpdate();
