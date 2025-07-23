@@ -61,7 +61,8 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/api/payment/.*"),
             Pattern.compile("^/api/payment/.*"),
             Pattern.compile("^/api/vip/.*"),
-            Pattern.compile("^/vip/.*"));
+            Pattern.compile("^/vip/.*"),
+            Pattern.compile("^/tripInfomation/.*"));
 
     // Role-specific access patterns
     private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(
@@ -90,7 +91,8 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/(customer-profile|edit-profile|feedback)$"),
                     Pattern.compile("^/(customerprofile|editprofile|customer-support)$"),
                     Pattern.compile("^/(listTicketBooking|submitFeedback)$"),
-                    Pattern.compile("^/api/booking/initiate.*")));
+                    Pattern.compile("^/api/booking/initiate.*"),
+                    Pattern.compile("^/tripInfomation.*")));
 
     // Common authenticated user paths (accessible to all logged-in users)
     private static final Set<Pattern> AUTHENTICATED_PATTERNS = Set.of(

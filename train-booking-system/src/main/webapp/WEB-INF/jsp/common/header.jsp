@@ -22,6 +22,9 @@
           <a href="${pageContext.request.contextPath}/searchTrip">Tìm vé</a>
         </li>
         <li>
+          <a href="${pageContext.request.contextPath}/tripInfo">Thông tin chuyến tàu</a>
+        </li>
+        <li>
           <a href="${pageContext.request.contextPath}/checkBooking">Thông tin đặt chỗ</a>
         </li>
         <li><a href="#">Kiểm tra vé</a></li>
