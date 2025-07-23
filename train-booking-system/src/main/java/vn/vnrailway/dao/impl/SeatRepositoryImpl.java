@@ -123,6 +123,22 @@ public class SeatRepositoryImpl implements SeatRepository {
         return seatStatusList;
     }
 
+    @Override
+    public List<Seat> findByCoachId(int coachId) throws SQLException {
+        List<Seat> seats = new ArrayList<>();
+        String sql = "SELECT * FROM Seats WHERE CoachID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coachId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    seats.add(mapResultSetToSeat(rs));
+                }
+            }
+        }
+        return seats;
+    }
+
     private vn.vnrailway.dto.SeatStatusDTO mapResultSetToSeatStatusDTO(ResultSet rs) throws SQLException {
         vn.vnrailway.dto.SeatStatusDTO dto = new vn.vnrailway.dto.SeatStatusDTO();
         dto.setSeatID(rs.getInt("SeatID"));

@@ -159,9 +159,38 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             throws SQLException, IOException {
         int coachId = Integer.parseInt(request.getParameter("coachId"));
         String typeCode = request.getParameter("typeCode");
-        String seatNumber = request.getParameter("seatNumber");
-        Seat newSeat = new Seat(coachId, typeCode, seatNumber);
-        seatRepository.addSeat(newSeat);
+        String rowLetter = request.getParameter("rowLetter");
+        int seatsPerRow = 1;
+        String prefix = "";
+        try {
+            seatsPerRow = Integer.parseInt(request.getParameter("seatsPerRow"));
+            prefix = request.getParameter("prefix");
+            if (prefix == null) prefix = "";
+        } catch (Exception ignored) {}
+        if (rowLetter == null || rowLetter.isEmpty()) rowLetter = "A";
+        // Lấy danh sách seatName và seatNumber đã tồn tại trong coach
+        List<Seat> existingSeats = seatRepository.findByCoachId(coachId);
+        java.util.Set<String> existingNames = new java.util.HashSet<>();
+        java.util.Set<Integer> existingNumbers = new java.util.HashSet<>();
+        int maxSeatNumber = 0;
+        for (Seat s : existingSeats) {
+            existingNames.add(s.getSeatName());
+            existingNumbers.add(s.getSeatNumber());
+            if (s.getSeatNumber() > maxSeatNumber) maxSeatNumber = s.getSeatNumber();
+        }
+        for (int c = 1; c <= seatsPerRow; c++) {
+            String seatName = prefix + rowLetter.toUpperCase() + c;
+            int seatNumber = ++maxSeatNumber;
+            if (!existingNames.contains(seatName) && !existingNumbers.contains(seatNumber)) {
+                Seat newSeat = new Seat();
+                newSeat.setCoachID(coachId);
+                newSeat.setSeatTypeID(Integer.parseInt(typeCode));
+                newSeat.setSeatName(seatName);
+                newSeat.setSeatNumber(seatNumber);
+                newSeat.setEnabled(true);
+                seatRepository.addSeat(newSeat);
+            }
+        }
     }
 
     private void updateTrain(HttpServletRequest request, HttpServletResponse response)

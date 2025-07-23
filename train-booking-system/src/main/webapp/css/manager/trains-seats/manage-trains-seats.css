@@ -163,33 +163,48 @@ body {
 }
 
 .seat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 18px 24px;
   background: #fff;
-  padding: 22px;
-  border-radius: 10px;
+  padding: 28px 10px 18px 10px;
+  border-radius: 12px;
   border: 1.5px solid #e3eafc;
+  min-height: 80px;
 }
 
 .seat {
-  width: 54px;
-  height: 54px;
-  border: 1.5px solid #adb5bd;
-  border-radius: 10px;
+  width: 64px;
+  height: 64px;
+  border: 2px solid #adb5bd;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.08em;
+  font-size: 1.15em;
   font-weight: 700;
   cursor: pointer;
   background: #f8f9fa;
   position: relative;
   transition: all 0.2s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+  margin: 0;
 }
 
 .seat span {
   color: #495057;
+  word-break: break-all;
+  text-align: center;
+}
+
+.seat:hover {
+  transform: scale(1.12);
+  box-shadow: 0 8px 18px rgba(0, 123, 255, 0.18);
+  border-color: #007bff;
+  background: #eaf4ff;
+  z-index: 2;
 }
 
 .add-seat-btn {
@@ -204,12 +219,6 @@ body {
 .add-seat-btn:hover {
   background: #d1e7ff;
   color: #0056b3;
-}
-
-.seat:hover {
-  transform: scale(1.13);
-  box-shadow: 0 6px 14px rgba(0, 123, 255, 0.13);
-  border-color: #007bff;
 }
 
 .delete-btn {
@@ -419,4 +428,17 @@ form[id^="edit-train-form"] input[type="submit"]:hover {
 }
 .lock-btn:hover {
   color: #d84315;
+}
+
+@media (max-width: 900px) {
+  .seat-grid {
+    gap: 10px 8px;
+    padding: 12px 2px 8px 2px;
+  }
+  .seat {
+    width: 44px;
+    height: 44px;
+    font-size: 0.95em;
+    border-radius: 8px;
+  }
 }

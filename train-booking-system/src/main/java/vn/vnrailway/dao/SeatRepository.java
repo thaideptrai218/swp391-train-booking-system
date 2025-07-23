@@ -24,4 +24,6 @@ public interface SeatRepository {
             java.sql.Timestamp bookingDateTime,
             boolean isRoundTrip,
             String currentUserSessionId) throws SQLException;
+
+    List<Seat> findByCoachId(int coachId) throws SQLException;
 }

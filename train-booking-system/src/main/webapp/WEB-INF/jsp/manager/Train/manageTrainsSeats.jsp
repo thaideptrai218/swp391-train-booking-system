@@ -176,8 +176,16 @@
                                         <input type="hidden" name="coachId" value="${coach.coachID}" />
                                         <table>
                                             <tr>
-                                                <th>Seat Number:</th>
-                                                <td><input type="text" name="seatNumber" required <c:if test='${train.isLocked}'>disabled</c:if>/></td>
+                                                <th>Row Letter:</th>
+                                                <td><input type="text" name="rowLetter" maxlength="2" value="A" required /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Seats per Row:</th>
+                                                <td><input type="number" name="seatsPerRow" min="1" value="1" required /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Seat Prefix:</th>
+                                                <td><input type="text" name="prefix" value="" maxlength="2" /></td>
                                             </tr>
                                             <tr>
                                                 <th>Seat Type:</th>
@@ -190,7 +198,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td colspan="2"><input type="submit" value="Add Seat" <c:if test='${train.isLocked}'>disabled</c:if>/></td>
+                                                <td colspan="2"><input type="submit" value="Add Seats" <c:if test='${train.isLocked}'>disabled</c:if>/></td>
                                             </tr>
                                         </table>
                                     </form>
