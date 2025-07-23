@@ -29,7 +29,8 @@ public class CustomerProfileServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         HttpSession session = request.getSession(false); // Do not create a new session if one doesn't exist
 
         if (session == null || session.getAttribute("loggedInUser") == null) {
@@ -40,7 +41,8 @@ public class CustomerProfileServlet extends HttpServlet {
 
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         try {
-            // Fetch the full user details from the database using the email from the session user
+            // Fetch the full user details from the database using the email from the
+            // session user
             Optional<User> userOptional = userRepository.findByEmail(loggedInUser.getEmail());
 
             if (userOptional.isPresent()) {
@@ -52,22 +54,26 @@ public class CustomerProfileServlet extends HttpServlet {
                 if (dateOfBirth != null) {
                     date = Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
-  request.setAttribute("dateOfBirth", date);
-
-  String avatarURL = "";
-  if ("Male".equals(user.getGender())) {
-  avatarURL = "${pageContext.request.contextPath}/assets/images/avatars/male/default.png";
-  } else if ("Female".equals(user.getGender())) {
-  avatarURL = "${pageContext.request.contextPath}/assets/images/avatars/female/default.png";
-  } else {
-  avatarURL = "https://bootdey.com/img/Content/avatar/avatar7.png"; // Default avatar
-  }
-  request.setAttribute("avatarURL", avatarURL);
-
-  request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
-  } else {
-  // User not found in DB, possibly an old session or data inconsistency
-  session.invalidate(); // Invalidate session
+                request.setAttribute("dateOfBirth", date);
+                String avatarPath = user.getAvatarPath();
+                String avatarURL;
+                if (avatarPath != null && !avatarPath.trim().isEmpty()) {
+                    avatarURL = request.getContextPath() + avatarPath;
+                } else {
+                    if ("Male".equalsIgnoreCase(user.getGender())) {
+                        avatarURL = request.getContextPath() + "/assets/images/avatars/male/default.png";
+                    } else if ("Female".equalsIgnoreCase(user.getGender())) {
+                        avatarURL = request.getContextPath() + "/assets/images/avatars/female/default.png";
+                    } else {
+                        avatarURL = "https://bootdey.com/img/Content/avatar/avatar7.png";
+                    }
+                }
+                request.setAttribute("avatarURL", avatarURL);
+                session.setAttribute("loggedInUser", user);
+                request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
+            } else {
+                // User not found in DB, possibly an old session or data inconsistency
+                session.invalidate(); // Invalidate session
                 response.sendRedirect(request.getContextPath() + "/login.jsp?error=userNotFound");
             }
         } catch (SQLException e) {
@@ -79,7 +85,8 @@ public class CustomerProfileServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("loggedInUser") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -97,7 +104,7 @@ public class CustomerProfileServlet extends HttpServlet {
                 user.setPhoneNumber(request.getParameter("phoneNumber"));
                 user.setAddress(request.getParameter("address"));
                 String gender = request.getParameter("gender");
-                 user.setGender(gender);
+                user.setGender(gender);
 
                 // Parse dateOfBirth
                 String dateOfBirthStr = request.getParameter("dateOfBirth");
@@ -109,7 +116,8 @@ public class CustomerProfileServlet extends HttpServlet {
                         // Handle date parsing error
                         request.setAttribute("errorMessage", "Invalid date format. Please use yyyy-MM-dd.");
                         request.setAttribute("user", user);
-                        request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/jsp/customer/customer-profile.jsp").forward(request,
+                                response);
                         return;
                     }
                 }

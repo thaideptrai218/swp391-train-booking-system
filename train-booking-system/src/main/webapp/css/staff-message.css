@@ -69,7 +69,6 @@ body {
     transform: translateX(5px);
 }
 
-
 .main-content {
     flex-grow: 1;
     padding: 30px;
@@ -97,7 +96,6 @@ body {
     font-size: 1.1rem;
     color: #6c757d;
 }
-
 
 .chat-container {
     max-width: 1200px;
@@ -148,10 +146,11 @@ body {
     overflow-y: auto;
 }
 
-.messages {
+#chatMessages {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding: 10px;
 }
 
 .message-container {
@@ -169,10 +168,14 @@ body {
 }
 
 .message-bubble {
-    background-color: #e9ecef;
     padding: 10px 15px;
     border-radius: 10px;
+    word-wrap: break-word;
     position: relative;
+}
+
+.received .message-bubble {
+    background-color: #e9ecef;
 }
 
 .sent .message-bubble {
@@ -182,7 +185,6 @@ body {
 
 .message-bubble p {
     margin: 0;
-    word-wrap: break-word;
 }
 
 .message-bubble small {
@@ -216,22 +218,26 @@ body {
     cursor: pointer;
 }
 
-.sent {
-    align-self: flex-end;
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
-.received {
-    align-self: flex-start;
-}
+@keyframes fadeInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
 
-.message-bubble {
-    background-color: #e9ecef;
-    padding: 10px 15px;
-    border-radius: 10px;
-    position: relative;
-}
-
-.sent .message-bubble {
-    background-color: #0084ff;
-    color: white;
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

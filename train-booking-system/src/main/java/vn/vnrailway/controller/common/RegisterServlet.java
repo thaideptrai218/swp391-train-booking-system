@@ -7,6 +7,7 @@ package vn.vnrailway.controller.common;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -135,13 +136,15 @@ public class RegisterServlet extends HttpServlet {
         UserRepository userRepository = new UserRepositoryImpl();
         try {
             // Check if email already exists
-            if (userRepository.findByEmail(email).isPresent()) {
+            Optional<User> existingUser = userRepository.findByEmail(email);
+            if (existingUser.isPresent()) {
                 errorMessage = "Email đã được đăng ký.";
             } else {
                 // Hash the password before saving
                 String hashedPassword = HashPassword.hashPassword(password);
-                
-                User newUser = new User(fullName, email, phoneNumber, hashedPassword, idCardNumber, "Customer", false, null, null, ""); // Default role "Customer"
+
+                User newUser = new User(fullName, email, phoneNumber, hashedPassword, idCardNumber, "Customer", false,
+                        null, null, ""); // Default role "Customer"
 
                 userRepository.save(newUser);
                 response.sendRedirect(request.getContextPath() + "/login?registrationSuccess=true"); // Redirect to

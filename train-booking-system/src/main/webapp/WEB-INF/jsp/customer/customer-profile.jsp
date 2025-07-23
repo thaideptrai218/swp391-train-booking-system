@@ -31,7 +31,20 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex flex-column align-items-center text-center">
-                      <img src="${avatarURL}" alt="Admin" class="rounded-circle" width="150">
+                      <img src="${pageContext.request.contextPath}${user.avatarPath}" class="img-fluid rounded-circle"
+                        style="width: 120px; height: 120px;">
+                      <form action="${pageContext.request.contextPath}/updateavatar" method="post"
+                        enctype="multipart/form-data" class="mt-2">
+                        <div class="form-group">
+                          <input type="file" name="avatarFile" id="avatarFileInput" class="d-none" accept="image/*"
+                            required>
+                          <label for="avatarFileInput" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-camera"></i> Chọn ảnh
+                          </label>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary mt-1">Cập nhật ảnh đại diện</button>
+                      </form>
+
                       <div class="mt-3">
                         <h4>${user.fullName}</h4>
                         <p class="text-secondary mb-1">Khách Hàng</p>
@@ -203,6 +216,17 @@
             </style>
             <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+              const fileInput = document.querySelector('input[name="avatarFile"]');
+              const img = document.querySelector('img');
+
+              fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  img.src = URL.createObjectURL(file);
+                }
+              });
+            </script>
       </body>
 
       </html>

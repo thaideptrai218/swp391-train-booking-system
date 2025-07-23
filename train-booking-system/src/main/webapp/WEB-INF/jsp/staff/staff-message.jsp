@@ -50,7 +50,8 @@
                                 <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
                                 </li>
                                 <li><a href="#">Quản lý đặt chỗ</a></li>
-                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
+                                </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
                                 <li><a href="#">Báo cáo</a></li>
@@ -105,8 +106,6 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
-
-                                <!-- Phân trang -->
                                 <div class="pagination">
                                     <c:if test="${currentPage > 1}">
                                         <a
@@ -130,7 +129,6 @@
                                     </c:if>
                                 </div>
                             </div>
-
                             <c:if test="${not empty param.userId}">
                                 <c:set var="selectedSummary" value="${chatSummaries[0]}" />
                                 <c:forEach var="summary" items="${chatSummaries}">
@@ -140,14 +138,17 @@
                                 </c:forEach>
                                 <div class="chat-box" id="chatBox">
                                     <h2>Chat với ${selectedSummary.fullName}</h2>
-                                    <jsp:include page="/WEB-INF/jsp/staff/chat-messages.jsp">
-                                        <jsp:param name="userId" value="${param.userId}" />
-                                    </jsp:include>
-                                    <form action="${pageContext.request.contextPath}/staff-message" method="post">
+                                    <div class="messages" id="chatMessages">
+                                        <jsp:include page="/WEB-INF/jsp/staff/chat-messages.jsp">
+                                            <jsp:param name="userId" value="${param.userId}" />
+                                        </jsp:include>
+                                    </div>
+                                    <form action="${pageContext.request.contextPath}/staff-message" method="post"
+                                        id="chatForm">
                                         <input type="hidden" name="userId" value="${param.userId}" />
                                         <div class="chat-input">
-                                            <textarea name="message" placeholder="Nhập tin nhắn..." rows="3"
-                                                required></textarea>
+                                            <textarea name="message" id="chatInput" placeholder="Nhập tin nhắn..."
+                                                rows="3" required></textarea>
                                             <button type="submit">Gửi</button>
                                         </div>
                                     </form>
@@ -156,6 +157,124 @@
                         </div>
                     </main>
                 </div>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <c:if test="${not empty param.userId}">
+                    <script>
+                        const userId = parseInt('${param.userId}');
+                        const contextPath = '${pageContext.request.contextPath}';
+                        let lastMessageId = 0;
+
+                        $(document).ready(function () {
+                            const messageContainers = $('#chatMessages .message-container');
+                            if (messageContainers.length > 0) {
+                                const initialIds = messageContainers.map(function () {
+                                    return parseInt($(this).data('message-id'));
+                                }).get();
+                                lastMessageId = Math.max(...initialIds, 0);
+                            }
+                            console.log('Initial lastMessageId:', lastMessageId);
+                            const chatMessages = $('#chatMessages');
+                            chatMessages.scrollTop(chatMessages[0].scrollHeight);
+
+                            $('#chatForm').on('submit', function (event) {
+                                event.preventDefault();
+                                const message = $('#chatInput').val().trim();
+                                if (!message) return;
+
+                                $.post('${pageContext.request.contextPath}/staff-message',
+                                    { userId: userId, message: message, page: '${currentPage}' },
+                                    function () {
+                                        $('#chatInput').val('');
+                                        fetchNewMessages();
+                                    }).fail(function (xhr) {
+                                        console.error('Lỗi khi gửi tin nhắn:', xhr.status, xhr.responseText);
+                                        $('#chatMessages').append('<p style="color: red;">Lỗi khi gửi tin nhắn. Vui lòng thử lại.</p>');
+                                    });
+                            });
+
+                            fetchNewMessages(); // Gọi lần đầu
+                            setInterval(fetchNewMessages, 3000); // Polling mỗi 3 giây
+                        });
+
+                        function fetchNewMessages() {
+                            $.ajax({
+                                url: contextPath + '/fetch-messages?userId=' + userId + '&lastMessageId=' + lastMessageId + '&t=' + new Date().getTime(),
+                                method: 'GET',
+                                dataType: 'json',
+                                success: function (messages) {
+                                    console.log('Fetched messages:', messages);
+                                    const chatMessages = $('#chatMessages');
+                                    if (!chatMessages.length) {
+                                        console.warn('Chat messages container not found');
+                                        return;
+                                    }
+
+                                    if (!messages || messages.length === 0) {
+                                        console.log('No new messages');
+                                        return;
+                                    }
+
+                                    messages.forEach(function (message) {
+                                        if (!message || !message.messageId || !message.content) {
+                                            console.warn('Invalid message data:', message);
+                                            return;
+                                        }
+
+                                        const existingIds = new Set(chatMessages.find('[data-message-id]').map(function () {
+                                            return parseInt($(this).data('message-id'));
+                                        }).get());
+
+                                        if (!existingIds.has(message.messageId)) {
+                                            const isStaff = message.senderType === 'Staff';
+                                            const containerClass = isStaff ? 'sent' : 'received';
+                                            let timestamp = 'Unknown time';
+                                            try {
+                                                if (message.timestamp) {
+                                                    timestamp = new Date(message.timestamp).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        hour12: true
+                                                    });
+                                                } else if (message.timestampAsDate) {
+                                                    timestamp = new Date(message.timestampAsDate).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        hour12: true
+                                                    });
+                                                }
+                                                if (timestamp === 'Invalid Date') {
+                                                    console.warn('Invalid timestamp:', message.timestamp || message.timestampAsDate);
+                                                    timestamp = 'Unknown time';
+                                                }
+                                            } catch (error) {
+                                                console.error('Error parsing timestamp:', error, message);
+                                                timestamp = 'Unknown time';
+                                            }
+
+                                            const safeContent = message.content;
+                                            const $messageContainer = $('<div>').addClass('message-container').addClass(containerClass).attr('data-message-id', message.messageId);
+                                            const $messageBubble = $('<div>').addClass('message-bubble');
+                                            $messageBubble.append($('<p>').text(safeContent));
+                                            $messageBubble.append($('<small>').text(timestamp));
+                                            $messageContainer.append($messageBubble);
+
+                                            chatMessages.append($messageContainer);
+                                            console.log('Appended message:', message.messageId);
+                                            lastMessageId = Math.max(lastMessageId, message.messageId);
+                                        }
+                                    });
+
+                                    chatMessages.scrollTop(chatMessages[0].scrollHeight);
+                                    console.log('Updated lastMessageId:', lastMessageId);
+                                },
+                                error: function (xhr) {
+                                    console.error('Fetch error:', xhr.status, xhr.responseText);
+                                    $('#chatMessages').append('<p style="color: red;">Lỗi khi tải tin nhắn. Vui lòng thử lại sau.</p>');
+                                }
+                            });
+                        }
+                    </script>
+                </c:if>
             </body>
 
             </html>

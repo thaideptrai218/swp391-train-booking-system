@@ -48,6 +48,7 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/assets/.*"),
             Pattern.compile("^/images/.*"),
             Pattern.compile("^/public/.*"),
+            Pattern.compile("^/uploads/.*"),
             Pattern.compile("^/authentication/.*"),
             Pattern.compile("^/api/stations/.*"),
             Pattern.compile("^/api/trip/.*"),
@@ -77,13 +78,14 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/staff/.*"),
                     Pattern.compile("^/staff-dashboard$"),
                     Pattern.compile("^/(feedback-list|refund-requests)$"),
-                    Pattern.compile("^/(customer-info|staff-message)$"),
+                    Pattern.compile("^/(customer-info|staff-message|fetch-messages)$"),
                     Pattern.compile("^/api/booking/.*"),
                     Pattern.compile("^/api/payment/.*")),
             "CUSTOMER", Set.of(
                     Pattern.compile("^/customer/.*"),
-                    Pattern.compile("^/(customer-profile|edit-profile|feedback)$"),
-                    Pattern.compile("^/(customerprofile|editprofile|customer-support)$"),
+                    Pattern.compile(
+                            "^/(customer-profile|edit-profile|feedback|updateavatar|uploads)$"),
+                    Pattern.compile("^/(customerprofile|editprofile|customer-support|customer-messages)$"),
                     Pattern.compile("^/(listTicketBooking|submitFeedback)$"),
                     Pattern.compile("^/api/booking/initiate.*")));
 

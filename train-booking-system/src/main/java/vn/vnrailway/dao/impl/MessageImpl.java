@@ -157,4 +157,35 @@ public class MessageImpl implements MessageDAO {
         }
         return count;
     }
+
+    @Override
+    public List<Message> getMessagesAfter(int userId, int lastMessageId) {
+        List<Message> messages = new ArrayList<>();
+        String sql = "SELECT * FROM Messages WHERE UserID = ? AND MessageID > ? ORDER BY MessageID ASC";
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, lastMessageId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Message msg = new Message(
+                        rs.getInt("MessageID"),
+                        rs.getInt("UserID"),
+                        rs.getObject("StaffID") != null ? rs.getInt("StaffID") : null,
+                        rs.getString("Content"),
+                        rs.getTimestamp("Timestamp").toLocalDateTime(),
+                        rs.getString("SenderType"));
+                messages.add(msg);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return messages;
+    }
+
 }

@@ -11,6 +11,8 @@ public interface UserRepository {
 
     Optional<User> findByEmail(String email) throws SQLException;
 
+    void updateAvatar(int userId, String avatarPath) throws SQLException;
+
     Optional<User> findByPhone(String phone) throws SQLException;
 
     List<User> findAll() throws SQLException;
@@ -24,14 +26,25 @@ public interface UserRepository {
     boolean deleteById(int userId) throws SQLException;
 
     List<User> findByAddress(String address) throws SQLException;
+
     List<User> findByGender(String gender) throws SQLException;
+
     Optional<User> findByDateOfBirth(LocalDate dateOfBirth) throws SQLException;
+
     boolean lockById(int userId) throws SQLException;
+
     boolean unlockById(int userId) throws SQLException;
+
     boolean hideById(int userId) throws SQLException;
-    List<Object[]> getLogsByPage(int page, int pageSize, String searchTerm, String action, String startDate, String endDate) throws SQLException;
+
+    List<Object[]> getLogsByPage(int page, int pageSize, String searchTerm, String action, String startDate,
+            String endDate) throws SQLException;
+
     int getTotalLogCount(String searchTerm, String action, String startDate, String endDate) throws SQLException;
+
     Optional<User> getUserByBookingCode(String bookingCode) throws SQLException;
-    // Optional: A method to verify credentials, though this might also fit in a service
-    // Optional<User> findByEmailAndPassword(String email, String passwordHash) throws SQLException;
+    // Optional: A method to verify credentials, though this might also fit in a
+    // service
+    // Optional<User> findByEmailAndPassword(String email, String passwordHash)
+    // throws SQLException;
 }
