@@ -264,13 +264,15 @@
                         <h2>Bảng điều khiển nhân viên</h2>
                         <nav>
                             <ul>
-                                <li><a href="#">Bảng điều khiển</a></li>
+                                <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
+                                </li>
                                 <li><a href="#">Quản lý đặt chỗ</a></li>
                                 <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các vé đã hoàn</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
+                                        vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>
@@ -318,7 +320,8 @@
                                     <tbody>
                                         <c:forEach var="req" items="${confirmRefundRequests}" varStatus="i">
                                             <tr>
-                                                <td colspan="13" style="background: #eef5ff !important; font-weight: bold; text-align: center; padding: 12px; color: #1565c0;">
+                                                <td colspan="13"
+                                                    style="background: #eef5ff !important; font-weight: bold; text-align: center; padding: 12px; color: #1565c0;">
                                                     ${req.startStation} - ${req.endStation} | ${req.scheduledDeparture}
                                                 </td>
                                             </tr>
@@ -332,7 +335,7 @@
                                                 </td>
                                                 <td>
                                                     <strong>${req.trainName}</strong><br />
-                                                    <small>Toa: ${req.coachName}</small><br/>
+                                                    <small>Toa: ${req.coachName}</small><br />
                                                     <small>Ghế số: ${req.seatNumber}</small><br />
                                                     <small>${req.seatType}</small>
                                                 </td>
@@ -341,11 +344,14 @@
                                                 </td>
                                                 <td>
                                                     <strong>Tiền vé:</strong><br />
-                                                    <fmt:formatNumber value="${req.originalPrice}" groupingUsed="true" />đ<br />
+                                                    <fmt:formatNumber value="${req.originalPrice}"
+                                                        groupingUsed="true" />đ<br />
                                                     <strong>Phí hoàn:</strong><br />
-                                                    <fmt:formatNumber value="${req.refundFee}" groupingUsed="true" />đ<br />
+                                                    <fmt:formatNumber value="${req.refundFee}" groupingUsed="true" />
+                                                    đ<br />
                                                     <strong style="color: #28a745;">Hoàn lại:</strong><br />
-                                                    <fmt:formatNumber value="${req.refundAmount}" groupingUsed="true" />đ
+                                                    <fmt:formatNumber value="${req.refundAmount}" groupingUsed="true" />
+                                                    đ
                                                 </td>
                                                 <td>
                                                     <small>${req.requestedAt}</small>
@@ -372,7 +378,8 @@
                                                     <input type="file" name="image" accept="image/*" />
                                                 </td>
                                                 <td>
-                                                    <button type="submit" name="saveBtn" value="${req.refundID}">Lưu</button>
+                                                    <button type="submit" name="saveBtn"
+                                                        value="${req.refundID}">Lưu</button>
                                                 </td>
                                             </tr>
                                         </c:forEach>
