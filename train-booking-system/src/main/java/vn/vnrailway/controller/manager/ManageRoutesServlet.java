@@ -81,7 +81,7 @@ public class ManageRoutesServlet extends HttpServlet {
         request.setAttribute("routeDetails", routeDetails);
         request.setAttribute("allStations", allStations);
         request.setAttribute("allRoutes", allRoutes);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageRoutes.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Route/manageRoutes.jsp").forward(request, response);
     }
 
     private void showEditRouteForm(HttpServletRequest request, HttpServletResponse response)

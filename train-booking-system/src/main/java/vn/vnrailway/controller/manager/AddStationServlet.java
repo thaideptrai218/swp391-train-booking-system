@@ -26,7 +26,7 @@ public class AddStationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addStation.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/addStation.jsp").forward(request, response);
     }
 
     @Override
@@ -35,22 +35,15 @@ public class AddStationServlet extends HttpServlet {
         String command = request.getParameter("command");
         if ("add".equals(command)) {
             try {
-                String newStationCode = request.getParameter("stationCode");
-                if (stationRepository.findByStationCode(newStationCode).isPresent()) {
-                    request.setAttribute("errorMessage",
-                            "Error: Station with code '" + newStationCode + "' already exists.");
-                    request.getRequestDispatcher("/WEB-INF/jsp/manager/addStation.jsp").forward(request, response);
-                } else {
-                    Station newStation = new Station();
-                    newStation.setStationCode(newStationCode);
-                    newStation.setStationName(request.getParameter("stationName"));
-                    newStation.setAddress(request.getParameter("address"));
-                    newStation.setCity(request.getParameter("city"));
-                    newStation.setRegion(request.getParameter("region"));
-                    newStation.setPhoneNumber(request.getParameter("phoneNumber"));
-                    stationRepository.save(newStation);
-                    response.sendRedirect("manageStations?message=Station+added+successfully!");
-                }
+                Station newStation = new Station();
+                newStation.setStationCode(null);
+                newStation.setStationName(request.getParameter("stationName"));
+                newStation.setAddress(request.getParameter("address"));
+                newStation.setCity(request.getParameter("city"));
+                newStation.setRegion(request.getParameter("region"));
+                newStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                stationRepository.save(newStation);
+                response.sendRedirect("manageStations?message=Station+added+successfully!");
             } catch (SQLException e) {
                 e.printStackTrace();
                 response.sendRedirect("manageStations?message=Error+adding+station.");

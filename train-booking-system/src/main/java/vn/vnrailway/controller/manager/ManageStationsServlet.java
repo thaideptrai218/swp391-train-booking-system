@@ -35,7 +35,7 @@ public class ManageStationsServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Error retrieving stations: " + e.getMessage());
             e.printStackTrace();
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageStations.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/manageStations.jsp").forward(request, response);
     }
 
     @Override

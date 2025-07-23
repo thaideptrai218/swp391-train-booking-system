@@ -87,7 +87,7 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             request.setAttribute("listCoachType", listCoachType);
             request.setAttribute("listSeatType", listSeatType);
 
-            request.getRequestDispatcher("/WEB-INF/jsp/manager/manageTrainsSeats.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/manager/Train/manageTrainsSeats.jsp").forward(request, response);
         } catch (SQLException ex) {
             throw new ServletException(ex);
         }

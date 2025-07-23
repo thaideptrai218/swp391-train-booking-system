@@ -38,7 +38,7 @@ public class EditStationServlet extends HttpServlet {
             Optional<Station> stationOpt = stationRepository.findById(stationId);
             if (stationOpt.isPresent()) {
                 request.setAttribute("station", stationOpt.get());
-                request.getRequestDispatcher("/WEB-INF/jsp/manager/editStation.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/editStation.jsp").forward(request, response);
             } else {
                 response.sendRedirect("manageStations");
             }
@@ -55,27 +55,16 @@ public class EditStationServlet extends HttpServlet {
         if ("edit".equals(command)) {
             try {
                 int editStationId = Integer.parseInt(request.getParameter("stationID"));
-                String updatedStationCode = request.getParameter("stationCode");
-
-                Optional<Station> existingStationByCode = stationRepository
-                        .findByStationCode(updatedStationCode);
-                if (existingStationByCode.isPresent()
-                        && existingStationByCode.get().getStationID() != editStationId) {
-                    request.setAttribute("errorMessage",
-                            "Error: Another station with code '" + updatedStationCode + "' already exists.");
-                    doGet(request, response);
-                } else {
-                    Station existingStation = stationRepository.findById(editStationId)
-                            .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
-                    existingStation.setStationCode(updatedStationCode);
-                    existingStation.setStationName(request.getParameter("stationName"));
-                    existingStation.setAddress(request.getParameter("address"));
-                    existingStation.setCity(request.getParameter("city"));
-                    existingStation.setRegion(request.getParameter("region"));
-                    existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
-                    stationRepository.update(existingStation);
-                    response.sendRedirect("manageStations?message=Station+updated+successfully!");
-                }
+                Station existingStation = stationRepository.findById(editStationId)
+                        .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
+                // Không cập nhật stationCode nữa
+                existingStation.setStationName(request.getParameter("stationName"));
+                existingStation.setAddress(request.getParameter("address"));
+                existingStation.setCity(request.getParameter("city"));
+                existingStation.setRegion(request.getParameter("region"));
+                existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                stationRepository.update(existingStation);
+                response.sendRedirect("manageStations?message=Station+updated+successfully!");
             } catch (SQLException | NumberFormatException e) {
                 e.printStackTrace();
                 response.sendRedirect("manageStations?message=Error+updating+station.");

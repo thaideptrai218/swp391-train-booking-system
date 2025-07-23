@@ -19,15 +19,6 @@ body {
      The transition for this is also handled by sidebar.css. */
 }
 
-/* .main-content.sidebar-collapsed is no longer used by the JS logic */
-/* The initial 70px margin is removed to let sidebar.css control the margin entirely.
-   If spacing is needed for the toggle button when sidebar is closed, 
-   it should be handled by ensuring main-content doesn't start under it,
-   or by adjusting the toggle button's position relative to a non-shifting header if one exists.
-   Given the current sidebar.css, main-content will have margin-left: 0 by default,
-   and margin-left: var(--sidebar-width) when .shifted is applied.
-*/
-
 h1,
 h2,
 h3 {
@@ -161,4 +152,105 @@ tr:nth-child(even) {
 .actions a,
 .actions button {
   margin-right: 5px;
+}
+
+/* Basic Modal Styling */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-width: 500px;
+  border-radius: 8px;
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.routes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.routes-table th,
+.routes-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+.routes-table th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+.routes-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.routes-table tr:hover {
+  background-color: #e9ecef;
+}
+.routes-table .action-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.routes-table .action-link:hover {
+  text-decoration: underline;
+}
+.edit-form-hidden {
+  display: none;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.pagination-container .page-link {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.pagination-container .page-link.active,
+.pagination-container .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+.pagination-container .page-link.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+  border-color: #ddd;
 }

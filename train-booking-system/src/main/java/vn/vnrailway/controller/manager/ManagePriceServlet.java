@@ -75,7 +75,7 @@ public class ManagePriceServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         List<PricingRule> listPricingRules = pricingRuleRepository.findAll();
         request.setAttribute("listPricingRules", listPricingRules);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/managePrice.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/managePrice.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
@@ -89,7 +89,7 @@ public class ManagePriceServlet extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Error fetching data for new price rule form", e);
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addPriceRule.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/addPriceRule.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
@@ -113,7 +113,7 @@ public class ManagePriceServlet extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Error fetching data for edit price rule form", e);
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/editPriceRule.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/editPriceRule.jsp").forward(request, response);
     }
 
     private void insertPricingRule(HttpServletRequest request, HttpServletResponse response)

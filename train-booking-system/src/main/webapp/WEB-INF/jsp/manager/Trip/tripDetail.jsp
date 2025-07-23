@@ -157,7 +157,7 @@
   <body>
   <body>
     <div class="dashboard-container">
-      <%@ include file="sidebar.jsp" %>
+      <jsp:include page="../sidebar.jsp" />
       <div class="main-content">
         <header class="dashboard-header">
           <h1>

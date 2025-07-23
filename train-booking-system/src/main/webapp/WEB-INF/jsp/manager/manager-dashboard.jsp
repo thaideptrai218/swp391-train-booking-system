@@ -29,11 +29,6 @@ uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
             để quản lý hệ thống.
           </p>
         </header>
-        <img
-          src="${pageContext.request.contextPath}/assets/common/pointer.png"
-          alt="Logo"
-          class="logo"
-        />
       </div>
     </div>
   </body>

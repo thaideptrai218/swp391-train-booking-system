@@ -19,7 +19,7 @@ prefix="c" %>
     />
   </head>
   <body>
-    <jsp:include page="sidebar.jsp" />
+    <jsp:include page="../sidebar.jsp" />
 
     <div class="dashboard-container">
       <div class="main-content">
@@ -34,18 +34,6 @@ prefix="c" %>
               name="stationID"
               value="${station.stationID}"
             />
-            <div class="form-group">
-              <label for="stationCode"
-                >Mã ga: <span class="required-asterisk">*</span></label
-              >
-              <input
-                type="text"
-                id="stationCode"
-                name="stationCode"
-                value="${station.stationCode}"
-                required
-              />
-            </div>
             <div class="form-group">
               <label for="stationName"
                 >Tên ga: <span class="required-asterisk">*</span></label

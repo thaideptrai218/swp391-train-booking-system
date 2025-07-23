@@ -122,7 +122,7 @@ public class RouteDetailServlet extends HttpServlet {
             request.getSession().removeAttribute("errorMessage");
         }
 
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/routeDetail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Route/routeDetail.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

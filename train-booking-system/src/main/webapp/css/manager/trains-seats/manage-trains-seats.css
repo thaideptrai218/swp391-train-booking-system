@@ -373,3 +373,25 @@ form[id^="edit-train-form"] input[type="submit"]:hover {
   background: #f9f9f9;
   border-color: #ddd;
 }
+
+.btn-primary-add {
+  background: linear-gradient(90deg, #007bff 0%, #0056b3 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 24px !important;
+  padding: 12px 28px !important;
+  font-size: 1.15em !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.13) !important;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s !important;
+  display: inline-block !important;
+  margin-bottom: 18px !important;
+  margin-top: 8px !important;
+  letter-spacing: 0.5px;
+}
+.btn-primary-add:hover {
+  background: linear-gradient(90deg, #0056b3 0%, #007bff 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.18) !important;
+  text-decoration: none !important;
+}

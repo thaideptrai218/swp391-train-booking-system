@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi Tiết Tuyến Đường - <c:out value="${currentRoute.routeName}" /></title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/manager/manageRoutes.css"> <%-- Assuming same CSS can be reused --%>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/manager/routes/manageRoutes.css"> <%-- Assuming same CSS can be reused --%>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
@@ -75,7 +75,7 @@
     </style>
 </head>
 <body>
-    <jsp:include page="sidebar.jsp" />
+    <jsp:include page="../sidebar.jsp" />
 
     <div class="main-content" id="mainContent">
         <a href="${pageContext.request.contextPath}/manageRoutes" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Quay Lại Danh Sách Tuyến</a>

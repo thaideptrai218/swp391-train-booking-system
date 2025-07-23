@@ -67,12 +67,12 @@ public class ManageHolidaysServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         List<HolidayPrice> listHolidays = holidayPriceRepository.getAllHolidayPrices();
         request.setAttribute("listHolidays", listHolidays);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageHolidays.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/HolidayPrices/manageHolidays.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addHoliday.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/HolidayPrices/addHoliday.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
@@ -80,7 +80,7 @@ public class ManageHolidaysServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         HolidayPrice existingHoliday = holidayPriceRepository.getHolidayPriceById(id);
         request.setAttribute("holiday", existingHoliday);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/editHoliday.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/HolidayPrices/editHoliday.jsp").forward(request, response);
     }
 
     private void insertHoliday(HttpServletRequest request, HttpServletResponse response)

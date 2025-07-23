@@ -195,3 +195,115 @@ form {
   margin-bottom: 20px;
   grid-column: 1 / -1; /* Span both columns */
 }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  display: flex;
+}
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+}
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+.add-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+.add-button:hover {
+  background-color: #0056b3;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background-color: #007bff;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+tr:hover {
+  background-color: #f1f1f1;
+}
+.actions a {
+  margin-right: 10px;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+.actions .edit {
+  background-color: #ffc107;
+  color: #333;
+}
+.actions .delete {
+  background-color: #dc3545;
+  color: white;
+}
+.actions .edit:hover {
+  background-color: #e0a800;
+}
+.actions .delete:hover {
+  background-color: #c82333;
+}
+.no-rules {
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+  padding: 20px;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.pagination-container .page-link {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.pagination-container .page-link.active,
+.pagination-container .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+.pagination-container .page-link.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+  border-color: #ddd;
+}

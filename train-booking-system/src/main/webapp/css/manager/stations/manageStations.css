@@ -354,3 +354,60 @@ body {
   margin-left: 4px;
   font-weight: bold;
 }
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.pagination-container .page-link {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.pagination-container .page-link.active,
+.pagination-container .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+.pagination-container .page-link.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+  border-color: #ddd;
+}
+.lock-btn.locked {
+  background-color: red;
+  color: white;
+}
+.actions {
+  min-width: 200px;
+  display: flex;
+  gap: 5px;
+}
+.edit-btn,
+.lock-btn {
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.edit-btn {
+  background-color: #ffc107;
+}
+.lock-btn {
+  background-color: #dc3545;
+}
+.lock-btn.locked {
+  background-color: #28a745;
+}

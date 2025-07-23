@@ -95,7 +95,7 @@ public class ManageTripsServlet extends HttpServlet {
         request.setAttribute("allTrains", allTrains);
         request.setAttribute("allRoutes", allRoutes);
         request.setAttribute("allHolidays", allHolidays);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addTrip.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Trip/addTrip.jsp").forward(request, response);
     }
 
     private void listTrips(HttpServletRequest request, HttpServletResponse response)
@@ -134,7 +134,7 @@ public class ManageTripsServlet extends HttpServlet {
             request.setAttribute("errorMessage", request.getSession().getAttribute("errorMessage"));
             request.getSession().removeAttribute("errorMessage");
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageTrips.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Trip/manageTrips.jsp").forward(request, response);
     }
 
     @Override
