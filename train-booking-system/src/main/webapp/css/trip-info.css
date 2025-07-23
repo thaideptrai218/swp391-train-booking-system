@@ -691,6 +691,145 @@ body {
         font-size: 0.7rem;
         padding: 1px 6px;
     }
+
+    .seat-pricing-table {
+        font-size: 0.85rem;
+    }
+
+    .seat-pricing-table thead th,
+    .seat-pricing-table tbody td {
+        padding: 10px 8px;
+    }
+
+    .seat-pricing-table .seat-type-description,
+    .seat-pricing-table .description-column {
+        display: none; /* Hide description on mobile */
+    }
+
+    .seat-pricing-container {
+        margin-top: 20px;
+    }
+}
+
+/* ===== SEAT PRICING TABLE STYLES ===== */
+
+.seat-pricing-container {
+    margin-top: 30px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.seat-pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.seat-pricing-table thead {
+    background: linear-gradient(135deg, #2b669a 0%, #1e4a6b 100%);
+    color: white;
+}
+
+.seat-pricing-table thead th {
+    padding: 18px 15px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.seat-pricing-table thead tr:first-child th {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 20px;
+}
+
+.seat-pricing-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.seat-pricing-table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.seat-pricing-table tbody tr:hover {
+    background-color: #e6f3ff;
+}
+
+.seat-pricing-table tbody td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #e1e8ed;
+    color: #333;
+}
+
+.seat-pricing-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Seat type name styling */
+.seat-pricing-table .seat-type-name {
+    font-weight: 700;
+    color: #2b669a;
+    text-align: left;
+}
+
+/* Description styling */
+.seat-pricing-table .seat-type-description {
+    text-align: left;
+    color: #666;
+    font-style: italic;
+}
+
+/* Price styling */
+.seat-pricing-table .seat-price {
+    font-weight: 700;
+    color: #0c6e87;
+    font-size: 1.1rem;
+    font-family: "Courier New", monospace;
+}
+
+/* Availability styling */
+.seat-pricing-table .seat-availability {
+    font-weight: 600;
+}
+
+.seat-pricing-table .seat-availability.available {
+    color: #28a745;
+}
+
+.seat-pricing-table .seat-availability.unavailable {
+    color: #dc3545;
+}
+
+/* Row styling based on availability */
+.seat-pricing-table .seat-type-row.available {
+    background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+}
+
+.seat-pricing-table .seat-type-row.unavailable {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
+    opacity: 0.7;
+}
+
+.seat-pricing-table .seat-type-row.available:hover {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+}
+
+.seat-pricing-table .seat-type-row.unavailable:hover {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+}
+
+.no-pricing-data {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.1rem;
+    background: white;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-style: italic;
 }
 
 /* ===== LOADING STATES ===== */

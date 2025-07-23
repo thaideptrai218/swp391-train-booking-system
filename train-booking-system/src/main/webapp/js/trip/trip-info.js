@@ -379,6 +379,9 @@ class TripInfoManager {
                 if (stationsContainer) {
                     stationsContainer.style.display = 'block';
                 }
+                
+                // Also load seat type pricing
+                await this.loadAndDisplaySeatTypePricing(tripId);
             } else {
                 console.warn('No stations data available');
                 // Hide the stations table if no data
@@ -395,6 +398,35 @@ class TripInfoManager {
             if (stationsContainer) {
                 stationsContainer.style.display = 'none';
             }
+        }
+    }
+
+    async loadAndDisplaySeatTypePricing(tripId) {
+        try {
+            if (!this.currentSearchData) {
+                console.warn('No search data available for seat pricing');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                'tripId': tripId,
+                'originStationId': this.currentSearchData.originStationId,
+                'destinationStationId': this.currentSearchData.destinationStationId,
+                'bookingDateTime': new Date().toISOString().slice(0, 19), // Current datetime
+                'isRoundTrip': 'false'
+            });
+
+            const response = await fetch(`${this.contextPath}/api/trip/seat-pricing?${params}`);
+            const result = await response.json();
+
+            if (result.success && result.seatTypePricing) {
+                this.displaySeatTypePricingTable(result.seatTypePricing);
+            } else {
+                console.warn('No seat pricing data available');
+            }
+
+        } catch (error) {
+            console.error('Seat pricing loading error:', error);
         }
     }
 
@@ -638,6 +670,81 @@ class TripInfoManager {
         }
 
         container.innerHTML = tableHTML;
+    }
+
+    displaySeatTypePricingTable(seatTypePricing) {
+        // Create or find the seat pricing container after stations table
+        let pricingContainer = document.getElementById('seatTypePricingContainer');
+        if (!pricingContainer) {
+            pricingContainer = document.createElement('div');
+            pricingContainer.id = 'seatTypePricingContainer';
+            pricingContainer.className = 'seat-pricing-container';
+            
+            // Insert after stations table container
+            const stationsContainer = document.getElementById('stationsTableContainer');
+            if (stationsContainer && stationsContainer.parentNode) {
+                stationsContainer.parentNode.insertBefore(pricingContainer, stationsContainer.nextSibling);
+            } else {
+                // Fallback: add to trip details section
+                const detailsSection = document.getElementById('tripDetailsSection');
+                if (detailsSection) {
+                    detailsSection.appendChild(pricingContainer);
+                }
+            }
+        }
+
+        if (!seatTypePricing || seatTypePricing.length === 0) {
+            pricingContainer.innerHTML = '<p class="no-pricing-data">Không có thông tin giá vé</p>';
+            return;
+        }
+
+        let tableHTML = `
+            <table class="seat-pricing-table">
+                <thead>
+                    <tr>
+                        <th colspan="4">Bảng giá vé theo loại chỗ</th>
+                    </tr>
+                    <tr>
+                        <th>Loại chỗ</th>
+                        <th class="description-column">Mô tả</th>
+                        <th>Giá vé (VNĐ)</th>
+                        <th>Chỗ trống</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        seatTypePricing.forEach(pricing => {
+            const price = pricing.pricePerSeat ? this.formatPrice(pricing.pricePerSeat) : 'N/A';
+            const availability = `${pricing.availableSeats}/${pricing.totalSeats}`;
+            const availabilityClass = pricing.hasAvailableSeats ? 'available' : 'unavailable';
+
+            tableHTML += `
+                <tr class="seat-type-row ${availabilityClass}">
+                    <td class="seat-type-name">${pricing.seatTypeName}</td>
+                    <td class="seat-type-description">${pricing.description || pricing.seatTypeName}</td>
+                    <td class="seat-price">${price}</td>
+                    <td class="seat-availability ${availabilityClass}">${availability}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+
+        pricingContainer.innerHTML = tableHTML;
+    }
+
+    formatPrice(price) {
+        if (!price) return '0';
+        
+        // Convert to number if it's a string
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+        
+        // Format with thousands separators
+        return new Intl.NumberFormat('vi-VN').format(numPrice);
     }
 
     // Utility methods for formatting
