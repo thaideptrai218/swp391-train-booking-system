@@ -6,9 +6,8 @@
 }
 
 .sidebar {
-    max-width: 250px; /* Minimum width for the sidebar */
-    min-width: 200px;
-    max-width: 200px;
+    min-width: 300px;
+    max-width: 350px;
     background-color: #f9f9f9; /* Light background for sidebar */
     padding: 15px;
     border-radius: 5px;

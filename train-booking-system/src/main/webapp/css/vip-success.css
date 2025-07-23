@@ -1,0 +1,409 @@
+/* VIP Payment Success Page Styles */
+
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Success Icon Animation */
+.success-icon {
+    font-size: 6rem;
+    color: #28a745;
+    text-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    animation: bounceIn 1s ease-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -20px, 0);
+    }
+    70% {
+        transform: translate3d(0, -10px, 0);
+    }
+    90% {
+        transform: translate3d(0, -4px, 0);
+    }
+}
+
+/* VIP Card Display */
+.vip-card-display {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: none;
+    position: relative;
+}
+
+.vip-card-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ffd700, #ff6b6b, #4ecdc4, #45b7d1);
+    animation: gradientMove 3s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* VIP Card Header */
+.vip-card-header {
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vip-card-display.vip-card-bronze .vip-card-header {
+    background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+}
+
+.vip-card-display.vip-card-silver .vip-card-header {
+    background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+}
+
+.vip-card-display.vip-card-gold .vip-card-header {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+.vip-card-display.vip-card-diamond .vip-card-header {
+    background: linear-gradient(135deg, #B9F2FF 0%, #00BFFF 100%);
+}
+
+.vip-card-header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.vip-icon-large {
+    font-size: 4rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+    to { text-shadow: 0 4px 16px rgba(255, 255, 255, 0.5); }
+}
+
+.vip-status .badge {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* VIP Card Body */
+.vip-card-body {
+    padding: 40px;
+    background: white;
+}
+
+.info-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.info-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.info-section h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.info-item label {
+    font-weight: 500;
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.info-item span {
+    font-weight: 600;
+    color: #212529;
+    text-align: right;
+}
+
+/* VIP Benefits */
+.vip-benefits {
+    background: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+    padding: 25px;
+    border-radius: 15px;
+    border: 2px solid #ffcc02;
+    border-left: 6px solid #ff9800;
+}
+
+.vip-benefits h6 {
+    color: #f57c00;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.vip-benefits p {
+    color: #5d4037;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* Important Notes */
+.important-notes .alert {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.1);
+    border-left: 6px solid #007bff;
+}
+
+.important-notes .alert h6 {
+    color: #0056b3;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.important-notes .alert ul {
+    margin-bottom: 0;
+    padding-left: 20px;
+}
+
+.important-notes .alert li {
+    margin-bottom: 6px;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Action Buttons */
+.action-buttons .btn {
+    border-radius: 25px;
+    padding: 15px 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-buttons .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.action-buttons .btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+/* Social Share */
+.social-share {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.social-share h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.social-buttons .btn {
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.social-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Page Header */
+.display-4 {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    from { filter: brightness(1); }
+    to { filter: brightness(1.2); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .success-icon {
+        font-size: 4rem;
+    }
+    
+    .vip-card-header {
+        padding: 20px;
+    }
+    
+    .vip-card-body {
+        padding: 25px;
+    }
+    
+    .vip-icon-large {
+        font-size: 3rem;
+    }
+    
+    .info-section {
+        padding: 20px;
+    }
+    
+    .action-buttons .btn {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+    
+    .social-share {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .vip-card-display {
+        margin: 0 -15px;
+        border-radius: 15px;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .info-item span {
+        text-align: left;
+    }
+}
+
+/* Loading and Transition Effects */
+.container {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

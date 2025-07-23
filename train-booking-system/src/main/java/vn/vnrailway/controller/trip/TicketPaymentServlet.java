@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession; // Added for session management
 import vn.vnrailway.dao.PassengerTypeRepository; // Assuming this DAO exists
 import vn.vnrailway.dao.impl.PassengerTypeRepositoryImpl;
 import vn.vnrailway.model.PassengerType; // Assuming this Model exists
+import vn.vnrailway.model.User; // Added User import
 import vn.vnrailway.utils.JsonUtils; // Added JsonUtils import
 
 @WebServlet("/ticketPayment") // Path matches the JSP's expectation for contextPath + /ticketPayment
@@ -49,6 +50,12 @@ public class TicketPaymentServlet extends HttpServlet {
                         session.getAttribute("lastQuery_originalStationName"));
                 request.setAttribute("lastQuery_destinationStationName",
                         session.getAttribute("lastQuery_destinationStationName"));
+                
+                // Get logged-in user information for auto-populating customer info
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                if (loggedInUser != null) {
+                    request.setAttribute("loggedInUser", loggedInUser);
+                }
             }
 
             request.getRequestDispatcher("/WEB-INF/jsp/public/trip/ticketPayment.jsp").forward(request, response);

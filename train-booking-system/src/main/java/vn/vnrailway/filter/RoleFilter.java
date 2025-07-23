@@ -39,7 +39,7 @@ public class RoleFilter implements Filter {
             "/confirmRefundTicket", "/confirmOTP", "/refundProcessing",
             "/checkRefundTicket", "/searchTrip", "/searchTripBackground",
             "/storeRoute", "/getCoachSeatsWithPrice", "/all-locations",
-            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode");
+            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode", "/tripInfomation");
 
     // Public path patterns (using regex for flexibility)
     private static final Set<Pattern> PUBLIC_PATH_PATTERNS = Set.of(
@@ -59,7 +59,11 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/train-info/.*"),
             Pattern.compile("^/check-booking/.*"),
             Pattern.compile("^/payment/.*"),
-            Pattern.compile("^/api/payment/.*"));
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/vip/.*"),
+            Pattern.compile("^/vip/.*"),
+            Pattern.compile("^/tripInfomation/.*"));
 
     // Role-specific access patterns
     private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(
@@ -70,9 +74,11 @@ public class RoleFilter implements Filter {
             "MANAGER", Set.of(
                     Pattern.compile("^/manager/.*"),
                     Pattern.compile("^/managerDashboard$"),
+                    Pattern.compile("^/(manageHolidays|addHoliday|editHoliday|holidayPriceSelector|)$"),
                     Pattern.compile("^/(addPriceRule|addRoute|addStation|addTrip)$"),
                     Pattern.compile("^/(editPriceRule|editStation|routeDetail|tripDetail)$"),
                     Pattern.compile("^/manage(Price|Routes|Staffs|Stations|TrainsSeats|Trips)$"),
+                    Pattern.compile("^/(manageCancellationPolicies|createPolicy|updatePolicy)$"),
                     Pattern.compile("^/(sidebar|train_form)$")),
             "STAFF", Set.of(
                     Pattern.compile("^/staff/.*"),
