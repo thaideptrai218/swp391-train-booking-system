@@ -1,0 +1,204 @@
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+            <fmt:setLocale value="vi_VN" />
+            <!DOCTYPE html>
+            <html lang="vi">
+
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Kiểm tra hoàn vé</title>
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/staff-message.css" />
+                <link rel="stylesheet"
+                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+                <style>
+                    .chat-container {
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 12px;
+                        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+                    }
+
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                        font-size: 15px;
+                    }
+
+                    th,
+                    td {
+                        padding: 12px 10px;
+                        border: 1px solid #ddd;
+                        vertical-align: top;
+                    }
+
+                    th {
+                        background-color: #f0f4fa;
+                        text-align: center;
+                    }
+
+                    tr:nth-child(even) {
+                        background-color: #f9fcff;
+                    }
+
+                    td:first-child {
+                        font-weight: bold;
+                    }
+
+                    .message {
+                        padding: 8px;
+                        background-color: #ffe5e5;
+                        border: 1px solid #ff8888;
+                        border-radius: 6px;
+                        margin-bottom: 12px;
+                    }
+
+                    button {
+                        padding: 6px 12px;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: white;
+                    }
+
+                    button[name="action"][value="approve"] {
+                        background-color: #28a745;
+                    }
+
+                    button[name="action"][value="reject"] {
+                        background-color: #dc3545;
+                    }
+
+                    input[type="text"] {
+                        border: 1px solid #ccc;
+                        padding: 6px;
+                        border-radius: 4px;
+                        width: 100%;
+                    }
+
+                    .section-header {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #d50000;
+                        margin-bottom: 10px;
+                    }
+                </style>
+            </head>
+
+            <body>
+                <div class="dashboard-container">
+                    <aside class="sidebar">
+                        <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
+                            <i class="fa-solid fa-house fa-xl home-icon"></i>
+                        </a>
+                        <h2>Bảng điều khiển nhân viên</h2>
+                        <nav>
+                            <ul>
+                                <li><a href="#">Bảng điều khiển</a></li>
+                                <li><a href="#">Quản lý đặt chỗ</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
+                                </li>
+                                <li><a href="#">Báo cáo</a></li>
+                                <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
+                            </ul>
+                        </nav>
+                    </aside>
+
+                    <main class="main-content">
+                        <header class="header">
+                            <h1>Kiểm tra hoàn vé</h1>
+                            <div class="user-info">
+                                <span>Đăng nhập với tư cách: Người dùng nhân viên</span>
+                            </div>
+                        </header>
+
+                        <div class="chat-container">
+                            <div class="section-header">Danh sách yêu cầu trả vé</div>
+
+                            <c:if test="${not empty message}">
+                                <div class="message">${message}</div>
+                            </c:if>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Mã vé</th>
+                                        <th>Hành khách</th>
+                                        <th>Thông tin</th>
+                                        <th>Chính sách</th>
+                                        <th>Chi phí</th>
+                                        <th>Thời gian yêu cầu</th>
+                                        <th>Người đặt vé</th>
+                                        <th>Người xử lý</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="req" items="${confirmRefundRequests}" varStatus="i">
+                                        <tr>
+                                            <td colspan="9" style="background: #eef5ff; font-weight: bold;">
+                                                ${req.startStation} - ${req.endStation} |
+                                                ${req.scheduledDeparture}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>${i.index + 1}</td>
+                                            <td>${req.ticketCode}</td>
+                                            <td>
+                                                <b>${req.passengerFullName}</b><br />
+                                                ${req.passengerType}<br />
+                                                Số giấy tờ: ${req.passengerIDCard}
+                                            </td>
+                                            <td>
+                                                ${req.trainName}<br />
+                                                Toa: ${req.coachName}<br/>
+                                                Ghế số: ${req.seatNumber}<br />
+                                                ${req.seatType}
+                                            </td>
+                                            <td style="text-align: center;">
+                                                ${req.refundPolicy}
+                                            </td>
+                                            <td style="text-align: left;">
+                                                Tiền vé:
+                                                <fmt:formatNumber value="${req.originalPrice}" groupingUsed="true" />
+                                                đ<br />
+                                                Phí hoàn:
+                                                <fmt:formatNumber value="${req.refundFee}" groupingUsed="true" />
+                                                đ<br />
+                                                Hoàn lại:
+                                                <fmt:formatNumber value="${req.refundAmount}" groupingUsed="true" /> đ
+                                            </td>
+                                            <td style="text-align: center;">
+                                                ${req.requestedAt}
+                                            </td>
+                                            <td style="text-align: left;">
+                                                <b>${req.userFullName}</b><br />
+                                                Email: ${req.userEmail}<br />
+                                                SĐT: ${req.userPhoneNumber}<br />
+                                                CMND: ${req.userIDCard}
+                                            </td>
+                                            <td style="text-align: left;">
+                                                <b>${req.staffFullName}</b><br />
+                                                Email: ${req.staffEmail}<br />
+                                                SĐT: ${req.staffPhoneNumber}<br />
+                                                CMND: ${req.staffIDCard}
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </main>
+                </div>
+            </body>
+
+            </html>

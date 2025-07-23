@@ -4,6 +4,7 @@ import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.TicketRepository;
 import vn.vnrailway.dto.CheckBookingDTO;
 import vn.vnrailway.dto.CheckInforRefundTicketDTO;
+import vn.vnrailway.dto.ConfirmRefundRequestDTO;
 import vn.vnrailway.dto.InfoPassengerDTO;
 import vn.vnrailway.dto.RefundRequestDTO;
 import vn.vnrailway.dto.RefundTicketDTO;
@@ -856,26 +857,155 @@ public class TicketRepositoryImpl implements TicketRepository {
         }
     }
 
+    public List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests() throws SQLException {
+        List<ConfirmRefundRequestDTO> list = new ArrayList<>();
+
+        String sql = "SELECT \r\n" + //
+                "\tTK.TicketCode,\r\n" + //
+                "\t-- Chính sách hoàn vé\r\n" + //
+                "    CP.PolicyName,\r\n" + //
+                "\tCP.PolicyID,\r\n" + //
+                "\tRF.RefundID,\r\n" + //
+                "\tRF.TicketID,\r\n" + //
+                "\tRF.Status,\r\n" + //
+                "\tRF.ProcessedByUserID,\r\n" + //
+                "\tRF.RequestedByUserID,\r\n" + //
+                "\r\n" + //
+                "\r\n" + //
+                "\t-- Thông tin hành khách\r\n" + //
+                "    P.FullName AS PassengerFullName,--\r\n" + //
+                "    P.IDCardNumber AS PassengerIDCard,--\r\n" + //
+                "    PT.TypeName AS PassengerType,--\r\n" + //
+                "\r\n" + //
+                "\t    -- Tính phí hoàn vé\r\n" + //
+                "    RF.FeeAmount AS RefundFee,--\r\n" + //
+                "\r\n" + //
+                "    -- Tính số tiền được hoàn lại\r\n" + //
+                "    RF.ActualRefundAmount AS RefundAmount,\r\n" + //
+                "\tRF.OriginalTicketPrice,\r\n" + //
+                "    RF.RequestedAt,--\r\n" + //
+                "\tRF.ProcessedAt,\r\n" + //
+                "\tB.BookingID,\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin vé\r\n" + //
+                "    TK.TicketStatus,--\r\n" + //
+                "\r\n" + //
+                "    -- Chỗ ngồi\r\n" + //
+                "    ST.TypeName AS SeatTypeName,--\r\n" + //
+                "    S.SeatNumber,--\r\n" + //
+                "    C.CoachName,--\r\n" + //
+                "\r\n" + //
+                "    -- Tàu và chuyến\r\n" + //
+                "    T.TrainName,--\r\n" + //
+                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,--\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin tuyến\r\n" + //
+                "    StartStation.StationName AS StartStationName,--\r\n" + //
+                "    EndStation.StationName AS EndStationName,--\r\n" + //
+                "\r\n" + //
+                "    -- Thông tin người đặt\r\n" + //
+                "    U.FullName AS UserFullName,--\r\n" + //
+                "    U.Email,--\r\n" + //
+                "    U.IDCardNumber AS UserIDCard,--\r\n" + //
+                "    U.PhoneNumber,\r\n" + //
+                "\r\n" + //
+                "\t--Thông tin nhân viên hủy vé\r\n" + //
+                "\tU2.FullName,\r\n" + //
+                "\tU2.Email,\r\n" + //
+                "\tU2.PhoneNumber,\r\n" + //
+                "\tU2.IDCardNumber,\r\n" + //
+                "\r\n" + //
+                "\tRF.Notes\r\n" + //
+                "\r\n" + //
+                "FROM Refunds RF\r\n" + //
+                "JOIN Tickets TK ON RF.TicketID = TK.TicketID\r\n" + //
+                "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
+                "JOIN Users U ON B.UserID = U.UserID\r\n" + //
+                "JOIN Users U2 ON RF.ProcessedByUserID = U2.UserID\r\n" + //
+                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                "JOIN Trips TRIP ON TK.TripID = TRIP.TripID\r\n" + //
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TRIP.TripID\r\n" + //
+                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TRIP.TripID\r\n" + //
+                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID \r\n" + //
+                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID \r\n" + //
+                "\r\n" + //
+                "-- JOIN chính sách hoàn vé theo thời gian còn lại\r\n" + //
+                "LEFT JOIN CancellationPolicies CP ON RF.AppliedPolicyID = CP.PolicyID\r\n" + //
+                "WHERE RF.isConfirmed = 0\r\n" + //
+                "    \r\n" + //
+                "ORDER BY RF.ProcessedAt DESC;";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                ConfirmRefundRequestDTO dto = new ConfirmRefundRequestDTO();
+
+                dto.setRefundID(rs.getInt("RefundID"));
+                dto.setTicketCode(rs.getString("TicketCode"));
+                dto.setTicketID(rs.getInt("TicketID")); // nếu cần, thêm TK.TicketID trong SELECT
+                dto.setUserID(rs.getInt("RequestedByUserID"));
+                dto.setBookingID(rs.getInt("BookingID"));
+
+                dto.setPassengerFullName(rs.getString("PassengerFullName"));
+                dto.setPassengerIDCard(rs.getString("PassengerIDCard"));
+                dto.setPassengerType(rs.getString("PassengerType"));
+
+                dto.setSeatType(rs.getString("SeatTypeName"));
+                dto.setSeatNumber(rs.getString("SeatNumber"));
+                dto.setCoachName(rs.getString("CoachName"));
+                dto.setTrainName(rs.getString("TrainName"));
+
+                dto.setStartStation(rs.getString("StartStationName"));
+                dto.setEndStation(rs.getString("EndStationName"));
+                dto.setPolicyID(rs.getInt("PolicyID"));
+                dto.setRefundPolicy(rs.getString("PolicyName"));
+
+                dto.setScheduledDeparture(rs.getTimestamp("ScheduledDepartureTime").toString());
+                dto.setOriginalPrice(rs.getDouble("OriginalTicketPrice"));
+                dto.setRefundFee(rs.getDouble("RefundFee"));
+                dto.setRefundAmount(rs.getDouble("RefundAmount"));
+
+                dto.setTicketStatus(rs.getString("TicketStatus"));
+                dto.setRefundStatus(rs.getString("Status")); // cần SELECT thêm RF.Status
+
+                dto.setRequestedAt(rs.getTimestamp("RequestedAt").toString());
+                dto.setProcessedAt(rs.getTimestamp("ProcessedAt").toString());
+
+                dto.setUserFullName(rs.getString("UserFullName"));
+                dto.setUserEmail(rs.getString("Email"));
+                dto.setUserIDCard(rs.getString("UserIDCard"));
+                dto.setUserPhoneNumber(rs.getString("PhoneNumber"));
+
+                dto.setStaffFullName(rs.getString("FullName")); // U2.FullName cần AS alias
+                dto.setStaffEmail(rs.getString("Email")); // U2.Email cần AS alias
+                dto.setStaffPhoneNumber(rs.getString("PhoneNumber"));
+                dto.setStaffIDCard(rs.getString("IDCardNumber"));
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     // Main method for testing (optional)
     public static void main(String[] args) {
         TicketRepository ticketRepository = new TicketRepositoryImpl();
-        // try {
-        // System.out.println("Testing TicketRepository...");
-        // // Example: Find all tickets for BookingID 1
-        // List<Ticket> ticketsForBooking1 = ticketRepository.findByBookingId(1);
-        // ticketsForBooking1.forEach(System.out::println);
-        // InfoPassengerDTO infoPassenger =
-        // ticketRepository.findTicketByTicketCode("TK578DA14D68B643719668366273E01817");
-        // if (infoPassenger != null) {
-        // System.out.println("InfoPassengerDTO: " + infoPassenger);
-        // } else {
-        // System.out.println("No ticket found with the given code.");
-        // }
-
-        // // Add more specific tests as needed
-        // } catch (SQLException e) {
-        // e.printStackTrace();
-        // }
+        List<ConfirmRefundRequestDTO> confirmedRequests;
+        try {
+            confirmedRequests = ticketRepository.getAllConfirmedRefundRequests();
+            for (ConfirmRefundRequestDTO request : confirmedRequests) {
+                System.out.println(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
