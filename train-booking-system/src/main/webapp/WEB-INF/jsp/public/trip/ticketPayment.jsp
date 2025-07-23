@@ -95,6 +95,157 @@
                 min-width: 200px;
             }
         }
+
+        /* VIP Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #8B4513;
+            font-weight: bold;
+        }
+
+        .modal-header .close {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8B4513;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-header .close:hover {
+            color: #654321;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .validation-message {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .validation-message.error {
+            color: #dc3545;
+        }
+
+        .validation-message.success {
+            color: #28a745;
+        }
+
+        .vip-result-card {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            color: #8B4513;
+            text-align: center;
+        }
+
+        .vip-result-card .vip-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .vip-result-card .vip-discount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #B8860B;
+        }
     </style>
 </head>
 <body>
@@ -278,6 +429,38 @@
             </td>
         </tr>
     </template>
+
+    <%-- VIP ID Validation Modal --%>
+    <div id="vipValidationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crown"></i> Xác thực thành viên VIP</h3>
+                <span class="close" onclick="closeVIPModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Vui lòng nhập số CMND/CCCD để xác thực thẻ VIP của bạn:</p>
+                <div class="form-group">
+                    <label for="vipIdInput">Số CMND/CCCD:</label>
+                    <input type="text" id="vipIdInput" class="form-control" placeholder="Nhập số CMND/CCCD" pattern="[0-9]{9,12}" maxlength="12">
+                    <div id="vipValidationMessage" class="validation-message"></div>
+                </div>
+                <div id="vipLoadingIndicator" style="display: none; text-align: center; margin: 10px 0;">
+                    <i class="fas fa-spinner fa-spin"></i> Đang xác thực...
+                </div>
+                <div id="vipValidationResult" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeVIPModal()">Hủy</button>
+                <button type="button" id="validateVIPBtn" class="btn btn-primary" onclick="validateVIPCredentials()">
+                    <i class="fas fa-check"></i> Xác thực
+                </button>
+                <button type="button" id="confirmVIPBtn" class="btn btn-success" style="display: none;" onclick="confirmVIPSelection()">
+                    <i class="fas fa-crown"></i> Xác nhận VIP
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="modalOverlay" class="modal-overlay" style="display: none;" onclick="closeVIPModal()"></div>
     
     <script>
         var contextPath = "${pageContext.request.contextPath}";
@@ -301,6 +484,10 @@
                 idCardNumber: "${loggedInUser.idCardNumber}"
             };
         </c:if>
+
+        // VIP Modal variables - will be used by external JS
+        window.currentVIPRow = null;
+        window.vipValidationResult = null;
     </script>
     <script src="${pageContext.request.contextPath}/js/trip/ticketPayment.js"></script>
 </body>

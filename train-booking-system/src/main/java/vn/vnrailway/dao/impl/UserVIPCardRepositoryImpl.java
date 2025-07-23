@@ -3,6 +3,7 @@ package vn.vnrailway.dao.impl;
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.UserVIPCardRepository;
 import vn.vnrailway.model.UserVIPCard;
+import vn.vnrailway.model.VIPCardType;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -36,6 +37,30 @@ public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
         
         userVIPCard.setActive(rs.getBoolean("IsActive"));
         userVIPCard.setTransactionReference(rs.getString("TransactionReference"));
+        
+        return userVIPCard;
+    }
+
+    /**
+     * Maps ResultSet to UserVIPCard object with joined VIPCardType data
+     */
+    private UserVIPCard mapResultSetToUserVIPCardWithType(ResultSet rs) throws SQLException {
+        UserVIPCard userVIPCard = mapResultSetToUserVIPCard(rs);
+        
+        // Map VIPCardType if available in the ResultSet
+        try {
+            VIPCardType vipCardType = new VIPCardType();
+            vipCardType.setVipCardTypeID(rs.getInt("VIPCardTypeID"));
+            vipCardType.setTypeName(rs.getString("TypeName"));
+            vipCardType.setPrice(rs.getBigDecimal("Price"));
+            vipCardType.setDiscountPercentage(rs.getBigDecimal("DiscountPercentage"));
+            vipCardType.setDurationMonths(rs.getInt("DurationMonths"));
+            vipCardType.setDescription(rs.getString("Description"));
+            
+            userVIPCard.setVipCardType(vipCardType);
+        } catch (SQLException e) {
+            // VIPCardType columns not available in ResultSet, leave as null
+        }
         
         return userVIPCard;
     }
@@ -91,8 +116,11 @@ public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
 
     @Override
     public Optional<UserVIPCard> findActiveByUserId(int userID) throws SQLException {
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE UserID = ? AND IsActive = 1 AND ExpiryDate > GETDATE()";
+        String sql = "SELECT uvc.UserVIPCardID, uvc.UserID, uvc.VIPCardTypeID, uvc.PurchaseDate, uvc.ExpiryDate, uvc.IsActive, uvc.TransactionReference, " +
+                    "vct.TypeName, vct.Price, vct.DiscountPercentage, vct.DurationMonths, vct.Description " +
+                    "FROM UserVIPCards uvc " +
+                    "JOIN VIPCardTypes vct ON uvc.VIPCardTypeID = vct.VIPCardTypeID " +
+                    "WHERE uvc.UserID = ? AND uvc.IsActive = 1 AND uvc.ExpiryDate > GETDATE()";
         
         try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -100,7 +128,7 @@ public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
             statement.setInt(1, userID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUserVIPCard(rs));
+                    return Optional.of(mapResultSetToUserVIPCardWithType(rs));
                 }
             }
         }

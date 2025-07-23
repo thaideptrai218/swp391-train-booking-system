@@ -9,6 +9,7 @@ import vn.vnrailway.dao.impl.TemporaryVIPPurchaseRepositoryImpl;
 import vn.vnrailway.dao.impl.UserVIPCardRepositoryImpl;
 import vn.vnrailway.model.User;
 import vn.vnrailway.model.VIPCardType;
+import vn.vnrailway.model.UserVIPCard;
 import vn.vnrailway.model.TemporaryVIPPurchase;
 
 import jakarta.servlet.ServletException;
@@ -64,13 +65,7 @@ public class VIPPaymentInitiateServlet extends HttpServlet {
         }
 
         try {
-            // Check if user already has an active VIP card
-            if (userVIPCardRepository.hasActiveVIPCard(loggedInUser.getUserID())) {
-                response.sendRedirect(request.getContextPath() + "/vip/purchase?error=already_has_vip");
-                return;
-            }
-
-            // Fetch VIP card type details
+            // Fetch VIP card type details first
             Optional<VIPCardType> vipCardTypeOpt = vipCardTypeRepository.findById(selectedVIPCardTypeId);
             if (!vipCardTypeOpt.isPresent()) {
                 session.removeAttribute("selectedVIPCardTypeId");
@@ -79,6 +74,24 @@ public class VIPPaymentInitiateServlet extends HttpServlet {
             }
 
             VIPCardType selectedVIPCard = vipCardTypeOpt.get();
+
+            // Check if user already has an active VIP card
+            Optional<UserVIPCard> existingVIPCardOpt = userVIPCardRepository.findActiveByUserId(loggedInUser.getUserID());
+            if (existingVIPCardOpt.isPresent()) {
+                UserVIPCard existingVIPCard = existingVIPCardOpt.get();
+                
+                // Check if trying to buy the same VIP card type
+                if (existingVIPCard.getVipCardTypeID() == selectedVIPCard.getVipCardTypeID()) {
+                    // Same card type - redirect to already_has_vip error
+                    response.sendRedirect(request.getContextPath() + "/vip/purchase?error=already_has_vip");
+                    return;
+                }
+                
+                // Different card type - allow upgrade/downgrade by deactivating existing card
+                // The existing card will be deactivated when the new purchase is successful
+                System.out.println("User " + loggedInUser.getUserID() + " is upgrading/changing VIP card from type " 
+                                 + existingVIPCard.getVipCardTypeID() + " to type " + selectedVIPCard.getVipCardTypeID());
+            }
 
             // Clean up any existing temporary VIP purchases for this session
             tempVIPPurchaseRepository.deleteBySessionId(session.getId());
