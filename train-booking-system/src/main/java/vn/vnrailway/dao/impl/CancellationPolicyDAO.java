@@ -40,7 +40,6 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
                 policy.setDescription(rs.getString("Description"));
                 policy.setActive(rs.getBoolean("IsActive"));
                 policy.setEffectiveFromDate(rs.getDate("EffectiveFromDate"));
-                policy.setEffectiveToDate(rs.getDate("EffectiveToDate"));
                 list.add(policy);
             }
         } catch (SQLException e) {
@@ -51,9 +50,9 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
 
     public void insert(CancellationPolicy policy) {
         String sql = "INSERT INTO CancellationPolicies " +
-                "(PolicyName, HoursBeforeDeparture_Min, HoursBeforeDeparture_Max, FeePercentage, FixedFeeAmount, IsRefundable, Description, IsActive, EffectiveFromDate, EffectiveToDate) "
+                "(PolicyName, HoursBeforeDeparture_Min, HoursBeforeDeparture_Max, FeePercentage, FixedFeeAmount, IsRefundable, Description, IsActive, EffectiveFromDate) "
                 +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -69,10 +68,6 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
             stmt.setString(7, policy.getDescription());
             stmt.setBoolean(8, policy.isActive());
             stmt.setDate(9, new java.sql.Date(policy.getEffectiveFromDate().getTime()));
-            if (policy.getEffectiveToDate() != null)
-                stmt.setDate(10, new java.sql.Date(policy.getEffectiveToDate().getTime()));
-            else
-                stmt.setNull(10, Types.DATE);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -99,7 +94,6 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
                 policy.setDescription(rs.getString("Description"));
                 policy.setActive(rs.getBoolean("IsActive"));
                 policy.setEffectiveFromDate(rs.getDate("EffectiveFromDate"));
-                policy.setEffectiveToDate(rs.getDate("EffectiveToDate"));
                 return policy;
             }
         }
@@ -116,8 +110,7 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
                 "IsRefundable = ?, " +
                 "Description = ?, " +
                 "IsActive = ?, " +
-                "EffectiveFromDate = ?, " +
-                "EffectiveToDate = ? " +
+                "EffectiveFromDate = ? " +
                 "WHERE PolicyID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -136,12 +129,7 @@ public class CancellationPolicyDAO implements CancellationPolicyRepository {
             stmt.setBoolean(8, policy.isActive());
             stmt.setDate(9, new java.sql.Date(policy.getEffectiveFromDate().getTime()));
 
-            if (policy.getEffectiveToDate() != null)
-                stmt.setDate(10, new java.sql.Date(policy.getEffectiveToDate().getTime()));
-            else
-                stmt.setNull(10, Types.DATE);
-
-            stmt.setInt(11, policy.getPolicyID());
+            stmt.setInt(10, policy.getPolicyID());
 
             stmt.executeUpdate();
         }

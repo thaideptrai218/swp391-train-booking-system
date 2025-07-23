@@ -12,7 +12,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (action) {
-        fetch(window.contextPath ? window.contextPath + "/managePrice" : "/managePrice", {
+        // Lấy contextPath từ <body data-context-path> hoặc window.contextPath hoặc fallback
+        const bodyTag = document.querySelector('body');
+        const contextPath = (bodyTag && bodyTag.getAttribute('data-context-path')) || window.contextPath || '/train-booking-system';
+        fetch(contextPath + "/managePrice", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -22,12 +25,16 @@ document.addEventListener("DOMContentLoaded", function () {
         })
           .then((response) => {
             if (!response.ok) {
-              alert("Error updating status");
+              response.text().then(text => {
+                alert("Error updating status: " + (text || response.status));
+                console.error("Error updating status:", text);
+              });
               this.checked = !isActive; // Revert the checkbox on error
             }
           })
-          .catch(() => {
-            alert("Error updating status");
+          .catch((err) => {
+            alert("Error updating status: " + err);
+            console.error("Error updating status:", err);
             this.checked = !isActive; // Revert the checkbox on error
           });
       }

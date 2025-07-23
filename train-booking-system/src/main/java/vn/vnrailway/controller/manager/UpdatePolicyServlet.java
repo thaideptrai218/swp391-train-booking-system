@@ -61,8 +61,6 @@ public class UpdatePolicyServlet extends HttpServlet {
         policy.setDescription(request.getParameter("description"));
         policy.setActive("1".equals(request.getParameter("isActive")));
         policy.setEffectiveFromDate(Date.valueOf(request.getParameter("effectiveFromDate")));
-        String toDate = request.getParameter("effectiveToDate");
-        policy.setEffectiveToDate(toDate.isEmpty() ? null : Date.valueOf(toDate));
 
         try {
             cancellationPolicyRepository.update(policy);

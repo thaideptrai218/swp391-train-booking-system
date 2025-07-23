@@ -162,6 +162,11 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         </div>
 
         <div class="form-group">
+          <label for="priority">Độ ưu tiên (Priority):</label>
+          <input type="number" id="priority" name="priority" value="${pricingRule.priority}" min="0" />
+        </div>
+
+        <div class="form-group">
           <label for="isForRoundTrip">Cho chuyến khứ hồi:</label>
           <select id="isForRoundTrip" name="isForRoundTrip">
             <option value="0" ${!pricingRule.forRoundTrip ? 'selected' : ''}>Một chiều</option>

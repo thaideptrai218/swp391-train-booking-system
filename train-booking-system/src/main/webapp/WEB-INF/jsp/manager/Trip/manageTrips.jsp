@@ -71,7 +71,7 @@
                               <option value="0" ${!trip.holidayTrip ? 'selected' : ''}>Không</option>
                               <option value="1" ${trip.holidayTrip ? 'selected' : ''}>Có</option>
                             </select>
-                            <select id="holidaySelect_${trip.tripID}" class="form-control-sm holiday-select" data-trip-id="${trip.tripID}" style="display: ${trip.holidayTrip ? 'inline-block' : 'none'};">
+                            <select id="holidaySelect_${trip.tripID}" class="form-control-sm holiday-select" data-trip-id="${trip.tripID}" style="display: '${trip.holidayTrip ? 'inline-block' : 'none'};'">
                               <option value="">-- Chọn ngày lễ --</option>
                               <c:forEach var="holiday" items="${allHolidays}">
                                 <option value="${holiday.discountPercentage}" ${trip.basePriceMultiplier == (holiday.discountPercentage / 100) ? 'selected' : ''}>${holiday.holidayName}</option>

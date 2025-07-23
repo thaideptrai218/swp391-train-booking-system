@@ -154,6 +154,11 @@ prefix="c" %>
         </div>
 
         <div class="form-group">
+          <label for="priority">Độ ưu tiên (Priority):</label>
+          <input type="number" id="priority" name="priority" value="0" min="0" />
+        </div>
+
+        <div class="form-group">
           <label for="isForRoundTrip">Cho chuyến khứ hồi:</label>
           <select id="isForRoundTrip" name="isForRoundTrip">
             <option value="0">Một chiều</option>
@@ -226,10 +231,9 @@ prefix="c" %>
             !ruleName ||
             !description ||
             !basePricePerKm ||
-            !applicableDateStart ||
-            !applicableDateEnd
+            !applicableDateStart
           ) {
-            alert("Các trường không được để trống.");
+            alert("Các trường không được để trống (ngoại trừ ngày kết thúc áp dụng).");
             event.preventDefault();
             return;
           }

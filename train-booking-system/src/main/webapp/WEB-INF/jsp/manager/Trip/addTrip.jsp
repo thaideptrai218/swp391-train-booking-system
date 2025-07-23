@@ -244,7 +244,7 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
   </head>
   <body>
     <div class="dashboard-container">
-      <%@ include file="sidebar.jsp" %>
+      <jsp:include page="../sidebar.jsp" />
       <div class="main-content">
         <header class="dashboard-header">
           <h1><i class="fas fa-plus-circle"></i> Thêm Chuyến Đi Mới</h1>

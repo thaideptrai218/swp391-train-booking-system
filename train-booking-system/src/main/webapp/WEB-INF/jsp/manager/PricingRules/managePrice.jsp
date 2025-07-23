@@ -40,7 +40,8 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
               <tr>
                 <th>ID</th>
                 <th>Tên</th>
-                <th>Giá cơ bản/Km</th>
+                <th>Mô tả</th>
+                <th>Giá cơ bản/km</th>
                 <th>Ngày bắt đầu áp dụng</th>
                 <th>Ngày kết thúc áp dụng</th>
                 <th>Hoạt động</th>
@@ -52,6 +53,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                 <tr>
                   <td>${rule.ruleID}</td>
                   <td><c:out value="${rule.ruleName}" /></td>
+                  <td>${rule.description}</td>
                   <td>
                     <fmt:formatNumber
                       value="${rule.basePricePerKm}"
@@ -69,11 +71,18 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                     <fmt:formatDate value="<%= applicableDateEnd %>" pattern="dd-MM-yyyy" />
                   </td>
                   <td>
-                    <input type="checkbox" class="status-checkbox"
-                    data-type="rule" data-id="${rule.ruleID}" ${rule.active ?
-                    'checked' : ''}>
+                    <c:choose>
+                      <c:when test="${rule.defaultRule}">
+                        <input type="checkbox" class="status-checkbox" checked disabled />
+                      </c:when>
+                      <c:otherwise>
+                        <input type="checkbox" class="status-checkbox"
+                               data-type="rule" data-id="${rule.ruleID}" ${rule.active ? 'checked' : ''}>
+                      </c:otherwise>
+                    </c:choose>
                   </td>
                   <td class="actions">
+                    <c:if test="${!rule.defaultRule}">
                     <a
                       href="${pageContext.request.contextPath}/managePrice?action=edit&id=${rule.ruleID}"
                       class="edit"
@@ -85,6 +94,7 @@ prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                       onclick="return confirm('Bạn có chắc chắn muốn xóa quy tắc này không?');"
                       >Xóa</a
                     >
+                    </c:if>
                   </td>
                 </tr>
               </c:forEach>

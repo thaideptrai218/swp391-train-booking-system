@@ -20,4 +20,6 @@ public class PricingRule {
     private LocalDate applicableDateStart;
     private LocalDate applicableDateEnd;
     private boolean isActive;
+    private boolean defaultRule;
+    private Integer priority;
 }
