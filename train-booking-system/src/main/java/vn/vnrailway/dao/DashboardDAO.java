@@ -56,4 +56,40 @@ public class DashboardDAO {
     public Map<String, Integer> getFeedbackByTopic() throws SQLException {
         return null;
     }
+
+    public int getPendingRefundsCount() throws SQLException {
+        return 0;
+    }
+
+    public int getPendingFeedbacksCount() throws SQLException {
+        return 0;
+    }
+
+    public int getUnansweredUsersCount() throws SQLException {
+        return 0;
+    }
+
+    public int getTotalTrainsCount() throws SQLException {
+        return 0;
+    }
+
+    public double getTotalRevenue(int months) throws SQLException {
+        return 0;
+    }
+
+    public double getTotalRefunds() throws SQLException {
+        return 0;
+    }
+
+    public Map<String, Integer> getPopularDepartureStations(int months) throws SQLException {
+        return null;
+    }
+
+    public Map<String, Integer> getPopularArrivalStations(int months) throws SQLException {
+        return null;
+    }
+
+    public List<Map<String, Object>> getPopularTrips() throws SQLException {
+        return null;
+    }
 }

@@ -44,8 +44,6 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("guestAccounts", guestAccounts);
 
         // Lấy dữ liệu cho biểu đồ
-        Map<String, Integer> genderDistribution = dashboardDAO.getGenderDistribution();
-        Map<String, Integer> ageGroupDistribution = dashboardDAO.getAgeGroupDistribution();
         Map<String, Integer> activeStatusDistribution = dashboardDAO.getActiveStatusDistribution();
         
         String loginRatioDaysParam = request.getParameter("loginRatioDays");
@@ -75,8 +73,6 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Chuyển Map thành JSON string
         Gson gson = new Gson();
-        request.setAttribute("genderDistribution", gson.toJson(genderDistribution));
-        request.setAttribute("ageGroupDistribution", gson.toJson(ageGroupDistribution));
         request.setAttribute("activeStatusDistribution", gson.toJson(activeStatusDistribution));
         request.setAttribute("loginRatio", gson.toJson(loginRatio));
         request.setAttribute("selectedLoginRatioDays", loginRatioDays);

@@ -102,15 +102,6 @@
                     </div>
                 </div>
 
-                <div class="chart-card">
-                    <h3>Phân Bổ Giới Tính Người Dùng</h3>
-                    <canvas id="genderDistributionChart"></canvas>
-                </div>
-
-                <div class="chart-card">
-                    <h3>Phân Bổ Độ Tuổi Người Dùng</h3>
-                    <canvas id="ageGroupDistributionChart"></canvas>
-                </div>
 
                 <div class="chart-card">
                     <h3>Trạng Thái Tài Khoản</h3>
@@ -136,8 +127,6 @@
 
     <div id="chartData" 
          data-user-chart='${userChart}'
-         data-gender-distribution='${genderDistribution}'
-         data-age-group-distribution='${ageGroupDistribution}'
          data-active-status='${activeStatusDistribution}'
          data-login-ratio='${loginRatio}'
          style="display: none;"></div>
@@ -179,22 +168,6 @@
                 }]
             }, { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } });
 
-            // 2. Gender Distribution Chart
-            const genderCtx = document.getElementById('genderDistributionChart').getContext('2d');
-            const genderData = getPieChartData(chartDataElement.dataset.genderDistribution, 'Phân bổ giới tính');
-            createChart(genderCtx, 'pie', genderData);
-
-            // 3. Age Group Distribution Chart
-            const ageGroupCtx = document.getElementById('ageGroupDistributionChart').getContext('2d');
-            const ageGroupData = JSON.parse(chartDataElement.dataset.ageGroupDistribution);
-            createChart(ageGroupCtx, 'bar', {
-                labels: Object.keys(ageGroupData),
-                datasets: [{
-                    label: 'Số lượng người dùng',
-                    data: Object.values(ageGroupData),
-                    backgroundColor: 'rgba(153, 102, 255, 0.6)'
-                }]
-            }, { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } });
 
             // 4. Active Status Chart
             const activeStatusCtx = document.getElementById('activeStatusChart').getContext('2d');
