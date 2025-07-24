@@ -12,7 +12,6 @@ prefix="c" %>
       rel="stylesheet"
       href="<c:url value='/css/manager/manager-dashboard.css'/>"
     />
-    <link rel="stylesheet" href="<c:url value='/css/manager/sidebar.css'/>" />
     <link
       rel="stylesheet"
       href="<c:url value='/css/manager/stations/manageStations.css'/>"
@@ -33,9 +32,7 @@ prefix="c" %>
         </header>
         <section class="content-section">
           <c:if test="${not empty message}">
-            <p
-              class="message ${message.contains('successfully') ? 'success-message' : 'error-message'}"
-            >
+            <p class="message ${message.contains('successfully') ? 'success-message' : 'error-message'}">
               ${message}
             </p>
           </c:if>

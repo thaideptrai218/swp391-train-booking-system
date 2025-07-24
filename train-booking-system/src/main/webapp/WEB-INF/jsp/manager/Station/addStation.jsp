@@ -12,7 +12,6 @@ prefix="c" %>
       rel="stylesheet"
       href="<c:url value='/css/manager/manager-dashboard.css'/>"
     />
-    <link rel="stylesheet" href="<c:url value='/css/manager/sidebar.css'/>" />
     <link
       rel="stylesheet"
       href="<c:url value='/css/manager/stations/manageStations.css'/>"
@@ -27,14 +26,27 @@ prefix="c" %>
           <h1>Thêm ga mới</h1>
         </header>
         <section class="content-section">
-          <form id="stationForm" action="addStation" method="post">
+          <form id="stationForm" action="addStation" method="POST">
             <div class="form-group">
-              <label for="stationName">Tên ga: <span class="required-asterisk">*</span></label>
-              <input type="text" id="stationName" name="stationName" required class="form-control" />
+              <label for="stationName"
+                >Tên ga: <span class="required-asterisk">*</span></label
+              >
+              <input
+                type="text"
+                id="stationName"
+                name="stationName"
+                required
+                class="form-control"
+              />
             </div>
             <div class="form-group">
               <label for="address">Địa chỉ:</label>
-              <input type="text" id="address" name="address" class="form-control" />
+              <input
+                type="text"
+                id="address"
+                name="address"
+                class="form-control"
+              />
             </div>
             <div class="form-group">
               <label for="city">Thành phố:</label>
@@ -42,14 +54,31 @@ prefix="c" %>
             </div>
             <div class="form-group">
               <label for="region">Khu vực:</label>
-              <input type="text" id="region" name="region" class="form-control" />
+              <input
+                type="text"
+                id="region"
+                name="region"
+                class="form-control"
+              />
             </div>
             <div class="form-group">
               <label for="phoneNumber">Số điện thoại:</label>
-              <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" />
+              <input
+                type="text"
+                id="phoneNumber"
+                name="phoneNumber"
+                class="form-control"
+              />
             </div>
             <div class="form-group">
-              <button type="submit" name="command" value="add" class="btn btn-primary">Thêm ga</button>
+              <button
+                type="submit"
+                name="command"
+                value="add"
+                class="btn btn-primary"
+              >
+                Thêm ga
+              </button>
               <a href="manageStations" class="cancel-button">Hủy</a>
             </div>
           </form>

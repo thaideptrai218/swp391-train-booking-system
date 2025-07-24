@@ -3,11 +3,10 @@ package vn.vnrailway.controller.manager;
 import vn.vnrailway.dao.StationRepository;
 import vn.vnrailway.dao.impl.StationRepositoryImpl;
 import vn.vnrailway.model.Station;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional; // Added this import
+import java.util.Optional;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -55,13 +54,12 @@ public class ManageStationsServlet extends HttpServlet {
             } else {
                 switch (command) {
                     case "add":
-                        String newStationCode = request.getParameter("stationCode");
-                        if (stationRepository.findByStationCode(newStationCode).isPresent()) {
-                            message = "Error: Station with code '" + newStationCode + "' already exists.";
+                        String newStationName = request.getParameter("stationName");
+                        if (stationRepository.findByStationName(newStationName).isPresent()) {
+                            message = "Error: Station with name '" + newStationName + "' already exists.";
                         } else {
                             Station newStation = new Station();
-                            newStation.setStationCode(newStationCode);
-                            newStation.setStationName(request.getParameter("stationName"));
+                            newStation.setStationName(newStationName);
                             newStation.setAddress(request.getParameter("address"));
                             newStation.setCity(request.getParameter("city"));
                             newStation.setRegion(request.getParameter("region"));
@@ -72,17 +70,17 @@ public class ManageStationsServlet extends HttpServlet {
                         break;
                     case "edit":
                         int editStationId = Integer.parseInt(request.getParameter("stationID"));
-                        String updatedStationCode = request.getParameter("stationCode");
+                        String updatedStationName = request.getParameter("stationName");
 
                         Optional<Station> existingStationByCode = stationRepository
-                                .findByStationCode(updatedStationCode);
+                                .findByStationName(updatedStationName);
                         if (existingStationByCode.isPresent()
                                 && existingStationByCode.get().getStationID() != editStationId) {
-                            message = "Error: Another station with code '" + updatedStationCode + "' already exists.";
+                            message = "Error: Another station with code '" + updatedStationName + "' already exists.";
                         } else {
                             Station existingStation = stationRepository.findById(editStationId)
                                     .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
-                            existingStation.setStationCode(updatedStationCode);
+                            existingStation.setStationCode(updatedStationName);
                             existingStation.setStationName(request.getParameter("stationName"));
                             existingStation.setAddress(request.getParameter("address"));
                             existingStation.setCity(request.getParameter("city"));

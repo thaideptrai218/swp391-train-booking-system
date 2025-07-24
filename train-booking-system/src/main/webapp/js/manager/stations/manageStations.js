@@ -129,8 +129,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   showAddFormBtn.addEventListener("click", function () {
-    // Redirect to an add station page or show a modal
-    // For now, let's assume it redirects
     window.location.href = "addStation";
   });
 
