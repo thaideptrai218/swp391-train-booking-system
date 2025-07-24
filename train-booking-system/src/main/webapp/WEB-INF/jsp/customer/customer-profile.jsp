@@ -3,16 +3,17 @@
     <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
       <!DOCTYPE html>
       <html lang="en">
-
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hồ sơ Người dùng</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/customer-profile.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
       </head>
 
       <body>
+            <jsp:include page="../common/header.jsp" />
         <div class="container">
           <div class="main-body">
 
@@ -73,7 +74,7 @@
                       <span class="text-secondary">https://vnrailway.vn</span>
                     </li>
                   </ul>
-                  <a class="btn btn-secondary btn-sm" style="margin-left: 1rem;"
+                  <a class="btn btn-secondary btn-sm"
                     href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
                 </div>
               </div>
@@ -162,6 +163,7 @@
 
               .main-body {
                 padding: 15px;
+                margin: 150px 0;
               }
 
               .card {
@@ -228,5 +230,6 @@
               });
             </script>
       </body>
-
+                  <jsp:include page="../common/footer.jsp" />
       </html>
+

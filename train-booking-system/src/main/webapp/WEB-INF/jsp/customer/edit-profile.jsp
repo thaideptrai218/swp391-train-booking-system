@@ -9,11 +9,13 @@
     <title>Chỉnh sửa Hồ sơ Người dùng</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/edit-profile.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
+  </head>
 <body>
 <div class="container">
     <div class="main-body">
-    
+            <jsp:include page="../common/header.jsp" />
           <!-- Breadcrumb -->
           <nav aria-label="breadcrumb" class="main-breadcrumb">
             <ol class="breadcrumb">
@@ -29,8 +31,8 @@
               <div class="card">
                 <div class="card-body">
                   <div class="d-flex flex-column align-items-center text-center">
-                    <img src="${avatarURL}" alt="Admin" class="rounded-circle" width="150">
-                    <div class="mt-3">
+                     <img src="${pageContext.request.contextPath}${user.avatarPath}" class="img-fluid rounded-circle"
+                        style="width: 120px; height: 120px;">                    <div class="mt-3">
                       <h4>${user.fullName}</h4>
                       <p class="text-secondary mb-1">Khách Hàng</p>
                       <p class="text-muted font-size-sm">Việt Nam</p>
@@ -54,7 +56,8 @@
                     <span class="text-secondary">https://vnrailway.vn</span>
                   </li>
                 </ul>
-                <a class="btn btn-secondary btn-sm btn-logout-custom" style="margin-left: 1rem;text-align:center" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+                <a class="btn btn-secondary btn-sm btn-logout-custom"
+                 href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
               </div>
             </div>
 
@@ -154,4 +157,5 @@
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+            <jsp:include page="../common/footer.jsp" />
 </html>
