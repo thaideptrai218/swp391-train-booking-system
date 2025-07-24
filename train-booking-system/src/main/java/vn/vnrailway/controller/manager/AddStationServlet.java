@@ -35,13 +35,47 @@ public class AddStationServlet extends HttpServlet {
         String command = request.getParameter("command");
         if ("add".equals(command)) {
             try {
+                String stationCode = request.getParameter("stationCode");
+                String stationName = request.getParameter("stationName");
+                String address = request.getParameter("address");
+                String city = request.getParameter("city");
+                String region = request.getParameter("region");
+                String phoneNumber = request.getParameter("phoneNumber");
+
+                String errorMessage = null;
+                if (stationName == null || stationName.trim().isEmpty()) {
+                    errorMessage = "Tên ga không được để trống.";
+                } else if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+                    errorMessage = "Số điện thoại không được để trống.";
+                } else if (stationRepository.findAll().stream()
+                        .anyMatch(s -> s.getStationName().equalsIgnoreCase(stationName))) {
+                    errorMessage = "Tên ga đã tồn tại.";
+                } else if (stationRepository.findAll().stream()
+                        .anyMatch(s -> s.getPhoneNumber() != null && s.getPhoneNumber().equals(phoneNumber))) {
+                    errorMessage = "Số điện thoại đã tồn tại.";
+                }
+
+                if (errorMessage != null) {
+                    request.setAttribute("errorMessage", errorMessage);
+                    request.setAttribute("stationCode", stationCode);
+                    request.setAttribute("stationName", stationName);
+                    request.setAttribute("address", address);
+                    request.setAttribute("city", city);
+                    request.setAttribute("region", region);
+                    request.setAttribute("phoneNumber", phoneNumber);
+                    request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/addStation.jsp").forward(request,
+                            response);
+                    return;
+                }
+
                 Station newStation = new Station();
-                newStation.setStationCode(null);
-                newStation.setStationName(request.getParameter("stationName"));
-                newStation.setAddress(request.getParameter("address"));
-                newStation.setCity(request.getParameter("city"));
-                newStation.setRegion(request.getParameter("region"));
-                newStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                newStation.setStationCode(stationCode);
+                newStation.setStationName(stationName);
+                newStation.setAddress(address);
+                newStation.setCity(city);
+                newStation.setRegion(region);
+                newStation.setPhoneNumber(phoneNumber);
+                newStation.setLocked(false);
                 stationRepository.save(newStation);
                 response.sendRedirect("manageStations?message=Station+added+successfully!");
             } catch (SQLException e) {

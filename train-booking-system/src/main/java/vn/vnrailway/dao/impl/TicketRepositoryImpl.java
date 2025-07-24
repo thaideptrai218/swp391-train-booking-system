@@ -907,16 +907,21 @@ public class TicketRepositoryImpl implements TicketRepository {
             // 4. Batch insert Refunds cho các vé hợp lệ
             try (PreparedStatement ps = conn.prepareStatement(insertRefundSql)) {
                 for (Ticket t : tickets) {
-                    if (t.getBookingID() == 0) continue; // Không có người đặt
-                    if (lastScheduledDeparture != null && lastScheduledDeparture.isBefore(now)) continue; // Đã qua giờ khởi hành cuối
-                    if (refundedTicketIds.contains(t.getTicketID())) continue; // Đã có refund
+                    if (t.getBookingID() == 0)
+                        continue; // Không có người đặt
+                    if (lastScheduledDeparture != null && lastScheduledDeparture.isBefore(now))
+                        continue; // Đã qua giờ khởi hành cuối
+                    if (refundedTicketIds.contains(t.getTicketID()))
+                        continue; // Đã có refund
 
                     ps.setInt(1, t.getTicketID());
                     ps.setInt(2, t.getBookingID());
                     ps.setNull(3, java.sql.Types.INTEGER); // AppliedPolicyID (null)
                     ps.setBigDecimal(4, t.getPrice() != null ? t.getPrice() : java.math.BigDecimal.ZERO); // OriginalTicketPrice
                     ps.setBigDecimal(5, java.math.BigDecimal.ZERO); // FeeAmount = 0
-                    ps.setBigDecimal(6, t.getPrice() != null ? t.getPrice() : java.math.BigDecimal.ZERO); // ActualRefundAmount = full price
+                    ps.setBigDecimal(6, t.getPrice() != null ? t.getPrice() : java.math.BigDecimal.ZERO); // ActualRefundAmount
+                                                                                                          // = full
+                                                                                                          // price
                     ps.setTimestamp(7, new java.sql.Timestamp(System.currentTimeMillis())); // RequestedAt = now
                     ps.setString(8, "Approved"); // Status
                     ps.setString(9, "Bank Transfer"); // RefundMethod
@@ -933,6 +938,8 @@ public class TicketRepositoryImpl implements TicketRepository {
             e.printStackTrace();
             throw e;
         }
+    }
+
     public List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests(String userID) throws SQLException {
         List<ConfirmRefundRequestDTO> list = new ArrayList<>();
 
