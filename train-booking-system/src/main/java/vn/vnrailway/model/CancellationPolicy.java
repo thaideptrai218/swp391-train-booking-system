@@ -21,4 +21,5 @@ public class CancellationPolicy {
     private String description;
     private boolean isActive;
     private Date effectiveFromDate;
+    private Date effectiveToDate;
 }

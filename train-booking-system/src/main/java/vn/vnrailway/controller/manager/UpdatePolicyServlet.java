@@ -51,19 +51,7 @@ public class UpdatePolicyServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        CancellationPolicy policy = new CancellationPolicy();
-        policy.setPolicyID(Integer.parseInt(request.getParameter("policyID")));
-        policy.setPolicyName(request.getParameter("policyName"));
-        policy.setHoursBeforeDepartureMin(Integer.parseInt(request.getParameter("hoursMin")));
-        String hoursMax = request.getParameter("hoursMax");
-        policy.setHoursBeforeDepartureMax(hoursMax.isEmpty() ? null : Integer.parseInt(hoursMax));
-        policy.setFeePercentage(new BigDecimal(request.getParameter("feePercentage")));
-        policy.setFixedFeeAmount(new BigDecimal(request.getParameter("fixedFeeAmount")));
-        policy.setRefundable("1".equals(request.getParameter("isRefundable")));
-        policy.setDescription(request.getParameter("description"));
-        policy.setActive("1".equals(request.getParameter("isActive")));
-        policy.setEffectiveFromDate(Date.valueOf(request.getParameter("effectiveFromDate")));
-
+        
         // Validation errors list
         List<String> errors = new ArrayList<>();
         int id = Integer.parseInt(request.getParameter("policyID"));
@@ -227,7 +215,7 @@ public class UpdatePolicyServlet extends HttpServlet {
             policy.setDescription(description != null ? description.trim() : "");
             policy.setActive("1".equals(isActive));
             policy.setEffectiveFromDate(effectiveFrom);
-            policy.setEffectiveToDate(effectiveTo);
+            policy.setEffectiveFromDate(effectiveTo);
 
             // Update policy
             cancellationPolicyRepository.update(policy);
