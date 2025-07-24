@@ -96,7 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByIdCardNumber(String idCardNumber) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE IDCardNumber = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath  FROM Users WHERE IDCardNumber = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, idCardNumber);

@@ -743,7 +743,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID\r\n" + //
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
@@ -809,7 +809,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID\r\n" + //
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
