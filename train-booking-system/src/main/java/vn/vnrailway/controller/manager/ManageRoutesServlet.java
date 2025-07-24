@@ -293,7 +293,7 @@ public class ManageRoutesServlet extends HttpServlet {
             return;
         }
 
-        Route newRoute = new Route(0, routeName, description); // ID will be auto-generated
+        Route newRoute = new Route(0, routeName, description, false); // ID will be auto-generated, isLocked = false
         Route savedRoute = routeRepository.save(newRoute); // Get the saved route with its ID
 
         if (savedRoute.getRouteID() > 0) {

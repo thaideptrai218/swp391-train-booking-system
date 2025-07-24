@@ -444,7 +444,7 @@ public class TripRepositoryImpl implements TripRepository {
         List<Object> params = new ArrayList<>();
 
         StringBuilder sqlBuilder = new StringBuilder("SELECT ");
-        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier, t.IsLocked ");
+        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier, t.IsLocked, t.DepartureDateTime ");
         sqlBuilder.append("FROM Trips t ");
         sqlBuilder.append("JOIN Routes r ON t.RouteID = r.RouteID ");
 
@@ -490,6 +490,7 @@ public class TripRepositoryImpl implements TripRepository {
                     dto.setRouteID(rs.getInt("RouteID"));
                     dto.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier"));
                     dto.setLocked(rs.getBoolean("IsLocked"));
+                    dto.setDepartureDateTime(rs.getTimestamp("DepartureDateTime").toLocalDateTime());
                     // trainName, departureDateTime, arrivalDateTime, trainID are no longer part of
                     // the DTO's active fields
                     // or are not selected by the current query for this view.

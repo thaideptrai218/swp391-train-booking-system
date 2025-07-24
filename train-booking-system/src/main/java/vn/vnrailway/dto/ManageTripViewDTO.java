@@ -26,4 +26,5 @@ public class ManageTripViewDTO {
     // private int trainID; // No longer populated by findAllForManagerView
     private int routeID;
     private boolean isLocked;
+    private LocalDateTime departureDateTime;
 }

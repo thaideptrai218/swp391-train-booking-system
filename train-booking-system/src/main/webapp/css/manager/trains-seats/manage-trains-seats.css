@@ -53,19 +53,30 @@ body {
 }
 
 .train-composition-display {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 32px;
   padding: 32px 32px 16px 32px;
-  overflow-x: auto;
   background: linear-gradient(90deg, #f4f8fd 60%, #e3eafc 100%);
   border-bottom: 1px solid #e3eafc;
   border-radius: 0 0 18px 18px;
   box-shadow: 0 4px 24px rgba(0, 123, 255, 0.07);
   transition: all 0.3s;
 }
+
+.train-head-item,
+.carriage-item {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 .carriage-item {
   min-width: 120px;
   margin: 0;
@@ -115,11 +126,11 @@ body {
 }
 @media (max-width: 900px) {
   .train-composition-display {
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     padding: 16px 8px 8px 8px;
   }
   .carriage-item, .train-head-item {
-    min-width: 80px;
     font-size: 0.95em;
   }
 }
@@ -428,6 +439,10 @@ form[id^="edit-train-form"] input[type="submit"]:hover {
 }
 .lock-btn:hover {
   color: #d84315;
+}
+
+.hidden-coach-list {
+  display: none !important;
 }
 
 @media (max-width: 900px) {

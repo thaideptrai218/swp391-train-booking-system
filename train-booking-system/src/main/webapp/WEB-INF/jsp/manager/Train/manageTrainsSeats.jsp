@@ -93,11 +93,14 @@
                         </div>
                     </div>
 
-                    <c:set var="compositionStyleString" value="display: none;" />
-                    <c:if test="${train.isLocked}">
-                      <c:set var="compositionStyleString" value="display: none; pointer-events:none; opacity:0.5" />
-                    </c:if>
-                    <div class="train-composition-display" style="${compositionStyleString}">
+                    <c:choose>
+                      <c:when test="${train.isLocked}">
+                        <div class="train-composition-display hidden-coach-list" style="pointer-events:none; opacity:0.5;">
+                      </c:when>
+                      <c:otherwise>
+                        <div class="train-composition-display hidden-coach-list">
+                      </c:otherwise>
+                    </c:choose>
                         <div class="train-head-item">
                             <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
                             <span class="train-name-label">${train.trainName}</span>
@@ -147,9 +150,9 @@
                     </div>
 
                     <c:forEach var="coach" items="${coachesByTrain[train.trainID]}">
-                        <c:set var="coachDetailsStyleString" value="display:none;" />
+                        <c:set var="coachDetailsStyleString" value="" />
                         <c:if test="${train.isLocked}">
-                          <c:set var="coachDetailsStyleString" value="display:none; pointer-events:none; opacity:0.5" />
+                          <c:set var="coachDetailsStyleString" value="pointer-events:none; opacity:0.5;" />
                         </c:if>
                         <div id="coach-details-${train.trainID}-${coach.coachID}" class="coach-details" style="${coachDetailsStyleString}">
                             <div class="coach-info">

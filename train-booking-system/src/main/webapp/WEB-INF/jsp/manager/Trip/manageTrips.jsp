@@ -28,6 +28,14 @@
             <div class="search-container">
               <input type="text" id="tripSearchInput" placeholder="Tìm theo Mã chuyến đi, Tên tuyến...">
             </div>
+            <form id="filterDateForm" method="get" action="${pageContext.request.contextPath}/manageTrips" style="display:inline-block;margin-left:16px;">
+              <select name="filterDate" onchange="this.form.submit()" style="padding:7px 12px;border-radius:6px;">
+                <option value="">Tất cả</option>
+                <option value="TODAY" ${param.filterDate == 'TODAY' ? 'selected' : ''}>Hôm nay</option>
+                <option value="WEEK" ${param.filterDate == 'WEEK' ? 'selected' : ''}>Tuần này</option>
+                <option value="MONTH" ${param.filterDate == 'MONTH' ? 'selected' : ''}>Tháng này</option>
+              </select>
+            </form>
             <a href="${pageContext.request.contextPath}/manageTrips?action=showAddForm" class="btn btn-primary action-add">
               <i class="fas fa-plus-circle"></i> Thêm Chuyến Đi Mới
             </a>
@@ -87,7 +95,7 @@
                           <form action="${pageContext.request.contextPath}/manageTrips" method="POST" style="display: inline-flex; align-items: center; gap: 5px; margin: 0;">
                             <input type="hidden" name="action" value="updateTripStatus" />
                             <input type="hidden" name="tripId" value="${trip.tripID}" />
-                            <select name="tripStatus" class="form-control-sm" onchange="this.form.submit()" ${trip.locked ? 'disabled' : ''}>
+                            <select name="tripStatus" class="form-control-sm" onchange="confirmCancelTrip(this, '${trip.tripID}')" ${trip.locked ? 'disabled' : ''}>
                               <option value="Scheduled" ${trip.tripStatus == 'Scheduled' ? 'selected' : ''}>Lên Lịch</option>
                               <option value="In Progress" ${trip.tripStatus == 'In Progress' ? 'selected' : ''}>Đang Diễn Ra</option>
                               <option value="Completed" ${trip.tripStatus == 'Completed' ? 'selected' : ''}>Đã Hoàn Thành</option>
@@ -128,3 +136,29 @@
     </div>
   </body>
 </html>
+
+<script>
+function confirmCancelTrip(selectElem, tripId) {
+  if (selectElem.value === 'Cancelled') {
+    if (!confirm('Bạn có chắc chắn muốn hủy chuyến này không?')) {
+      setTimeout(() => {
+        selectElem.value = selectElem.getAttribute('data-prev');
+        selectElem.blur();
+      }, 10);
+    } else {
+      setTimeout(() => { selectElem.form.submit(); }, 10);
+    }
+  } else {
+    setTimeout(() => { selectElem.form.submit(); }, 10);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('select[name="tripStatus"]').forEach(function(sel) {
+    sel.setAttribute('data-prev', sel.value);
+    sel.addEventListener('focus', function() {
+      sel.setAttribute('data-prev', sel.value);
+    });
+  });
+});
+</script>

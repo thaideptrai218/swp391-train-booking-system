@@ -18,6 +18,8 @@ import java.util.Optional;
 import org.eclipse.tags.shaded.org.apache.xpath.SourceTree;
 
 import java.math.BigDecimal; // Import BigDecimal
+import java.util.HashSet;
+import java.util.Set;
 
 public class TicketRepositoryImpl implements TicketRepository {
 
@@ -853,6 +855,82 @@ public class TicketRepositoryImpl implements TicketRepository {
         } catch (SQLException e) {
             e.printStackTrace();
             throw e; // Ném lại ngoại lệ để caller có thể xử lý
+        }
+    }
+
+    @Override
+    public void refundAllTicketsForTrip(int tripId) throws SQLException {
+        String updateTicketsSql = "UPDATE Tickets SET IsRefundable = 0 WHERE TripID = ?;";
+        String selectTicketsSql = "SELECT * FROM Tickets WHERE TripID = ?;";
+        String selectRefundedTicketIdsSql = "SELECT TicketID FROM Refunds WHERE TicketID IN (SELECT TicketID FROM Tickets WHERE TripID = ?)";
+        String insertRefundSql = "INSERT INTO Refunds (TicketID, BookingID, AppliedPolicyID, OriginalTicketPrice, FeeAmount, ActualRefundAmount, RequestedAt, Status, RefundMethod, Notes, RequestedByUserID, ProcessedByUserID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        vn.vnrailway.dao.TripStationRepository tripStationRepository = new vn.vnrailway.dao.impl.TripStationRepositoryImpl();
+        java.util.List<vn.vnrailway.model.TripStation> tripStations = tripStationRepository.findByTripId(tripId);
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime lastScheduledDeparture = null;
+        if (!tripStations.isEmpty()) {
+            lastScheduledDeparture = tripStations.get(tripStations.size() - 1).getScheduledDeparture();
+        }
+        try (Connection conn = DBContext.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Update all tickets IsRefundable = 0
+            try (PreparedStatement ps = conn.prepareStatement(updateTicketsSql)) {
+                ps.setInt(1, tripId);
+                ps.executeUpdate();
+            }
+
+            // 2. Select all tickets for the trip
+            List<Ticket> tickets = new ArrayList<>();
+            try (PreparedStatement ps = conn.prepareStatement(selectTicketsSql)) {
+                ps.setInt(1, tripId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Ticket t = mapResultSetToTicket(rs);
+                        tickets.add(t);
+                    }
+                }
+            }
+
+            // 3. Lấy danh sách TicketID đã có Refunds
+            Set<Integer> refundedTicketIds = new HashSet<>();
+            try (PreparedStatement ps = conn.prepareStatement(selectRefundedTicketIdsSql)) {
+                ps.setInt(1, tripId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        refundedTicketIds.add(rs.getInt(1));
+                    }
+                }
+            }
+
+            // 4. Batch insert Refunds cho các vé hợp lệ
+            try (PreparedStatement ps = conn.prepareStatement(insertRefundSql)) {
+                for (Ticket t : tickets) {
+                    if (t.getBookingID() == 0) continue; // Không có người đặt
+                    if (lastScheduledDeparture != null && lastScheduledDeparture.isBefore(now)) continue; // Đã qua giờ khởi hành cuối
+                    if (refundedTicketIds.contains(t.getTicketID())) continue; // Đã có refund
+
+                    ps.setInt(1, t.getTicketID());
+                    ps.setInt(2, t.getBookingID());
+                    ps.setNull(3, java.sql.Types.INTEGER); // AppliedPolicyID (null)
+                    ps.setBigDecimal(4, t.getPrice() != null ? t.getPrice() : java.math.BigDecimal.ZERO); // OriginalTicketPrice
+                    ps.setBigDecimal(5, java.math.BigDecimal.ZERO); // FeeAmount = 0
+                    ps.setBigDecimal(6, t.getPrice() != null ? t.getPrice() : java.math.BigDecimal.ZERO); // ActualRefundAmount = full price
+                    ps.setTimestamp(7, new java.sql.Timestamp(System.currentTimeMillis())); // RequestedAt = now
+                    ps.setString(8, "Approved"); // Status
+                    ps.setString(9, "Bank Transfer"); // RefundMethod
+                    ps.setString(10, "Auto refund due to trip cancellation"); // Notes
+                    ps.setNull(11, java.sql.Types.INTEGER); // RequestedByUserID (null)
+                    ps.setInt(12, 15); // ProcessedByUserID = 15
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 

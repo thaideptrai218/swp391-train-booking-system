@@ -128,6 +128,27 @@ public class ManageTripsServlet extends HttpServlet {
         }
 
         List<ManageTripViewDTO> listTrips = tripRepository.findAllForManagerView(searchTerm, sortField, sortOrder);
+        String filterDate = request.getParameter("filterDate");
+        if (filterDate != null && !filterDate.isEmpty()) {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
+            java.time.LocalDate endOfWeek = today.with(java.time.DayOfWeek.SUNDAY);
+            java.time.YearMonth thisMonth = java.time.YearMonth.now();
+            listTrips = listTrips.stream().filter(trip -> {
+                if (trip.getDepartureDateTime() == null) return false;
+                java.time.LocalDate depDate = trip.getDepartureDateTime().toLocalDate();
+                switch (filterDate) {
+                    case "TODAY":
+                        return depDate.equals(today);
+                    case "WEEK":
+                        return !depDate.isBefore(startOfWeek) && !depDate.isAfter(endOfWeek);
+                    case "MONTH":
+                        return thisMonth.equals(java.time.YearMonth.from(depDate));
+                    default:
+                        return true;
+                }
+            }).toList();
+        }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
         request.setAttribute("allHolidays", allHolidays);
@@ -375,10 +396,11 @@ public class ManageTripsServlet extends HttpServlet {
                 String newStatus = request.getParameter("tripStatus");
                 if (newStatus != null && !newStatus.trim().isEmpty()) {
                     tripRepository.updateTripStatus(tripId, newStatus);
-                    // Nếu trạng thái là Hủy chuyến thì gửi email hoàn tiền cho khách
+                    // Nếu trạng thái là Hủy chuyến thì gửi email hoàn tiền cho khách và cập nhật vé, refunds
                     if ("Hủy chuyến".equalsIgnoreCase(newStatus) || "Cancelled".equalsIgnoreCase(newStatus)) {
-                        // Lấy danh sách vé theo TripID
                         vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                        ticketRepository.refundAllTicketsForTrip(tripId);
+                        // Lấy danh sách vé theo TripID
                         vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
                         vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
                         java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(tripId);
@@ -455,6 +477,18 @@ public class ManageTripsServlet extends HttpServlet {
                 e.printStackTrace();
             }
             response.sendRedirect(request.getContextPath() + "/manageTrips");
+        } else if ("countTickets".equals(action)) {
+            try {
+                int tripId = Integer.parseInt(request.getParameter("tripId"));
+                vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                int ticketCount = ticketRepository.findByTripId(tripId).size();
+                response.setContentType("application/json");
+                response.getWriter().write("{\"ticketCount\":" + ticketCount + "}");
+            } catch (Exception e) {
+                response.setContentType("application/json");
+                response.getWriter().write("{\"ticketCount\":0}");
+            }
+            return;
         } else if ("deleteTrip".equals(action)) {
             try {
                 int tripId = Integer.parseInt(request.getParameter("tripId"));

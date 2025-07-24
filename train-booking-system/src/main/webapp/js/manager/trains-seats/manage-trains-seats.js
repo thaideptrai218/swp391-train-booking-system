@@ -63,6 +63,15 @@ document.addEventListener('DOMContentLoaded', function() {
   displayTrains(1);
   setupPagination();
 
+  // Ẩn toàn bộ coach list và coach details khi load trang
+  document.querySelectorAll('.train-composition-display').forEach(function(el) {
+    el.classList.add('hidden-coach-list');
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('.coach-details').forEach(function(el) {
+    el.style.display = 'none';
+  });
+
   // Auto-set next coach number and coach name on modal open
   document.querySelectorAll('a[onclick^="openModal(\'add-coach-modal-"]').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -79,17 +88,21 @@ document.addEventListener('DOMContentLoaded', function() {
     header.addEventListener('click', function() {
       var container = header.closest('.train-container');
       var composition = container.querySelector('.train-composition-display');
-      if (composition) {
-        // Ẩn tất cả các train-composition khác
-        document.querySelectorAll('.train-composition-display').forEach(function(other) {
-          if (other !== composition) other.style.display = 'none';
-        });
-        // Toggle coach của train này
-        composition.style.display = (composition.style.display === 'none' || composition.style.display === '') ? 'flex' : 'none';
-        // Scroll ngang mượt nếu hiển thị
-        if (composition.style.display === 'flex') {
-          composition.scrollIntoView({behavior: 'smooth', block: 'center'});
+      // Ẩn tất cả coach-list khác
+      document.querySelectorAll('.train-composition-display').forEach(function(other) {
+        if (other !== composition) {
+          other.classList.add('hidden-coach-list');
+          other.style.display = 'none';
         }
+      });
+      // Toggle coach-list của train này
+      if (composition.classList.contains('hidden-coach-list')) {
+        composition.classList.remove('hidden-coach-list');
+        composition.style.display = 'grid';
+        composition.style.gridTemplateColumns = 'repeat(6, 1fr)';
+      } else {
+        composition.classList.add('hidden-coach-list');
+        composition.style.display = 'none';
       }
     });
   });
