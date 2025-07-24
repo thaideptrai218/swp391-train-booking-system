@@ -138,12 +138,13 @@
                                         <th>Chính sách</th>
                                         <th>Chi phí</th>
                                         <th>Thời gian yêu cầu</th>
+                                        <th>Thời gian xử lý</th>
                                         <th>Người đặt vé</th>
-                                        <th>Thao tác</th>
+                                        <th>Người xử lý</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach var="req" items="${refundRequests}" varStatus="i">
+                                    <c:forEach var="req" items="${confirmRefundRequests}" varStatus="i">
                                         <tr>
                                             <td colspan="9" style="background: #eef5ff; font-weight: bold;">
                                                 ${req.startStation} - ${req.endStation} |
@@ -180,24 +181,20 @@
                                             <td style="text-align: center;">
                                                 ${req.requestedAt}
                                             </td>
+                                            <td style="text-align: center;">
+                                                ${req.processedAt}
+                                            </td>
                                             <td style="text-align: left;">
                                                 <b>${req.userFullName}</b><br />
-                                                Email: ${req.email}<br />
-                                                SĐT: ${req.phoneNumber}<br />
+                                                Email: ${req.userEmail}<br />
+                                                SĐT: ${req.userPhoneNumber}<br />
                                                 CMND: ${req.userIDCard}
                                             </td>
-                                            <td>
-                                                <form method="post" action="refundProcessing">
-                                                    <input type="hidden" name="ticketInfo"
-                                                        value="${req.ticketID}|${req.policyID}|${req.originalPrice}|${req.refundFee}|${req.refundAmount}|${req.requestedAt}|${req.userID}|${sessionScope.loggedInUser.userID}|${req.bookingID}" />
-                                                    <input type="hidden" name="email" value="${req.email}" />
-                                                    <div style="margin-top: 6px;">
-                                                        <button type="submit" name="action" value="approve">Chấp
-                                                            nhận</button>
-                                                        <button type="submit" name="action" value="reject">Từ
-                                                            chối</button>
-                                                    </div>
-                                                </form>
+                                            <td style="text-align: left;">
+                                                <b>${req.staffFullName}</b><br />
+                                                Email: ${req.staffEmail}<br />
+                                                SĐT: ${req.staffPhoneNumber}<br />
+                                                CMND: ${req.staffIDCard}
                                             </td>
                                         </tr>
                                     </c:forEach>

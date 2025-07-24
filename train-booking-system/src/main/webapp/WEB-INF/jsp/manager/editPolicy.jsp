@@ -79,6 +79,44 @@
                     a:hover {
                         text-decoration: underline;
                     }
+
+                    .alert {
+                        padding: 15px;
+                        margin: 20px 0;
+                        border: 1px solid transparent;
+                        border-radius: 6px;
+                        font-weight: 500;
+                    }
+
+                    .alert-danger {
+                        color: #721c24;
+                        background-color: #f8d7da;
+                        border-color: #f5c6cb;
+                    }
+
+                    .alert-success {
+                        color: #155724;
+                        background-color: #d4edda;
+                        border-color: #c3e6cb;
+                    }
+
+                    .alert ul {
+                        margin: 0;
+                        padding-left: 20px;
+                    }
+
+                    .alert li {
+                        margin: 5px 0;
+                    }
+
+                    .error-input {
+                        border-color: #dc3545 !important;
+                        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+                    }
+
+                    .form-group.error label {
+                        color: #dc3545;
+                    }
                 </style>
             </head>
 
@@ -88,6 +126,22 @@
                     <div class="main-content">
                         <div class="container">
                             <h1>Sửa Chính Sách Hủy Vé</h1>
+                            <c:if test="${not empty validationErrors}">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle"></i> <strong>Có lỗi xảy ra:</strong>
+                                    <ul>
+                                        <c:forEach var="error" items="${validationErrors}">
+                                            <li>${error}</li>
+                                        </c:forEach>
+                                    </ul>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${not empty errorMessage}">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle"></i> ${errorMessage}
+                                </div>
+                            </c:if>
 
                             <form method="post" action="${pageContext.request.contextPath}/updatePolicy">
                                 <input type="hidden" name="policyID" value="${policy.policyID}" />

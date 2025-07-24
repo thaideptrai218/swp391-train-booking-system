@@ -85,6 +85,9 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/staff-dashboard$"),
                     Pattern.compile("^/(feedback-list|refund-requests)$"),
                     Pattern.compile("^/(customer-info|staff-message|fetch-messages)$"),
+                    Pattern.compile("^/(checkConfirmRefundRequest)$"),
+                    Pattern.compile("^/(feedback-list|refund-requests|listOfRefundTickets)$"),
+                    Pattern.compile("^/(customer-info|staff-message)$"),
                     Pattern.compile("^/api/booking/.*"),
                     Pattern.compile("^/api/payment/.*")),
             "CUSTOMER", Set.of(

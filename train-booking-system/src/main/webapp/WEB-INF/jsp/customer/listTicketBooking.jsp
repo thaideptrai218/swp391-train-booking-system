@@ -61,76 +61,93 @@
                                         <tr style="background-color: #e8f0fe; text-align: center;">
                                             <th>#</th>
                                             <th>Họ tên</th>
-                                            <th>Thông tin vé</th>
-                                            <th>Thành tiền (VND)</th>
+                                            <th>CMND/CCCD</th>
+                                            <th>Loại hành khách</th>
+                                            <th>Tàu & Ghế</th>
+                                            <th>Tuyến đi</th>
+                                            <th>Thời gian</th>
+                                            <th>Mã vé</th>
+                                            <th>Giá</th>
                                             <th>Trạng thái</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="info" items="${infoPassenger}"
-                                            varStatus="i">
-                                            <tr style="background-color: #f0f8ff;">
-                                                <td colspan="9" style="font-weight: bold; padding: 8px;">
-                                                    ${info.startStationName} - ${info.endStationName}
-                                                    ${info.scheduledDepartureTime}
-                                                </td>
-                                            </tr>
-                                            <tr style="border-top: 1px solid #ccc;">
-                                                <td style="text-align: start;">${i.index + 1}</td>
-                                                <td style="text-align: start;">
-                                                    <b>${info.passengerFullName}</b><br />
-                                                    ${info.passengerType}<br />
-                                                    Số giấy tờ: ${info.passengerIDCard}
-                                                </td>
+                                        <c:forEach var="info" items="${infoPassenger}" varStatus="i">
+                                            <tr style="background-color: #f8fbfd;">
+                                                <td style="text-align: center;">${fromIndex + i.index + 1}</td>
+                                                <td>${info.passengerFullName}</td>
+                                                <td>${info.passengerIDCard}</td>
+                                                <td>${info.passengerType}</td>
                                                 <td style="text-align: start;">
                                                     ${info.trainName}<br />
-                                                    Toa: ${info.coachName} – Ghế số: ${info.seatNumber}<br />
-                                                    ${info.seatTypeName}<br />
-                                                    Mã vé: ${info.ticketCode}
+                                                    Toa: ${info.coachName} – Ghế: ${info.seatNumber}<br />
+                                                    ${info.seatTypeName}
                                                 </td>
+                                                <td>${info.startStationName} - ${info.endStationName}</td>
+                                                <td style="text-align: start;">Ngày đi:
+                                                    ${info.scheduledDepartureTime.subSequence(0, 10)}<br />
+                                                    Giờ khởi hành: ${info.scheduledDepartureTime.subSequence(11, 16)}
+                                                </td>
+                                                <td>${info.ticketCode}</td>
                                                 <td style="text-align: right;">
                                                     <fmt:formatNumber value="${info.price}" type="number"
                                                         groupingUsed="true" />đ
                                                 </td>
-                                                
                                                 <td style="text-align: center;">
                                                     <c:choose>
                                                         <c:when test="${info.ticketStatus == 'Valid'}">
                                                             <span style="color: #28a745; font-weight: bold;">Hợp
-                                                                lệ</span> <!-- xanh lá đẹp -->
+                                                                lệ</span>
                                                         </c:when>
                                                         <c:when test="${info.ticketStatus == 'Used'}">
                                                             <span style="color: #007bff; font-weight: bold;">Đã sử
                                                                 dụng</span>
-                                                            <!-- xanh dương tươi -->
                                                         </c:when>
                                                         <c:when test="${info.ticketStatus == 'Processing'}">
                                                             <span style="color: #fd7e14; font-weight: bold;">Đang xử
-                                                                lý</span> <!-- cam nổi bật -->
+                                                                lý</span>
                                                         </c:when>
-                                                        <c:when test="${info.ticketStatus == 'Refunded'}">
+                                                        <c:when
+                                                            test="${info.ticketStatus == 'Refunded' || info.ticketStatus == 'RejectedRefund'}">
                                                             <span style="color: #dc3545; font-weight: bold;">Đã
-                                                                hủy</span> <!-- đỏ đậm -->
-                                                        </c:when>
-                                                        <c:when test="${info.ticketStatus == 'RejectedRefund'}">
-                                                            <span style="color: #dc3545; font-weight: bold;">Đã
-                                                                hủy</span> <!-- đỏ đậm -->
+                                                                hủy</span>
                                                         </c:when>
                                                         <c:when test="${info.ticketStatus == 'Expired'}">
                                                             <span style="color: #6c757d; font-weight: bold;">Đã hết
                                                                 hạn</span>
-                                                            <!-- xám trung tính -->
                                                         </c:when>
                                                         <c:otherwise>
                                                             <span style="color: #343a40; font-weight: bold;">Không xác
-                                                                định</span> <!-- đen xám -->
+                                                                định</span>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
                                             </tr>
                                         </c:forEach>
                                     </tbody>
-                                </table>  
+                                </table>
+
+
+                                <div style="text-align: center; margin-top: 20px;">
+                                    <c:forEach begin="1" end="${totalPages}" var="pageNum">
+                                        <c:choose>
+                                            <c:when test="${pageNum == currentPage}">
+                                                <span
+                                                    style="padding: 5px 10px; margin: 2px; font-weight: bold; background-color: #007bff; color: white; border-radius: 5px;">
+                                                    ${pageNum}
+                                                </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="listTicketBooking?page=${pageNum}"
+                                                    style="padding: 5px 10px; margin: 2px; text-decoration: none; background-color: #e8f0fe; color: #007bff; border-radius: 5px;">
+                                                    ${pageNum}
+                                                </a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </div>
+
+
                             </c:if>
                         </div>
                     </section>
