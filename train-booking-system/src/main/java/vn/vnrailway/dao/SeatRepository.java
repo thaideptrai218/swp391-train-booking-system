@@ -1,8 +1,10 @@
 package vn.vnrailway.dao;
 
 import vn.vnrailway.dto.SeatStatusDTO;
+import vn.vnrailway.dto.SeatTypePricingDTO;
 import vn.vnrailway.model.Seat;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface SeatRepository {
@@ -25,5 +27,14 @@ public interface SeatRepository {
             boolean isRoundTrip,
             String currentUserSessionId) throws SQLException;
 
+
     List<Seat> findByCoachId(int coachId) throws SQLException;
+    List<SeatTypePricingDTO> getTripSeatTypePricing(
+            int tripId,
+            int legOriginStationId,
+            int legDestinationStationId,
+            Timestamp bookingDateTime,
+            boolean isRoundTrip,
+            String currentUserSessionId) throws SQLException;
+
 }

@@ -95,7 +95,8 @@ public class PaymentTransaction implements Serializable {
                 ", amount=" + amount +
                 ", transactionDateTime=" + transactionDateTime +
                 ", status='" + status + '\'' +
-                ", notes='" + (notes != null ? notes.substring(0, Math.min(notes.length(), 50)) + "..." : "null") + '\'' +
+                ", notes='" + (notes != null ? notes.substring(0, Math.min(notes.length(), 50)) + "..." : "null") + '\''
+                +
                 '}';
     }
 }

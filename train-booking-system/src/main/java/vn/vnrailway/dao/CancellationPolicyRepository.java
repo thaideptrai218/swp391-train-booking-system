@@ -11,4 +11,6 @@ public interface CancellationPolicyRepository {
     void insert(CancellationPolicy policy) throws SQLException ;
     CancellationPolicy findById(int id) throws SQLException;
     void update(CancellationPolicy policy) throws SQLException;
+    List<CancellationPolicy> searchByPolicyName(String policyName) throws SQLException;
+    
 }

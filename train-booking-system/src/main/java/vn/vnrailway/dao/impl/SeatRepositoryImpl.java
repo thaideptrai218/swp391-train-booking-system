@@ -155,4 +155,52 @@ public class SeatRepositoryImpl implements SeatRepository {
         dto.setCalculatedPrice(rs.getBigDecimal("CalculatedPrice"));
         return dto;
     }
+
+    @Override
+    public List<vn.vnrailway.dto.SeatTypePricingDTO> getTripSeatTypePricing(
+            int tripId,
+            int legOriginStationId,
+            int legDestinationStationId,
+            Timestamp bookingDateTime,
+            boolean isRoundTrip,
+            String currentUserSessionId) throws SQLException {
+        
+        List<vn.vnrailway.dto.SeatTypePricingDTO> seatTypePricingList = new ArrayList<>();
+        String callSP = "{CALL dbo.GetTripSeatTypePricing(?, ?, ?, ?, ?, ?)}";
+
+        try (Connection conn = DBContext.getConnection();
+                CallableStatement cs = conn.prepareCall(callSP)) {
+
+            cs.setInt(1, tripId);
+            cs.setInt(2, legOriginStationId);
+            cs.setInt(3, legDestinationStationId);
+            cs.setTimestamp(4, bookingDateTime);
+            cs.setBoolean(5, isRoundTrip);
+            cs.setString(6, currentUserSessionId);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    seatTypePricingList.add(mapResultSetToSeatTypePricingDTO(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("SQL Error in getTripSeatTypePricing: " + e.getMessage());
+            throw e;
+        }
+        return seatTypePricingList;
+    }
+
+    private vn.vnrailway.dto.SeatTypePricingDTO mapResultSetToSeatTypePricingDTO(ResultSet rs) throws SQLException {
+        vn.vnrailway.dto.SeatTypePricingDTO dto = new vn.vnrailway.dto.SeatTypePricingDTO();
+        dto.setSeatTypeID(rs.getInt("SeatTypeID"));
+        dto.setSeatTypeName(rs.getString("SeatTypeName"));
+        dto.setCoachTypeName(rs.getString("CoachTypeName"));
+        dto.setDescription(rs.getString("DisplayDescription"));
+        dto.setPricePerSeat(rs.getBigDecimal("CalculatedPrice"));
+        dto.setTotalSeats(rs.getInt("TotalSeats"));
+        dto.setAvailableSeats(rs.getInt("AvailableSeats"));
+        dto.setHasAvailableSeats(rs.getInt("AvailableSeats") > 0);
+        return dto;
+    }
 }

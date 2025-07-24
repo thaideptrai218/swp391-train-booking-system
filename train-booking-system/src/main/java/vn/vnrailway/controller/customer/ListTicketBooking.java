@@ -53,16 +53,36 @@ public class ListTicketBooking extends HttpServlet {
         }
 
         try {
-            List<InfoPassengerDTO> infoPassenger = ticketRepository.findListTicketBooking(id);
-            if (infoPassenger == null || infoPassenger.isEmpty()) {
+            List<InfoPassengerDTO> allTickets = ticketRepository.findListTicketBooking(id);
+
+            int pageSize = 5; // số vé mỗi trang
+            int page = 1;
+            String pageParam = request.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                page = Integer.parseInt(pageParam);
+            }
+
+            int totalItems = allTickets.size();
+            int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+            // Tính chỉ số bắt đầu và kết thúc
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, totalItems);
+
+            // Tách danh sách vé theo trang
+            List<InfoPassengerDTO> pagedTickets = allTickets.subList(fromIndex, toIndex);
+
+            if (allTickets == null || allTickets.isEmpty()) {
                 request.setAttribute("errorMessage", "Không có lịch sử đặt vé.");
                 request.getRequestDispatcher("/WEB-INF/jsp/customer/listTicketBooking.jsp").forward(request, response);
                 return;
             } else {
-                request.setAttribute("infoPassenger", infoPassenger);
+                request.setAttribute("fromIndex", fromIndex);
+                request.setAttribute("infoPassenger", pagedTickets);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.getRequestDispatcher("/WEB-INF/jsp/customer/listTicketBooking.jsp").forward(request, response);
             }
-            // Kiểm tra thông tin vé
 
         } catch (SQLException e) {
             e.printStackTrace(); // Log lỗi

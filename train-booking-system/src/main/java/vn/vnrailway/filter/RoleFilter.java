@@ -39,7 +39,7 @@ public class RoleFilter implements Filter {
             "/confirmRefundTicket", "/confirmOTP", "/refundProcessing",
             "/checkRefundTicket", "/searchTrip", "/searchTripBackground",
             "/storeRoute", "/getCoachSeatsWithPrice", "/all-locations",
-            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode");
+            "/landing", "/terms", "/ticketPayment", "/train-info", "/forgotbookingcode", "/tripInfomation");
 
     // Public path patterns (using regex for flexibility)
     private static final Set<Pattern> PUBLIC_PATH_PATTERNS = Set.of(
@@ -48,6 +48,7 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/assets/.*"),
             Pattern.compile("^/images/.*"),
             Pattern.compile("^/public/.*"),
+            Pattern.compile("^/uploads/.*"),
             Pattern.compile("^/authentication/.*"),
             Pattern.compile("^/api/stations/.*"),
             Pattern.compile("^/api/trip/.*"),
@@ -58,7 +59,11 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/train-info/.*"),
             Pattern.compile("^/check-booking/.*"),
             Pattern.compile("^/payment/.*"),
-            Pattern.compile("^/api/payment/.*"));
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/payment/.*"),
+            Pattern.compile("^/api/vip/.*"),
+            Pattern.compile("^/vip/.*"),
+            Pattern.compile("^/tripInfomation/.*"));
 
     // Role-specific access patterns
     private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(
@@ -79,13 +84,17 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/staff/.*"),
                     Pattern.compile("^/staff-dashboard$"),
                     Pattern.compile("^/(feedback-list|refund-requests)$"),
+                    Pattern.compile("^/(customer-info|staff-message|fetch-messages)$"),
+                    Pattern.compile("^/(checkConfirmRefundRequest)$"),
+                    Pattern.compile("^/(feedback-list|refund-requests|listOfRefundTickets)$"),
                     Pattern.compile("^/(customer-info|staff-message)$"),
                     Pattern.compile("^/api/booking/.*"),
                     Pattern.compile("^/api/payment/.*")),
             "CUSTOMER", Set.of(
                     Pattern.compile("^/customer/.*"),
-                    Pattern.compile("^/(customer-profile|edit-profile|feedback)$"),
-                    Pattern.compile("^/(customerprofile|editprofile|customer-support)$"),
+                    Pattern.compile(
+                            "^/(customer-profile|edit-profile|feedback|updateavatar|uploads)$"),
+                    Pattern.compile("^/(customerprofile|editprofile|customer-support|customer-messages)$"),
                     Pattern.compile("^/(listTicketBooking|submitFeedback)$"),
                     Pattern.compile("^/api/booking/initiate.*")));
 

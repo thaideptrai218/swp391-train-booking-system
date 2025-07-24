@@ -265,6 +265,14 @@ body {
     border-bottom-right-radius: 5px;
 }
 
+.sent .message-bubble p {
+    color: white;
+}
+
+.sent .message-bubble small {
+    color: rgb(218, 218, 218);
+}
+
 .message-bubble p {
     margin: 0;
     word-wrap: break-word;

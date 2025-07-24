@@ -47,7 +47,7 @@ public class GetAllStationsServlet extends HttpServlet {
                     System.err.println("Encountered a null Station object in the list from findAll(). Skipping.");
                     continue; // Skip null models to prevent NPE during mapping
                 }
-                // Assuming Station model has getStationID(), getStationName(), getStationCode()
+                // Create StationDTO with correct field mapping for autocomplete
                 stationDTOs.add(new StationDTO(model.getStationID(), model.getStationName(), model.getStationCode()));
             }
             

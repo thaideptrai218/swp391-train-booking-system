@@ -26,6 +26,7 @@ public class User implements Serializable {
     private boolean isGuestAccount;
     private String gender; // Added for gender, constrained to 'Male', 'Female', 'Other', or null
     private String address; // Already present, retained
+    private String avatarPath;
 
     // No-argument constructor
     public User() {
@@ -68,6 +69,27 @@ public class User implements Serializable {
         this.dateOfBirth = dateOfBirth; // Can be null
         setGender(gender); // Use setter for validation
         this.address = (address != null) ? address : "";
+    }
+
+    public User(int userID, String fullName, String email, String phoneNumber,
+            String passwordHash, String idCardNumber, String role, boolean isActive,
+            LocalDateTime createdAt, LocalDateTime lastLogin, boolean isGuestAccount,
+            LocalDate dateOfBirth, String gender, String address, String avatarPath) {
+        this.userID = userID;
+        this.fullName = (fullName != null) ? fullName : "";
+        this.email = (email != null) ? email : "";
+        this.phoneNumber = (phoneNumber != null) ? phoneNumber : "";
+        this.passwordHash = passwordHash; // Can be null
+        this.idCardNumber = idCardNumber; // Can be null
+        setRole(role); // Use setter for validation
+        this.isActive = isActive;
+        this.createdAt = (createdAt != null) ? createdAt : LocalDateTime.now();
+        this.lastLogin = lastLogin; // Can be null
+        this.isGuestAccount = isGuestAccount;
+        this.dateOfBirth = dateOfBirth; // Can be null
+        setGender(gender); // Use setter for validation
+        this.address = (address != null) ? address : "";
+        this.avatarPath = avatarPath;
     }
 
     // Getters and Setters
@@ -126,11 +148,15 @@ public class User implements Serializable {
     public void setRole(String role) {
         if (role != null) {
             String trimmedRole = role.trim();
-            if (trimmedRole.equalsIgnoreCase("Customer") || trimmedRole.equalsIgnoreCase("Staff") || trimmedRole.equalsIgnoreCase("Admin") || trimmedRole.equalsIgnoreCase("Guest") || trimmedRole.equalsIgnoreCase("Manager")) {
+            if (trimmedRole.equalsIgnoreCase("Customer") || trimmedRole.equalsIgnoreCase("Staff")
+                    || trimmedRole.equalsIgnoreCase("Admin") || trimmedRole.equalsIgnoreCase("Guest")
+                    || trimmedRole.equalsIgnoreCase("Manager")) {
                 this.role = trimmedRole;
             } else {
-                // Log the issue instead of throwing an exception to prevent the page from crashing.
-                System.err.println("Warning: Invalid role found in database: '" + role + "'. Setting role to null for this user.");
+                // Log the issue instead of throwing an exception to prevent the page from
+                // crashing.
+                System.err.println(
+                        "Warning: Invalid role found in database: '" + role + "'. Setting role to null for this user.");
                 this.role = null;
             }
         } else {
@@ -207,6 +233,14 @@ public class User implements Serializable {
         this.address = (address != null) ? address : "";
     }
 
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = (avatarPath != null) ? avatarPath : "";
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -224,6 +258,7 @@ public class User implements Serializable {
                 ", dateOfBirth=" + dateOfBirth +
                 ", gender='" + gender + '\'' +
                 ", address='" + address + '\'' +
+                ", avatarPath='" + avatarPath + '\'' +
                 '}';
     }
 }

@@ -63,7 +63,6 @@ public class RefundProcessingServlet extends HttpServlet {
         String action = request.getParameter("action");
         String ticketInfo = request.getParameter("ticketInfo");
         String email = request.getParameter("email");
-        String note = request.getParameter("note");
 
         try {
             Properties props = new Properties();
@@ -112,7 +111,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 try {
-                    ticketRepository.approveRefundTicket(ticketInfo, note);
+                    ticketRepository.approveRefundTicket(ticketInfo);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -121,7 +120,7 @@ public class RefundProcessingServlet extends HttpServlet {
                 }
             } else if ("reject".equals(action)) {
                 try {
-                    ticketRepository.rejectRefundTicket(ticketInfo, note);
+                    ticketRepository.rejectRefundTicket(ticketInfo);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block

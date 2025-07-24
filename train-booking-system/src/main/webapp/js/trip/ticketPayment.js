@@ -45,7 +45,33 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTotalPaymentAndPassengerCount();
         startPaymentTimer();
         setupEventListeners();
+        autoPopulateCustomerInfo(); // Auto-populate customer info for logged-in users
         checkCartAndRedirectIfEmpty(); // Check on initial load as well
+    }
+    
+    // Auto-populate customer information for logged-in users
+    function autoPopulateCustomerInfo() {
+        if (typeof loggedInUser !== 'undefined' && loggedInUser) {
+            // Populate full name if available
+            if (loggedInUser.fullName && loggedInUser.fullName.trim() !== '') {
+                customerFullNameInput.value = loggedInUser.fullName.trim();
+            }
+            
+            // Populate email (main field only, leave confirmation empty for user to type)
+            if (loggedInUser.email && loggedInUser.email.trim() !== '') {
+                customerEmailInput.value = loggedInUser.email.trim();
+            }
+            
+            // Populate phone number if available
+            if (loggedInUser.phoneNumber && loggedInUser.phoneNumber.trim() !== '') {
+                customerPhoneInput.value = loggedInUser.phoneNumber.trim();
+            }
+            
+            // Populate ID card number if available
+            if (loggedInUser.idCardNumber && loggedInUser.idCardNumber.trim() !== '') {
+                customerIDCardInput.value = loggedInUser.idCardNumber.trim();
+            }
+        }
     }
 
     // --- UTILITY FUNCTIONS ---
@@ -531,7 +557,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     fullName: fullNameInput?.value || "",
                     passengerType: passengerTypeSelect?.value || "",
                     idCardNumber: idCardInput?.value || "",
-                    dateOfBirth: dobInput?.value || ""
+                    dateOfBirth: dobInput?.value || "",
+                    // Preserve VIP validation data
+                    vipValidated: row.dataset.vipValidated || "false",
+                    vipDiscountPercentage: row.dataset.vipDiscountPercentage || "0",
+                    vipTypeName: row.dataset.vipTypeName || "",
+                    vipIcon: row.dataset.vipIcon || "",
+                    vipMemberName: row.dataset.vipMemberName || ""
                 };
             }
         });
@@ -579,6 +611,41 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Trigger change event for validation
                 const changeEvent = new Event('change', { bubbles: true });
                 dobInput.dispatchEvent(changeEvent);
+            }
+            
+            // Restore VIP validation data
+            if (savedData.vipValidated === "true") {
+                row.dataset.vipValidated = "true";
+                row.dataset.vipDiscountPercentage = savedData.vipDiscountPercentage;
+                row.dataset.vipTypeName = savedData.vipTypeName;
+                row.dataset.vipIcon = savedData.vipIcon;
+                row.dataset.vipMemberName = savedData.vipMemberName;
+                
+                // Restore VIP indicator
+                const passengerTypeCell = row.querySelector('.passenger-name-type-cell');
+                if (passengerTypeCell && savedData.vipTypeName && savedData.vipIcon) {
+                    // Remove existing VIP indicator
+                    const existingIndicator = passengerTypeCell.querySelector('.vip-member-indicator');
+                    if (existingIndicator) {
+                        existingIndicator.remove();
+                    }
+                    
+                    // Add VIP indicator
+                    const vipIndicator = document.createElement('div');
+                    vipIndicator.className = 'vip-member-indicator';
+                    vipIndicator.innerHTML = `${savedData.vipIcon} VIP ${savedData.vipTypeName} (-${savedData.vipDiscountPercentage}%)`;
+                    vipIndicator.style.cssText = `
+                        font-size: 0.8em;
+                        color: #B8860B;
+                        font-weight: bold;
+                        margin-top: 2px;
+                        padding: 2px 4px;
+                        background: linear-gradient(135deg, #FFD700, #FFA500);
+                        border-radius: 3px;
+                        display: inline-block;
+                    `;
+                    passengerTypeCell.appendChild(vipIndicator);
+                }
             }
         });
     }
@@ -767,6 +834,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const isChild = selectedOption.dataset.isChild === "true";
         const passengerTypeName = selectedOption.textContent;
 
+        // Check if VIP Member is selected
+        if (passengerTypeName.includes("VIP") || passengerTypeName.includes("Thành viên VIP")) {
+            // Show VIP validation modal
+            showVIPModal(row);
+            return; // Exit early, price calculation will happen after VIP validation
+        }
+
         const dobErrorSpan = row.querySelector(".dateOfBirthError");
         clearError(dobErrorSpan);
 
@@ -793,11 +867,28 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        const discountAmount = basePrice * (discountPercentage / 100);
-        const finalPrice = basePrice - discountAmount;
+        // Calculate discount
+        let totalDiscountAmount = basePrice * (discountPercentage / 100);
+        let finalPrice = basePrice - totalDiscountAmount;
 
-        if (discountCell)
-            discountCell.textContent = formatCurrency(discountAmount);
+        // Apply additional VIP discount if passenger is validated VIP member
+        if (row.dataset.vipValidated === "true") {
+            const vipDiscountPercentage = parseFloat(row.dataset.vipDiscountPercentage || "0");
+            const vipDiscountAmount = finalPrice * (vipDiscountPercentage / 100);
+            finalPrice = finalPrice - vipDiscountAmount;
+            totalDiscountAmount = totalDiscountAmount + vipDiscountAmount;
+            
+            // Add VIP indicator to the discount cell
+            if (discountCell) {
+                const vipIcon = row.dataset.vipIcon || "👑";
+                const vipTypeName = row.dataset.vipTypeName || "VIP";
+                discountCell.innerHTML = `${formatCurrency(totalDiscountAmount)}<br><small style="color: #B8860B;">${vipIcon} VIP ${vipTypeName}</small>`;
+            }
+        } else {
+            if (discountCell)
+                discountCell.textContent = formatCurrency(totalDiscountAmount);
+        }
+
         if (finalPriceCell)
             finalPriceCell.textContent = formatCurrency(finalPrice);
 
@@ -1370,6 +1461,234 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+
+    // === VIP MODAL FUNCTIONS ===
+    function showVIPModal(row) {
+        window.currentVIPRow = row;
+        window.vipValidationResult = null;
+        
+        // Reset modal state
+        document.getElementById('vipIdInput').value = '';
+        document.getElementById('vipValidationMessage').textContent = '';
+        document.getElementById('vipValidationMessage').className = 'validation-message';
+        document.getElementById('vipValidationResult').style.display = 'none';
+        document.getElementById('validateVIPBtn').style.display = 'inline-block';
+        document.getElementById('confirmVIPBtn').style.display = 'none';
+        
+        // Show modal
+        document.getElementById('vipValidationModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on input
+        setTimeout(() => {
+            document.getElementById('vipIdInput').focus();
+        }, 100);
+    }
+
+    function closeVIPModal() {
+        document.getElementById('vipValidationModal').style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // If VIP validation was not successful and row is not already VIP validated, reset passenger type to default
+        if (!window.vipValidationResult || !window.vipValidationResult.isValid) {
+            if (window.currentVIPRow && window.currentVIPRow.dataset.vipValidated !== "true") {
+                const passengerTypeSelect = window.currentVIPRow.querySelector('.passenger-type-selector');
+                if (passengerTypeSelect) {
+                    passengerTypeSelect.selectedIndex = 0; // Reset to default
+                    handlePassengerTypeChange(passengerTypeSelect);
+                }
+            }
+        }
+        
+        window.currentVIPRow = null;
+        window.vipValidationResult = null;
+    }
+
+    async function validateVIPCredentials() {
+        const idCardNumber = document.getElementById('vipIdInput').value.trim();
+        const messageElement = document.getElementById('vipValidationMessage');
+        const resultElement = document.getElementById('vipValidationResult');
+        const loadingElement = document.getElementById('vipLoadingIndicator');
+        const validateBtn = document.getElementById('validateVIPBtn');
+        const confirmBtn = document.getElementById('confirmVIPBtn');
+        
+        // Reset previous state
+        messageElement.textContent = '';
+        messageElement.className = 'validation-message';
+        resultElement.style.display = 'none';
+        
+        // Validate input
+        if (!idCardNumber) {
+            messageElement.textContent = 'Vui lòng nhập số CMND/CCCD';
+            messageElement.className = 'validation-message error';
+            return;
+        }
+        
+        if (!/^\d{9,12}$/.test(idCardNumber)) {
+            messageElement.textContent = 'Số CMND/CCCD không hợp lệ. Vui lòng nhập 9-12 chữ số.';
+            messageElement.className = 'validation-message error';
+            return;
+        }
+        
+        try {
+            // Show loading
+            loadingElement.style.display = 'block';
+            validateBtn.disabled = true;
+            
+            const response = await fetch(contextPath + "/api/vip/validateCredentials", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "idCardNumber=" + encodeURIComponent(idCardNumber)
+            });
+            
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                window.vipValidationResult = data;
+                
+                if (data.isValid) {
+                    // Show success result
+                    resultElement.innerHTML = `
+                        <div class="vip-result-card">
+                            <div>
+                                <span class="vip-icon">${data.vipIcon}</span>
+                                <strong>VIP ${data.vipTypeName}</strong>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div>Thành viên: <strong>${data.fullName}</strong></div>
+                                <div class="vip-discount">Giảm giá: ${data.discountPercentage}%</div>
+                            </div>
+                        </div>
+                    `;
+                    resultElement.style.display = 'block';
+                    messageElement.textContent = data.message;
+                    messageElement.className = 'validation-message success';
+                    
+                    // Show confirm button, hide validate button
+                    validateBtn.style.display = 'none';
+                    confirmBtn.style.display = 'inline-block';
+                } else {
+                    // Show validation failed message
+                    messageElement.textContent = data.message;
+                    messageElement.className = 'validation-message error';
+                    resultElement.style.display = 'none';
+                }
+            } else {
+                messageElement.textContent = data.message || 'Có lỗi xảy ra khi xác thực VIP';
+                messageElement.className = 'validation-message error';
+            }
+            
+        } catch (error) {
+            console.error("Error validating VIP credentials:", error);
+            messageElement.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+            messageElement.className = 'validation-message error';
+        } finally {
+            // Hide loading
+            loadingElement.style.display = 'none';
+            validateBtn.disabled = false;
+        }
+    }
+
+    function confirmVIPSelection() {
+        if (!window.vipValidationResult || !window.vipValidationResult.isValid || !window.currentVIPRow) {
+            return;
+        }
+        
+        // Set VIP data to the row
+        window.currentVIPRow.dataset.vipValidated = "true";
+        window.currentVIPRow.dataset.vipDiscountPercentage = window.vipValidationResult.discountPercentage;
+        window.currentVIPRow.dataset.vipTypeName = window.vipValidationResult.vipTypeName;
+        window.currentVIPRow.dataset.vipIcon = window.vipValidationResult.vipIcon;
+        window.currentVIPRow.dataset.vipMemberName = window.vipValidationResult.fullName;
+        
+        // Auto-fill passenger name if available
+        const nameInput = window.currentVIPRow.querySelector('.passenger-fullName');
+        if (nameInput && window.vipValidationResult.fullName) {
+            nameInput.value = window.vipValidationResult.fullName;
+        }
+        
+        // Update passenger type to "Người lớn" (Adult) since VIP members are typically adults
+        const passengerTypeSelect = window.currentVIPRow.querySelector('.passenger-type-selector');
+        if (passengerTypeSelect) {
+            // Find and select "Người lớn" or similar adult type
+            for (let i = 0; i < passengerTypeSelect.options.length; i++) {
+                const option = passengerTypeSelect.options[i];
+                if (option.textContent.includes("Người lớn") || option.textContent.includes("Adult")) {
+                    passengerTypeSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Auto-fill ID card number from the validated VIP credential
+        const idCardInput = window.currentVIPRow.querySelector('.passenger-idCardNumber');
+        if (idCardInput) {
+            const validatedIdCardNumber = document.getElementById('vipIdInput').value.trim();
+            idCardInput.value = validatedIdCardNumber;
+            idCardInput.style.display = 'block'; // Make sure it's visible
+            idCardInput.required = true;
+        }
+        
+        // Add VIP indicator to the passenger type cell
+        const passengerTypeCell = window.currentVIPRow.querySelector('.passenger-name-type-cell');
+        if (passengerTypeCell) {
+            // Remove existing VIP indicator
+            const existingIndicator = passengerTypeCell.querySelector('.vip-member-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Add new VIP indicator
+            const vipIndicator = document.createElement('div');
+            vipIndicator.className = 'vip-member-indicator';
+            vipIndicator.innerHTML = `${window.vipValidationResult.vipIcon} VIP ${window.vipValidationResult.vipTypeName} (-${window.vipValidationResult.discountPercentage}%)`;
+            vipIndicator.style.cssText = `
+                font-size: 0.8em;
+                color: #B8860B;
+                font-weight: bold;
+                margin-top: 2px;
+                padding: 2px 4px;
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                border-radius: 3px;
+                display: inline-block;
+            `;
+            passengerTypeCell.appendChild(vipIndicator);
+        }
+        
+        // Recalculate price with VIP discount
+        if (passengerTypeSelect) {
+            handlePassengerTypeChange(passengerTypeSelect);
+        }
+        
+        // Close modal
+        closeVIPModal();
+    }
+
+    // Make VIP functions globally available
+    window.showVIPModal = showVIPModal;
+    window.closeVIPModal = closeVIPModal;
+    window.validateVIPCredentials = validateVIPCredentials;
+    window.confirmVIPSelection = confirmVIPSelection;
+
+    // Handle Enter key in VIP input
+    document.addEventListener('DOMContentLoaded', function() {
+        const vipInput = document.getElementById('vipIdInput');
+        if (vipInput) {
+            vipInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    validateVIPCredentials();
+                }
+            });
+        }
+    });
 
     // --- START ---
     initializePage();

@@ -1,0 +1,327 @@
+/* VIP Purchase Page Styles */
+
+/* Main VIP Cards Container - Flexbox Row */
+.vip-cards-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin: 40px 0;
+}
+
+/* Individual VIP Card - Flex Column */
+.vip-card {
+    flex: 1;
+    min-width: 280px;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background: white;
+}
+
+.vip-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.vip-card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 30px 25px;
+}
+
+/* VIP Card Colors */
+.vip-card-bronze {
+    border: 3px solid #CD7F32;
+    background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+    color: white;
+}
+
+.vip-card-silver {
+    border: 3px solid #C0C0C0;
+    background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+    color: white;
+}
+
+.vip-card-gold {
+    border: 3px solid #FFD700;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: white;
+    position: relative;
+}
+
+.vip-card-diamond {
+    border: 3px solid #B9F2FF;
+    background: linear-gradient(135deg, #B9F2FF 0%, #00BFFF 100%);
+    color: white;
+}
+
+/* VIP Icon Section */
+.vip-icon {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.icon-emoji {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-tier {
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    opacity: 0.9;
+}
+
+/* Popular and Premium Badges */
+.popular-badge, .premium-badge {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: #ff4757;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transform: rotate(15deg);
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+}
+
+.premium-badge {
+    background: #8e44ad;
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.3);
+}
+
+/* Type Name Section */
+.vip-type-name {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.vip-type-name h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Duration Options */
+.duration-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.duration-option {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.duration-option:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+}
+
+/* Price and Discount Display */
+.price-discount {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.price {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.discount {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffff88;
+    margin-bottom: 5px;
+}
+
+.duration {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Buy VIP Button */
+.buy-button {
+    text-align: center;
+}
+
+.btn-vip {
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-bronze {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+}
+
+.btn-silver {
+    background: linear-gradient(135deg, #E5E5E5 0%, #A9A9A9 100%);
+    color: #333;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #FFEB3B 0%, #FF9800 100%);
+    color: #333;
+}
+
+.btn-diamond {
+    background: linear-gradient(135deg, #E1F5FE 0%, #03A9F4 100%);
+    color: white;
+}
+
+.btn-vip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Description Section */
+.vip-description {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.vip-description p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin: 0;
+    text-align: center;
+}
+
+/* Benefits Section */
+.benefits-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 60px 0;
+    border-radius: 20px;
+    margin-top: 60px;
+}
+
+.benefit-item {
+    padding: 30px 20px;
+    transition: all 0.3s ease;
+}
+
+.benefit-item:hover {
+    transform: translateY(-5px);
+}
+
+.benefit-item i {
+    transition: all 0.3s ease;
+}
+
+.benefit-item:hover i {
+    transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .vip-cards-container {
+        gap: 20px;
+    }
+    
+    .vip-card {
+        min-width: 260px;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 992px) {
+    .vip-cards-container {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .vip-card {
+        flex: 1 1 calc(50% - 20px);
+        min-width: 280px;
+        max-width: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .vip-cards-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+    
+    .vip-card {
+        flex: none;
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .icon-emoji {
+        font-size: 3rem;
+    }
+    
+    .vip-type-name h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Page Header Styles */
+.display-4 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Back Button */
+.btn-outline-secondary {
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}

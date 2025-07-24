@@ -1,6 +1,7 @@
 package vn.vnrailway.dao;
 
 import vn.vnrailway.dto.CheckInforRefundTicketDTO;
+import vn.vnrailway.dto.ConfirmRefundRequestDTO;
 import vn.vnrailway.dto.InfoPassengerDTO;
 import vn.vnrailway.dto.RefundRequestDTO;
 import vn.vnrailway.model.Ticket;
@@ -43,11 +44,12 @@ public interface TicketRepository {
     
     void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
 
-    void rejectRefundTicket(String ticketInfo, String note) throws SQLException;
+    void rejectRefundTicket(String ticketInfo) throws SQLException;
 
-    void approveRefundTicket(String ticketInfo, String note) throws SQLException;
+    void approveRefundTicket(String ticketInfo) throws SQLException;
 
     List<InfoPassengerDTO> findListTicketBooking(String id) throws SQLException;
 
     void refundAllTicketsForTrip(int tripId) throws SQLException;
+    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests(String userID) throws SQLException;
 }

@@ -97,13 +97,15 @@
                         <h2>Bảng điều khiển nhân viên</h2>
                         <nav>
                             <ul>
-                                <li><a href="#">Bảng điều khiển</a></li>
+                                <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
+                                </li>
                                 <li><a href="#">Quản lý đặt chỗ</a></li>
                                 <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="#">Báo cáo</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">Danh sách các
+                                        vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>
@@ -160,7 +162,7 @@
                                             </td>
                                             <td>
                                                 ${req.trainName}<br />
-                                                Toa: ${req.coachName}<br/>
+                                                Toa: ${req.coachName}<br />
                                                 Ghế số: ${req.seatNumber}<br />
                                                 ${req.seatType}
                                             </td>
@@ -191,7 +193,6 @@
                                                     <input type="hidden" name="ticketInfo"
                                                         value="${req.ticketID}|${req.policyID}|${req.originalPrice}|${req.refundFee}|${req.refundAmount}|${req.requestedAt}|${req.userID}|${sessionScope.loggedInUser.userID}|${req.bookingID}" />
                                                     <input type="hidden" name="email" value="${req.email}" />
-                                                    <input type="text" name="note" placeholder="Nhập chú thích..." />
                                                     <div style="margin-top: 6px;">
                                                         <button type="submit" name="action" value="approve">Chấp
                                                             nhận</button>
