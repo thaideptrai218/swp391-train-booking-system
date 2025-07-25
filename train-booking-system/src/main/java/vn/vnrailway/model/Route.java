@@ -12,4 +12,5 @@ public class Route {
     private String routeName;
     private String description; // Có thể null
     private boolean isLocked;
+    private boolean isActive; // Thêm trạng thái hoạt động
 }

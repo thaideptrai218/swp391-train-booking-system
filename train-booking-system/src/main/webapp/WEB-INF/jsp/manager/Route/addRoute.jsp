@@ -8,12 +8,143 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <title>Thêm Tuyến Đường Mới</title>
     <link
       rel="stylesheet"
-      href="${pageContext.request.contextPath}/css/manager/manageRoutes.css"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/manager/manager-dashboard.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/common.css"
     />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        line-height: 1.6;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .main-content {
+        max-width: 600px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+        padding: 36px 48px 32px 48px;
+        margin: 40px auto;
+        transition: box-shadow 0.2s;
+      }
+      .main-content:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      }
+      h1 {
+        color: #2d3a4a;
+        margin-bottom: 28px;
+        font-weight: 500;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 12px;
+        font-size: 2em;
+        letter-spacing: 0.5px;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #374151;
+        letter-spacing: 0.2px;
+      }
+      .form-group input[type="text"],
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        font-size: 1rem;
+        color: #374151;
+        background-color: #f9fafb;
+        border: 1.5px solid #d1d5db;
+        border-radius: 6px;
+        transition: border-color 0.18s, box-shadow 0.18s;
+        box-sizing: border-box;
+      }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: #2563eb;
+        outline: 0;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.10);
+        background: #fff;
+      }
+      .form-group textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      .btn.btn-primary {
+        background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1.08rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-right: 12px;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+        transition: background 0.18s, box-shadow 0.18s;
+      }
+      .btn.btn-primary:hover {
+        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+        box-shadow: 0 4px 16px rgba(37,99,235,0.13);
+      }
+      .btn.btn-secondary {
+        background-color: #f3f4f6;
+        color: #374151;
+        border: 1.5px solid #d1d5db;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1.08rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.18s, border 0.18s;
+      }
+      .btn.btn-secondary:hover {
+        background-color: #e5e7eb;
+        border-color: #a1a1aa;
+      }
+      .error-message {
+        color: #b91c1c;
+        background: #fee2e2;
+        border: 1.5px solid #fecaca;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        font-size: 1rem;
+      }
+      .success-message {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1.5px solid #6ee7b7;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        font-size: 1rem;
+      }
+      @media (max-width: 700px) {
+        .main-content {
+          padding: 18px 8px;
+        }
+      }
+    </style>
   </head>
   <body>
     <jsp:include page="../sidebar.jsp" />
@@ -51,10 +182,8 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <label for="departureStationId">Điểm Đi:</label>
             <select name="departureStationId" id="departureStationId" required>
               <option value="">-- Chọn Điểm Đi --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
+              <c:forEach var="station" items="${allStations}">
+                <option value="${station.stationID}">${station.stationName}</option>
               </c:forEach>
             </select>
           </div>
@@ -62,10 +191,8 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <label for="arrivalStationId">Điểm Đến:</label>
             <select name="arrivalStationId" id="arrivalStationId" required>
               <option value="">-- Chọn Điểm Đến --</option>
-              <c:forEach items="${allStations}" var="station">
-                <option value="${station.stationID}">
-                  ${station.stationName}
-                </option>
+              <c:forEach var="station" items="${allStations}">
+                <option value="${station.stationID}">${station.stationName}</option>
               </c:forEach>
             </select>
           </div>

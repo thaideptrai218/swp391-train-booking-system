@@ -50,12 +50,30 @@ public class SeatRepositoryImpl implements SeatRepository {
         }
     }
 
-    @Override
-    public boolean deleteSeat(int id) throws SQLException {
+    // Kiểm tra xem ghế có vé tham chiếu không
+    public boolean hasTickets(int seatId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Tickets WHERE SeatID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, seatId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Hàm xóa ghế, kiểm tra trước khi xóa
+    public boolean deleteSeat(int seatId) throws SQLException {
+        if (hasTickets(seatId)) {
+            throw new IllegalStateException("Không thể xóa ghế này vì đang có vé tham chiếu!");
+        }
         String sql = "DELETE FROM Seats WHERE SeatID = ?";
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, seatId);
             return ps.executeUpdate() > 0;
         }
     }

@@ -99,7 +99,7 @@ public class ManageTripsServlet extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Train> allTrains = trainRepository.getAllTrains();
-        List<Route> allRoutes = routeRepository.findAll();
+        List<Route> allRoutes = routeRepository.findAll().stream().filter(Route::isActive).toList();
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("allTrains", allTrains);
         request.setAttribute("allRoutes", allRoutes);
@@ -115,12 +115,12 @@ public class ManageTripsServlet extends HttpServlet {
 
         if (sortField == null || sortField.isEmpty()) {
             sortField = "tripID";
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if ("tripID".equalsIgnoreCase(sortField) && (sortOrder == null || sortOrder.isEmpty())) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if (sortOrder == null || sortOrder.isEmpty()
                 || (!"ASC".equalsIgnoreCase(sortOrder) && !"DESC".equalsIgnoreCase(sortOrder))) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         }
 
         if (searchTerm == null) {
@@ -148,6 +148,12 @@ public class ManageTripsServlet extends HttpServlet {
                         return true;
                 }
             }).toList();
+        }
+        String filterStatus = request.getParameter("filterStatus");
+        if (filterStatus != null && !filterStatus.isEmpty()) {
+            listTrips = listTrips.stream()
+                .filter(trip -> filterStatus.equals(trip.getTripStatus()))
+                .toList();
         }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
@@ -396,14 +402,26 @@ public class ManageTripsServlet extends HttpServlet {
                 String newStatus = request.getParameter("tripStatus");
                 if (newStatus != null && !newStatus.trim().isEmpty()) {
                     tripRepository.updateTripStatus(tripId, newStatus);
-                    // Nếu trạng thái là Hủy chuyến thì gửi email hoàn tiền cho khách và cập nhật vé, refunds
+                    // Nếu trạng thái là Hủy chuyến thì cập nhật vé và TempRefundRequests
                     if ("Hủy chuyến".equalsIgnoreCase(newStatus) || "Cancelled".equalsIgnoreCase(newStatus)) {
                         vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
-                        ticketRepository.refundAllTicketsForTrip(tripId);
-                        // Lấy danh sách vé theo TripID
-                        vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
-                        vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
                         java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(tripId);
+                        try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
+                            conn.setAutoCommit(false);
+                            // 1. Cập nhật TicketStatus = 'Cancelled' cho tất cả vé
+                            String updateTicketStatusSql = "UPDATE Tickets SET TicketStatus = 'Cancelled' WHERE TripID = ?";
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTicketStatusSql)) {
+                                ps.setInt(1, tripId);
+                                ps.executeUpdate();
+                            }
+                            // Bỏ qua update TempRefundRequests
+                            conn.commit();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        // Gửi email hoàn tiền cho mỗi khách (1 email/booking)
+                        vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
+                        vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
                         java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
                         for (vn.vnrailway.model.Ticket ticket : tickets) {
                             bookingIds.add(ticket.getBookingID());
@@ -428,40 +446,40 @@ public class ManageTripsServlet extends HttpServlet {
                                             props.put("mail.smtp.starttls.enable", "true");
                                             final String EMAIL_FROM = "assasinhp619@gmail.com";
                                             final String EMAIL_PASSWORD = "slos bctt epxv osla";
-                                            Session mailSession = Session.getInstance(props, new Authenticator() {
+                                            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
                                                 @Override
-                                                protected PasswordAuthentication getPasswordAuthentication() {
-                                                    return new PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
+                                                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                    return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
                                                 }
                                             });
-                                            Message mimeMessage = new MimeMessage(mailSession);
-                                            mimeMessage.setFrom(new InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
-                                            mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+                                            jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
+                                            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
+                                            mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(email));
                                             mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
                                             mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
-                                            mimeMessage.setSubject(MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
-                                            String messageContent = """
-                                                <html>
-                                                <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
-                                                    <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
-                                                        <h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>
-                                                        <p>Xin chào,</p>
-                                                        <p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>
-                                                        <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
-                                                        <p>Xin cảm ơn!</p>
-                                                        <br/>
-                                                        <p>Trân trọng,</p>
-                                                        <p><strong>Đội ngũ Vetaure</strong></p>
-                                                    </div>
-                                                </body>
-                                                </html>
-                                            """;
+                                            mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                            String messageContent = String.format(
+                                                "<html>"
+                                              + "<body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>"
+                                              +   "<div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>"
+                                              +     "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
+                                              +     "<p>Xin chào, <b>%s</b>!</p>"
+                                              +     "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
+                                              +     "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>"
+                                              +     "<p>Xin cảm ơn!</p>"
+                                              +     "<br/>"
+                                              +     "<p>Trân trọng,</p>"
+                                              +     "<p><strong>Đội ngũ Vetaure</strong></p>"
+                                              +   "</div>"
+                                              + "</body>"
+                                              + "</html>",
+                                              user.getFullName()
+                                            );
                                             mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
-                                            Transport.send(mimeMessage);
+                                            jakarta.mail.Transport.send(mimeMessage);
                                             sentEmails.add(email);
                                         } catch (Exception ex) {
                                             ex.printStackTrace();
-                                            // Có thể log lỗi gửi email ở đây nếu cần
                                         }
                                     }
                                 }
@@ -527,5 +545,30 @@ public class ManageTripsServlet extends HttpServlet {
         } else {
             doGet(request, response);
         }
+    }
+
+    private void sendEmail(String to, String subject, String content) throws jakarta.mail.MessagingException, java.io.IOException {
+        java.util.Properties props = new java.util.Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
+            @Override
+            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                return new jakarta.mail.PasswordAuthentication("assasinhp619@gmail.com", "slos bctt epxv osla");
+            }
+        });
+
+        jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
+        mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress("assasinhp619@gmail.com", "Vetaure", "UTF-8"));
+        mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(to));
+        mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+        mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+        mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(subject, "UTF-8", "B"));
+        mimeMessage.setContent(content, "text/html; charset=UTF-8");
+
+        jakarta.mail.Transport.send(mimeMessage);
     }
 }

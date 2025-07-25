@@ -129,8 +129,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   showAddFormBtn.addEventListener("click", function () {
-    // Redirect to an add station page or show a modal
-    // For now, let's assume it redirects
     window.location.href = "addStation";
   });
 
@@ -153,6 +151,26 @@ document.addEventListener("DOMContentLoaded", function () {
         icon.className = "fas fa-lock";
         text.textContent = "Khóa";
       }
+    });
+  });
+
+  // Xử lý sự kiện click checkbox hoạt động
+  document.querySelectorAll('.active-checkbox').forEach(function(checkbox) {
+    checkbox.addEventListener('change', function() {
+      const stationId = this.getAttribute('data-id');
+      const isActive = this.checked;
+      const confirmMsg = isActive ? 'Bạn có chắc chắn muốn kích hoạt ga này?' : 'Bạn có chắc chắn muốn vô hiệu hóa ga này?';
+      if (!confirm(confirmMsg)) {
+        this.checked = !isActive;
+        return;
+      }
+      // Gửi AJAX cập nhật trạng thái hoạt động
+      fetch('manageStations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `command=updateActiveStatus&stationID=${stationId}&isActive=${isActive}`
+      })
+      .then(res => res.ok ? location.reload() : alert('Có lỗi xảy ra!'));
     });
   });
 

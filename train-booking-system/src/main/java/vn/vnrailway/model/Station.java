@@ -9,11 +9,14 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Station {
     private int stationID;
-    private String stationCode;
     private String stationName;
     private String address; // Có thể null
     private String city; // Có thể null
     private String region; // Có thể null
     private String phoneNumber;
     private boolean isLocked;
+    private boolean isActive; // Thêm trường trạng thái hoạt động
+    private String stationCode; // Thêm mã code, có thể null
+    public String getStationCode() { return stationCode; }
+    public void setStationCode(String stationCode) { this.stationCode = stationCode; }
 }

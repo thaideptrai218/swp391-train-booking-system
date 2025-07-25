@@ -11,11 +11,7 @@
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
-      <section class="hero" style="
-        background-image: url('${pageContext.request.contextPath}/assets/images/landing/top_BG.png');
-        background-size: cover;
-        background-position: center;
-      ">
+      <section class="hero">
         <header class="navbar">
           <div class="container">
             <a href="${pageContext.request.contextPath}/landing" class="logo-block-link">
@@ -115,7 +111,7 @@
                 <c:if test="${empty stationList and empty errorMessage}">
                   <p>Không có thông tin ga tàu nào để hiển thị.</p>
                 </c:if>
-                <c:forEach var="station" items="${stationList}">
+                <c:forEach var="station" items="${stationList}" begin="0" end="14">
                   <div class="location-item">
                     <img
                       src="${pageContext.request.contextPath}/assets/images/landing/stations/${station.stationCode}.jpg"
@@ -170,10 +166,9 @@
             <div class="section-header">
               <h1 class="section-main-title">Địa điểm nổi bật</h1>
               <div class="carousel-navigation">
-                <button class="nav-arrow prev-location">
-                  << /button>
-                    <button class="nav-arrow next-location">></button>
-                    <a href="${pageContext.request.contextPath}/all-locations" class="view-all-link">Xem thêm <span
+                <button class="nav-arrow prev-location">&lt;</button>
+                <button class="nav-arrow next-location">&gt;</button>
+                <a href="${pageContext.request.contextPath}/all-locations" class="view-all-link">Xem thêm <span
                         class="arrow">&rarr;</span></a>
               </div>
             </div>
@@ -369,25 +364,7 @@
 
       <script src="${pageContext.request.contextPath}/js/landing/landing-page.js"></script>
       <script src="${pageContext.request.contextPath}/js/script.js"></script>
-      <script>
-        function copyHotline(event) {
-          event.preventDefault();
-          const hotline = "0983868888";
-          navigator.clipboard.writeText(hotline).then(function() {
-            showToast("Đã sao chép số điện thoại vào clipboard");
-          }, function(err) {
-            console.error('Could not copy text: ', err);
-          });
-        }
-
-        function showToast(message) {
-          const toast = document.getElementById("toast");
-          toast.textContent = message;
-          toast.className = "toast show";
-          setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
-        }
-      </script>
-
+      
       <div id="toast" class="toast"></div>
       <div id="stationModal" class="modal">
         <div class="modal-content">

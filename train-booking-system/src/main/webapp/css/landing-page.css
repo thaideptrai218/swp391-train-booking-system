@@ -350,13 +350,20 @@ table {
 .hero {
     position: relative;
     height: 100vh;
-    background-image: url(../assets/icons/landing/top_BG.png); /* Corrected path */
+    background-image: var(--hero-bg-image, url('../assets/icons/landing/top_BG.png'));
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     color: var(--color-white);
     padding-top: 0;
     overflow: hidden;
+}
+
+/* Nếu muốn set background-image động từ JSP, có thể dùng style="--hero-bg-image: url('...')" trên section.hero */
+
+/* Style cho nav-arrow prev-location */
+.nav-arrow.prev-location {
+    /* Không cần style riêng, dùng chung với .nav-arrow */
 }
 
 .hero .hero-content-wrapper {

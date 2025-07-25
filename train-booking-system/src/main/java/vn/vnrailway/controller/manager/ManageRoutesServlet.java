@@ -19,11 +19,13 @@ import vn.vnrailway.dao.FeaturedRouteRepository;
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dao.impl.FeaturedRouteRepositoryImpl;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
+import vn.vnrailway.dao.impl.StationRepositoryImpl;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Station;
 import vn.vnrailway.dao.TripRepository; // Added
 import vn.vnrailway.dao.impl.TripRepositoryImpl; // Added
+import vn.vnrailway.dao.StationRepository;
 
 @WebServlet("/manageRoutes")
 public class ManageRoutesServlet extends HttpServlet {
@@ -31,6 +33,7 @@ public class ManageRoutesServlet extends HttpServlet {
     private RouteRepository routeRepository;
     private TripRepository tripRepository; // Added
     private FeaturedRouteRepository featuredRouteRepository;
+    private StationRepository stationRepository;
 
     public ManageRoutesServlet() {
         super();
@@ -42,6 +45,7 @@ public class ManageRoutesServlet extends HttpServlet {
         this.routeRepository = new RouteRepositoryImpl();
         this.tripRepository = new TripRepositoryImpl(); // Added
         this.featuredRouteRepository = new FeaturedRouteRepositoryImpl();
+        this.stationRepository = new StationRepositoryImpl();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -74,13 +78,22 @@ public class ManageRoutesServlet extends HttpServlet {
 
     private void listRoutesAndStations(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
+        String activeFilter = request.getParameter("activeFilter");
+        Boolean isActive = null;
+        if (activeFilter == null || activeFilter.isEmpty() || "active".equals(activeFilter)) {
+            isActive = true;
+        } else if ("inactive".equals(activeFilter)) {
+            isActive = false;
+        } // else isActive = null (tất cả)
         List<RouteStationDetailDTO> routeDetails = routeRepository.getAllRouteStationDetails();
-        List<Station> allStations = routeRepository.getAllStations();
-        List<Route> allRoutes = routeRepository.findAll(); // For adding stations to existing routes
+        // Lọc chỉ lấy các ga đang hoạt động
+        List<Station> allStations = routeRepository.getAllStations().stream().toList();
+        List<Route> allRoutes = routeRepository.findAllByActive(isActive); // For adding stations to existing routes
 
         request.setAttribute("routeDetails", routeDetails);
         request.setAttribute("allStations", allStations);
         request.setAttribute("allRoutes", allRoutes);
+        request.setAttribute("activeFilter", activeFilter == null ? "active" : activeFilter);
         request.getRequestDispatcher("/WEB-INF/jsp/manager/Route/manageRoutes.jsp").forward(request, response);
     }
 
@@ -137,7 +150,8 @@ public class ManageRoutesServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Không thể xác định trạm đầu/cuối cho tuyến này để chỉnh sửa.");
             }
             // Ensure allStations is available for the dropdowns
-            request.setAttribute("allStations", routeRepository.getAllStations());
+            request.setAttribute("allStations",
+                    routeRepository.getAllStations().stream().filter(Station::isActive).toList());
 
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Invalid Route ID for editing.");
@@ -179,6 +193,121 @@ public class ManageRoutesServlet extends HttpServlet {
                 case "updateStationOrder":
                     updateStationOrder(request, response);
                     break;
+                case "updateRouteActive":
+                    int routeId = Integer.parseInt(request.getParameter("routeId"));
+                    boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
+                    routeRepository.updateRouteActive(routeId, isActive);
+                    // Nếu route bị khóa (isActive == false), cập nhật trạng thái các trip liên quan
+                    if (!isActive) {
+                        try {
+                            List<vn.vnrailway.model.Trip> trips = tripRepository.findByRouteId(routeId);
+                            vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                            vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
+                            vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
+                            java.util.Set<String> sentEmails = new java.util.HashSet<>();
+                            for (vn.vnrailway.model.Trip trip : trips) {
+                                tripRepository.updateTripStatus(trip.getTripID(), "Cancelled");
+                                java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository
+                                        .findByTripId(trip.getTripID());
+                                try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
+                                    conn.setAutoCommit(false);
+                                    // 1. Cập nhật TicketStatus = 'Cancelled' cho tất cả vé
+                                    String updateTicketStatusSql = "UPDATE Tickets SET TicketStatus = 'Cancelled' WHERE TripID = ?";
+                                    try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTicketStatusSql)) {
+                                        ps.setInt(1, trip.getTripID());
+                                        ps.executeUpdate();
+                                    }
+                                    // 2. Cập nhật TempRefundRequests: AppliedPolicyID = null, FeeAmount = 0,
+                                    // RequestedAt = null
+                                    String updateTempRefundSql = "UPDATE TempRefundRequests SET AppliedPolicyID = NULL, FeeAmount = 0, RequestedAt = NULL WHERE TicketID = ?";
+                                    try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTempRefundSql)) {
+                                        for (vn.vnrailway.model.Ticket t : tickets) {
+                                            ps.setInt(1, t.getTicketID());
+                                            ps.addBatch();
+                                        }
+                                        ps.executeBatch();
+                                    }
+                                    conn.commit();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                // Gửi email cho user đã đặt vé
+                                java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
+                                for (vn.vnrailway.model.Ticket ticket : tickets) {
+                                    bookingIds.add(ticket.getBookingID());
+                                }
+                                for (Integer bookingId : bookingIds) {
+                                    java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository
+                                            .findById(bookingId);
+                                    if (bookingOpt.isPresent()) {
+                                        vn.vnrailway.model.Booking booking = bookingOpt.get();
+                                        int userId = booking.getUserID();
+                                        java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository
+                                                .findById(userId);
+                                        if (userOpt.isPresent()) {
+                                            vn.vnrailway.model.User user = userOpt.get();
+                                            String email = user.getEmail();
+                                            if (email != null && !email.isEmpty() && !sentEmails.contains(email)) {
+                                                // Gửi email hủy chuyến
+                                                try {
+                                                    java.util.Properties props = new java.util.Properties();
+                                                    props.put("mail.smtp.host", "smtp.gmail.com");
+                                                    props.put("mail.smtp.port", "587");
+                                                    props.put("mail.smtp.auth", "true");
+                                                    props.put("mail.smtp.starttls.enable", "true");
+                                                    final String EMAIL_FROM = "assasinhp619@gmail.com";
+                                                    final String EMAIL_PASSWORD = "slos bctt epxv osla";
+                                                    jakarta.mail.Session mailSession = jakarta.mail.Session
+                                                            .getInstance(props, new jakarta.mail.Authenticator() {
+                                                                @Override
+                                                                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                                    return new jakarta.mail.PasswordAuthentication(
+                                                                            EMAIL_FROM, EMAIL_PASSWORD);
+                                                                }
+                                                            });
+                                                    jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(
+                                                            mailSession);
+                                                    mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(
+                                                            EMAIL_FROM, "Vetaure", "UTF-8"));
+                                                    mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO,
+                                                            jakarta.mail.internet.InternetAddress.parse(email));
+                                                    mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+                                                    mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+                                                    mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(
+                                                            "Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                                    String messageContent = """
+                                                                <html>
+                                                                <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
+                                                                    <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
+                                                                        <h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>
+                                                                        <p>Xin chào,</p>
+                                                                        <p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>
+                                                                        <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
+                                                                        <p>Xin cảm ơn!</p>
+                                                                        <br/>
+                                                                        <p>Trân trọng,</p>
+                                                                        <p><strong>Đội ngũ Vetaure</strong></p>
+                                                                    </div>
+                                                                </body>
+                                                                </html>
+                                                            """;
+                                                    mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
+                                                    jakarta.mail.Transport.send(mimeMessage);
+                                                    sentEmails.add(email);
+                                                } catch (Exception ex) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    return;
                 default:
                     response.sendRedirect(request.getContextPath() + "/manageRoutes");
                     break;
@@ -263,57 +392,38 @@ public class ManageRoutesServlet extends HttpServlet {
         int arrivalStationId = Integer.parseInt(request.getParameter("arrivalStationId"));
         String description = request.getParameter("description");
 
-        if (departureStationId == arrivalStationId) {
-            // Set an error message and redirect or forward back to the form
-            request.setAttribute("errorMessage", "Điểm đi và điểm đến không được trùng nhau.");
-            // Repopulate necessary data for the form
-            listRoutesAndStations(request, response); // This forwards, so return after
+        // Kiểm tra trực tiếp trạng thái hoạt động của ga từ DB
+        if (!isStationActive(departureStationId) || !isStationActive(arrivalStationId)) {
+            request.setAttribute("errorMessage", "Chỉ được chọn các ga đang hoạt động làm điểm đi/đến.");
+            listRoutesAndStations(request, response);
             return;
         }
-
-        List<Station> allStations = routeRepository.getAllStations(); // Already fetched in listRoutesAndStations
-        String departureStationName = allStations.stream()
-                .filter(s -> s.getStationID() == departureStationId)
-                .findFirst()
-                .map(Station::getStationName)
+        // Lấy tên ga đi
+        String departureStationName = stationRepository.findById(departureStationId)
+                .map(vn.vnrailway.model.Station::getStationName)
                 .orElseThrow(() -> new ServletException("Departure station not found"));
-        String arrivalStationName = allStations.stream()
-                .filter(s -> s.getStationID() == arrivalStationId)
-                .findFirst()
-                .map(Station::getStationName)
+        String arrivalStationName = stationRepository.findById(arrivalStationId)
+                .map(vn.vnrailway.model.Station::getStationName)
                 .orElseThrow(() -> new ServletException("Arrival station not found"));
-
         String routeName = departureStationName + " - " + arrivalStationName;
-
-        // Check if a route with this name already exists
         Optional<Route> existingRouteOpt = routeRepository.findByRouteName(routeName);
         if (existingRouteOpt.isPresent()) {
             request.setAttribute("errorMessage", "Tuyến đường '" + routeName + "' đã tồn tại.");
             listRoutesAndStations(request, response);
             return;
         }
-
-        Route newRoute = new Route(0, routeName, description, false); // ID will be auto-generated, isLocked = false
-        Route savedRoute = routeRepository.save(newRoute); // Get the saved route with its ID
-
+        Route newRoute = new Route();
+        newRoute.setRouteName(routeName);
+        newRoute.setDescription(description);
+        newRoute.setLocked(false);
+        newRoute.setActive(true);
+        Route savedRoute = routeRepository.save(newRoute);
         if (savedRoute.getRouteID() > 0) {
-            // Add departure station (sequence 1)
             routeRepository.addStationToRoute(savedRoute.getRouteID(), departureStationId, 1, BigDecimal.ZERO, 0);
-            // Add arrival station (sequence 2)
-            // Distance for arrival station: for now, also 0, or could be a placeholder.
-            // Actual distances are usually set when adding intermediate stations or
-            // editing.
-            routeRepository.addStationToRoute(savedRoute.getRouteID(), arrivalStationId, 2, BigDecimal.ZERO, 0); // Assuming
-                                                                                                                 // distance
-                                                                                                                 // 0
-                                                                                                                 // for
-                                                                                                                 // simplicity
-                                                                                                                 // now
+            routeRepository.addStationToRoute(savedRoute.getRouteID(), arrivalStationId, 2, BigDecimal.ZERO, 0);
         } else {
-            // Handle error: route not saved correctly
             throw new ServletException("Could not save the new route properly, ID not generated.");
         }
-
         request.getSession().setAttribute("successMessage", "Tuyến đường '" + routeName + "' đã được thêm thành công!");
         response.sendRedirect(request.getContextPath() + "/manageRoutes");
     }
@@ -619,6 +729,21 @@ public class ManageRoutesServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         response.getWriter().write(jsonResponse);
+    }
+
+    // Thêm hàm kiểm tra trạng thái hoạt động của ga trực tiếp từ DB
+    private boolean isStationActive(int stationId) throws SQLException {
+        String sql = "SELECT IsActive FROM Stations WHERE StationID = ?";
+        try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection();
+                java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stationId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("IsActive");
+                }
+            }
+        }
+        return false;
     }
 
     // Inner DTO class for parsing station order updates

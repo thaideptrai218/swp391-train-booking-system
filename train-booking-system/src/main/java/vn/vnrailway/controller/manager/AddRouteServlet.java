@@ -32,6 +32,6 @@ public class AddRouteServlet extends HttpServlet {
         } catch (SQLException e) {
             request.setAttribute("errorMessage", "Error fetching stations: " + e.getMessage());
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addRoute.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Route/addRoute.jsp").forward(request, response);
     }
 }

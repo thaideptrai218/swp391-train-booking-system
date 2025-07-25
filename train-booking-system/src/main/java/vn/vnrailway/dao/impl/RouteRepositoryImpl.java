@@ -1,7 +1,6 @@
 package vn.vnrailway.dao.impl;
 
 import vn.vnrailway.config.DBContext;
-import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
@@ -30,6 +29,10 @@ public class RouteRepositoryImpl implements RouteRepository {
         route.setRouteID(rs.getInt("RouteID"));
         route.setRouteName(rs.getString("RouteName"));
         route.setDescription(rs.getString("Description"));
+        try {
+            route.setActive(rs.getBoolean("IsActive"));
+        } catch (SQLException ignore) {
+        }
         return route;
     }
 
@@ -37,6 +40,10 @@ public class RouteRepositoryImpl implements RouteRepository {
         Station station = new Station();
         station.setStationID(rs.getInt("StationID"));
         station.setStationName(rs.getString("StationName"));
+        try {
+            station.setActive(rs.getBoolean("IsActive"));
+        } catch (SQLException ignore) {
+        }
         // Add other station properties if needed for the dropdown/display
         // e.g., station.setCity(rs.getString("City"));
         return station;
@@ -44,7 +51,7 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public Optional<Route> findById(int routeId) throws SQLException {
-        String sql = "SELECT RouteID, RouteName, Description FROM Routes WHERE RouteID = ?";
+        String sql = "SELECT RouteID, RouteName, Description, IsActive FROM Routes WHERE RouteID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, routeId);
@@ -60,7 +67,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     @Override
     public List<Route> findAll() throws SQLException {
         List<Route> routes = new ArrayList<>();
-        String sql = "SELECT RouteID, RouteName, Description FROM Routes";
+        String sql = "SELECT RouteID, RouteName, Description, IsActive FROM Routes";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -73,7 +80,7 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public Optional<Route> findByRouteName(String routeName) throws SQLException {
-        String sql = "SELECT RouteID, RouteName, Description FROM Routes WHERE RouteName = ?";
+        String sql = "SELECT RouteID, RouteName, Description, IsActive FROM Routes WHERE RouteName = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, routeName);
@@ -88,12 +95,13 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public Route save(Route route) throws SQLException {
-        String sql = "INSERT INTO Routes (RouteName, Description) VALUES (?, ?)";
+        String sql = "INSERT INTO Routes (RouteName, Description, IsActive) VALUES (?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, route.getRouteName());
             ps.setString(2, route.getDescription());
+            ps.setBoolean(3, route.isActive());
 
             int affectedRows = ps.executeUpdate();
 
@@ -115,14 +123,27 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public boolean update(Route route) throws SQLException {
-        String sql = "UPDATE Routes SET RouteName = ?, Description = ? WHERE RouteID = ?";
+        String sql = "UPDATE Routes SET RouteName = ?, Description = ?, IsActive = ? WHERE RouteID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, route.getRouteName());
             ps.setString(2, route.getDescription());
-            ps.setInt(3, route.getRouteID());
+            ps.setBoolean(3, route.isActive());
+            ps.setInt(4, route.getRouteID());
 
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean updateRouteActive(int routeId, boolean isActive) throws SQLException {
+        String sql = "UPDATE Routes SET IsActive = ? WHERE RouteID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isActive);
+            ps.setInt(2, routeId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         }
@@ -229,6 +250,23 @@ public class RouteRepositoryImpl implements RouteRepository {
     @Override
     public void addStationToRoute(int routeId, int stationId, int sequenceNumber, BigDecimal distanceFromStart,
             int defaultStopTime) throws SQLException {
+        // Kiểm tra trạng thái hoạt động của ga trước khi thêm vào Route
+        String checkActiveSql = "SELECT IsActive FROM Stations WHERE StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement checkPs = conn.prepareStatement(checkActiveSql)) {
+            checkPs.setInt(1, stationId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    boolean isActive = rs.getBoolean("IsActive");
+                    if (!isActive) {
+                        throw new SQLException("Không thể thêm ga không hoạt động vào tuyến đường.");
+                    }
+                } else {
+                    throw new SQLException("Không tìm thấy ga với ID: " + stationId);
+                }
+            }
+        }
+        // Nếu ga đang hoạt động, thực hiện thêm vào RouteStations
         String sql = "INSERT INTO RouteStations (RouteID, StationID, SequenceNumber, DistanceFromStart, DefaultStopTime) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -278,7 +316,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     @Override
     public List<Station> getAllStations() throws SQLException {
         List<Station> stations = new ArrayList<>();
-        String sql = "SELECT StationID, StationName FROM Stations ORDER BY StationName"; // Add other fields if needed
+        String sql = "SELECT StationID, StationName, IsActive FROM Stations WHERE IsActive = 1 ORDER BY StationID";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -620,6 +658,27 @@ public class RouteRepositoryImpl implements RouteRepository {
                     /* ignored */ }
             }
         }
+    }
+
+    @Override
+    public List<Route> findAllByActive(Boolean isActive) throws SQLException {
+        List<Route> routes = new ArrayList<>();
+        String sql = "SELECT RouteID, RouteName, Description, IsActive FROM Routes";
+        if (isActive != null) {
+            sql += " WHERE IsActive = ?";
+        }
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (isActive != null) {
+                ps.setBoolean(1, isActive);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    routes.add(mapResultSetToRoute(rs));
+                }
+            }
+        }
+        return routes;
     }
 
     // Main method for testing
