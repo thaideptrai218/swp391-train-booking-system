@@ -149,6 +149,12 @@ public class ManageTripsServlet extends HttpServlet {
                 }
             }).toList();
         }
+        String filterStatus = request.getParameter("filterStatus");
+        if (filterStatus != null && !filterStatus.isEmpty()) {
+            listTrips = listTrips.stream()
+                .filter(trip -> filterStatus.equals(trip.getTripStatus()))
+                .toList();
+        }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
         request.setAttribute("allHolidays", allHolidays);

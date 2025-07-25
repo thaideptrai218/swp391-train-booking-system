@@ -169,7 +169,7 @@
                 <c:if test="${empty stationList and empty errorMessage}">
                   <p>Không có thông tin ga tàu nào để hiển thị.</p>
                 </c:if>
-                <c:forEach var="station" items="${stationList}">
+                <c:forEach var="station" items="${stationList}" begin="0" end="14">
                   <div class="location-item">
                     <img
                       src="${pageContext.request.contextPath}/assets/images/landing/stations/${station.stationCode}.jpg"
@@ -225,8 +225,7 @@
             <div class="section-header">
               <h1 class="section-main-title">Địa điểm nổi bật</h1>
               <div class="carousel-navigation">
-                <button class="nav-arrow prev-location">
-                  << /button>
+                    <button class="nav-arrow prev-location"><</button>
                     <button class="nav-arrow next-location">></button>
                     <a href="${pageContext.request.contextPath}/all-locations" class="view-all-link">Xem thêm <span
                         class="arrow">&rarr;</span></a>

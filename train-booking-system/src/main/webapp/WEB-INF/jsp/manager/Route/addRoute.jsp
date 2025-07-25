@@ -8,7 +8,13 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <title>Thêm Tuyến Đường Mới</title>
     <link
       rel="stylesheet"
-      href="${pageContext.request.contextPath}/css/manager/manageRoutes.css"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/manager/manager-dashboard.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/common.css"
     />
     <link
       rel="stylesheet"
@@ -21,14 +27,19 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         color: #333;
         line-height: 1.6;
         margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
       }
       .main-content {
         max-width: 600px;
-        margin: 40px auto;
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.10);
         padding: 36px 48px 32px 48px;
+        margin: 40px auto;
         transition: box-shadow 0.2s;
       }
       .main-content:hover {
