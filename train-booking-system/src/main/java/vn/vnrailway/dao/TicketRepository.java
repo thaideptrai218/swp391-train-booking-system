@@ -43,7 +43,7 @@ public interface TicketRepository {
 
     double getTotalRevenue() throws SQLException;
     
-    void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
+    void insertTempRefundRequests(String ticketCode, String noteSTK) throws SQLException; // Insert temporary refund requests
 
     void rejectRefundTicket(String ticketInfo) throws SQLException;
 
