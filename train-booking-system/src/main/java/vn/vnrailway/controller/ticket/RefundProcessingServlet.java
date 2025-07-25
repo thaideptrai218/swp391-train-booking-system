@@ -1,5 +1,9 @@
 package vn.vnrailway.controller.ticket;
 
+import java.io.*;
+import java.util.Base64;
+import java.nio.file.Files;
+import jakarta.servlet.http.Part;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -10,6 +14,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,16 +34,29 @@ import vn.vnrailway.model.Booking;
 import vn.vnrailway.model.Ticket;
 import vn.vnrailway.model.User;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Properties;
+import java.util.UUID;
 
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 15 // 15MB
+)
 @WebServlet(name = "RefundProcessingServlet", urlPatterns = { "/refundProcessing" })
 public class RefundProcessingServlet extends HttpServlet {
     private TicketRepository ticketRepository;
     private static final String EMAIL_FROM = "assasinhp619@gmail.com";
     // Replace with your 16-character App Password
     private static final String EMAIL_PASSWORD = "slos bctt epxv osla";
+
+    private static final String UPLOAD_DIR = "uploads/refund_images";
 
     @Override
     public void init() throws ServletException {
@@ -63,6 +81,25 @@ public class RefundProcessingServlet extends HttpServlet {
         String action = request.getParameter("action");
         String ticketInfo = request.getParameter("ticketInfo");
         String email = request.getParameter("email");
+
+
+        Part filePart = request.getPart("imageFile"); // lấy ảnh từ input name="imageFile"
+        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+        String uploadPath = "C:\\Users\\Xuan Truong\\Documents\\SWP\\swp391-train-booking-system\\train-booking-system\\src\\main\\webapp\\uploads";
+
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+        // Tạo tên file duy nhất để tránh trùng
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+
+        String filePath = uploadPath + File.separator + uniqueFileName;
+
+        // Lưu file vào thư mục uploads
+        filePart.write(filePath);
+
+        String dbFilePath = uniqueFileName;
 
         try {
             Properties props = new Properties();
@@ -111,7 +148,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 try {
-                    ticketRepository.approveRefundTicket(ticketInfo);
+                    ticketRepository.approveRefundTicket(ticketInfo, dbFilePath);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -120,7 +157,7 @@ public class RefundProcessingServlet extends HttpServlet {
                 }
             } else if ("reject".equals(action)) {
                 try {
-                    ticketRepository.rejectRefundTicket(ticketInfo);
+                    ticketRepository.rejectRefundTicket(ticketInfo, dbFilePath);
                     response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -135,11 +172,7 @@ public class RefundProcessingServlet extends HttpServlet {
         }
     }
 
-    public static void main(String[] args, HttpServletRequest request, HttpServletResponse response) {
-        String ticketInfo = request.getParameter("ticketInfo");
-        String[] parts = ticketInfo.split("\\|");
-        for (String part : parts) {
-            System.out.println(part);
-        }
+    public static void main(String[] args) throws IOException {
+        
     }
 }

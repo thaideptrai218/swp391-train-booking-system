@@ -271,7 +271,7 @@
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">Danh sách các
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
                                         vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
@@ -314,7 +314,6 @@
                                             <th>Người xử lý</th>
                                             <th>Ghi chú</th>
                                             <th>Ảnh chuyển khoản</th>
-                                            <th>Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -343,13 +342,13 @@
                                                     <small>${req.refundPolicy}</small>
                                                 </td>
                                                 <td>
-                                                    <strong>Tiền vé:</strong><br />
+                                                    <strong>Tiền vé:</strong>
                                                     <fmt:formatNumber value="${req.originalPrice}"
                                                         groupingUsed="true" />đ<br />
-                                                    <strong>Phí hoàn:</strong><br />
+                                                    <strong>Phí hoàn:</strong>
                                                     <fmt:formatNumber value="${req.refundFee}" groupingUsed="true" />
                                                     đ<br />
-                                                    <strong style="color: #28a745;">Hoàn lại:</strong><br />
+                                                    <strong style="color: #28a745;">Hoàn lại:</strong>
                                                     <fmt:formatNumber value="${req.refundAmount}" groupingUsed="true" />
                                                     đ
                                                 </td>
@@ -371,20 +370,16 @@
                                                     <small>SĐT: ${req.staffPhoneNumber}</small><br />
                                                     <small>CMND: ${req.staffIDCard}</small>
                                                 </td>
-                                                <form action="">
-                                                    <input type="hidden" name="refundID" value="${req.refundID}" />
-                                                    <td>
-                                                        <input type="text" name="note" placeholder="Nhập ghi chú..." />
-                                                    </td>
-                                                    <td>
-                                                        <input type="file" name="image" accept="image/*" />
-                                                    </td>
-                                                    <td>
-                                                        <button type="submit" name="saveBtn"
-                                                            value="${req.refundID}">Lưu</button>
-                                                    </td>
-                                                </form>
-
+                                                <td>
+                                                    ${req.notes}
+                                                </td>
+                                                <td>
+                                                    <c:if test="${not empty req.images}">
+                                                        <img src="${pageContext.request.contextPath}/uploads/train-booking-system/src/main/webapp/uploads/e306c74a-ef46-4d2c-a335-3becb802ef0a_z6734377470657_31177930b3b258fd36bbb3d11e5b920d.png"
+                                                            width="200" />
+                                                            ${req.images}
+                                                    </c:if>
+                                                </td>
                                             </tr>
                                         </c:forEach>
                                     </tbody>
