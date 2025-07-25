@@ -17,4 +17,10 @@ public interface StationRepository {
     boolean update(Station station) throws SQLException;
 
     boolean updateStationLocked(int stationId, boolean isLocked) throws SQLException;
+
+    boolean updateStationActive(int stationId, boolean isActive) throws SQLException;
+
+    boolean deleteById(int stationId) throws SQLException;
+
+    List<Station> findByActive(Boolean isActive) throws SQLException;
 }

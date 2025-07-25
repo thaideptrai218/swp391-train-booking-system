@@ -41,6 +41,14 @@ prefix="c" %>
           </c:if>
 
           <div class="controls-container">
+            <form id="filterForm" method="get" style="display:inline-block; margin-right: 16px;">
+              <label for="activeFilter">Trạng thái:</label>
+              <select name="activeFilter" id="activeFilter" onchange="document.getElementById('filterForm').submit();">
+                <option value="active" ${activeFilter == 'active' ? 'selected' : ''}>Hoạt động</option>
+                <option value="inactive" ${activeFilter == 'inactive' ? 'selected' : ''}>Không hoạt động</option>
+                <option value="all" ${activeFilter == 'all' ? 'selected' : ''}>Tất cả</option>
+              </select>
+            </form>
             <div class="search-container">
               <input
                 type="text"
@@ -63,6 +71,7 @@ prefix="c" %>
                   <th>Thành phố</th>
                   <th>Khu vực</th>
                   <th>Điện thoại</th>
+                  <th>Hoạt động</th>
                   <th>Hành động</th>
                 </tr>
               </thead>
@@ -75,6 +84,9 @@ prefix="c" %>
                     <td>${station.city}</td>
                     <td>${station.region}</td>
                     <td>${station.phoneNumber}</td>
+                    <td>
+                      <input type="checkbox" class="active-checkbox" data-id="${station.stationID}" ${station.active ? 'checked' : ''} ${station.locked ? 'disabled' : ''} />
+                    </td>
                     <td class="actions">
                       <a href="editStation?id=${station.stationID}" class="edit-btn${station.locked ? ' disabled-link' : ''}" ${station.locked ? 'tabindex="-1"' : ''}>
                         <i class="fas fa-edit"></i> Sửa
@@ -86,12 +98,21 @@ prefix="c" %>
                           <i class="fas ${station.locked ? 'fa-lock-open' : 'fa-lock'}"></i> <span>${station.locked ? 'Mở khóa' : 'Khóa'}</span>
                         </button>
                       </form>
+                      <c:if test="${!station.active}">
+                        <form action="manageStations" method="POST" style="display:inline-block; margin-left:8px;">
+                          <input type="hidden" name="command" value="deleteStation" />
+                          <input type="hidden" name="stationID" value="${station.stationID}" />
+                          <button type="submit" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa ga này không?');">
+                            <i class="fas fa-trash"></i> Xóa
+                          </button>
+                        </form>
+                      </c:if>
                     </td>
                   </tr>
                 </c:forEach>
                 <c:if test="${empty stations}">
                   <tr>
-                    <td colspan="7">Không tìm thấy ga nào.</td>
+                    <td colspan="8">Không tìm thấy ga nào.</td>
                   </tr>
                 </c:if>
               </tbody>

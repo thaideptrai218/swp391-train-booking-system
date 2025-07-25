@@ -78,6 +78,14 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
 
       <!-- Toolbar -->
       <div class="container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <form id="filterForm" method="get" style="margin-right: 20px;">
+              <label for="activeFilter">Trạng thái:</label>
+              <select name="activeFilter" id="activeFilter" onchange="document.getElementById('filterForm').submit();">
+                <option value="active" ${activeFilter == 'active' ? 'selected' : ''}>Hoạt động</option>
+                <option value="inactive" ${activeFilter == 'inactive' ? 'selected' : ''}>Không hoạt động</option>
+                <option value="all" ${activeFilter == 'all' ? 'selected' : ''}>Tất cả</option>
+              </select>
+          </form>
           <div class="search-container" style="flex-grow: 1; margin-right: 20px;">
               <input type="text" id="routeSearchInput" placeholder="Tìm kiếm theo ID hoặc Tên Tuyến Đường..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
           </div>
@@ -98,6 +106,7 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
               <tr>
                 <th>ID</th>
                 <th>Tên Tuyến Đường</th>
+                <th>Hoạt động</th>
                 <th>Hành Động</th>
               </tr>
             </thead>
@@ -106,6 +115,9 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
                 <tr>
                   <td><c:out value="${route.routeID}" /></td>
                   <td><c:out value="${route.routeName}" /></td>
+                  <td>
+                    <input type="checkbox" class="route-active-checkbox" data-id="${route.routeID}" ${route.active ? 'checked' : ''} />
+                  </td>
                   <td>
                     <a
                       href="${pageContext.request.contextPath}/manager/routeDetail?routeId=${route.routeID}"

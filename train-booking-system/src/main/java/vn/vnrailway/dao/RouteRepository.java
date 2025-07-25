@@ -48,4 +48,8 @@ public interface RouteRepository {
 
         // Method to increment sequence numbers for stations from a certain point
         void incrementSequenceNumbersFrom(int routeId, int fromSequenceNumber) throws SQLException;
+
+        boolean updateRouteActive(int routeId, boolean isActive) throws SQLException;
+
+        List<Route> findAllByActive(Boolean isActive) throws SQLException;
 }

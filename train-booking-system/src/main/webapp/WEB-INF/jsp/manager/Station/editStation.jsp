@@ -55,6 +55,10 @@ prefix="c" %>
               <input type="text" id="phoneNumber" name="phoneNumber" value="${station.phoneNumber}" class="form-control" />
             </div>
             <div class="form-group">
+              <label for="isActive">Hoạt động:</label>
+              <input type="checkbox" id="isActive" name="isActive" value="true" ${station.active ? 'checked' : ''} />
+            </div>
+            <div class="form-group">
               <button type="submit" name="command" value="edit" class="btn btn-primary">Cập nhật ga</button>
               <a href="manageStations" class="cancel-button">Hủy</a>
             </div>
