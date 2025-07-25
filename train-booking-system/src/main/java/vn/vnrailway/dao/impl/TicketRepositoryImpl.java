@@ -201,6 +201,23 @@ public class TicketRepositoryImpl implements TicketRepository {
         return ticket;
     }
 
+    public List<String> getAllStationNames() throws SQLException {
+        List<String> stationNames = new ArrayList<>();
+        String sql = "SELECT StationName FROM Stations";
+
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                stationNames.add(rs.getString("StationName"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stationNames;
+    }
+
     @Override
     public boolean update(Ticket ticket) throws SQLException {
         String sql = "UPDATE Tickets SET TicketCode = ?, BookingID = ?, TripID = ?, SeatID = ?, PassengerID = ?, StartStationID = ?, EndStationID = ?, Price = ?, TicketStatus = ?, CoachNameSnapshot = ?, SeatNameSnapshot = ?, PassengerName = ?, PassengerIDCardNumber = ?, FareComponentDetails = ?, ParentTicketID = ? WHERE TicketID = ?";

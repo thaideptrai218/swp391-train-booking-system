@@ -33,6 +33,7 @@ public interface TicketRepository {
     Ticket save(Ticket ticket) throws SQLException;
 
     InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException; // For checking ticket status
+    List<String> getAllStationNames() throws SQLException; // For autocomplete in the form
 
     boolean update(Ticket ticket) throws SQLException; // Mainly for status changes
 
