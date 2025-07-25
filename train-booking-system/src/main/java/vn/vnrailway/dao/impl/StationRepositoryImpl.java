@@ -21,13 +21,16 @@ public class StationRepositoryImpl implements StationRepository {
         station.setPhoneNumber(rs.getString("PhoneNumber"));
         try {
             station.setLocked(rs.getBoolean("IsLocked"));
-        } catch (SQLException ignore) {}
+        } catch (SQLException ignore) {
+        }
         try {
             station.setActive(rs.getBoolean("IsActive"));
-        } catch (SQLException ignore) {}
+        } catch (SQLException ignore) {
+        }
         try {
             station.setStationCode(rs.getString("StationCode"));
-        } catch (SQLException ignore) {}
+        } catch (SQLException ignore) {
+        }
         return station;
     }
 
@@ -43,11 +46,12 @@ public class StationRepositoryImpl implements StationRepository {
             }
         }
         return Optional.empty();
+
     }
 
     @Override
     public Optional<Station> findByStationName(String stationName) throws SQLException {
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations WHERE StationName COLLATE SQL_Latin1_General_CI_AI = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations WHERE StationName = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, stationName);
             try (ResultSet rs = ps.executeQuery()) {
@@ -81,7 +85,7 @@ public class StationRepositoryImpl implements StationRepository {
             sql += " WHERE IsActive = ?";
         }
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             if (isActive != null) {
                 ps.setBoolean(1, isActive);
             }
@@ -173,7 +177,7 @@ public class StationRepositoryImpl implements StationRepository {
     public boolean deleteById(int stationId) throws SQLException {
         String sql = "DELETE FROM Stations WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stationId);
             return ps.executeUpdate() > 0;
         }

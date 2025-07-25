@@ -19,11 +19,13 @@ import vn.vnrailway.dao.FeaturedRouteRepository;
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dao.impl.FeaturedRouteRepositoryImpl;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
+import vn.vnrailway.dao.impl.StationRepositoryImpl;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Station;
 import vn.vnrailway.dao.TripRepository; // Added
 import vn.vnrailway.dao.impl.TripRepositoryImpl; // Added
+import vn.vnrailway.dao.StationRepository;
 
 @WebServlet("/manageRoutes")
 public class ManageRoutesServlet extends HttpServlet {
@@ -31,6 +33,7 @@ public class ManageRoutesServlet extends HttpServlet {
     private RouteRepository routeRepository;
     private TripRepository tripRepository; // Added
     private FeaturedRouteRepository featuredRouteRepository;
+    private StationRepository stationRepository;
 
     public ManageRoutesServlet() {
         super();
@@ -42,6 +45,7 @@ public class ManageRoutesServlet extends HttpServlet {
         this.routeRepository = new RouteRepositoryImpl();
         this.tripRepository = new TripRepositoryImpl(); // Added
         this.featuredRouteRepository = new FeaturedRouteRepositoryImpl();
+        this.stationRepository = new StationRepositoryImpl();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -203,7 +207,8 @@ public class ManageRoutesServlet extends HttpServlet {
                             java.util.Set<String> sentEmails = new java.util.HashSet<>();
                             for (vn.vnrailway.model.Trip trip : trips) {
                                 tripRepository.updateTripStatus(trip.getTripID(), "Cancelled");
-                                java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(trip.getTripID());
+                                java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository
+                                        .findByTripId(trip.getTripID());
                                 try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
                                     conn.setAutoCommit(false);
                                     // 1. Cập nhật TicketStatus = 'Cancelled' cho tất cả vé
@@ -212,7 +217,8 @@ public class ManageRoutesServlet extends HttpServlet {
                                         ps.setInt(1, trip.getTripID());
                                         ps.executeUpdate();
                                     }
-                                    // 2. Cập nhật TempRefundRequests: AppliedPolicyID = null, FeeAmount = 0, RequestedAt = null
+                                    // 2. Cập nhật TempRefundRequests: AppliedPolicyID = null, FeeAmount = 0,
+                                    // RequestedAt = null
                                     String updateTempRefundSql = "UPDATE TempRefundRequests SET AppliedPolicyID = NULL, FeeAmount = 0, RequestedAt = NULL WHERE TicketID = ?";
                                     try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTempRefundSql)) {
                                         for (vn.vnrailway.model.Ticket t : tickets) {
@@ -231,11 +237,13 @@ public class ManageRoutesServlet extends HttpServlet {
                                     bookingIds.add(ticket.getBookingID());
                                 }
                                 for (Integer bookingId : bookingIds) {
-                                    java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository.findById(bookingId);
+                                    java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository
+                                            .findById(bookingId);
                                     if (bookingOpt.isPresent()) {
                                         vn.vnrailway.model.Booking booking = bookingOpt.get();
                                         int userId = booking.getUserID();
-                                        java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository.findById(userId);
+                                        java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository
+                                                .findById(userId);
                                         if (userOpt.isPresent()) {
                                             vn.vnrailway.model.User user = userOpt.get();
                                             String email = user.getEmail();
@@ -249,34 +257,40 @@ public class ManageRoutesServlet extends HttpServlet {
                                                     props.put("mail.smtp.starttls.enable", "true");
                                                     final String EMAIL_FROM = "assasinhp619@gmail.com";
                                                     final String EMAIL_PASSWORD = "slos bctt epxv osla";
-                                                    jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
-                                                        @Override
-                                                        protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                                                            return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
-                                                        }
-                                                    });
-                                                    jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
-                                                    mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
-                                                    mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(email));
+                                                    jakarta.mail.Session mailSession = jakarta.mail.Session
+                                                            .getInstance(props, new jakarta.mail.Authenticator() {
+                                                                @Override
+                                                                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                                    return new jakarta.mail.PasswordAuthentication(
+                                                                            EMAIL_FROM, EMAIL_PASSWORD);
+                                                                }
+                                                            });
+                                                    jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(
+                                                            mailSession);
+                                                    mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(
+                                                            EMAIL_FROM, "Vetaure", "UTF-8"));
+                                                    mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO,
+                                                            jakarta.mail.internet.InternetAddress.parse(email));
                                                     mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
                                                     mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
-                                                    mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                                    mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(
+                                                            "Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
                                                     String messageContent = """
-                                                        <html>
-                                                        <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
-                                                            <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
-                                                                <h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>
-                                                                <p>Xin chào,</p>
-                                                                <p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>
-                                                                <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
-                                                                <p>Xin cảm ơn!</p>
-                                                                <br/>
-                                                                <p>Trân trọng,</p>
-                                                                <p><strong>Đội ngũ Vetaure</strong></p>
-                                                            </div>
-                                                        </body>
-                                                        </html>
-                                                    """;
+                                                                <html>
+                                                                <body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>
+                                                                    <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
+                                                                        <h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>
+                                                                        <p>Xin chào,</p>
+                                                                        <p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>
+                                                                        <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
+                                                                        <p>Xin cảm ơn!</p>
+                                                                        <br/>
+                                                                        <p>Trân trọng,</p>
+                                                                        <p><strong>Đội ngũ Vetaure</strong></p>
+                                                                    </div>
+                                                                </body>
+                                                                </html>
+                                                            """;
                                                     mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
                                                     jakarta.mail.Transport.send(mimeMessage);
                                                     sentEmails.add(email);
@@ -385,7 +399,6 @@ public class ManageRoutesServlet extends HttpServlet {
             return;
         }
         // Lấy tên ga đi
-        vn.vnrailway.dao.StationRepository stationRepository = new vn.vnrailway.dao.impl.StationRepositoryImpl();
         String departureStationName = stationRepository.findById(departureStationId)
                 .map(vn.vnrailway.model.Station::getStationName)
                 .orElseThrow(() -> new ServletException("Departure station not found"));

@@ -17,4 +17,6 @@ public class Station {
     private boolean isLocked;
     private boolean isActive; // Thêm trường trạng thái hoạt động
     private String stationCode; // Thêm mã code, có thể null
+    public String getStationCode() { return stationCode; }
+    public void setStationCode(String stationCode) { this.stationCode = stationCode; }
 }

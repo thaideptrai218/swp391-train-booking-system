@@ -23,83 +23,115 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         margin: 0;
       }
       .main-content {
-        max-width: 700px;
-        margin: 30px auto;
+        max-width: 600px;
+        margin: 40px auto;
         background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+        padding: 36px 48px 32px 48px;
+        transition: box-shadow 0.2s;
+      }
+      .main-content:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.13);
       }
       h1 {
-        color: #343a40;
-        margin-bottom: 25px;
-        font-weight: 400;
+        color: #2d3a4a;
+        margin-bottom: 28px;
+        font-weight: 500;
         border-bottom: 1px solid #e9ecef;
-        padding-bottom: 15px;
-        font-size: 1.8em;
+        padding-bottom: 12px;
+        font-size: 2em;
+        letter-spacing: 0.5px;
       }
       .form-group {
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
       }
       .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #495057;
+        font-weight: 600;
+        color: #374151;
+        letter-spacing: 0.2px;
       }
       .form-group input[type="text"],
       .form-group select,
       .form-group textarea {
         width: 100%;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        padding: 0.65rem 1rem;
+        font-size: 1rem;
+        color: #374151;
+        background-color: #f9fafb;
+        border: 1.5px solid #d1d5db;
+        border-radius: 6px;
+        transition: border-color 0.18s, box-shadow 0.18s;
         box-sizing: border-box;
       }
       .form-group input:focus,
       .form-group select:focus,
       .form-group textarea:focus {
-        border-color: #80bdff;
+        border-color: #2563eb;
         outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.15);
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.10);
+        background: #fff;
+      }
+      .form-group textarea {
+        min-height: 90px;
+        resize: vertical;
       }
       .btn.btn-primary {
-        background-color: #007bff;
+        background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
         color: #fff;
         border: none;
-        padding: 0.5rem 1.2rem;
-        border-radius: 0.25rem;
-        font-size: 1rem;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1.08rem;
+        font-weight: 500;
         cursor: pointer;
-        margin-right: 10px;
+        margin-right: 12px;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+        transition: background 0.18s, box-shadow 0.18s;
       }
       .btn.btn-primary:hover {
-        background-color: #0056b3;
+        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+        box-shadow: 0 4px 16px rgba(37,99,235,0.13);
       }
       .btn.btn-secondary {
-        background-color: #f8f9fa;
-        color: #212529;
-        border: 1px solid #ced4da;
-        padding: 0.5rem 1.2rem;
-        border-radius: 0.25rem;
-        font-size: 1rem;
+        background-color: #f3f4f6;
+        color: #374151;
+        border: 1.5px solid #d1d5db;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1.08rem;
+        font-weight: 500;
         cursor: pointer;
+        transition: background 0.18s, border 0.18s;
       }
       .btn.btn-secondary:hover {
-        background-color: #e2e6ea;
+        background-color: #e5e7eb;
+        border-color: #a1a1aa;
       }
       .error-message {
-        color: #721c24;
-        background: #f8d7da;
-        border: 1px solid #f5c6cb;
-        border-radius: 4px;
-        padding: 10px;
-        margin-bottom: 20px;
+        color: #b91c1c;
+        background: #fee2e2;
+        border: 1.5px solid #fecaca;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        font-size: 1rem;
+      }
+      .success-message {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1.5px solid #6ee7b7;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        font-size: 1rem;
+      }
+      @media (max-width: 700px) {
+        .main-content {
+          padding: 18px 8px;
+        }
       }
     </style>
   </head>
