@@ -15,7 +15,7 @@ body {
 /* Container chính */
 .support-container {
     max-width: 1400px;
-    margin: 0 auto;
+    margin: 100px auto;
     padding: 40px 20px;
     min-height: 100vh;
 }

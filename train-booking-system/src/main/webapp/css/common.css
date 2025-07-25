@@ -187,7 +187,7 @@ a:hover {
 /* Header Styles                           */
 /* ========================================= */
 .navbar {
-    background-color: transparent;
+    background-color: #2b669a;
     color: var(--color-white);
     position: absolute;
     top: 0;
@@ -199,6 +199,7 @@ a:hover {
 
 .navbar .container {
     /* Specific override for navbar's container */
+    background-color: #2b669a;
     display: flex;
     align-items: center;
     justify-content: space-between;
