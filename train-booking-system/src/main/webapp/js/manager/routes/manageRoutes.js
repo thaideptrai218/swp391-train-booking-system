@@ -148,4 +148,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   filterAndPaginate();
+
+  // Xử lý sự kiện click checkbox hoạt động của Route
+  document.querySelectorAll('.route-active-checkbox').forEach(function(checkbox) {
+    checkbox.addEventListener('change', function() {
+      const routeId = this.getAttribute('data-id');
+      const isActive = this.checked;
+      const confirmMsg = isActive ? 'Bạn có chắc chắn muốn kích hoạt tuyến đường này?' : 'Bạn có chắc chắn muốn vô hiệu hóa tuyến đường này?';
+      if (!confirm(confirmMsg)) {
+        this.checked = !isActive;
+        return;
+      }
+      // Gửi AJAX cập nhật trạng thái hoạt động
+      fetch('manageRoutes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=updateRouteActive&routeId=${routeId}&isActive=${isActive}`
+      })
+      .then(res => res.ok ? location.reload() : alert('Có lỗi xảy ra!'));
+    });
+  });
 });

@@ -27,9 +27,17 @@ public class ManageStationsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String activeFilter = request.getParameter("activeFilter");
+        Boolean isActive = null;
+        if (activeFilter == null || activeFilter.isEmpty() || "active".equals(activeFilter)) {
+            isActive = true;
+        } else if ("inactive".equals(activeFilter)) {
+            isActive = false;
+        } // else isActive = null (tất cả)
         try {
-            List<Station> stations = stationRepository.findAll();
+            List<Station> stations = stationRepository.findByActive(isActive);
             request.setAttribute("stations", stations);
+            request.setAttribute("activeFilter", activeFilter == null ? "active" : activeFilter);
         } catch (SQLException e) {
             request.setAttribute("errorMessage", "Error retrieving stations: " + e.getMessage());
             e.printStackTrace();
@@ -51,6 +59,12 @@ public class ManageStationsServlet extends HttpServlet {
                 boolean isLocked = "lockStation".equals(command);
                 stationRepository.updateStationLocked(stationId, isLocked);
                 message = isLocked ? "Ga đã được khóa." : "Ga đã được mở khóa.";
+            } else if ("updateActiveStatus".equals(command)) {
+                int stationId = Integer.parseInt(request.getParameter("stationID"));
+                String isActiveParam = request.getParameter("isActive");
+                boolean isActive = "true".equalsIgnoreCase(isActiveParam) || "1".equals(isActiveParam) || "on".equalsIgnoreCase(isActiveParam);
+                stationRepository.updateStationActive(stationId, isActive);
+                message = isActive ? "Ga đã được kích hoạt." : "Ga đã bị vô hiệu hóa.";
             } else {
                 switch (command) {
                     case "add":
@@ -64,6 +78,7 @@ public class ManageStationsServlet extends HttpServlet {
                             newStation.setCity(request.getParameter("city"));
                             newStation.setRegion(request.getParameter("region"));
                             newStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                            newStation.setActive("true".equals(request.getParameter("isActive")));
                             stationRepository.save(newStation);
                             message = "Station added successfully!";
                         }
@@ -80,14 +95,25 @@ public class ManageStationsServlet extends HttpServlet {
                         } else {
                             Station existingStation = stationRepository.findById(editStationId)
                                     .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
-                            existingStation.setStationCode(updatedStationName);
                             existingStation.setStationName(request.getParameter("stationName"));
                             existingStation.setAddress(request.getParameter("address"));
                             existingStation.setCity(request.getParameter("city"));
                             existingStation.setRegion(request.getParameter("region"));
                             existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                            existingStation.setActive("true".equals(request.getParameter("isActive")));
                             stationRepository.update(existingStation);
                             message = "Station updated successfully!";
+                        }
+                        break;
+                    case "deleteStation":
+                        int delStationId = Integer.parseInt(request.getParameter("stationID"));
+                        Station delStation = stationRepository.findById(delStationId)
+                                .orElseThrow(() -> new SQLException("Station not found for ID: " + delStationId));
+                        if (delStation.isActive()) {
+                            message = "Chỉ có thể xóa ga khi trạng thái Hoạt động = 0.";
+                        } else {
+                            stationRepository.deleteById(delStationId);
+                            message = "Xóa ga thành công!";
                         }
                         break;
                     default:

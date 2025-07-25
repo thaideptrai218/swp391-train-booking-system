@@ -21,14 +21,19 @@ public class StationRepositoryImpl implements StationRepository {
         station.setPhoneNumber(rs.getString("PhoneNumber"));
         try {
             station.setLocked(rs.getBoolean("IsLocked"));
-        } catch (SQLException ignore) {
-        }
+        } catch (SQLException ignore) {}
+        try {
+            station.setActive(rs.getBoolean("IsActive"));
+        } catch (SQLException ignore) {}
+        try {
+            station.setStationCode(rs.getString("StationCode"));
+        } catch (SQLException ignore) {}
         return station;
     }
 
     @Override
     public Optional<Station> findById(int stationId) throws SQLException {
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked FROM Stations WHERE StationID = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stationId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -42,7 +47,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public Optional<Station> findByStationName(String stationName) throws SQLException {
-        String sql = "SELECT StationID, StationName, Address, City, Region, PhoneNumber FROM Stations WHERE StationName COLLATE SQL_Latin1_General_CI_AI = ?";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations WHERE StationName COLLATE SQL_Latin1_General_CI_AI = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, stationName);
             try (ResultSet rs = ps.executeQuery()) {
@@ -57,7 +62,7 @@ public class StationRepositoryImpl implements StationRepository {
     @Override
     public List<Station> findAll() throws SQLException {
         List<Station> stations = new ArrayList<>();
-        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked FROM Stations";
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -69,18 +74,39 @@ public class StationRepositoryImpl implements StationRepository {
     }
 
     @Override
+    public List<Station> findByActive(Boolean isActive) throws SQLException {
+        List<Station> stations = new ArrayList<>();
+        String sql = "SELECT StationID, StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive FROM Stations";
+        if (isActive != null) {
+            sql += " WHERE IsActive = ?";
+        }
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (isActive != null) {
+                ps.setBoolean(1, isActive);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    stations.add(mapResultSetToStation(rs));
+                }
+            }
+        }
+        return stations;
+    }
+
+    @Override
     public Station save(Station station) throws SQLException {
-        String sql = "INSERT INTO Stations (StationCode, StationName, Address, City, Region, PhoneNumber, IsLocked) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Stations (StationName, Address, City, Region, PhoneNumber, IsLocked, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, station.getStationCode());
-            ps.setString(2, station.getStationName());
-            ps.setString(3, station.getAddress());
-            ps.setString(4, station.getCity());
-            ps.setString(5, station.getRegion());
-            ps.setString(6, station.getPhoneNumber());
-            ps.setBoolean(7, station.isLocked());
+            ps.setString(1, station.getStationName());
+            ps.setString(2, station.getAddress());
+            ps.setString(3, station.getCity());
+            ps.setString(4, station.getRegion());
+            ps.setString(5, station.getPhoneNumber());
+            ps.setBoolean(6, station.isLocked());
+            ps.setBoolean(7, station.isActive());
 
             int affectedRows = ps.executeUpdate();
 
@@ -101,7 +127,7 @@ public class StationRepositoryImpl implements StationRepository {
 
     @Override
     public boolean update(Station station) throws SQLException {
-        String sql = "UPDATE Stations SET StationName = ?, Address = ?, City = ?, Region = ?, PhoneNumber = ?, IsLocked = ? WHERE StationID = ?";
+        String sql = "UPDATE Stations SET StationName = ?, Address = ?, City = ?, Region = ?, PhoneNumber = ?, IsLocked = ?, IsActive = ? WHERE StationID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -111,7 +137,8 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setString(4, station.getRegion());
             ps.setString(5, station.getPhoneNumber());
             ps.setBoolean(6, station.isLocked());
-            ps.setInt(7, station.getStationID());
+            ps.setBoolean(7, station.isActive());
+            ps.setInt(8, station.getStationID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -127,6 +154,28 @@ public class StationRepositoryImpl implements StationRepository {
             ps.setInt(2, stationId);
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean updateStationActive(int stationId, boolean isActive) throws SQLException {
+        String sql = "UPDATE Stations SET IsActive = ? WHERE StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isActive);
+            ps.setInt(2, stationId);
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+    @Override
+    public boolean deleteById(int stationId) throws SQLException {
+        String sql = "DELETE FROM Stations WHERE StationID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stationId);
+            return ps.executeUpdate() > 0;
         }
     }
 

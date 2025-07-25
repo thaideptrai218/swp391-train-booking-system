@@ -101,11 +101,10 @@
                         <div class="train-composition-display hidden-coach-list">
                       </c:otherwise>
                     </c:choose>
-                        <div class="train-head-item">
-                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
-                            <span class="train-name-label">${train.trainName}</span>
-                            <c:if test="${train.isLocked}"><span style='color:#ff9800;font-weight:bold;'>(Đã khóa)</span></c:if>
-                        </div>
+                        <a href="javascript:void(0);" onclick="openModal('add-coach-modal-${train.trainID}')" class="carriage-item" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
+                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon" style="opacity:0.5;"/>
+                            <span class="carriage-number-label">Add Coach</span>
+                        </a>
                         <c:forEach var="coach" items="${coachesByTrain[train.trainID]}">
                             <div class="carriage-item" onclick="<c:if test='${!train.isLocked}'>toggleCoachDetails('${train.trainID}', '${coach.coachID}')</c:if>" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
                                 <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon"/>
@@ -115,10 +114,11 @@
                                 </a>
                             </div>
                         </c:forEach>
-                        <a href="javascript:void(0);" onclick="openModal('add-coach-modal-${train.trainID}')" class="carriage-item" <c:if test='${train.isLocked}'>style="pointer-events:none;opacity:0.5;"</c:if>>
-                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-carriage.svg" class="carriage-svg-icon" style="opacity:0.5;"/>
-                            <span class="carriage-number-label">Add Coach</span>
-                        </a>
+                        <div class="train-head-item">
+                            <img src="${pageContext.request.contextPath}/assets/icons/trip/train-head.svg" alt="Đầu tàu ${train.trainName}" class="train-head-svg-icon" />
+                            <span class="train-name-label">${train.trainName}</span>
+                            <c:if test="${train.isLocked}"><span style='color:#ff9800;font-weight:bold;'>(Đã khóa)</span></c:if>
+                        </div>
                     </div>
 
                     <div id="add-coach-modal-${train.trainID}" class="modal">
