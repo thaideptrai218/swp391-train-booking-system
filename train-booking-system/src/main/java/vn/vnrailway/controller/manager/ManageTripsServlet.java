@@ -115,12 +115,12 @@ public class ManageTripsServlet extends HttpServlet {
 
         if (sortField == null || sortField.isEmpty()) {
             sortField = "tripID";
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if ("tripID".equalsIgnoreCase(sortField) && (sortOrder == null || sortOrder.isEmpty())) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if (sortOrder == null || sortOrder.isEmpty()
                 || (!"ASC".equalsIgnoreCase(sortOrder) && !"DESC".equalsIgnoreCase(sortOrder))) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         }
 
         if (searchTerm == null) {
@@ -414,18 +414,76 @@ public class ManageTripsServlet extends HttpServlet {
                                 ps.setInt(1, tripId);
                                 ps.executeUpdate();
                             }
-                            // 2. Cập nhật TempRefundRequests: AppliedPolicyID = null, FeeAmount = 0, RequestedAt = null
-                            String updateTempRefundSql = "UPDATE TempRefundRequests SET AppliedPolicyID = NULL, FeeAmount = 0, RequestedAt = NULL WHERE TicketID = ?";
-                            try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTempRefundSql)) {
-                                for (vn.vnrailway.model.Ticket t : tickets) {
-                                    ps.setInt(1, t.getTicketID());
-                                    ps.addBatch();
-                                }
-                                ps.executeBatch();
-                            }
+                            // Bỏ qua update TempRefundRequests
                             conn.commit();
                         } catch (Exception ex) {
                             ex.printStackTrace();
+                        }
+                        // Gửi email hoàn tiền cho mỗi khách (1 email/booking)
+                        vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
+                        vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
+                        java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
+                        for (vn.vnrailway.model.Ticket ticket : tickets) {
+                            bookingIds.add(ticket.getBookingID());
+                        }
+                        java.util.Set<String> sentEmails = new java.util.HashSet<>();
+                        for (Integer bookingId : bookingIds) {
+                            java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository.findById(bookingId);
+                            if (bookingOpt.isPresent()) {
+                                vn.vnrailway.model.Booking booking = bookingOpt.get();
+                                int userId = booking.getUserID();
+                                java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository.findById(userId);
+                                if (userOpt.isPresent()) {
+                                    vn.vnrailway.model.User user = userOpt.get();
+                                    String email = user.getEmail();
+                                    if (email != null && !email.isEmpty() && !sentEmails.contains(email)) {
+                                        // Gửi email hoàn tiền
+                                        try {
+                                            java.util.Properties props = new java.util.Properties();
+                                            props.put("mail.smtp.host", "smtp.gmail.com");
+                                            props.put("mail.smtp.port", "587");
+                                            props.put("mail.smtp.auth", "true");
+                                            props.put("mail.smtp.starttls.enable", "true");
+                                            final String EMAIL_FROM = "assasinhp619@gmail.com";
+                                            final String EMAIL_PASSWORD = "slos bctt epxv osla";
+                                            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
+                                                @Override
+                                                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                    return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
+                                                }
+                                            });
+                                            jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
+                                            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
+                                            mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(email));
+                                            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+                                            mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+                                            mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                            String messageContent = String.format(
+                                                "<html>"
+                                              + "<body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>"
+                                              +   "<div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>"
+                                              +     "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
+                                              +     "<p>Xin chào, <b>%s</b>!</p>"
+                                              +     "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
+                                              +     "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>"
+                                              +     "<p>Xin cảm ơn!</p>"
+                                              +     "<br/>"
+                                              +     "<p>Trân trọng,</p>"
+                                              +     "<p><strong>Đội ngũ Vetaure</strong></p>"
+                                              +   "</div>"
+                                              + "</body>"
+                                              + "</html>",
+                                              user.getFullName()
+                                            );
+                                            mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
+                                            jakarta.mail.Transport.send(mimeMessage);
+                                            sentEmails.add(email);
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     request.getSession().setAttribute("successMessage", "Trip status updated for Trip ID: " + tripId);
@@ -487,5 +545,30 @@ public class ManageTripsServlet extends HttpServlet {
         } else {
             doGet(request, response);
         }
+    }
+
+    private void sendEmail(String to, String subject, String content) throws jakarta.mail.MessagingException, java.io.IOException {
+        java.util.Properties props = new java.util.Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
+            @Override
+            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                return new jakarta.mail.PasswordAuthentication("assasinhp619@gmail.com", "slos bctt epxv osla");
+            }
+        });
+
+        jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
+        mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress("assasinhp619@gmail.com", "Vetaure", "UTF-8"));
+        mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(to));
+        mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+        mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+        mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(subject, "UTF-8", "B"));
+        mimeMessage.setContent(content, "text/html; charset=UTF-8");
+
+        jakarta.mail.Transport.send(mimeMessage);
     }
 }
