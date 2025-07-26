@@ -786,9 +786,10 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    Notes,\r\n" + //
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID,\r\n" + //
-                "    Images\r\n" + //
+                "    Images,\r\n" + //
+                "    isConfirmed\r\n" + //
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
@@ -825,6 +826,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setInt(11, userIDByRequest);
                 ps.setInt(12, userIDByProcessing);
                 ps.setString(13, imageFileName); // Tên file hình ảnh
+                ps.setBoolean(14, false); // isConfirmed
                 ps.executeUpdate();
             }
 
@@ -855,10 +857,11 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "    Notes,\r\n" + //
                 "    RequestedByUserID,\r\n" + //
                 "    ProcessedByUserID,\r\n" + //
-                "    Images\r\n" + //
+                "    Images,\r\n" + //
+                "    isConfirmed\r\n" + //
 
                 ")\r\n" + //
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String deleteTempRefundSql = "DELETE FROM TempRefundRequests WHERE TicketID =  ?";
 
         String[] parts = ticketInfo.split("\\|");
@@ -895,6 +898,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setInt(11, userIDByRequest);
                 ps.setInt(12, userIDByProcessing);
                 ps.setString(13, imageFileName);
+                ps.setBoolean(14, false); // isConfirmed
                 ps.executeUpdate();
             }
 
@@ -1073,6 +1077,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 "-- JOIN chính sách hoàn vé theo thời gian còn lại\r\n" + //
                 "LEFT JOIN CancellationPolicies CP ON RF.AppliedPolicyID = CP.PolicyID\r\n" + //
                 "    \r\n" + //
+                "WHERE RF.isConfirmed = 1\r\n" + //
                 "ORDER BY RF.ProcessedAt DESC;";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
