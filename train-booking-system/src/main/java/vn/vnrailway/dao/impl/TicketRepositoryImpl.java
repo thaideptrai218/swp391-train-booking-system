@@ -826,7 +826,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setInt(11, userIDByRequest);
                 ps.setInt(12, userIDByProcessing);
                 ps.setString(13, imageFileName); // Tên file hình ảnh
-                ps.setBoolean(14, false); // isConfirmed
+                ps.setBoolean(14, true); // isConfirmed
                 ps.executeUpdate();
             }
 
@@ -898,7 +898,7 @@ public class TicketRepositoryImpl implements TicketRepository {
                 ps.setInt(11, userIDByRequest);
                 ps.setInt(12, userIDByProcessing);
                 ps.setString(13, imageFileName);
-                ps.setBoolean(14, false); // isConfirmed
+                ps.setBoolean(14, true); // isConfirmed
                 ps.executeUpdate();
             }
 
