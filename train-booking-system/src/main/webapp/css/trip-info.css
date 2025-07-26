@@ -13,8 +13,11 @@ body {
     min-height: calc(100vh - 200px);
     padding: 20px 0;
 }
-
-
+.container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
 
 .page-title {
     text-align: center;

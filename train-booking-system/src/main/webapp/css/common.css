@@ -320,6 +320,8 @@ a:hover {
     align-items: center;
     border-bottom: 1px solid #4b4c4e;
     margin-bottom: 8px;
+    justify-content: center;
+    color: white;
 }
 
 .profile-dropdown-menu .dropdown-username {

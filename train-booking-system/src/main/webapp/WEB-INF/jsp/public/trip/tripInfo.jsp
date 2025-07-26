@@ -46,7 +46,7 @@ import="java.util.List, vn.vnrailway.model.PassengerType" %>
     </head>
     <body data-context-path="${pageContext.request.contextPath}">
 
-        <%@include file="../../common/header.jsp" %>
+       <jsp:include page="../../common/header.jsp" />
 
         <main class="trip-info-main">
             <div class="container">
