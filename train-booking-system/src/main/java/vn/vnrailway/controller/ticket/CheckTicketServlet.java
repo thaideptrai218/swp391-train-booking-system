@@ -96,8 +96,9 @@ public class CheckTicketServlet extends HttpServlet {
             return;
         }
 
-        if (!ticketCode.matches("^[a-zA-Z0-9]+$")) {
-            request.setAttribute("errorMessage", "Mã vé chỉ được chứa chữ cái và số.");
+        if (!ticketCode.matches("^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$")) {
+            request.setAttribute("errorMessage",
+                    "Mã vé chỉ được chứa chữ cái, số và dấu gạch ngang, nhưng không bắt đầu hoặc kết thúc bằng dấu gạch ngang.");
             request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
             return;
         }
