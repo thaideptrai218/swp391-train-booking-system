@@ -56,7 +56,6 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/api/booking/initiate.*"),
             Pattern.compile("^/api/seat/getCoachSeats.*"),
             Pattern.compile("^/trip/.*"),
-            Pattern.compile("^/train-info/.*"),
             Pattern.compile("^/check-booking/.*"),
             Pattern.compile("^/payment/.*"),
             Pattern.compile("^/api/payment/.*"),

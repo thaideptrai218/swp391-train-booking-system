@@ -30,31 +30,36 @@ public class ManagerDashboardServlet extends HttpServlet {
             // Lấy tham số bộ lọc
             String departureMonthsParam = request.getParameter("departureMonths");
             String arrivalMonthsParam = request.getParameter("arrivalMonths");
+            String actualRevenueMonthsParam = request.getParameter("actualRevenueMonths");
 
             int departureMonths = (departureMonthsParam != null && !departureMonthsParam.isEmpty()) ? Integer.parseInt(departureMonthsParam) : 12;
             int arrivalMonths = (arrivalMonthsParam != null && !arrivalMonthsParam.isEmpty()) ? Integer.parseInt(arrivalMonthsParam) : 12;
+            int actualRevenueMonths = (actualRevenueMonthsParam != null && !actualRevenueMonthsParam.isEmpty()) ? Integer.parseInt(actualRevenueMonthsParam) : 1;
+
 
             // Dữ liệu thống kê chung
             int totalTrains = dashboardDAO.getTotalTrainsCount();
             double totalRefunds = dashboardDAO.getTotalRefunds();
             int pendingRefundsCount = dashboardDAO.getPendingRefundsCount();
+            int totalTicketsSold = dashboardDAO.getTotalTicketsSold();
+            int refundableTicketsCount = dashboardDAO.getRefundableTicketsCount();
 
-            // Dữ liệu doanh thu theo từng giai đoạn
-            double revenue1Month = dashboardDAO.getTotalRevenue(1);
-            double revenue3Months = dashboardDAO.getTotalRevenue(3);
-            double revenue6Months = dashboardDAO.getTotalRevenue(6);
-            double revenue12Months = dashboardDAO.getTotalRevenue(12);
-            double profit = revenue12Months - totalRefunds;
+            // Dữ liệu doanh thu mới
+            double expectedRevenue = dashboardDAO.getExpectedRevenue();
+            double actualRevenue = dashboardDAO.getActualRevenue(actualRevenueMonths);
+            double profit = actualRevenue - totalRefunds;
 
             // Đặt các thuộc tính cho JSP
             request.setAttribute("totalTrains", totalTrains);
             request.setAttribute("totalRefunds", totalRefunds);
             request.setAttribute("pendingRefundsCount", pendingRefundsCount);
-            request.setAttribute("revenue1Month", revenue1Month);
-            request.setAttribute("revenue3Months", revenue3Months);
-            request.setAttribute("revenue6Months", revenue6Months);
-            request.setAttribute("revenue12Months", revenue12Months);
+            request.setAttribute("expectedRevenue", expectedRevenue);
+            request.setAttribute("actualRevenue", actualRevenue);
             request.setAttribute("profit", profit);
+            request.setAttribute("selectedActualRevenueMonths", actualRevenueMonths);
+            request.setAttribute("totalTicketsSold", totalTicketsSold);
+            request.setAttribute("refundableTicketsCount", refundableTicketsCount);
+
 
             // Dữ liệu cho biểu đồ
             Map<String, Integer> popularDepartureStations = dashboardDAO.getPopularDepartureStations(departureMonths);
@@ -75,7 +80,7 @@ public class ManagerDashboardServlet extends HttpServlet {
             request.setAttribute("selectedArrivalMonths", arrivalMonths);
 
         } catch (SQLException e) {
-            throw new ServletException("Database error in ManagerDashboardServlet", e);
+           throw new ServletException("Database error in ManagerDashboardServlet", e);
         }
 
         request.getRequestDispatcher("/WEB-INF/jsp/manager/manager-dashboard.jsp").forward(request, response);

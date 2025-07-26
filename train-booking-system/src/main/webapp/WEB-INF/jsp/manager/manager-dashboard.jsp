@@ -37,12 +37,14 @@
         }
         .charts-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 20px;
+            justify-items: center;
         }
         .chart-card {
-             max-width: 400px;
+             width: 100%;
+             max-width: 500px;
              margin: auto;
         }
         .table-container {
@@ -76,36 +78,47 @@
             </header>
 
             <div class="revenue-container">
-                 <div class="stat-card">
-                    <h3>Doanh thu (1 tháng)</h3>
-                    <p><fmt:formatNumber value="${revenue1Month}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
+                <div class="stat-card">
+                    <h3>Doanh thu dự kiến (6 tháng)</h3>
+                    <p><fmt:formatNumber value="${expectedRevenue}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
                 </div>
                 <div class="stat-card">
-                    <h3>Doanh thu (3 tháng)</h3>
-                    <p><fmt:formatNumber value="${revenue3Months}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
-                </div>
-                <div class="stat-card">
-                    <h3>Doanh thu (6 tháng)</h3>
-                    <p><fmt:formatNumber value="${revenue6Months}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
-                </div>
-                <div class="stat-card">
-                    <h3>Doanh thu (1 năm)</h3>
-                    <p><fmt:formatNumber value="${revenue12Months}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
-                </div>
-            </div>
-
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Yêu cầu hoàn tiền</h3>
-                    <p>${pendingRefundsCount}</p>
+                    <h3>Doanh thu thực tế</h3>
+                    <p><fmt:formatNumber value="${actualRevenue}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
+                     <form action="managerDashboard" method="get" class="filter-form" onchange="this.submit()">
+                        <select name="actualRevenueMonths">
+                            <option value="1" ${selectedActualRevenueMonths == 1 ? 'selected' : ''}>1 tháng</option>
+                            <option value="3" ${selectedActualRevenueMonths == 3 ? 'selected' : ''}>3 tháng</option>
+                            <option value="6" ${selectedActualRevenueMonths == 6 ? 'selected' : ''}>6 tháng</option>
+                            <option value="12" ${selectedActualRevenueMonths == 12 ? 'selected' : ''}>12 tháng</option>
+                        </select>
+                        <input type="hidden" name="departureMonths" value="${selectedDepartureMonths}">
+                        <input type="hidden" name="arrivalMonths" value="${selectedArrivalMonths}">
+                    </form>
                 </div>
                 <div class="stat-card">
                     <h3>Tổng tiền đã hoàn</h3>
                     <p><fmt:formatNumber value="${totalRefunds}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
                 </div>
                 <div class="stat-card">
-                    <h3>Lợi nhuận (1 năm)</h3>
+                    <h3>Lợi nhuận thực tế</h3>
                     <p><fmt:formatNumber value="${profit}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
+                </div>
+                
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Tổng số vé đã bán</h3>
+                    <p>${totalTicketsSold}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Số vé có thể hoàn</h3>
+                    <p>${refundableTicketsCount}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Yêu cầu hoàn tiền</h3>
+                    <p>${pendingRefundsCount}</p>
                 </div>
                  <div class="stat-card">
                     <h3>Tổng Số Đoàn Tàu</h3>
