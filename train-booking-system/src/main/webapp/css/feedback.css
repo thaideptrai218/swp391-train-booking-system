@@ -13,6 +13,8 @@ body {
     font-family: Inter, sans-serif;
     padding: 20px;
     position: relative;
+    margin: 100px 0;
+
 }
 
 .feedback-content {
@@ -22,6 +24,7 @@ body {
 }
 
 .feedback-form {
+    margin: 150px 0;
     position: relative;
     height: 702px;
 }

@@ -11,6 +11,8 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/customer-support.css" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
                 <style>
                     .messages {
                         max-height: 400px;
@@ -41,6 +43,8 @@
             </head>
 
             <body>
+                    <jsp:include page="../common/header.jsp" />
+
                 <div style="margin-bottom: 20px; background-color: #0E385A;">
                     <a href="${pageContext.request.contextPath}/landing" class="back-button" style="color: white;">Quay
                         lại trang chủ</a>
@@ -209,6 +213,6 @@
                     // Tự động gọi fetchMessages mỗi 3 giây
                     setInterval(fetchMessages, 3000);
                 </script>
+                    <jsp:include page="../common/footer.jsp" />
             </body>
-
             </html>

@@ -5,6 +5,11 @@ body {
     padding: 10px; /* Reduced padding */
 }
 
+.navbar .container {
+    background-color: #2b669a;
+
+}
+
 .container {
     max-width: 1000px; /* Adjusted max-width */
     margin: 0 auto;
@@ -166,7 +171,6 @@ body {
     font-size: 0.75rem; /* Smaller font size */
 }
 body{
-    margin-top:20px;
     color: #1a202c;
     text-align: left;
     background-color: #e2e8f0;    
