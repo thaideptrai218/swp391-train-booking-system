@@ -3,16 +3,17 @@
     <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
       <!DOCTYPE html>
       <html lang="en">
-
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hồ sơ Người dùng</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/customer-profile.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
       </head>
 
       <body>
+            <jsp:include page="../common/header.jsp" />
         <div class="container">
           <div class="main-body">
 
@@ -31,7 +32,20 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex flex-column align-items-center text-center">
-                      <img src="${avatarURL}" alt="Admin" class="rounded-circle" width="150">
+                      <img src="${pageContext.request.contextPath}${user.avatarPath}" class="img-fluid rounded-circle"
+                        style="width: 120px; height: 120px;">
+                      <form action="${pageContext.request.contextPath}/updateavatar" method="post"
+                        enctype="multipart/form-data" class="mt-2">
+                        <div class="form-group">
+                          <input type="file" name="avatarFile" id="avatarFileInput" class="d-none" accept="image/*"
+                            required>
+                          <label for="avatarFileInput" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-camera"></i> Chọn ảnh
+                          </label>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary mt-1">Cập nhật ảnh đại diện</button>
+                      </form>
+
                       <div class="mt-3">
                         <h4>${user.fullName}</h4>
                         <p class="text-secondary mb-1">Khách Hàng</p>
@@ -60,7 +74,7 @@
                       <span class="text-secondary">https://vnrailway.vn</span>
                     </li>
                   </ul>
-                  <a class="btn btn-secondary btn-sm" style="margin-left: 1rem;"
+                  <a class="btn btn-secondary btn-sm"
                     href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
                 </div>
               </div>
@@ -154,6 +168,9 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+                          <jsp:include page="../common/footer.jsp" />
             <style type="text/css">
               body {
                 margin-top: 20px;
@@ -164,6 +181,7 @@
 
               .main-body {
                 padding: 15px;
+                margin: 150px 0;
               }
 
               .card {
@@ -218,6 +236,17 @@
             </style>
             <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
-      </body>
+            <script>
+              const fileInput = document.querySelector('input[name="avatarFile"]');
+              const img = document.querySelector('img');
 
+              fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  img.src = URL.createObjectURL(file);
+                }
+              });
+            </script>
+      </body>
       </html>
+

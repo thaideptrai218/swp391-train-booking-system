@@ -21,6 +21,7 @@ BEGIN
         -- === Control ===
         Priority INT NOT NULL DEFAULT 0,    -- Higher number = higher priority. Crucial for overrides.
         IsActive BIT NOT NULL DEFAULT 1,
+        IsDefault BIT NOT NULL DEFAULT 0,
         -- Foreign Keys
         CONSTRAINT FK_SR_PricingRules_TrainType FOREIGN KEY (TrainTypeID) REFERENCES dbo.TrainTypes(TrainTypeID),
         CONSTRAINT FK_SR_PricingRules_Route FOREIGN KEY (RouteID) REFERENCES dbo.Routes(RouteID)
@@ -28,3 +29,17 @@ BEGIN
     );
     PRINT 'Table PricingRules (Simpler Still) created.';
 END
+
+IF COL_LENGTH('dbo.PricingRules', 'IsDefault') IS NULL
+BEGIN
+    ALTER TABLE dbo.PricingRules ADD IsDefault BIT NOT NULL DEFAULT 0;
+END
+
+SET IDENTITY_INSERT dbo.PricingRules ON;
+-- Đảm bảo có ít nhất một bản ghi mặc định
+IF NOT EXISTS (SELECT 1 FROM dbo.PricingRules WHERE IsDefault = 1)
+BEGIN
+    INSERT INTO dbo.PricingRules (RuleName, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, IsActive, IsDefault)
+    VALUES (N'Default Price', 10.00, NULL, NULL, NULL, NULL, NULL, 0, 1, 1);
+END
+SET IDENTITY_INSERT dbo.PricingRules OFF;

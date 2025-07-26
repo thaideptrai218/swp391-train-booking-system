@@ -112,7 +112,7 @@ public class TripDetailServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Trip ID was not provided.");
         }
 
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/tripDetail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Trip/tripDetail.jsp").forward(request, response);
     }
 
     @Override

@@ -24,24 +24,13 @@ public class StaffDashboardServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // Refund Request Status
-            Map<String, Integer> refundRequestStatus = dashboardDAO.getRefundRequestStatus();
-            request.setAttribute("refundRequestStatus", new Gson().toJson(refundRequestStatus));
+            int pendingRefundsCount = dashboardDAO.getPendingRefundsCount();
+            int pendingFeedbacksCount = dashboardDAO.getPendingFeedbacksCount();
+            int unansweredUsersCount = dashboardDAO.getUnansweredUsersCount();
 
-            // Refund Requests Over Time
-            String refundTrendDaysParam = request.getParameter("refundTrendDays");
-            int refundTrendDays = (refundTrendDaysParam != null) ? Integer.parseInt(refundTrendDaysParam) : 7;
-            Map<String, Integer> refundRequestsOverTime = dashboardDAO.getRefundRequestsOverTime(refundTrendDays);
-            request.setAttribute("refundRequestsOverTime", new Gson().toJson(refundRequestsOverTime));
-            request.setAttribute("selectedRefundTrendDays", refundTrendDays);
-
-            // Feedback Status
-            Map<String, Integer> feedbackStatus = dashboardDAO.getFeedbackStatus();
-            request.setAttribute("feedbackStatus", new Gson().toJson(feedbackStatus));
-
-            // Feedback by Topic
-            Map<String, Integer> feedbackByTopic = dashboardDAO.getFeedbackByTopic();
-            request.setAttribute("feedbackByTopic", new Gson().toJson(feedbackByTopic));
+            request.setAttribute("pendingRefundsCount", pendingRefundsCount);
+            request.setAttribute("pendingFeedbacksCount", pendingFeedbacksCount);
+            request.setAttribute("unansweredUsersCount", unansweredUsersCount);
 
         } catch (SQLException e) {
             throw new ServletException("Database error in StaffDashboardServlet", e);

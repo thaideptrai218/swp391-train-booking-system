@@ -3,11 +3,10 @@ package vn.vnrailway.controller.manager;
 import vn.vnrailway.dao.StationRepository;
 import vn.vnrailway.dao.impl.StationRepositoryImpl;
 import vn.vnrailway.model.Station;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional; // Added this import
+import java.util.Optional;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,14 +27,22 @@ public class ManageStationsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String activeFilter = request.getParameter("activeFilter");
+        Boolean isActive = null;
+        if (activeFilter == null || activeFilter.isEmpty() || "active".equals(activeFilter)) {
+            isActive = true;
+        } else if ("inactive".equals(activeFilter)) {
+            isActive = false;
+        }
         try {
-            List<Station> stations = stationRepository.findAll();
+            List<Station> stations = stationRepository.findByActive(isActive);
             request.setAttribute("stations", stations);
+            request.setAttribute("activeFilter", activeFilter == null ? "active" : activeFilter);
         } catch (SQLException e) {
-            request.setAttribute("errorMessage", "Error retrieving stations: " + e.getMessage());
+            request.setAttribute("errorMessage", "Lỗi khi truy vấn: " + e.getMessage());
             e.printStackTrace();
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageStations.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/manageStations.jsp").forward(request, response);
     }
 
     @Override
@@ -46,45 +53,70 @@ public class ManageStationsServlet extends HttpServlet {
 
         try {
             if (command == null) {
-                message = "No command specified.";
+                message = "Không có lệnh nào được gửi.";
+            } else if ("lockStation".equals(command) || "unlockStation".equals(command)) {
+                int stationId = Integer.parseInt(request.getParameter("stationID"));
+                boolean isLocked = "lockStation".equals(command);
+                stationRepository.updateStationLocked(stationId, isLocked);
+                message = isLocked ? "Ga đã được khóa." : "Ga đã được mở khóa.";
+
+            } else if ("updateActiveStatus".equals(command)) {
+                int stationId = Integer.parseInt(request.getParameter("stationID"));
+                String isActiveParam = request.getParameter("isActive");
+                boolean isActive = "true".equalsIgnoreCase(isActiveParam) || "1".equals(isActiveParam)
+                        || "on".equalsIgnoreCase(isActiveParam);
+                stationRepository.updateStationActive(stationId, isActive);
+                message = isActive ? "Ga đã được kích hoạt." : "Ga đã bị vô hiệu hóa.";
             } else {
                 switch (command) {
                     case "add":
-                        String newStationCode = request.getParameter("stationCode");
-                        if (stationRepository.findByStationCode(newStationCode).isPresent()) {
-                            message = "Error: Station with code '" + newStationCode + "' already exists.";
+                        String newStationName = request.getParameter("stationName");
+                        if (stationRepository.findByStationName(newStationName).isPresent()) {
+                            message = "Error: Ga với tên '" + newStationName + "' đã tồn tại.";
                         } else {
                             Station newStation = new Station();
-                            newStation.setStationCode(newStationCode);
-                            newStation.setStationName(request.getParameter("stationName"));
+                            newStation.setStationName(newStationName);
                             newStation.setAddress(request.getParameter("address"));
                             newStation.setCity(request.getParameter("city"));
                             newStation.setRegion(request.getParameter("region"));
                             newStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                            newStation.setActive("true".equals(request.getParameter("isActive")));
                             stationRepository.save(newStation);
-                            message = "Station added successfully!";
+                            message = "Thêm ga thành công!";
                         }
                         break;
                     case "edit":
                         int editStationId = Integer.parseInt(request.getParameter("stationID"));
-                        String updatedStationCode = request.getParameter("stationCode");
+                        String updatedStationName = request.getParameter("stationName");
 
                         Optional<Station> existingStationByCode = stationRepository
-                                .findByStationCode(updatedStationCode);
+                                .findByStationName(updatedStationName);
                         if (existingStationByCode.isPresent()
                                 && existingStationByCode.get().getStationID() != editStationId) {
-                            message = "Error: Another station with code '" + updatedStationCode + "' already exists.";
+                            message = "Error: Thử lại ga '" + updatedStationName + "' đã tồn tại.";
                         } else {
                             Station existingStation = stationRepository.findById(editStationId)
                                     .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
-                            existingStation.setStationCode(updatedStationCode);
                             existingStation.setStationName(request.getParameter("stationName"));
                             existingStation.setAddress(request.getParameter("address"));
                             existingStation.setCity(request.getParameter("city"));
                             existingStation.setRegion(request.getParameter("region"));
                             existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
+                            existingStation.setActive("true".equals(request.getParameter("isActive")));
                             stationRepository.update(existingStation);
+
                             message = "Station updated successfully!";
+                        }
+                        break;
+                    case "deleteStation":
+                        int delStationId = Integer.parseInt(request.getParameter("stationID"));
+                        Station delStation = stationRepository.findById(delStationId)
+                                .orElseThrow(() -> new SQLException("Không tìm thấy ga với ID: " + delStationId));
+                        if (delStation.isActive()) {
+                            message = "Chỉ có thể xóa ga khi trạng thái Hoạt động = 0.";
+                        } else {
+                            stationRepository.deleteById(delStationId);
+                            message = "Xóa ga thành công!";
                         }
                         break;
                     default:
@@ -93,7 +125,7 @@ public class ManageStationsServlet extends HttpServlet {
                 }
             }
         } catch (SQLException | NumberFormatException e) {
-            message = "Error performing action: " + e.getMessage();
+            message = "Lỗi khi thực hiện hành động: " + e.getMessage();
             e.printStackTrace();
         }
 

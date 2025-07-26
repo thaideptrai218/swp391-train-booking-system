@@ -45,10 +45,12 @@ GO
 
 
 
+-- Xóa function cũ nếu tồn tại
 IF OBJECT_ID('dbo.GetApplicableBasePriceKm', 'FN') IS NOT NULL
     DROP FUNCTION dbo.GetApplicableBasePriceKm;
 GO
 
+-- Tạo lại function với logic ưu tiên rule đặc biệt, fallback về rule mặc định
 CREATE FUNCTION dbo.GetApplicableBasePriceKm
 (
     @TrainTypeID_Input INT,
@@ -61,30 +63,40 @@ AS
 BEGIN
     DECLARE @BasePricePerKm_Result DECIMAL(10,2);
 
+    -- Ưu tiên rule đặc biệt (không phải mặc định)
     SELECT TOP 1
         @BasePricePerKm_Result = PR.BasePricePerKm
     FROM dbo.PricingRules PR
     WHERE
         PR.IsActive = 1
-        -- Check if the rule definition itself is currently active
-        -- REMOVE: AND @BookingDateTime_Input >= PR.EffectiveFromDate
-        -- REMOVE: AND @BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.EffectiveToDate), DATEADD(day, 1, '9999-12-30'))
-        -- Check if the @BookingDateTime_Input falls within the rule's specific applicable date range (for seasonal/event pricing)
         AND (@BookingDateTime_Input >= ISNULL(PR.ApplicableDateStart, @BookingDateTime_Input))
         AND (@BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.ApplicableDateEnd), DATEADD(day, 1, @BookingDateTime_Input)))
-        -- Match on context parameters (NULL in rule means "applies to all")
         AND (PR.TrainTypeID IS NULL OR PR.TrainTypeID = @TrainTypeID_Input)
         AND (PR.RouteID IS NULL OR PR.RouteID = @RouteID_Input)
         AND (PR.IsForRoundTrip IS NULL OR PR.IsForRoundTrip = @IsRoundTrip_Input)
+        AND NOT (PR.TrainTypeID IS NULL AND PR.RouteID IS NULL AND PR.IsForRoundTrip IS NULL AND PR.ApplicableDateStart IS NULL AND PR.ApplicableDateEnd IS NULL)
     ORDER BY
         PR.Priority DESC,
-        -- Tie-breaking: prefer rules that are more specific
         (CASE WHEN PR.TrainTypeID IS NOT NULL THEN 0 ELSE 1 END) ASC,
         (CASE WHEN PR.RouteID IS NOT NULL THEN 0 ELSE 1 END) ASC,
         (CASE WHEN PR.IsForRoundTrip IS NOT NULL THEN 0 ELSE 1 END) ASC,
-        (CASE WHEN PR.ApplicableDateStart IS NOT NULL OR PR.ApplicableDateEnd IS NOT NULL THEN 0 ELSE 1 END) ASC; -- Rules with specific date ranges are more specific
+        (CASE WHEN PR.ApplicableDateStart IS NOT NULL OR PR.ApplicableDateEnd IS NOT NULL THEN 0 ELSE 1 END) ASC;
 
-    RETURN @BasePricePerKm_Result; -- Will be NULL if no matching rule is found
+    -- Nếu không có rule đặc biệt, fallback về rule mặc định
+    IF @BasePricePerKm_Result IS NULL
+    BEGIN
+        SELECT TOP 1
+            @BasePricePerKm_Result = PR.BasePricePerKm
+        FROM dbo.PricingRules PR
+        WHERE
+            PR.IsActive = 1
+            AND (@BookingDateTime_Input >= ISNULL(PR.ApplicableDateStart, @BookingDateTime_Input))
+            AND (@BookingDateTime_Input < ISNULL(DATEADD(day, 1, PR.ApplicableDateEnd), DATEADD(day, 1, @BookingDateTime_Input)))
+            AND (PR.TrainTypeID IS NULL AND PR.RouteID IS NULL AND PR.IsForRoundTrip IS NULL AND PR.ApplicableDateStart IS NULL AND PR.ApplicableDateEnd IS NULL)
+        ORDER BY PR.Priority DESC;
+    END
+
+    RETURN @BasePricePerKm_Result; -- Sẽ trả về NULL nếu không có rule nào phù hợp
 END
 GO
 
@@ -234,30 +246,25 @@ PRINT 'Stored Procedure dbo.GetCoachSeatsWithAvailabilityAndPrice (with CurrentU
 GO
 
 
-PRINT 'Inserting Basic Dataset for PricingRules (Simpler Still)...';
-DELETE FROM dbo.PricingRules; -- Clear existing simplified rules
+--DELETE FROM dbo.PricingRules;
+
 SET IDENTITY_INSERT dbo.PricingRules ON;
-INSERT INTO dbo.PricingRules (RuleID, RuleName, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, IsActive) VALUES
--- General Defaults (Lowest Priority)
-(1, 'Default One-Way',            10.00, NULL, NULL, 0,    NULL,         NULL,         0, 1), -- Base per km
-(2, 'Default Round-Trip',          9.00, NULL, NULL, 1,    NULL,         NULL,         0, 1), -- Slightly cheaper for round trip
 
--- TrainType Specific
-(3, 'Express Train One-Way',      15.00, 2,    NULL, 0,    NULL,         NULL,         10, 1), -- TrainTypeID 2 = Express
-(4, 'Express Train Round-Trip',   13.50, 2,    NULL, 1,    NULL,         NULL,         10, 1),
-(5, 'Standard Train One-Way',      8.00, 1,    NULL, 0,    NULL,         NULL,         10, 1), -- TrainTypeID 1 = Standard
+IF NOT EXISTS (SELECT 1 FROM dbo.PricingRules WHERE IsDefault = 1)
+BEGIN
+    INSERT INTO dbo.PricingRules (RuleID, RuleName, Description, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, IsActive, IsDefault)
+    VALUES (1, N'Giá Cơ Bản One-Way', '1 Chiều Không thay đổi', 120.00, NULL, NULL, NULL, NULL, NULL, 0, 1, 1),
+	(2, N'Giá Cơ Bản Round-Trip', '2 Chiều Không thay đổi', 200.00, NULL, NULL, 1, NULL, NULL, 0, 1, 1);
+END
 
--- Route Specific
-(6, 'North-South Summer One-Way', 12.00, NULL, 1,    0,    '2024-06-01', '2024-08-31', 20, 1), -- RouteID 1, during summer
-(7, 'Hanoi-DN Express Route OW',  18.00, NULL, 2,    0,    NULL,         NULL,         20, 1), -- RouteID 2
+INSERT INTO dbo.PricingRules (RuleID, RuleName, BasePricePerKm, TrainTypeID, RouteID, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, Priority, IsActive)
+VALUES
+(3, N'Giá mùa hè', 220.00, NULL, NULL, 0, '2024-06-01', '2024-08-31', 0, 1),
+(4, N'Giá mùa đông', 250.00, NULL, NULL, 0, NULL, NULL, 0, 1),
+(5, N'Giá mùa du lịch', 300.00, NULL, NULL, 0, NULL, NULL, 0, 1);
 
--- Combination: TrainType and Route Specific
-(8, 'Express on North-South OW',  16.00, 2,    1,    0,    NULL,         NULL,         30, 1),
 
--- Most Specific: TrainType, Route, Dates
-(9, 'Express on N-S Summer OW',   17.50, 2,    1,    0,    '2024-06-01', '2024-08-31', 40, 1);
-SET IDENTITY_INSERT dbo.PricingRules OFF;
-GO
+--SET IDENTITY_INSERT dbo.PricingRules OFF;
 
 
 

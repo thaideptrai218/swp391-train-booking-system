@@ -18,4 +18,5 @@ public interface MessageDAO {
 
     int getTotalChatSummariesCount();
 
+    List<Message> getMessagesAfter(int userId, int lastMessageId);
 }

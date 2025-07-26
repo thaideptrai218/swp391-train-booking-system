@@ -25,6 +25,8 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
         rule.setApplicableDateStart(rs.getObject("ApplicableDateStart", LocalDate.class));
         rule.setApplicableDateEnd(rs.getObject("ApplicableDateEnd", LocalDate.class));
         rule.setActive(rs.getBoolean("IsActive"));
+        rule.setDefaultRule(rs.getBoolean("IsDefault"));
+        rule.setPriority(rs.getObject("Priority", Integer.class));
         return rule;
     }
 
@@ -76,7 +78,7 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public PricingRule save(PricingRule pricingRule) throws SQLException {
-        String sql = "INSERT INTO PricingRules (RuleName, Description, TrainTypeID, RouteID, BasePricePerKm, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO PricingRules (RuleName, Description, TrainTypeID, RouteID, BasePricePerKm, IsForRoundTrip, ApplicableDateStart, ApplicableDateEnd, IsActive, Priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -89,6 +91,7 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
             ps.setObject(7, pricingRule.getApplicableDateStart());
             ps.setObject(8, pricingRule.getApplicableDateEnd());
             ps.setBoolean(9, pricingRule.isActive());
+            ps.setObject(10, pricingRule.getPriority(), Types.INTEGER);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 0) {
@@ -107,7 +110,11 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public boolean update(PricingRule pricingRule) throws SQLException {
-        String sql = "UPDATE PricingRules SET RuleName = ?, Description = ?, TrainTypeID = ?, RouteID = ?, BasePricePerKm = ?, IsForRoundTrip = ?, ApplicableDateStart = ?, ApplicableDateEnd = ?, IsActive = ? WHERE RuleID = ?";
+        // Chặn sửa rule mặc định
+        if (pricingRule.isDefaultRule()) {
+            throw new SQLException("Không thể sửa quy tắc giá mặc định!");
+        }
+        String sql = "UPDATE PricingRules SET RuleName = ?, Description = ?, TrainTypeID = ?, RouteID = ?, BasePricePerKm = ?, IsForRoundTrip = ?, ApplicableDateStart = ?, ApplicableDateEnd = ?, IsActive = ?, Priority = ? WHERE RuleID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, pricingRule.getRuleName());
@@ -119,7 +126,8 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
             ps.setObject(7, pricingRule.getApplicableDateStart());
             ps.setObject(8, pricingRule.getApplicableDateEnd());
             ps.setBoolean(9, pricingRule.isActive());
-            ps.setInt(10, pricingRule.getRuleID());
+            ps.setObject(10, pricingRule.getPriority(), Types.INTEGER);
+            ps.setInt(11, pricingRule.getRuleID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -128,6 +136,17 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public boolean deleteById(int ruleId) throws SQLException {
+        // Chặn xóa rule mặc định
+        String checkSql = "SELECT IsDefault FROM PricingRules WHERE RuleID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+            checkPs.setInt(1, ruleId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next() && rs.getBoolean("IsDefault")) {
+                    throw new SQLException("Không thể xóa quy tắc giá mặc định!");
+                }
+            }
+        }
         String sql = "DELETE FROM PricingRules WHERE RuleID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -151,14 +170,27 @@ public class PricingRuleRepositoryImpl implements PricingRuleRepository {
 
     @Override
     public void updateRuleStatus(int id, boolean isActive) {
+        // Không cho phép update trạng thái rule default
+        String checkSql = "SELECT IsDefault FROM PricingRules WHERE RuleID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+            checkPs.setInt(1, id);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next() && rs.getBoolean("IsDefault")) {
+                    throw new SQLException("Không thể thay đổi trạng thái hoạt động của giá mặc định!");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         String sql = "UPDATE PricingRules SET IsActive = ? WHERE RuleID = ?";
         try (Connection conn = DBContext.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBoolean(1, isActive);
             ps.setInt(2, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

@@ -5,7 +5,8 @@
                 <p style="text-align: center; color: #666;">Không có tin nhắn nào trước đó.</p>
             </c:if>
             <c:forEach var="message" items="${chatMessages}">
-                <div class="message-container ${message.senderType == 'Staff' ? 'sent' : 'received'}">
+                <div class="message-container ${message.senderType == 'Staff' ? 'sent' : 'received'}"
+                    data-message-id="${message.messageId}">
                     <div class="message-bubble">
                         <p>${message.content}</p>
                         <small>

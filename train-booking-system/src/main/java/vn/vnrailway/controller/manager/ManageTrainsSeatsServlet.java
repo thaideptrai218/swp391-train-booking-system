@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -67,6 +68,16 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             } else if ("delete_seat".equals(action)) {
                 deleteSeat(request, response);
                 return;
+            } else if ("lock_train".equals(action)) {
+                int trainId = Integer.parseInt(request.getParameter("trainId"));
+                trainRepository.updateTrainLocked(trainId, true);
+                response.sendRedirect("manage-trains-seats");
+                return;
+            } else if ("unlock_train".equals(action)) {
+                int trainId = Integer.parseInt(request.getParameter("trainId"));
+                trainRepository.updateTrainLocked(trainId, false);
+                response.sendRedirect("manage-trains-seats");
+                return;
             }
 
             List<Train> listTrain = trainRepository.getAllTrains();
@@ -87,7 +98,7 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             request.setAttribute("listCoachType", listCoachType);
             request.setAttribute("listSeatType", listSeatType);
 
-            request.getRequestDispatcher("/WEB-INF/jsp/manager/manageTrainsSeats.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/manager/Train/manageTrainsSeats.jsp").forward(request, response);
         } catch (SQLException ex) {
             throw new ServletException(ex);
         }
@@ -139,8 +150,40 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
         int coachNumber = Integer.parseInt(request.getParameter("coachNumber"));
         String coachName = request.getParameter("coachName");
         Train train = trainRepository.getTrainByTrainCode(trainCode);
-        Coach newCoach = new Coach(train.getTrainID(), coachNumber, coachName, Integer.parseInt(typeCode));
-        newCoach.setPositionInTrain(coachNumber); // Ensure unique position in train
+
+        // Lấy danh sách các vị trí và số hiệu đã có
+        List<Coach> existingCoaches = coachRepository.findByTrainIdOrderByPositionInTrainDesc(train.getTrainID());
+        java.util.Set<Integer> usedPositions = existingCoaches.stream()
+            .map(Coach::getPositionInTrain)
+            .collect(java.util.stream.Collectors.toSet());
+        java.util.Set<Integer> usedCoachNumbers = existingCoaches.stream()
+            .map(Coach::getCoachNumber)
+            .collect(java.util.stream.Collectors.toSet());
+
+        int position = coachNumber;
+        if (usedPositions.contains(position)) {
+            position = 1;
+            while (usedPositions.contains(position) && position <= 1000) {
+                position++;
+            }
+            if (position > 1000) {
+                throw new SQLException("Tất cả vị trí toa đã bị chiếm, không thể thêm toa mới.");
+            }
+        }
+
+        int finalCoachNumber = coachNumber;
+        if (usedCoachNumbers.contains(finalCoachNumber)) {
+            finalCoachNumber = 1;
+            while (usedCoachNumbers.contains(finalCoachNumber) && finalCoachNumber <= 1000) {
+                finalCoachNumber++;
+            }
+            if (finalCoachNumber > 1000) {
+                throw new SQLException("Tất cả số hiệu toa đã bị chiếm, không thể thêm toa mới.");
+            }
+        }
+
+        Coach newCoach = new Coach(train.getTrainID(), finalCoachNumber, coachName, Integer.parseInt(typeCode));
+        newCoach.setPositionInTrain(position);
         newCoach.setCapacity(0); // Default capacity, adjust if needed
         coachRepository.addCoach(newCoach);
     }
@@ -149,9 +192,38 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
             throws SQLException, IOException {
         int coachId = Integer.parseInt(request.getParameter("coachId"));
         String typeCode = request.getParameter("typeCode");
-        String seatNumber = request.getParameter("seatNumber");
-        Seat newSeat = new Seat(coachId, typeCode, seatNumber);
-        seatRepository.addSeat(newSeat);
+        String rowLetter = request.getParameter("rowLetter");
+        int seatsPerRow = 1;
+        String prefix = "";
+        try {
+            seatsPerRow = Integer.parseInt(request.getParameter("seatsPerRow"));
+            prefix = request.getParameter("prefix");
+            if (prefix == null) prefix = "";
+        } catch (Exception ignored) {}
+        if (rowLetter == null || rowLetter.isEmpty()) rowLetter = "A";
+        // Lấy danh sách seatName và seatNumber đã tồn tại trong coach
+        List<Seat> existingSeats = seatRepository.findByCoachId(coachId);
+        java.util.Set<String> existingNames = new java.util.HashSet<>();
+        java.util.Set<Integer> existingNumbers = new java.util.HashSet<>();
+        int maxSeatNumber = 0;
+        for (Seat s : existingSeats) {
+            existingNames.add(s.getSeatName());
+            existingNumbers.add(s.getSeatNumber());
+            if (s.getSeatNumber() > maxSeatNumber) maxSeatNumber = s.getSeatNumber();
+        }
+        for (int c = 1; c <= seatsPerRow; c++) {
+            String seatName = prefix + rowLetter.toUpperCase() + c;
+            int seatNumber = ++maxSeatNumber;
+            if (!existingNames.contains(seatName) && !existingNumbers.contains(seatNumber)) {
+                Seat newSeat = new Seat();
+                newSeat.setCoachID(coachId);
+                newSeat.setSeatTypeID(Integer.parseInt(typeCode));
+                newSeat.setSeatName(seatName);
+                newSeat.setSeatNumber(seatNumber);
+                newSeat.setEnabled(true);
+                seatRepository.addSeat(newSeat);
+            }
+        }
     }
 
     private void updateTrain(HttpServletRequest request, HttpServletResponse response)
@@ -192,16 +264,38 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
     }
 
     private void deleteCoach(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        coachRepository.deleteCoach(id);
-        response.sendRedirect("manage-trains-seats");
+        try {
+            coachRepository.deleteCoach(id);
+            response.sendRedirect("manage-trains-seats");
+        } catch (IllegalStateException e) {
+            request.setAttribute("error", e.getMessage());
+            try {
+                doGet(request, response);
+            } catch (ServletException ex) {
+                throw new IOException(ex);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 
     private void deleteSeat(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        seatRepository.deleteSeat(id);
-        response.sendRedirect("manage-trains-seats");
+        try {
+            seatRepository.deleteSeat(id);
+            response.sendRedirect("manage-trains-seats");
+        } catch (IllegalStateException e) {
+            request.setAttribute("error", e.getMessage());
+            try {
+                doGet(request, response);
+            } catch (ServletException ex) {
+                throw new IOException(ex);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 }

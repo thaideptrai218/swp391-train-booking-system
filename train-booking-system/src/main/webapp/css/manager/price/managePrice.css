@@ -1,0 +1,309 @@
+/* General body and container styling (can be in a more global CSS if preferred) */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  color: #333;
+  display: flex; /* For sidebar layout */
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 1200px; /* Limit container width for very wide screens */
+  margin: auto; /* Center container if max-width is applied */
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+/* Add New Rule Button */
+.add-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #28a745; /* Green for add */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 14px; /* Slightly smaller font for more data */
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px; /* Adjusted padding */
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background-color: #007bff; /* Blue header */
+  color: white;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #e9ecef; /* Lighter hover color */
+}
+
+/* Action Buttons in Table */
+.actions a {
+  margin-right: 8px;
+  text-decoration: none;
+  padding: 6px 12px; /* Adjusted padding */
+  border-radius: 4px; /* Slightly more rounded */
+  font-size: 13px; /* Smaller font for action buttons */
+  transition: opacity 0.3s ease;
+}
+
+.actions a:hover {
+  opacity: 0.8;
+}
+
+.actions .edit {
+  background-color: #ffc107; /* Yellow for edit */
+  color: #212529; /* Darker text for better contrast */
+  border: 1px solid #dda800; /* Border for definition */
+}
+
+.actions .delete {
+  background-color: #dc3545; /* Red for delete */
+  color: white;
+  border: 1px solid #c82333;
+}
+
+/* No Rules Message */
+.no-rules {
+  text-align: center;
+  font-size: 18px;
+  color: #6c757d; /* Gray text */
+  padding: 30px;
+  border: 1px dashed #ddd;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+/* Form Styling (for addPriceRule.jsp and editPriceRule.jsp) */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  gap: 25px; /* Increased gap */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px; /* Increased margin */
+  font-weight: bold;
+  color: #495057; /* Darker label color */
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select {
+  width: 100%;
+  padding: 12px; /* Increased padding */
+  border: 1px solid #ced4da; /* Standard Bootstrap border color */
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 15px; /* Slightly larger font in inputs */
+}
+
+.form-group input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.full-width {
+  grid-column: 1 / -1; /* Span both columns */
+}
+
+.button-group {
+  grid-column: 1 / -1;
+  text-align: right;
+  margin-top: 25px; /* Increased margin */
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.button-group button {
+  padding: 12px 25px; /* Increased padding */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.button-group button[type="submit"] {
+  background-color: #28a745; /* Green for save/update */
+  color: white;
+}
+.button-group button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+.button-group button[type="button"] {
+  /* For Cancel button */
+  background-color: #6c757d; /* Gray for cancel */
+  color: white;
+}
+.button-group button[type="button"]:hover {
+  background-color: #5a6268;
+}
+
+.error-message {
+  color: #dc3545; /* Red for errors */
+  background-color: #f8d7da; /* Light red background */
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  grid-column: 1 / -1; /* Span both columns */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  display: flex;
+}
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+}
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+.add-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+.add-button:hover {
+  background-color: #0056b3;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background-color: #007bff;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+tr:hover {
+  background-color: #f1f1f1;
+}
+.actions a {
+  margin-right: 10px;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+.actions .edit {
+  background-color: #ffc107;
+  color: #333;
+}
+.actions .delete {
+  background-color: #dc3545;
+  color: white;
+}
+.actions .edit:hover {
+  background-color: #e0a800;
+}
+.actions .delete:hover {
+  background-color: #c82333;
+}
+.no-rules {
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+  padding: 20px;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.pagination-container .page-link {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.pagination-container .page-link.active,
+.pagination-container .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+.pagination-container .page-link.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+  border-color: #ddd;
+}

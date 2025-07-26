@@ -34,11 +34,20 @@ public class CustomerSupportServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         User loggedInUser = (User) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         String message = request.getParameter("message");
-        if (message != null && !message.isEmpty()) {
+        if (message != null && !message.trim().isEmpty()) {
             int userId = loggedInUser.getUserID();
             messageDAO.saveMessage(userId, null, message, "Customer");
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-        response.sendRedirect(request.getContextPath() + "/customer-support");
     }
+
 }

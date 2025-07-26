@@ -27,6 +27,8 @@ public interface SeatRepository {
             boolean isRoundTrip,
             String currentUserSessionId) throws SQLException;
 
+
+    List<Seat> findByCoachId(int coachId) throws SQLException;
     List<SeatTypePricingDTO> getTripSeatTypePricing(
             int tripId,
             int legOriginStationId,
@@ -34,4 +36,5 @@ public interface SeatRepository {
             Timestamp bookingDateTime,
             boolean isRoundTrip,
             String currentUserSessionId) throws SQLException;
+
 }

@@ -151,7 +151,7 @@
                                                     <td style="text-align: center;">
                                                         <c:if test="${p.refundable}">
                                                             <input type="checkbox" name="ticketInfo"
-                                                                value="${p.ticketCode}|${p.ticketID}|${p.policyID}|${p.refundFee}|${p.refundAmount}"/>
+                                                                value="${p.ticketCode}|${p.ticketID}|${p.policyID}|${p.refundFee}|${p.refundAmount}" />
                                                         </c:if>
                                                         <c:if test="${not p.refundable}">
                                                             <span style="color: gray;">Không thể trả</span>
@@ -181,6 +181,14 @@
                                                 readonly />
                                         </div>
                                     </div>
+
+                                    <div class="form-row" style="margin-top: 20px;">
+                                        <label for="bankAccountNumber">Số tài khoản nhận tiền (Số tài khoản - Ngân Hàng. VD: 123456789 - Vietcombank)<span
+                                                style="color: red">*</span></label>
+                                        <input type="text" id="bankAccountNumber" name="bankAccountNumber"
+                                            placeholder="Nhập số tài khoản ngân hàng" required />
+                                    </div>
+
 
                                     <button id="continueBtn" type="submit" disabled
                                         style="width: 10%; margin-top: 15px; padding: 10px 20px; font-size: 16px; cursor: not-allowed;">Tiếp

@@ -1,6 +1,7 @@
 package vn.vnrailway.dao;
 
 import vn.vnrailway.dto.CheckInforRefundTicketDTO;
+import vn.vnrailway.dto.ConfirmRefundRequestDTO;
 import vn.vnrailway.dto.InfoPassengerDTO;
 import vn.vnrailway.dto.RefundRequestDTO;
 import vn.vnrailway.model.Ticket;
@@ -32,6 +33,7 @@ public interface TicketRepository {
     Ticket save(Ticket ticket) throws SQLException;
 
     InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException; // For checking ticket status
+    List<String> getAllStationNames() throws SQLException; // For autocomplete in the form
 
     boolean update(Ticket ticket) throws SQLException; // Mainly for status changes
 
@@ -41,11 +43,14 @@ public interface TicketRepository {
 
     double getTotalRevenue() throws SQLException;
     
-    void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
+    void insertTempRefundRequests(String ticketCode, String noteSTK) throws SQLException; // Insert temporary refund requests
 
-    void rejectRefundTicket(String ticketInfo, String note) throws SQLException;
+    void rejectRefundTicket(String ticketInfo, String imageFileName) throws SQLException;
 
-    void approveRefundTicket(String ticketInfo, String note) throws SQLException;
+    void approveRefundTicket(String ticketInfo, String imageFileName) throws SQLException;
 
     List<InfoPassengerDTO> findListTicketBooking(String id) throws SQLException;
+
+    void refundAllTicketsForTrip(int tripId) throws SQLException;
+    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests() throws SQLException;
 }

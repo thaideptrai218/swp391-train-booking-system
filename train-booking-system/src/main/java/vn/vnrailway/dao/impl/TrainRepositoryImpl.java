@@ -16,6 +16,7 @@ public class TrainRepositoryImpl implements TrainRepository {
         train.setTrainName(rs.getString("TrainName"));
         train.setTrainTypeID(rs.getInt("TrainTypeID"));
         train.setActive(rs.getBoolean("IsActive"));
+        train.setLocked(rs.getBoolean("IsLocked"));
         return train;
     }
 
@@ -95,5 +96,16 @@ public class TrainRepositoryImpl implements TrainRepository {
             }
         }
         return java.util.Optional.empty();
+    }
+
+    @Override
+    public boolean updateTrainLocked(int trainId, boolean isLocked) throws SQLException {
+        String sql = "UPDATE Trains SET IsLocked = ? WHERE TrainID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isLocked);
+            ps.setInt(2, trainId);
+            return ps.executeUpdate() > 0;
+        }
     }
 }

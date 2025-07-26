@@ -15,25 +15,27 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dao.TrainRepository;
-import vn.vnrailway.dao.TrainTypeRepository; // Added
+import vn.vnrailway.dao.TrainTypeRepository;
 import vn.vnrailway.dao.TripRepository;
-import vn.vnrailway.dao.TripStationRepository; // Added
+import vn.vnrailway.dao.TripStationRepository;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dao.impl.TrainRepositoryImpl;
-import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl;
 import vn.vnrailway.dao.impl.TripRepositoryImpl;
-import vn.vnrailway.dao.impl.TripStationRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.TripStationRepositoryImpl;
+import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.dto.ManageTripViewDTO;
-import vn.vnrailway.dto.RouteStationDetailDTO; // Added
+import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Train;
-import vn.vnrailway.model.TrainType; // Added
+import vn.vnrailway.model.TrainType;
 import vn.vnrailway.model.Trip;
-import vn.vnrailway.model.TripStation; // Added
-import java.math.RoundingMode; // Added
-import java.util.Comparator; // Added
-import java.util.Optional; // Added
+import vn.vnrailway.model.TripStation;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.Optional;
 import vn.vnrailway.dao.HolidayPriceRepository;
+import vn.vnrailway.dao.impl.BookingRepositoryImpl;
 import vn.vnrailway.dao.impl.HolidayPriceRepositoryImpl;
 import vn.vnrailway.model.HolidayPrice;
 
@@ -43,8 +45,8 @@ public class ManageTripsServlet extends HttpServlet {
     private TripRepository tripRepository;
     private RouteRepository routeRepository;
     private TrainRepository trainRepository;
-    private TripStationRepository tripStationRepository; // Added
-    private TrainTypeRepository trainTypeRepository; // Added
+    private TripStationRepository tripStationRepository;
+    private TrainTypeRepository trainTypeRepository;
     private HolidayPriceRepository holidayPriceRepository;
 
     @Override
@@ -53,7 +55,7 @@ public class ManageTripsServlet extends HttpServlet {
         tripRepository = new TripRepositoryImpl();
         routeRepository = new RouteRepositoryImpl();
         trainRepository = new TrainRepositoryImpl();
-        tripStationRepository = new TripStationRepositoryImpl(); // Added
+        tripStationRepository = new TripStationRepositoryImpl();
         trainTypeRepository = new TrainTypeRepositoryImpl(); // Added
         try {
             holidayPriceRepository = new HolidayPriceRepositoryImpl();
@@ -69,7 +71,6 @@ public class ManageTripsServlet extends HttpServlet {
         if (action == null) {
             action = "list";
         }
-
         try {
             switch (action) {
                 case "showAddForm":
@@ -90,12 +91,12 @@ public class ManageTripsServlet extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Train> allTrains = trainRepository.getAllTrains();
-        List<Route> allRoutes = routeRepository.findAll();
+        List<Route> allRoutes = routeRepository.findAll().stream().filter(Route::isActive).toList();
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("allTrains", allTrains);
         request.setAttribute("allRoutes", allRoutes);
         request.setAttribute("allHolidays", allHolidays);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addTrip.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Trip/addTrip.jsp").forward(request, response);
     }
 
     private void listTrips(HttpServletRequest request, HttpServletResponse response)
@@ -106,12 +107,12 @@ public class ManageTripsServlet extends HttpServlet {
 
         if (sortField == null || sortField.isEmpty()) {
             sortField = "tripID";
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if ("tripID".equalsIgnoreCase(sortField) && (sortOrder == null || sortOrder.isEmpty())) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         } else if (sortOrder == null || sortOrder.isEmpty()
                 || (!"ASC".equalsIgnoreCase(sortOrder) && !"DESC".equalsIgnoreCase(sortOrder))) {
-            sortOrder = "ASC";
+            sortOrder = "DESC";
         }
 
         if (searchTerm == null) {
@@ -119,6 +120,39 @@ public class ManageTripsServlet extends HttpServlet {
         }
 
         List<ManageTripViewDTO> listTrips = tripRepository.findAllForManagerView(searchTerm, sortField, sortOrder);
+        String filterDate = request.getParameter("filterDate");
+        if (filterDate != null && !filterDate.isEmpty()) {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
+            java.time.LocalDate endOfWeek = today.with(java.time.DayOfWeek.SUNDAY);
+            java.time.YearMonth thisMonth = java.time.YearMonth.now();
+            listTrips = listTrips.stream().filter(trip -> {
+                if (trip.getDepartureDateTime() == null)
+                    return false;
+                java.time.LocalDate depDate = trip.getDepartureDateTime().toLocalDate();
+                switch (filterDate) {
+                    case "TODAY":
+                        return depDate.equals(today);
+                    case "WEEK":
+                        return !depDate.isBefore(startOfWeek) && !depDate.isAfter(endOfWeek);
+                    case "MONTH":
+                        return thisMonth.equals(java.time.YearMonth.from(depDate));
+                    default:
+                        return true;
+                }
+            }).toList();
+        }
+        String filterStatus = request.getParameter("filterStatus");
+        if (filterStatus != null && !filterStatus.isEmpty()) {
+            listTrips = listTrips.stream()
+                    .filter(trip -> filterStatus.equals(trip.getTripStatus()))
+                    .toList();
+        } else {
+            // Mặc định hiển thị trips có trạng thái "Lên Lịch" khi không có filter
+            listTrips = listTrips.stream()
+                    .filter(trip -> "Scheduled".equals(trip.getTripStatus()))
+                    .toList();
+        }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
         request.setAttribute("allHolidays", allHolidays);
@@ -134,7 +168,7 @@ public class ManageTripsServlet extends HttpServlet {
             request.setAttribute("errorMessage", request.getSession().getAttribute("errorMessage"));
             request.getSession().removeAttribute("errorMessage");
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageTrips.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/Trip/manageTrips.jsp").forward(request, response);
     }
 
     @Override
@@ -165,9 +199,11 @@ public class ManageTripsServlet extends HttpServlet {
                         HolidayPrice holiday = holidayPriceRepository.getHolidayPriceById(holidayId);
                         if (holiday != null) {
                             isHolidayTrip = true;
-                            basePriceMultiplier = new BigDecimal(holiday.getDiscountPercentage()).divide(new BigDecimal("100"));
+                            basePriceMultiplier = new BigDecimal(holiday.getDiscountPercentage())
+                                    .divide(new BigDecimal("100"));
                         }
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {
+                    }
                 }
                 String tripStatus = request.getParameter("tripStatus");
 
@@ -263,10 +299,12 @@ public class ManageTripsServlet extends HttpServlet {
 
                     for (int i = 0; i < routeStations.size(); i++) {
                         RouteStationDetailDTO rsDetail = routeStations.get(i);
-                        BigDecimal currentEstimateTimeHours = rsDetail.getDistanceFromStart() != null ?
-                                rsDetail.getDistanceFromStart().divide(averageVelocity, 4, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+                        BigDecimal currentEstimateTimeHours = rsDetail.getDistanceFromStart() != null
+                                ? rsDetail.getDistanceFromStart().divide(averageVelocity, 4, RoundingMode.HALF_UP)
+                                : BigDecimal.ZERO;
                         int defaultStopTimeMinutes = rsDetail.getDefaultStopTime();
-                        if (defaultStopTimeMinutes < 0) defaultStopTimeMinutes = 0;
+                        if (defaultStopTimeMinutes < 0)
+                            defaultStopTimeMinutes = 0;
 
                         LocalDateTime arrivalAtCurrentStation;
                         LocalDateTime departureFromCurrentStation;
@@ -275,7 +313,8 @@ public class ManageTripsServlet extends HttpServlet {
                             arrivalAtCurrentStation = newTrip.getDepartureDateTime();
                             departureFromCurrentStation = newTrip.getDepartureDateTime();
                         } else {
-                            BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours.subtract(previousEstimateTimeHours);
+                            BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours
+                                    .subtract(previousEstimateTimeHours);
                             long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
                             arrivalAtCurrentStation = previousDepartureDateTime.plusSeconds(travelTimeSeconds);
                             departureFromCurrentStation = arrivalAtCurrentStation.plusMinutes(defaultStopTimeMinutes);
@@ -366,6 +405,96 @@ public class ManageTripsServlet extends HttpServlet {
                 String newStatus = request.getParameter("tripStatus");
                 if (newStatus != null && !newStatus.trim().isEmpty()) {
                     tripRepository.updateTripStatus(tripId, newStatus);
+                    // Nếu trạng thái là Hủy chuyến thì cập nhật vé và TempRefundRequests
+                    if ("Hủy chuyến".equalsIgnoreCase(newStatus) || "Cancelled".equalsIgnoreCase(newStatus)) {
+                        vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                        java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(tripId);
+                        try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
+                            conn.setAutoCommit(false);
+                            // 1. Cập nhật isCancelled = 1 cho tất cả vé
+                            String updateTicketStatusSql = "UPDATE Tickets SET isCancelled = 1 WHERE TripID = ?";
+                            try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTicketStatusSql)) {
+                                ps.setInt(1, tripId);
+                                ps.executeUpdate();
+                            }
+                            // Bỏ qua update TempRefundRequests
+                            conn.commit();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        // Gửi email hoàn tiền cho mỗi khách (1 email/booking)
+                        vn.vnrailway.dao.UserRepository userRepository = new UserRepositoryImpl();
+                        vn.vnrailway.dao.BookingRepository bookingRepository = new BookingRepositoryImpl();
+                        java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
+                        for (vn.vnrailway.model.Ticket ticket : tickets) {
+                            bookingIds.add(ticket.getBookingID());
+                        }
+                        java.util.Set<String> sentEmails = new java.util.HashSet<>();
+                        for (Integer bookingId : bookingIds) {
+                            java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository
+                                    .findById(bookingId);
+                            if (bookingOpt.isPresent()) {
+                                vn.vnrailway.model.Booking booking = bookingOpt.get();
+                                int userId = booking.getUserID();
+                                java.util.Optional<vn.vnrailway.model.User> userOpt = userRepository.findById(userId);
+                                if (userOpt.isPresent()) {
+                                    vn.vnrailway.model.User user = userOpt.get();
+                                    String email = user.getEmail();
+                                    if (email != null && !email.isEmpty() && !sentEmails.contains(email)) {
+                                        // Gửi email hoàn tiền
+                                        try {
+                                            java.util.Properties props = new java.util.Properties();
+                                            props.put("mail.smtp.host", "smtp.gmail.com");
+                                            props.put("mail.smtp.port", "587");
+                                            props.put("mail.smtp.auth", "true");
+                                            props.put("mail.smtp.starttls.enable", "true");
+                                            final String EMAIL_FROM = "assasinhp619@gmail.com";
+                                            final String EMAIL_PASSWORD = "slos bctt epxv osla";
+                                            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props,
+                                                    new jakarta.mail.Authenticator() {
+                                                        @Override
+                                                        protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                            return new jakarta.mail.PasswordAuthentication(EMAIL_FROM,
+                                                                    EMAIL_PASSWORD);
+                                                        }
+                                                    });
+                                            jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(
+                                                    mailSession);
+                                            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM,
+                                                    "Vetaure", "UTF-8"));
+                                            mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO,
+                                                    jakarta.mail.internet.InternetAddress.parse(email));
+                                            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
+                                            mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
+                                            mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(
+                                                    "Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                            String messageContent = String.format(
+                                                    "<html>"
+                                                            + "<body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>"
+                                                            + "<div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>"
+                                                            + "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
+                                                            + "<p>Xin chào, <b>%s</b>!</p>"
+                                                            + "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
+                                                            + "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng vào website để hủy vé, chúng tôi sẽ hoàn tiền lại cho bạn.</p>"
+                                                            + "<p>Xin lỗi vì sự bất tiện này. Xin cảm ơn!</p>"
+                                                            + "<br/>"
+                                                            + "<p>Trân trọng,</p>"
+                                                            + "<p><strong>Đội ngũ Vetaure</strong></p>"
+                                                            + "</div>"
+                                                            + "</body>"
+                                                            + "</html>",
+                                                    user.getFullName());
+                                            mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
+                                            jakarta.mail.Transport.send(mimeMessage);
+                                            sentEmails.add(email);
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     request.getSession().setAttribute("successMessage", "Trip status updated for Trip ID: " + tripId);
                 } else {
                     request.getSession().setAttribute("errorMessage", "Trip status cannot be empty.");
@@ -375,16 +504,21 @@ public class ManageTripsServlet extends HttpServlet {
                 e.printStackTrace();
             }
             response.sendRedirect(request.getContextPath() + "/manageTrips");
+        } else if ("countTickets".equals(action)) {
+            try {
+                int tripId = Integer.parseInt(request.getParameter("tripId"));
+                vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
+                int ticketCount = ticketRepository.findByTripId(tripId).size();
+                response.setContentType("application/json");
+                response.getWriter().write("{\"ticketCount\":" + ticketCount + "}");
+            } catch (Exception e) {
+                response.setContentType("application/json");
+                response.getWriter().write("{\"ticketCount\":0}");
+            }
+            return;
         } else if ("deleteTrip".equals(action)) {
             try {
                 int tripId = Integer.parseInt(request.getParameter("tripId"));
-                // Before deleting a trip, ensure related TripStations are deleted to avoid FK
-                // constraints
-                // The TripStationRepository might have a deleteByTripId method, or handle it
-                // here.
-                // For now, assuming TripRepository.deleteById handles or cascades, or DB
-                // handles it.
-                // If not, add: tripStationRepository.deleteByTripId(tripId);
                 boolean deleted = tripRepository.deleteById(tripId);
                 if (deleted) {
                     request.getSession().setAttribute("successMessage",
@@ -395,6 +529,19 @@ public class ManageTripsServlet extends HttpServlet {
                 }
             } catch (Exception e) {
                 request.getSession().setAttribute("errorMessage", "Error deleting trip: " + e.getMessage());
+                e.printStackTrace();
+            }
+            response.sendRedirect(request.getContextPath() + "/manageTrips");
+        } else if ("lockTrip".equals(action) || "unlockTrip".equals(action)) {
+            try {
+                int tripId = Integer.parseInt(request.getParameter("tripId"));
+                boolean isLocked = "lockTrip".equals(action);
+                tripRepository.updateTripLocked(tripId, isLocked);
+                String msg = isLocked ? "Chuyến đi đã được khóa." : "Chuyến đi đã được mở khóa.";
+                request.getSession().setAttribute("successMessage", msg);
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage",
+                        "Lỗi khi cập nhật trạng thái khóa: " + e.getMessage());
                 e.printStackTrace();
             }
             response.sendRedirect(request.getContextPath() + "/manageTrips");

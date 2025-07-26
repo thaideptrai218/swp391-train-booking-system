@@ -30,6 +30,11 @@ uri="http://java.sun.com/jsp/jstl/core" %>
   <h3><i class="fas fa-cogs"></i> Chức Năng</h3>
   <ul>
     <li>
+      <a href="${pageContext.request.contextPath}/managerDashboard">
+        <i class="fas fa-tachometer-alt"></i> Bảng Điều Khiển
+      </a>
+    </li>
+    <li>
       <a href="${pageContext.request.contextPath}/manageStations">
         <i class="fas fa-map-signs"></i> Quản Lý Ga Tàu
       </a>
@@ -54,12 +59,6 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <i class="fas fa-dollar-sign"></i> Quản Lý Giá cả
       </a>
     </li>
-    <li>
-      <a href="${pageContext.request.contextPath}/manageStaffs">
-        <i class="fas fa-users-cog"></i> Quản Lý Nhân Viên
-      </a>
-    </li>
-
     <li>
       <a href="${pageContext.request.contextPath}/manageCancellationPolicies">
         <i class="fas fa-users-cog"></i> Quản Lý Chính Sách Hủy Vé

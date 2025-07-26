@@ -75,7 +75,7 @@ public class ManagePriceServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         List<PricingRule> listPricingRules = pricingRuleRepository.findAll();
         request.setAttribute("listPricingRules", listPricingRules);
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/managePrice.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/managePrice.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
@@ -89,7 +89,7 @@ public class ManagePriceServlet extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Error fetching data for new price rule form", e);
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/addPriceRule.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/addPriceRule.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
@@ -113,7 +113,7 @@ public class ManagePriceServlet extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Error fetching data for edit price rule form", e);
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/editPriceRule.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/PricingRules/editPriceRule.jsp").forward(request, response);
     }
 
     private void insertPricingRule(HttpServletRequest request, HttpServletResponse response)
@@ -127,18 +127,19 @@ public class ManagePriceServlet extends HttpServlet {
         LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
         LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
         boolean isActive = "true".equals(request.getParameter("isActive"));
+        Integer priority = getNullableIntParameter(request, "priority");
 
         if (ruleName == null || ruleName.trim().isEmpty() ||
                 description == null || description.trim().isEmpty() ||
                 basePricePerKm == null ||
-                applicableDateStart == null || applicableDateEnd == null) {
+                applicableDateStart == null) {
 
-            request.setAttribute("errorMessage", "Các trường không được để trống.");
+            request.setAttribute("errorMessage", "Các trường không được để trống (ngoại trừ ngày kết thúc áp dụng).");
             showNewForm(request, response);
             return;
         }
 
-        if (applicableDateEnd.isBefore(applicableDateStart)) {
+        if (applicableDateEnd != null && applicableDateEnd.isBefore(applicableDateStart)) {
             request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
             showNewForm(request, response);
             return;
@@ -149,7 +150,7 @@ public class ManagePriceServlet extends HttpServlet {
         }
 
         PricingRule newRule = new PricingRule(0, ruleName, description, trainTypeID, routeID, basePricePerKm,
-                isForRoundTrip, applicableDateStart, applicableDateEnd, isActive);
+                isForRoundTrip, applicableDateStart, applicableDateEnd, isActive, false, priority);
         pricingRuleRepository.save(newRule);
         response.sendRedirect(request.getContextPath() + "/managePrice");
     }
@@ -157,6 +158,13 @@ public class ManagePriceServlet extends HttpServlet {
     private void updatePricingRule(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
         int ruleID = Integer.parseInt(request.getParameter("ruleID"));
+        PricingRule existingRule = pricingRuleRepository.findById(ruleID)
+                .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + ruleID));
+        if (existingRule.isDefaultRule()) {
+            request.setAttribute("errorMessage", "Không thể sửa quy tắc giá mặc định!");
+            showEditForm(request, response);
+            return;
+        }
         String ruleName = request.getParameter("ruleName");
         String description = request.getParameter("description");
         Integer trainTypeID = getNullableIntParameter(request, "trainTypeID");
@@ -166,35 +174,27 @@ public class ManagePriceServlet extends HttpServlet {
         LocalDate applicableDateStart = getNullableLocalDateParameter(request, "applicableDateStart");
         LocalDate applicableDateEnd = getNullableLocalDateParameter(request, "applicableDateEnd");
         boolean isActive = "true".equals(request.getParameter("isActive"));
+        Integer priority = getNullableIntParameter(request, "priority");
 
         if (ruleName == null || ruleName.trim().isEmpty() ||
                 description == null || description.trim().isEmpty() ||
                 basePricePerKm == null ||
-                applicableDateStart == null || applicableDateEnd == null) {
+                applicableDateStart == null) {
 
-            request.setAttribute("errorMessage", "Các trường không được để trống.");
+            request.setAttribute("errorMessage", "Các trường không được để trống (ngoại trừ ngày kết thúc áp dụng).");
             showEditForm(request, response);
             return;
         }
 
-        if (applicableDateEnd.isBefore(applicableDateStart)) {
+        if (applicableDateEnd != null && applicableDateEnd.isBefore(applicableDateStart)) {
             request.setAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu.");
             showEditForm(request, response);
             return;
         }
 
-        PricingRule existingRule = pricingRuleRepository.findById(ruleID)
-                .orElseThrow(() -> new ServletException("Pricing Rule not found with ID: " + ruleID));
-
-        if (basePricePerKm != null && (!basePricePerKm.equals(existingRule.getBasePricePerKm()))) {
-            basePricePerKm = basePricePerKm.multiply(new BigDecimal(1000));
-        } else {
-            basePricePerKm = existingRule.getBasePricePerKm();
-        }
-
         PricingRule ruleToUpdate = new PricingRule(ruleID, ruleName, description, trainTypeID, routeID,
                 basePricePerKm, isForRoundTrip,
-                applicableDateStart, applicableDateEnd, isActive);
+                applicableDateStart, applicableDateEnd, isActive, existingRule.isDefaultRule(), priority);
         pricingRuleRepository.update(ruleToUpdate);
         response.sendRedirect(request.getContextPath() + "/managePrice");
     }
@@ -202,6 +202,12 @@ public class ManagePriceServlet extends HttpServlet {
     private void deletePricingRule(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
+        PricingRule rule = pricingRuleRepository.findById(id).orElse(null);
+        if (rule != null && rule.isDefaultRule()) {
+            request.getSession().setAttribute("errorMessage", "Không thể xóa quy tắc giá mặc định!");
+            response.sendRedirect(request.getContextPath() + "/managePrice");
+            return;
+        }
         pricingRuleRepository.deleteById(id);
         response.sendRedirect(request.getContextPath() + "/managePrice");
     }

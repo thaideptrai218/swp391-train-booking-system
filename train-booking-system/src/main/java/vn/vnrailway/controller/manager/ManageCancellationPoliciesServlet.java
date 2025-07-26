@@ -9,6 +9,7 @@ import vn.vnrailway.model.Station;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional; // Added this import
 import jakarta.servlet.ServletException;
@@ -31,13 +32,63 @@ public class ManageCancellationPoliciesServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<CancellationPolicy> policies = cancellationPolicyRepository.getAll();
+            // Get search parameter
+            String searchQuery = request.getParameter("search");
+            List<CancellationPolicy> policies;
+
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                searchQuery = normalizeString(searchQuery);
+
+                // Validate search query length and characters
+                if (searchQuery.length() > 100) {
+                    request.setAttribute("errorMessage", "Từ khóa tìm kiếm không được vượt quá 100 ký tự");
+                    request.setAttribute("policies", new ArrayList<>()); 
+                    request.getRequestDispatcher("/WEB-INF/jsp/manager/manageCancellationPolicies.jsp").forward(request,
+                            response);
+                    return;
+                }
+
+
+                policies = cancellationPolicyRepository.searchByPolicyName(searchQuery);
+
+                System.out.println("Search query: '" + searchQuery + "' - Found: " + policies.size() + " results");
+
+
+                request.setAttribute("searchQuery", searchQuery);
+
+
+                if (policies.isEmpty()) {
+                    request.setAttribute("searchMessage",
+                            "Không tìm thấy chính sách nào phù hợp với từ khóa: \"" + searchQuery + "\"");
+                } else {
+                    request.setAttribute("searchMessage",
+                            "Tìm thấy " + policies.size() + " kết quả cho từ khóa: \"" + searchQuery + "\"");
+                }
+
+            } else {
+                // Get all policies
+                policies = cancellationPolicyRepository.getAll();
+                System.out.println("Loading all policies - Found: " + policies.size() + " total");
+            }
+
             request.setAttribute("policies", policies);
+            request.getRequestDispatcher("/WEB-INF/jsp/manager/manageCancellationPolicies.jsp").forward(request,
+                    response);
+
         } catch (SQLException e) {
-            request.setAttribute("errorMessage", "Error retrieving cancellation policies: " + e.getMessage());
+            request.setAttribute("policies", new ArrayList<>());
+            request.setAttribute("errorMessage", "Lỗi truy xuất dữ liệu: " + e.getMessage());
+
+            // Preserve search query even on error
+            String searchQuery = request.getParameter("search");
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                request.setAttribute("searchQuery", searchQuery.trim());
+            }
+
+            request.getRequestDispatcher("/WEB-INF/jsp/manager/manageCancellationPolicies.jsp").forward(request,
+                    response);
             e.printStackTrace();
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/manageCancellationPolicies.jsp").forward(request, response);
     }
 
     @Override
@@ -45,5 +96,13 @@ public class ManageCancellationPoliciesServlet extends HttpServlet {
             throws ServletException, IOException {
         // Handle form submissions for managing cancellation policies here
         // This could include adding, updating, or deleting policies
+    }
+
+    private String normalizeString(String input) {
+        if (input == null)
+            return null;
+
+        // Trim leading/trailing spaces and replace multiple spaces with single space
+        return input.trim().replaceAll("\\s+", " ");
     }
 }

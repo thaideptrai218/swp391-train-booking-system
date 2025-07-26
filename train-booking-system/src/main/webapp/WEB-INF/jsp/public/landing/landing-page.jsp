@@ -20,7 +20,7 @@
           position: fixed;
           z-index: 9999;
           left: 50%;
-          top: 50%;
+          top: 20%;
           transform: translate(-50%, -50%);
           opacity: 0;
           transition: opacity 0.3s, visibility 0.3s;
@@ -36,19 +36,13 @@
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
-
-      <c:if test="${not empty sessionScope.successMessage}">
-        <div id="toast" class="toast">${sessionScope.successMessage}</div>
+      <c:if test="${not empty sessionScope.refundSuccessMessage}">
         <script>
-          window.onload = () => {
-            const toast = document.getElementById("toast");
-            toast.classList.add("show");
-            setTimeout(() => {
-              toast.classList.remove("show");
-            }, 8000); // Tự ẩn sau 8 giây
-          };
+            window.addEventListener('DOMContentLoaded', (event) => {
+                showToast("${sessionScope.refundSuccessMessage}");
+            });
         </script>
-        <c:remove var="successMessage" scope="session" />
+        <c:remove var="refundSuccessMessage" scope="session" />
       </c:if>
 
 
@@ -169,7 +163,7 @@
                 <c:if test="${empty stationList and empty errorMessage}">
                   <p>Không có thông tin ga tàu nào để hiển thị.</p>
                 </c:if>
-                <c:forEach var="station" items="${stationList}">
+                <c:forEach var="station" items="${stationList}" begin="0" end="14">
                   <div class="location-item">
                     <img
                       src="${pageContext.request.contextPath}/assets/images/landing/stations/${station.stationCode}.jpg"
@@ -225,8 +219,7 @@
             <div class="section-header">
               <h1 class="section-main-title">Địa điểm nổi bật</h1>
               <div class="carousel-navigation">
-                <button class="nav-arrow prev-location">
-                  << /button>
+                    <button class="nav-arrow prev-location"><</button>
                     <button class="nav-arrow next-location">></button>
                     <a href="${pageContext.request.contextPath}/all-locations" class="view-all-link">Xem thêm <span
                         class="arrow">&rarr;</span></a>

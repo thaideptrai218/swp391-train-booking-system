@@ -34,12 +34,13 @@ public class UserRepositoryImpl implements UserRepository {
         }
         user.setGender(rs.getString("Gender"));
         user.setAddress(rs.getString("Address"));
+        user.setAvatarPath(rs.getString("AvatarPath"));
         return user;
     }
 
     @Override
     public Optional<User> findById(int userId) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE UserID = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -54,7 +55,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(String email) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE Email = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE Email = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -68,8 +69,19 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void updateAvatar(int userId, String avatarPath) throws SQLException {
+        String sql = "UPDATE Users SET AvatarPath = ? WHERE UserID = ?";
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, avatarPath);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
     public Optional<User> findByPhone(String phone) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE PhoneNumber = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE PhoneNumber = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, phone);
@@ -84,7 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByIdCardNumber(String idCardNumber) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE IDCardNumber = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath  FROM Users WHERE IDCardNumber = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, idCardNumber);
@@ -100,7 +112,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> findAll() throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -115,7 +127,7 @@ public class UserRepositoryImpl implements UserRepository {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM Users ORDER BY UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, offset);
             ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
@@ -130,8 +142,8 @@ public class UserRepositoryImpl implements UserRepository {
     public int countAll() throws SQLException {
         String sql = "SELECT COUNT(*) FROM Users";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -139,7 +151,8 @@ public class UserRepositoryImpl implements UserRepository {
         return 0;
     }
 
-    public List<User> searchAndFilterUsers(String searchTerm, String role, String status, int offset, int limit) throws SQLException {
+    public List<User> searchAndFilterUsers(String searchTerm, String role, String status, int offset, int limit)
+            throws SQLException {
         List<User> users = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM Users WHERE 1=1");
         List<Object> params = new ArrayList<>();
@@ -164,7 +177,7 @@ public class UserRepositoryImpl implements UserRepository {
             params.add("%" + searchTerm + "%");
             params.add("%" + searchTerm + "%");
         }
-        
+
         if (role != null && !role.isEmpty() && !role.equals("all")) {
             sql.append(" AND Role = ?");
             params.add(role);
@@ -180,7 +193,7 @@ public class UserRepositoryImpl implements UserRepository {
         params.add(limit);
 
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -229,7 +242,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
 
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -245,7 +258,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> findByRole(String role) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, Gender, Address FROM Users WHERE Role = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, Gender, Address, AvatarPath FROM Users WHERE Role = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, role);
@@ -262,7 +275,7 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) throws SQLException {
         String sql = "INSERT INTO Users (FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
@@ -360,7 +373,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> findByAddress(String address) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE Address = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE Address = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -378,7 +391,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> findByGender(String gender) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE Gender = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE Gender = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -395,7 +408,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByDateOfBirth(LocalDate dateOfBirth) throws SQLException {
-        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address FROM Users WHERE DateOfBirth = ?";
+        String sql = "SELECT UserID, FullName, Email, PhoneNumber, PasswordHash, IDCardNumber, Role, IsActive, CreatedAt, LastLogin, DateOfBirth, Gender, Address, AvatarPath FROM Users WHERE DateOfBirth = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -521,9 +534,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<Object[]> getLogsByPage(int page, int pageSize, String searchTerm, String action, String startDate, String endDate) throws SQLException {
+    public List<Object[]> getLogsByPage(int page, int pageSize, String searchTerm, String action, String startDate,
+            String endDate) throws SQLException {
         List<Object[]> auditLogs = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT LogId, EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime FROM dbo.AuditLogs WHERE 1=1");
+        StringBuilder sql = new StringBuilder(
+                "SELECT LogId, EditorEmail, Action, TargetEmail, OldValue, NewValue, LogTime FROM dbo.AuditLogs WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (searchTerm != null && !searchTerm.isEmpty()) {
@@ -549,7 +564,7 @@ public class UserRepositoryImpl implements UserRepository {
         params.add(pageSize);
 
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -571,7 +586,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public int getTotalLogCount(String searchTerm, String action, String startDate, String endDate) throws SQLException {
+    public int getTotalLogCount(String searchTerm, String action, String startDate, String endDate)
+            throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM dbo.AuditLogs WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -594,7 +610,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
 
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }

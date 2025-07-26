@@ -10,9 +10,13 @@
                 <title>Góp Ý</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/feedback.css">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
             </head>
 
             <body>
+                    <jsp:include page="../common/header.jsp" />
+
                 <div class="feedback">
                     <div class="feedback-content">
                         <div style="margin-bottom: 20px;">
@@ -157,5 +161,6 @@
                     });
                 </script>
             </body>
+                    <jsp:include page="../common/footer.jsp" />
 
             </html>

@@ -50,10 +50,11 @@ public class ConfirmOTPServlet extends HttpServlet {
         if (storedOTP.equals(inputOTP)) {
             session.setAttribute("otpVerified", true);
             String[] ticketInfos = (String[]) session.getAttribute("ticketInfos");
+            String noteSTK = (String) session.getAttribute("noteSTK");
             for (String ticketInfo : ticketInfos) {
 
                 try {
-                    ticketRepository.insertTempRefundRequests(ticketInfo);
+                    ticketRepository.insertTempRefundRequests(ticketInfo, noteSTK);
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

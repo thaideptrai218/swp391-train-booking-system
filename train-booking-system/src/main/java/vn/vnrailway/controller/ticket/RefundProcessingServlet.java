@@ -1,5 +1,9 @@
 package vn.vnrailway.controller.ticket;
 
+import java.io.*;
+import java.util.Base64;
+import java.nio.file.Files;
+import jakarta.servlet.http.Part;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -10,6 +14,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,16 +34,29 @@ import vn.vnrailway.model.Booking;
 import vn.vnrailway.model.Ticket;
 import vn.vnrailway.model.User;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Properties;
+import java.util.UUID;
 
-@WebServlet(name = "RefundProcessingServlet", urlPatterns = { "/refundProcessing" })
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 15 // 15MB
+)
+@WebServlet(name = "RefundProcessingServlet", urlPatterns = { "/staff/refundProcessing" })
 public class RefundProcessingServlet extends HttpServlet {
     private TicketRepository ticketRepository;
     private static final String EMAIL_FROM = "assasinhp619@gmail.com";
     // Replace with your 16-character App Password
     private static final String EMAIL_PASSWORD = "slos bctt epxv osla";
+
+
 
     @Override
     public void init() throws ServletException {
@@ -51,7 +69,7 @@ public class RefundProcessingServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+        response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
 
     }
 
@@ -63,7 +81,25 @@ public class RefundProcessingServlet extends HttpServlet {
         String action = request.getParameter("action");
         String ticketInfo = request.getParameter("ticketInfo");
         String email = request.getParameter("email");
-        String note = request.getParameter("note");
+
+
+        Part filePart = request.getPart("imageFile"); // lấy ảnh từ input name="imageFile"
+        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+        String uploadPath = "C:/uploads";
+
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+        // Tạo tên file duy nhất để tránh trùng
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+
+        String filePath = uploadPath + File.separator + uniqueFileName;
+
+        // Lưu file vào thư mục uploads
+        filePart.write(filePath);
+
+        String dbFilePath = uniqueFileName;
 
         try {
             Properties props = new Properties();
@@ -88,7 +124,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             // Set subject with UTF-8 encoding
             mimeMessage.setSubject(
-                    MimeUtility.encodeText("Yêu cầu cung cấp lại số tài khoản hoàn tiền - Vetaure", "UTF-8", "B"));
+                    MimeUtility.encodeText("Yêu cầu hoàn tiền đã được thông qua - Vetaure", "UTF-8", "B"));
 
             String messageContent = """
                         <html>
@@ -96,7 +132,8 @@ public class RefundProcessingServlet extends HttpServlet {
                             <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
                                 <h2 style='color: #2c3e50;'>Thông báo từ Vetaure</h2>
                                 <p>Xin chào,</p>
-                                <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
+                                <p>Yêu cầu xử lý hoàn tiền của bạn đã hoàn thành. Chúng tôi sẽ chuyển tiền hoàn lại vào tài khoản ngân hàng mà bạn đã cung cấp.</p>
+                                <p>Tiền sẽ được hoàn lại trong vòng 24 giờ. Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi.</p>
                                 <p>Xin cảm ơn!</p>
                                 <br/>
                                 <p>Trân trọng,</p>
@@ -112,35 +149,31 @@ public class RefundProcessingServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 try {
-                    ticketRepository.approveRefundTicket(ticketInfo, note);
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    ticketRepository.approveRefundTicket(ticketInfo, dbFilePath);
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 }
             } else if ("reject".equals(action)) {
                 try {
-                    ticketRepository.rejectRefundTicket(ticketInfo, note);
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    ticketRepository.rejectRefundTicket(ticketInfo, dbFilePath);
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("message", "Không thể gửi email. Vui lòng thử lại sau.");
-            response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+            response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
         }
     }
 
-    public static void main(String[] args, HttpServletRequest request, HttpServletResponse response) {
-        String ticketInfo = request.getParameter("ticketInfo");
-        String[] parts = ticketInfo.split("\\|");
-        for (String part : parts) {
-            System.out.println(part);
-        }
+    public static void main(String[] args) throws IOException {
+        
     }
 }

@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface TripRepository {
         Optional<Trip> findById(int tripId) throws SQLException;
 
-        List<Trip> findAll() throws SQLException; // Might be too broad, consider pagination or filtering
+        List<Trip> findAll() throws SQLException;
 
         List<Trip> findByTrainId(int trainId) throws SQLException;
 
@@ -27,18 +27,10 @@ public interface TripRepository {
 
         boolean deleteById(int tripId) throws SQLException;
 
-        // Advanced search method - this will be complex and likely involve joins
-        // The DTO is used here because search results often combine data from multiple
-        // tables
         List<TripSearchResultDTO> searchAvailableTrips(
                         int originStationId,
                         int destinationStationId,
                         LocalDate departureDate) throws SQLException;
-
-        // You might also want methods to find trips by date range, status, etc.
-        // List<Trip> findByDepartureDateRange(LocalDateTime start, LocalDateTime end)
-        // throws SQLException;
-        // List<Trip> findByStatus(String status) throws SQLException;
 
         List<BestSellerLocationDTO> getBestSellerLocations(int limit) throws SQLException;
 
@@ -62,10 +54,10 @@ public interface TripRepository {
 
         boolean updateTripBasePriceMultiplier(int tripId, java.math.BigDecimal newMultiplier) throws SQLException;
 
-        // Method to count trips associated with a route
+        boolean updateTripLocked(int tripId, boolean isLocked) throws SQLException;
+
         int countTripsByRouteId(int routeId) throws SQLException;
 
-        // Method to delete all trips associated with a route
         boolean deleteTripsByRouteId(int routeId) throws SQLException;
 
         List<TripDTO> findAllAsDTO() throws SQLException;

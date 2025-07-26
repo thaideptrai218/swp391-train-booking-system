@@ -18,4 +18,6 @@ public interface TrainRepository {
     Train getTrainByTrainCode(String trainCode) throws SQLException;
 
     Optional<Train> findById(int trainId) throws SQLException;
+
+    boolean updateTrainLocked(int trainId, boolean isLocked) throws SQLException;
 }

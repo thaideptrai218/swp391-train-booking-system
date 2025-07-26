@@ -2,8 +2,8 @@ package vn.vnrailway.dao;
 
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Station;
+import vn.vnrailway.controller.manager.ManageRoutesServlet.StationOrderUpdateDTO;
 import vn.vnrailway.dto.RouteStationDetailDTO;
-
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,15 +14,12 @@ public interface RouteRepository {
 
         List<Route> findAll() throws SQLException;
 
-        Route save(Route route) throws SQLException; // Returns the saved route, possibly with generated ID
+        Route save(Route route) throws SQLException;
 
-        boolean update(Route route) throws SQLException; // Updates Route's own properties (name, description)
-
-        boolean deleteById(int routeId) throws SQLException; // Deletes a route and its associated RouteStations
+        boolean update(Route route) throws SQLException;
 
         Optional<Route> findByRouteName(String routeName) throws SQLException;
 
-        // Methods for CRUD on RouteStationDetailDTO view and RouteStations
         List<RouteStationDetailDTO> getAllRouteStationDetails() throws SQLException;
 
         void addStationToRoute(int routeId, int stationId, int sequenceNumber, BigDecimal distanceFromStart,
@@ -33,19 +30,18 @@ public interface RouteRepository {
 
         boolean removeStationFromRoute(int routeId, int stationId) throws SQLException;
 
-        // Utility method to get all stations (for dropdowns, etc.)
         List<Station> getAllStations() throws SQLException;
 
-        // Method to update the sequence of all stations in a route
-        boolean updateRouteStationOrder(int routeId,
-                        List<vn.vnrailway.controller.manager.ManageRoutesServlet.StationOrderUpdateDTO> stationsOrder)
+        boolean updateRouteStationOrder(int routeId, List<StationOrderUpdateDTO> stationsOrder)
                         throws SQLException;
 
-        // Method to get the next available sequence number for a route
         int getNextSequenceNumberForRoute(int routeId) throws SQLException;
 
         List<RouteStationDetailDTO> findStationDetailsByRouteId(int routeId) throws SQLException;
 
-        // Method to increment sequence numbers for stations from a certain point
         void incrementSequenceNumbersFrom(int routeId, int fromSequenceNumber) throws SQLException;
+
+        boolean updateRouteActive(int routeId, boolean isActive) throws SQLException;
+
+        List<Route> findAllByActive(Boolean isActive) throws SQLException;
 }

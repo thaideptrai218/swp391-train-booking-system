@@ -171,3 +171,22 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
+// Copy hotline and show toast (moved from JSP inline script)
+function copyHotline(event) {
+  if (event) event.preventDefault();
+  const hotline = "0983868888";
+  navigator.clipboard.writeText(hotline).then(function() {
+    showToast("Đã sao chép số điện thoại vào clipboard");
+  }, function(err) {
+    console.error('Could not copy text: ', err);
+  });
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.className = "toast show";
+  setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+}
