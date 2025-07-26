@@ -130,7 +130,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -242,7 +242,7 @@ a:hover {
 .navbar .nav-list li a {
     text-decoration: none;
     color: var(--color-white);
-    font-size: 20px;
+    font-size: 15px; /* Changed from 20px to 15px */
     font-style: normal;
     font-weight: 700;
     line-height: 150%;
@@ -260,7 +260,7 @@ a:hover {
 .navbar .nav-list li.btn a {
     padding: 12px 32px;
     color: var(--color-white);
-    font-size: 18px;
+    font-size: 15px; /* Changed from 18px to 15px */
     font-weight: 500;
     line-height: normal;
 }
@@ -453,14 +453,15 @@ a:hover {
 
 .footer-bottom p.copyright {
     margin-top: 15px;
-    /* Message styling */
-    .error-message {
-        color: #dc3545; /* Red color for errors */
-        font-weight: bold;
-    }
+}
 
-    .success-message {
-        color: #28a745; /* Green color for success */
-        font-weight: bold;
-    }
+/* Message styling */
+.error-message {
+    color: #dc3545; /* Red color for errors */
+    font-weight: bold;
+}
+
+.success-message {
+    color: #28a745; /* Green color for success */
+    font-weight: bold;
 }

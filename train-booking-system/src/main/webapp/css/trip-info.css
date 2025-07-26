@@ -14,15 +14,7 @@ body {
     padding: 20px 0;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
 
-.navbar .container {
-    background-color: #2b669a;
-}
 
 .page-title {
     text-align: center;

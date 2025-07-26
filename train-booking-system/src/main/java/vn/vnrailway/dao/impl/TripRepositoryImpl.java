@@ -38,7 +38,10 @@ public class TripRepositoryImpl implements TripRepository {
         trip.setTripStatus(rs.getString("TripStatus"));
         trip.setBasePriceMultiplier(rs.getBigDecimal("BasePriceMultiplier"));
         // Bổ sung lấy isLocked
-        try { trip.setLocked(rs.getBoolean("IsLocked")); } catch (SQLException ignore) {}
+        try {
+            trip.setLocked(rs.getBoolean("IsLocked"));
+        } catch (SQLException ignore) {
+        }
         return trip;
     }
 
@@ -186,7 +189,7 @@ public class TripRepositoryImpl implements TripRepository {
     public boolean updateTripLocked(int tripId, boolean isLocked) throws SQLException {
         String sql = "UPDATE Trips SET IsLocked = ? WHERE TripID = ?";
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBoolean(1, isLocked);
             ps.setInt(2, tripId);
             int affectedRows = ps.executeUpdate();
@@ -209,13 +212,14 @@ public class TripRepositoryImpl implements TripRepository {
 
     @Override
     public List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId,
-            LocalDate departureDate) throws SQLException {
+            LocalDate departureDate, int numberOfPassenger) throws SQLException {
         List<TripSearchResultDTO> results = new ArrayList<>();
         String originStationCode;
         String destinationStationCode;
 
-        String callSP = "{CALL dbo.SearchTrips(?, ?, ?, ?)}"; // Params: OriginCode, DestCode, DepartureDate, ReturnDate
-                                                              // (NULL for one-way)
+        String callSP = "{CALL dbo.SearchTrips(?, ?, ?, ?, ?)}"; // Params: OriginCode, DestCode, DepartureDate,
+                                                                 // ReturnDate
+                                                                 // (NULL for one-way)
 
         try (Connection conn = DBContext.getConnection()) {
             // Fetch station codes using the provided IDs
@@ -227,6 +231,7 @@ public class TripRepositoryImpl implements TripRepository {
                 cs.setString(2, destinationStationCode);
                 cs.setDate(3, Date.valueOf(departureDate));
                 cs.setNull(4, Types.DATE); // @ReturnDate = NULL for one-way search
+                cs.setInt(5, numberOfPassenger);
 
                 try (ResultSet rs = cs.executeQuery()) {
                     while (rs.next()) {
@@ -289,88 +294,6 @@ public class TripRepositoryImpl implements TripRepository {
             throw e; // Re-throw to allow higher layers to handle it
         }
         return results;
-    }
-
-    // Main method for testing
-    public static void main(String[] args) {
-        TripRepository tripRepository = new TripRepositoryImpl();
-        try {
-            // Test findAll (basic trips, not search DTO)
-            System.out.println("Testing findAll trips:");
-            List<Trip> trips = tripRepository.findAll();
-            if (trips.isEmpty()) {
-                System.out.println("No trips found.");
-            } else {
-                trips.forEach(t -> System.out.println(t));
-            }
-
-            // Test findById (assuming trip with ID 1 exists)
-            int testTripId = 1; // Ensure this ID exists
-            System.out.println("\nTesting findById for trip ID: " + testTripId);
-            Optional<Trip> tripOpt = tripRepository.findById(testTripId);
-            tripOpt.ifPresentOrElse(
-                    t -> System.out.println("Found trip: " + t),
-                    () -> System.out.println("Trip with ID " + testTripId + " not found."));
-
-            // Test searchAvailableTrips
-            // IMPORTANT: You'll need valid station IDs and a date with expected trips in
-            // your DB
-            int originStationIdForTest = 1; // Example: Hanoi
-            int destinationStationIdForTest = 5; // Example: Da Nang
-            LocalDate departureDateForTest = LocalDate.now().plusDays(1); // Example: tomorrow
-
-            System.out.println("\nTesting searchAvailableTrips from Station " + originStationIdForTest +
-                    " to Station " + destinationStationIdForTest + " on " + departureDateForTest + ":");
-            List<TripSearchResultDTO> searchResults = tripRepository.searchAvailableTrips(
-                    originStationIdForTest, destinationStationIdForTest, departureDateForTest);
-
-            if (searchResults.isEmpty()) {
-                System.out.println("No available trips found for the criteria.");
-            } else {
-                searchResults.forEach(dto -> System.out.println(dto));
-            }
-
-            // Example of saving a new trip (uncomment and modify to test)
-            /*
-             * System.out.println("\nTesting save new trip:");
-             * // Ensure TrainID 1 and RouteID 1 exist for this test
-             * Trip newTrip = new Trip();
-             * newTrip.setTrainID(1);
-             * newTrip.setRouteID(1);
-             * newTrip.setDepartureDateTime(LocalDateTime.now().plusDays(5).withHour(10).
-             * withMinute(0));
-             * newTrip.setArrivalDateTime(LocalDateTime.now().plusDays(5).withHour(18).
-             * withMinute(0));
-             * newTrip.setHolidayTrip(false);
-             * newTrip.setTripStatus("Scheduled");
-             * newTrip.setBasePriceMultiplier(new BigDecimal("1.0"));
-             * 
-             * Trip savedTrip = tripRepository.save(newTrip);
-             * System.out.println("Saved trip: " + savedTrip);
-             * 
-             * if (savedTrip.getTripID() > 0) {
-             * // Example of updating the trip
-             * System.out.println("\nTesting update trip ID: " + savedTrip.getTripID());
-             * savedTrip.setTripStatus("Delayed");
-             * boolean updated = tripRepository.update(savedTrip);
-             * System.out.println("Update successful: " + updated);
-             * 
-             * Optional<Trip> updatedTripOpt =
-             * tripRepository.findById(savedTrip.getTripID());
-             * updatedTripOpt.ifPresent(t -> System.out.println("Updated trip details: " +
-             * t));
-             * 
-             * // Example of deleting the trip
-             * System.out.println("\nTesting delete trip ID: " + savedTrip.getTripID());
-             * boolean deleted = tripRepository.deleteById(savedTrip.getTripID());
-             * System.out.println("Delete successful: " + deleted);
-             * }
-             */
-
-        } catch (SQLException e) {
-            System.err.println("Error testing TripRepository: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -444,7 +367,8 @@ public class TripRepositoryImpl implements TripRepository {
         List<Object> params = new ArrayList<>();
 
         StringBuilder sqlBuilder = new StringBuilder("SELECT ");
-        sqlBuilder.append("t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier, t.IsLocked, t.DepartureDateTime ");
+        sqlBuilder.append(
+                "t.TripID, r.RouteName, t.IsHolidayTrip, t.TripStatus, t.RouteID, t.BasePriceMultiplier, t.IsLocked, t.DepartureDateTime ");
         sqlBuilder.append("FROM Trips t ");
         sqlBuilder.append("JOIN Routes r ON t.RouteID = r.RouteID ");
 

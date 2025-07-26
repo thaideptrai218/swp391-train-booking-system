@@ -381,7 +381,7 @@ button {
 }
 
 #feedbackMessage {
-    margin-top: 10px;
+    margin-top: -50px;
     font-size: 14px;
     text-align: center;
 }

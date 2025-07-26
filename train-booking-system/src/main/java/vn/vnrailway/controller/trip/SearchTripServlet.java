@@ -53,6 +53,7 @@ public class SearchTripServlet extends HttpServlet {
             try {
                 int originId = Integer.parseInt(originStationIdParam);
                 int destinationId = Integer.parseInt(destinationStationIdParam);
+                int passengerTotalInt;
 
                 Optional<Station> originStationOpt = stationRepository.findById(originId);
                 Optional<Station> destinationStationOpt = stationRepository.findById(destinationId);
@@ -111,9 +112,11 @@ public class SearchTripServlet extends HttpServlet {
         String destinationStationIdStr = request.getParameter("destinationStationId");
         String departureDateStr = request.getParameter("departure-date");
         String returnDateStr = request.getParameter("return-date"); // Optional
+        String passengerTotal = request.getParameter("passenger-total-number");
 
         int originStationId;
         int destinationStationId;
+        int passengerTotalInt;
         LocalDate departureLocalDate;
         LocalDate returnLocalDate = null;
         DateTimeFormatter inputDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -123,6 +126,7 @@ public class SearchTripServlet extends HttpServlet {
             originStationId = Integer.parseInt(originStationIdStr);
             destinationStationId = Integer.parseInt(destinationStationIdStr);
             departureLocalDate = LocalDate.parse(departureDateStr, inputDateFormatter);
+            passengerTotalInt = Integer.parseInt(passengerTotal);
 
             if (returnDateStr != null && !returnDateStr.trim().isEmpty()) {
                 returnLocalDate = LocalDate.parse(returnDateStr, inputDateFormatter);
@@ -172,7 +176,7 @@ public class SearchTripServlet extends HttpServlet {
 
         try {
             List<TripSearchResultDTO> outboundTrips = tripService.searchAvailableTrips(originStationId,
-                    destinationStationId, departureLocalDate);
+                    destinationStationId, departureLocalDate, passengerTotalInt);
             request.setAttribute("outboundTrips", outboundTrips);
             request.setAttribute("outboundTripsFromServlet", true); // Flag to prevent mock data in JSP
 
@@ -195,7 +199,7 @@ public class SearchTripServlet extends HttpServlet {
 
             if (returnLocalDate != null) {
                 List<TripSearchResultDTO> returnTrips = tripService.searchAvailableTrips(destinationStationId,
-                        originStationId, returnLocalDate);
+                        originStationId, returnLocalDate, passengerTotalInt);
                 request.setAttribute("returnTrips", returnTrips);
                 request.setAttribute("returnDateDisplay", returnLocalDate.format(displayDateFormatter));
             }

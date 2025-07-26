@@ -23,44 +23,46 @@ import java.util.Map;
  */
 @WebServlet("/api/trip/search")
 public class TripSearchServlet extends HttpServlet {
-    
+
     private TripRepository tripRepository;
-    
+
     @Override
     public void init() throws ServletException {
         super.init();
         this.tripRepository = new TripRepositoryImpl();
     }
-    
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
+
         try {
             // Get search parameters
             String originStationIdParam = request.getParameter("originStationId");
             String destinationStationIdParam = request.getParameter("destinationStationId");
             String departureDateParam = request.getParameter("departureDate");
-            
+            String passengerNUmber = request.getParameter("passenger-total-number");
+
             // Validate required parameters
             if (originStationIdParam == null || destinationStationIdParam == null || departureDateParam == null) {
-                sendErrorResponse(response, "Missing required parameters: originStationId, destinationStationId, departureDate", 400);
+                sendErrorResponse(response,
+                        "Missing required parameters: originStationId, destinationStationId, departureDate", 400);
                 return;
             }
-            
+
             // Parse parameters
             int originStationId;
             int destinationStationId;
             LocalDate departureDate;
-            
+            int passengerNumberInt;
+
             try {
                 originStationId = Integer.parseInt(originStationIdParam);
                 destinationStationId = Integer.parseInt(destinationStationIdParam);
-                
-                // Try YYYY-MM-DD format first (from date picker), then dd/MM/yyyy format
+                passengerNumberInt = Integer.parseInt(passengerNUmber);
                 try {
                     departureDate = LocalDate.parse(departureDateParam);
                 } catch (DateTimeParseException e1) {
@@ -76,41 +78,39 @@ public class TripSearchServlet extends HttpServlet {
                 sendErrorResponse(response, "Invalid station ID format", 400);
                 return;
             }
-            
+
             // Validate station IDs are different
             if (originStationId == destinationStationId) {
                 sendErrorResponse(response, "Origin and destination stations must be different", 400);
                 return;
             }
-            
+
             // Search for trips
             List<TripSearchResultDTO> trips = tripRepository.searchAvailableTrips(
-                originStationId, 
-                destinationStationId, 
-                departureDate
-            );
-            
+                    originStationId,
+                    destinationStationId,
+                    departureDate, passengerNumberInt);
+
             // Build response
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("success", true);
             responseData.put("trips", trips);
             responseData.put("searchCriteria", Map.of(
-                "originStationId", originStationId,
-                "destinationStationId", destinationStationId,
-                "departureDate", departureDate.toString()
-            ));
+                    "originStationId", originStationId,
+                    "destinationStationId", destinationStationId,
+                    "departureDate", departureDate.toString()));
             responseData.put("totalResults", trips.size());
-            
+
             String jsonResponse = JsonUtils.toJsonString(responseData);
             response.getWriter().write(jsonResponse);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             sendErrorResponse(response, "Internal server error: " + e.getMessage(), 500);
         }
     }
-    
-    private void sendErrorResponse(HttpServletResponse response, String message, int statusCode) 
+
+    private void sendErrorResponse(HttpServletResponse response, String message, int statusCode)
             throws IOException {
         response.setStatus(statusCode);
         Map<String, Object> errorResponse = new HashMap<>();
