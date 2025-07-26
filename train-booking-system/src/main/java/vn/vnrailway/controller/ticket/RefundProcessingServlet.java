@@ -56,7 +56,7 @@ public class RefundProcessingServlet extends HttpServlet {
     // Replace with your 16-character App Password
     private static final String EMAIL_PASSWORD = "slos bctt epxv osla";
 
-    private static final String UPLOAD_DIR = "uploads/refund_images";
+
 
     @Override
     public void init() throws ServletException {
@@ -86,7 +86,7 @@ public class RefundProcessingServlet extends HttpServlet {
         Part filePart = request.getPart("imageFile"); // lấy ảnh từ input name="imageFile"
         String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
 
-        String uploadPath = "C:\\Users\\Xuan Truong\\Documents\\SWP\\swp391-train-booking-system\\train-booking-system\\src\\main\\webapp\\uploads";
+        String uploadPath = "C:/uploads";
 
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) uploadDir.mkdirs();

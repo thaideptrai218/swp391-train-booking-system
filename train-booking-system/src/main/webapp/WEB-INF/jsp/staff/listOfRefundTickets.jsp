@@ -374,11 +374,16 @@
                                                     ${req.notes}
                                                 </td>
                                                 <td>
-                                                    <c:if test="${not empty req.images}">
-                                                        <img src="${pageContext.request.contextPath}/uploads/train-booking-system/src/main/webapp/uploads/e306c74a-ef46-4d2c-a335-3becb802ef0a_z6734377470657_31177930b3b258fd36bbb3d11e5b920d.png"
-                                                            width="200" />
-                                                            ${req.images}
-                                                    </c:if>
+                                                    <c:choose>
+                                                        <c:when test="${not empty req.images}">
+                                                            <img src="${pageContext.request.contextPath}/image/${req.images}"
+                                                                width="200" alt="Ảnh chuyển khoản"
+                                                                style="border: 1px solid #ddd; border-radius: 4px;" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span style="color: #666; font-style: italic;">Chưa có ảnh</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </td>
                                             </tr>
                                         </c:forEach>

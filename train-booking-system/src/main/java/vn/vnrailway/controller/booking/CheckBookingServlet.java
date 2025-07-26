@@ -26,6 +26,12 @@ import java.util.Optional;
 public class CheckBookingServlet extends HttpServlet {
     private BookingRepository bookingRepository;
 
+    // Mã đặt chỗ: chỉ chữ cái và số, ít nhất 1 ký tự
+    private static final String BOOKING_CODE_REGEX = "^[a-zA-Z0-9]+$";
+
+    // Số điện thoại: 10 số, bắt đầu bằng 0
+    private static final String PHONE_REGEX = "^0\\d{9}$";
+
     @Override
     public void init() throws ServletException {
         super.init();
@@ -52,12 +58,19 @@ public class CheckBookingServlet extends HttpServlet {
         request.setAttribute("phoneNumber", phoneNumber);
         request.setAttribute("email", email);
 
-        if (!bookingCode.isEmpty() || !phoneNumber.isEmpty() && !email.isEmpty()) {
+        if (!bookingCode.isEmpty() || (!phoneNumber.isEmpty() && !email.isEmpty())) {
+
+            // VALIDATE BẮT BUỘC
             if (bookingCode.isEmpty()) {
                 request.setAttribute("errorMessage", "Vui lòng nhập mã đặt chỗ.");
+            } else if (!bookingCode.matches("^[a-zA-Z0-9]+$")) {
+                request.setAttribute("errorMessage", "Mã đặt chỗ chỉ được chứa chữ cái và số.");
             } else if (phoneNumber.isEmpty() && email.isEmpty()) {
                 request.setAttribute("errorMessage", "Vui lòng nhập số điện thoại hoặc email.");
+            } else if (!phoneNumber.isEmpty() && !phoneNumber.matches("^0\\d{9}$")) {
+                request.setAttribute("errorMessage", "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.");
             } else {
+                // Nếu không có lỗi validate → gọi DB để kiểm tra
                 try {
                     CheckBookingDTO checkBookingDTO = bookingRepository.findBookingDetailsByCode(bookingCode,
                             phoneNumber, email);
