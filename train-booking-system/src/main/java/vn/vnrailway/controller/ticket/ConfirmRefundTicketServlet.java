@@ -179,6 +179,13 @@ public class ConfirmRefundTicketServlet extends HttpServlet {
         String email = request.getParameter("email");
         String message = "";
         String messageType = "";
+        String noteSTK = request.getParameter("bankAccountNumber");
+            if (noteSTK == null || !noteSTK.trim().matches("^\\d{6,20}\\s-\\s[A-Za-zÀ-ỹ\\s]+$")) {
+                request.setAttribute("errorMessage",
+                        "Số tài khoản không đúng định dạng. Vui lòng nhập theo mẫu: 0123456789 - Vietcombank");
+                request.getRequestDispatcher("/WEB-INF/jsp/refund-ticket/refund-ticket.jsp").forward(request, response);
+                return;
+            }
 
         try {
             Properties props = new Properties();
@@ -271,6 +278,7 @@ public class ConfirmRefundTicketServlet extends HttpServlet {
 
             String[] ticketInfos = request.getParameterValues("ticketInfo");
             session.setAttribute("ticketInfos", ticketInfos);
+            session.setAttribute("noteSTK", noteSTK);
 
             request.setAttribute(messageContent, ticketInfos);
             // Chuyển hướng đến trang nhập OTP

@@ -104,7 +104,7 @@
                                 </li>
                                 <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
                                 </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">Danh sách các
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
                                         vé đã hoàn</a></li>
                                 <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
                                 </li>
@@ -141,13 +141,14 @@
                                         <th>Chi phí</th>
                                         <th>Thời gian yêu cầu</th>
                                         <th>Người đặt vé</th>
+                                        <th>Ghi chú STK</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <c:forEach var="req" items="${refundRequests}" varStatus="i">
                                         <tr>
-                                            <td colspan="9" style="background: #eef5ff; font-weight: bold;">
+                                            <td colspan="10" style="background: #eef5ff; font-weight: bold;">
                                                 ${req.startStation} - ${req.endStation} |
                                                 ${req.scheduledDeparture}
                                             </td>
@@ -188,10 +189,21 @@
                                                 SĐT: ${req.phoneNumber}<br />
                                                 CMND: ${req.userIDCard}
                                             </td>
+                                            <td style="text-align: left;">
+                                                <c:choose>
+                                                    <c:when test="${not empty req.noteSTK}">
+                                                        ${req.noteSTK}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Không có ghi chú
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
                                             <td>
-                                                <form method="post" action="refundProcessing">
+                                                <form method="post" action="refundProcessing" enctype="multipart/form-data">
+                                                    <input type="file" name="imageFile" accept="image/*" required />
                                                     <input type="hidden" name="ticketInfo"
-                                                        value="${req.ticketID}|${req.policyID}|${req.originalPrice}|${req.refundFee}|${req.refundAmount}|${req.requestedAt}|${req.userID}|${sessionScope.loggedInUser.userID}|${req.bookingID}" />
+                                                        value="${req.ticketID}|${req.policyID}|${req.originalPrice}|${req.refundFee}|${req.refundAmount}|${req.requestedAt}|${req.userID}|${sessionScope.loggedInUser.userID}|${req.bookingID}|${req.noteSTK}" />
                                                     <input type="hidden" name="email" value="${req.email}" />
                                                     <div style="margin-top: 6px;">
                                                         <button type="submit" name="action" value="approve">Chấp

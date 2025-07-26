@@ -28,6 +28,7 @@ public class RefundTicketDTO {
     private String startStationName;
     private String endStationName;
     private int policyID;
+    private String noteSTK;
 
     // Thông tin hoàn vé
     private int hoursBeforeDeparture;

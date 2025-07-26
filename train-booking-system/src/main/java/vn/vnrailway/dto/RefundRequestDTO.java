@@ -39,4 +39,6 @@ public class RefundRequestDTO {
     private String email;
     private String userIDCard;
     private String phoneNumber;
+    private String noteSTK; // Note for refund request, e.g., "Refund due to cancellation"
+    private String image;
 }

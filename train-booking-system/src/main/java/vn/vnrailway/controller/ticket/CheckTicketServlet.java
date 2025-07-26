@@ -64,6 +64,16 @@ public class CheckTicketServlet extends HttpServlet {
         request.setAttribute("departureDate", departureDate);
         request.setAttribute("idNumber", idNumber);
 
+        List<String> stationList = null;
+        try {
+            stationList = ticketRepository.getAllStationNames();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        request.setAttribute("stationList", stationList);
+
         if (ticketCode.isEmpty()) {
             request.setAttribute("errorMessage", "Vui lòng nhập mã vé để kiểm tra vé.");
             request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
@@ -86,8 +96,15 @@ public class CheckTicketServlet extends HttpServlet {
             return;
         }
 
+        if (!ticketCode.matches("^[a-zA-Z0-9]+$")) {
+            request.setAttribute("errorMessage", "Mã vé chỉ được chứa chữ cái và số.");
+            request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
+            return;
+        }
+
         if (!idNumber.isEmpty() && !idNumber.matches("^\\d{12}$")) {
-            request.setAttribute("errorMessage", "Số giấy tờ phải là 12 chữ số nếu là vé người lớn, trẻ con không cần nhập. Vui lòng nhập lại.");
+            request.setAttribute("errorMessage",
+                    "Số giấy tờ phải là 12 chữ số nếu là vé người lớn, trẻ con không cần nhập. Vui lòng nhập lại.");
             request.getRequestDispatcher("/WEB-INF/jsp/check-ticket/check-ticket.jsp").forward(request, response);
             return;
         }
