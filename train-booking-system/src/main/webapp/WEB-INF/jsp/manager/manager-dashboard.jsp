@@ -66,6 +66,35 @@
         .filter-form {
             margin-top: 15px;
         }
+        .revenue-filter-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        .revenue-filter-container .filter-buttons {
+            display: flex;
+            gap: 10px;
+            background-color: #f2f2f2;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        .revenue-filter-container .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            background-color: transparent;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .revenue-filter-container .filter-btn.active {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -77,24 +106,23 @@
                 <h1>Bảng Điều Khiển Quản Lý</h1>
             </header>
 
+            <div class="revenue-filter-container">
+                <div class="filter-buttons">
+                    <button class="filter-btn ${selectedActualRevenueMonths == 1 ? 'active' : ''}" onclick="applyRevenueFilter(1)">1 Tháng</button>
+                    <button class="filter-btn ${selectedActualRevenueMonths == 3 ? 'active' : ''}" onclick="applyRevenueFilter(3)">3 Tháng</button>
+                    <button class="filter-btn ${selectedActualRevenueMonths == 6 ? 'active' : ''}" onclick="applyRevenueFilter(6)">6 Tháng</button>
+                    <button class="filter-btn ${selectedActualRevenueMonths == 12 ? 'active' : ''}" onclick="applyRevenueFilter(12)">12 Tháng</button>
+                </div>
+            </div>
+
             <div class="revenue-container">
                 <div class="stat-card">
-                    <h3>Doanh thu dự kiến (6 tháng)</h3>
+                    <h3>Doanh thu dự kiến</h3>
                     <p><fmt:formatNumber value="${expectedRevenue}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
                 </div>
                 <div class="stat-card">
                     <h3>Doanh thu thực tế</h3>
                     <p><fmt:formatNumber value="${actualRevenue}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
-                     <form action="managerDashboard" method="get" class="filter-form" onchange="this.submit()">
-                        <select name="actualRevenueMonths">
-                            <option value="1" ${selectedActualRevenueMonths == 1 ? 'selected' : ''}>1 tháng</option>
-                            <option value="3" ${selectedActualRevenueMonths == 3 ? 'selected' : ''}>3 tháng</option>
-                            <option value="6" ${selectedActualRevenueMonths == 6 ? 'selected' : ''}>6 tháng</option>
-                            <option value="12" ${selectedActualRevenueMonths == 12 ? 'selected' : ''}>12 tháng</option>
-                        </select>
-                        <input type="hidden" name="departureMonths" value="${selectedDepartureMonths}">
-                        <input type="hidden" name="arrivalMonths" value="${selectedArrivalMonths}">
-                    </form>
                 </div>
                 <div class="stat-card">
                     <h3>Tổng tiền đã hoàn</h3>
@@ -117,8 +145,8 @@
                     <p>${refundableTicketsCount}</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Yêu cầu hoàn tiền</h3>
-                    <p>${pendingRefundsCount}</p>
+                    <h3>Tổng số yêu cầu đã được hoàn tiền</h3>
+                    <p>${approvedRefundsCount}</p>
                 </div>
                  <div class="stat-card">
                     <h3>Tổng Số Đoàn Tàu</h3>
@@ -191,6 +219,12 @@
          style="display: none;"></div>
 
     <script>
+        function applyRevenueFilter(months) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('actualRevenueMonths', months);
+            window.location.href = url.toString();
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const chartDataElement = document.getElementById('chartData');
             const popularDeparturesData = JSON.parse(chartDataElement.dataset.popularDepartures);

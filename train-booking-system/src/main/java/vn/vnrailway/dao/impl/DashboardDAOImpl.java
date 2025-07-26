@@ -32,6 +32,9 @@ public class DashboardDAOImpl extends DashboardDAO {
     @Override
     public int getUserCountByRole(String role) {
         String query = "SELECT COUNT(*) FROM Users WHERE Role = ?";
+        if ("Guest".equalsIgnoreCase(role)) {
+            query = "SELECT COUNT(*) FROM Users WHERE Role = ? OR IsGuestAccount = 1";
+        }
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, role);
@@ -368,8 +371,8 @@ public class DashboardDAOImpl extends DashboardDAO {
     }
 
     @Override
-    public double getExpectedRevenue() throws SQLException {
-        double actualRevenueLast6Months = getActualRevenue(6);
+    public double getExpectedRevenue(int months) throws SQLException {
+        double actualRevenueLastNMonths = getActualRevenue(months);
 
         String futureRevenueQuery = "SELECT SUM(ISNULL(b.TotalPrice, 0)) " +
                                     "FROM Bookings b " +
@@ -389,7 +392,7 @@ public class DashboardDAOImpl extends DashboardDAO {
             e.printStackTrace();
         }
 
-        return actualRevenueLast6Months + futureRevenue;
+        return actualRevenueLastNMonths + futureRevenue;
     }
 
     @Override
@@ -418,13 +421,30 @@ public class DashboardDAOImpl extends DashboardDAO {
     }
 
     @Override
-    public double getTotalRefunds() throws SQLException {
-        String query = "SELECT SUM(ActualRefundAmount) FROM Refunds WHERE Status = 'Accepted'";
+    public double getTotalRefunds(int months) throws SQLException {
+        String query = "SELECT SUM(ActualRefundAmount) FROM Refunds WHERE Status = 'Approved' AND ProcessedAt >= DATEADD(month, ?, GETDATE())";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, -months);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int getApprovedRefundsCount() throws SQLException {
+        String query = "SELECT COUNT(*) FROM Refunds WHERE Status = 'Approved'";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                return rs.getDouble(1);
+                return rs.getInt(1);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -527,18 +547,24 @@ public class DashboardDAOImpl extends DashboardDAO {
 
     @Override
     public int getRefundableTicketsCount() throws SQLException {
-        String query = "SELECT COUNT(t.TicketCode) " +
-               "FROM Tickets t " +
-               "JOIN Bookings b ON t.BookingID = b.BookingID " +
-               "JOIN Trips tr ON t.TripID = tr.TripID " +
-               "WHERE b.PaymentStatus = 'Paid' AND tr.DepartureDateTime > GETDATE() " +
-               "AND EXISTS ( " +
-               "    SELECT 1 FROM CancellationPolicies cp " +
-               "    WHERE cp.IsRefundable = 1 AND cp.IsActive = 1 " +
-               "      AND GETDATE() BETWEEN cp.EffectiveFromDate AND ISNULL(cp.EffectiveToDate, '9999-12-31') " +
-               "      AND DATEDIFF(hour, GETDATE(), tr.DepartureDateTime) >= cp.HoursBeforeDeparture_Min " +
-               "      AND DATEDIFF(hour, GETDATE(), tr.DepartureDateTime) < cp.HoursBeforeDeparture_Max " +
-               ")";
+        String query = "SELECT COUNT(DISTINCT TK.TicketID) " +
+                "FROM Tickets TK " +
+                "JOIN Bookings B ON TK.BookingID = B.BookingID AND B.PaymentStatus = 'Paid' " +
+                "JOIN Trips TR ON TK.TripID = TR.TripID " +
+                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID " +
+                "LEFT JOIN CancellationPolicies CP ON " +
+                "    TK.IsCancelled = 0 " +
+                "    AND DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min " +
+                "    AND (CP.HoursBeforeDeparture_Max IS NULL OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max) " +
+                "    AND CP.IsActive = 1 " +
+                "    AND CP.IsRefundable = 1 " +
+                "WHERE " +
+                "    TK.TicketStatus = 'Valid' " +
+                "    AND DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 " +
+                "    AND ( " +
+                "        TK.IsCancelled = 1 " +
+                "        OR (TK.IsRefundable = 1 AND CP.PolicyID IS NOT NULL) " +
+                "    )";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {

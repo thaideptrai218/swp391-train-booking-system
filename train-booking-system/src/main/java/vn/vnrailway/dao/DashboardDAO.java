@@ -77,7 +77,7 @@ public class DashboardDAO {
         return 0;
     }
 
-    public double getExpectedRevenue() throws SQLException {
+    public double getExpectedRevenue(int months) throws SQLException {
         return 0;
     }
 
@@ -85,7 +85,7 @@ public class DashboardDAO {
         return 0;
     }
 
-    public double getTotalRefunds() throws SQLException {
+    public double getTotalRefunds(int months) throws SQLException {
         return 0;
     }
 
@@ -106,6 +106,10 @@ public class DashboardDAO {
     }
 
     public int getRefundableTicketsCount() throws SQLException {
+        return 0;
+    }
+
+    public int getApprovedRefundsCount() throws SQLException {
         return 0;
     }
 }

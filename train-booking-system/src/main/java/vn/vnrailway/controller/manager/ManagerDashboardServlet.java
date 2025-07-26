@@ -39,20 +39,20 @@ public class ManagerDashboardServlet extends HttpServlet {
 
             // Dữ liệu thống kê chung
             int totalTrains = dashboardDAO.getTotalTrainsCount();
-            double totalRefunds = dashboardDAO.getTotalRefunds();
-            int pendingRefundsCount = dashboardDAO.getPendingRefundsCount();
+            double totalRefunds = dashboardDAO.getTotalRefunds(actualRevenueMonths);
+            int approvedRefundsCount = dashboardDAO.getApprovedRefundsCount();
             int totalTicketsSold = dashboardDAO.getTotalTicketsSold();
             int refundableTicketsCount = dashboardDAO.getRefundableTicketsCount();
 
             // Dữ liệu doanh thu mới
-            double expectedRevenue = dashboardDAO.getExpectedRevenue();
+            double expectedRevenue = dashboardDAO.getExpectedRevenue(actualRevenueMonths);
             double actualRevenue = dashboardDAO.getActualRevenue(actualRevenueMonths);
             double profit = actualRevenue - totalRefunds;
 
             // Đặt các thuộc tính cho JSP
             request.setAttribute("totalTrains", totalTrains);
             request.setAttribute("totalRefunds", totalRefunds);
-            request.setAttribute("pendingRefundsCount", pendingRefundsCount);
+            request.setAttribute("approvedRefundsCount", approvedRefundsCount);
             request.setAttribute("expectedRevenue", expectedRevenue);
             request.setAttribute("actualRevenue", actualRevenue);
             request.setAttribute("profit", profit);
