@@ -5,13 +5,12 @@ body {
 }
 
 .main-content {
-  margin-top: 150px;
   display: flex;
   justify-content: center;
   /* align-items: flex-start; */
   gap: 30px;
   padding: 20px;
-  /* margin: 20px; */
+  margin: 20px;
 }
 
 .check-info {

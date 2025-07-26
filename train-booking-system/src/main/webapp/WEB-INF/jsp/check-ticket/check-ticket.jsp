@@ -7,14 +7,12 @@
       <head>
         <title>Tra cứu thông tin đặt vé</title>
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/check-booking.css" />
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
-
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
 
       <body>
-                    <jsp:include page="../common/header.jsp" />
-
+        <jsp:include page="../common/header.jsp" />
         <!-- <header>
           <div class="navbar">
             <a href="${pageContext.request.contextPath}/landing">
@@ -152,10 +150,13 @@
                             <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
                           </c:when>
                           <c:when test="${infoPassenger.ticketStatus == 'Refunded'}">
-                            <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                            <span style="color: #dc3545; font-weight: bold;">Đã hoàn tiền</span> <!-- đỏ đậm -->
                           </c:when>
                           <c:when test="${infoPassenger.ticketStatus == 'RejectedRefund'}">
-                            <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                            <span style="color: #dc3545; font-weight: bold;">Đã từ chối hoàn tiền</span> <!-- đỏ đậm -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'Cancelled'}">
+                            <span style="color: #dc3545; font-weight: bold;">Chuyến đi bị hủy</span> <!-- đỏ đậm -->
                           </c:when>
                           <c:when test="${infoPassenger.ticketStatus == 'Expired'}">
                             <span style="color: #6c757d; font-weight: bold;">Đã hết hạn</span>
