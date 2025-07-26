@@ -409,7 +409,7 @@ public class ManageTripsServlet extends HttpServlet {
                         try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
                             conn.setAutoCommit(false);
                             // 1. Cập nhật isCancelled = 1 cho tất cả vé
-                            String updateTicketStatusSql = "UPDATE Tickets SET isCancelled = 1 WHERE TripID = ?";
+                            String updateTicketStatusSql = "UPDATE Tickets SET isCancelled = 1, TicketStatus = 'Cancelled' WHERE TripID = ?";
                             try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTicketStatusSql)) {
                                 ps.setInt(1, tripId);
                                 ps.executeUpdate();

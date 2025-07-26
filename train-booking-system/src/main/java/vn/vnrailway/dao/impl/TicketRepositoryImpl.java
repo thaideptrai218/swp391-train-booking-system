@@ -420,119 +420,148 @@ public class TicketRepositoryImpl implements TicketRepository {
     @Override
     public CheckInforRefundTicketDTO findInformationRefundTicketDetailsByCode(String bookingCode, String phoneNumber,
             String email) throws SQLException {
-        String sql = "USE TrainTicketSystemDB_V2;\r\n" + //
-                "\r\n" + //
-                "SELECT \r\n" + //
-                "    P.FullName AS PassengerFullName,\r\n" + //
-                "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
-                "    TK.TicketCode,\r\n" + //
-                "    TK.TicketID,\r\n" + //
-                "    PT.TypeName AS PassengerType,\r\n" + //
-                "    ST.TypeName AS SeatTypeName,\r\n" + //
-                "    S.SeatNumber,\r\n" + //
-                "    C.CoachName,\r\n" + //
-                "    T.TrainName,\r\n" + //
-                "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
-                "    TK.TicketStatus,\r\n" + //
-                "    TK.Price,\r\n" + //
-                "    StartStation.StationName AS StartStationName,\r\n" + //
-                "    EndStation.StationName AS EndStationName,\r\n" + //
-                "\r\n" + //
-                "    CASE \r\n" + //
-                "\t\tWHEN TK.IsCancelled = 1 THEN 1\r\n" + //
-                "\t\tELSE CP.PolicyID\r\n" + //
-                "\tEND AS PolicyID,\r\n" + //
-                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
-                "\r\n" + //
-                "    -- Thông tin hoàn vé\r\n" + //
-                "    CASE \r\n" + //
-                "\t\tWHEN TK.IsRefundable = 0 THEN 0\r\n" + //
-                "        WHEN TK.IsCancelled = 1 THEN 1\r\n" + //
-                "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 OR TK.IsRefundable = 0 THEN 0 \r\n"
-                + //
-                "        ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
-                "    END AS IsRefundable,\r\n" + //
-                "\r\n" + //
-                "    CASE \r\n" + //
-                "        WHEN TK.IsCancelled = 1 THEN N'Hoàn tiền 100% chuyến đi bị hủy'\r\n" + //
-                "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
-                "        ELSE ISNULL(CP.PolicyName, N'Không áp dụng')\r\n" + //
-                "    END AS RefundPolicy,\r\n" + //
-                "\r\n" + //
-                "    -- Tính phí hoàn vé\r\n" + //
-                "    CASE\r\n" + //
-                "        WHEN TK.IsCancelled = 1 THEN 0\r\n" + //
-                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                "            CASE \r\n" + //
-                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN (TK.Price * CP.FeePercentage / 100.0)\r\n"
-                + //
-                "                ELSE CP.FixedFeeAmount\r\n" + //
-                "            END\r\n" + //
-                "        ELSE 0\r\n" + //
-                "    END AS RefundFee,\r\n" + //
-                "\r\n" + //
-                "    -- Tính số tiền được hoàn lại\r\n" + //
-                "    CASE \r\n" + //
-                "        WHEN TK.IsCancelled = 1 THEN TK.Price\r\n" + //
-                "        WHEN CP.IsRefundable = 1 THEN \r\n" + //
-                "            CASE \r\n" + //
-                "                WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n"
-                + //
-                "                ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
-                "            END\r\n" + //
-                "        ELSE 0\r\n" + //
-                "    END AS RefundAmount,\r\n" + //
-                "\r\n" + //
-                "    -- Trạng thái hoàn vé\r\n" + //
-                "    CASE \r\n" + //
-                "        WHEN TK.TicketStatus IN ('Used', 'Expired') THEN N'Không thể hoàn vé (vé đã sử dụng hoặc hết hạn)'\r\n"
-                + //
-                "        WHEN TK.TicketStatus = 'Refunded' THEN N'Yêu cầu được chấp nhận'\r\n" + //
-                "        WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối'\r\n" + //
-                "        WHEN TK.TicketStatus = 'Processing' THEN N'Đang trong quá trình xử lý hoàn vé'\r\n" + //
-                "\t\tWHEN TK.IsCancelled = 1 THEN N'Được hoàn vé (do chuyến đi bị hủy)'\r\n" + //
-                "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n"
-                + //
-                "        WHEN CP.PolicyName IS NULL THEN N'Không có chính sách hoàn vé'\r\n" + //
-                "        WHEN CP.IsRefundable = 0 THEN N'Không đủ điều kiện hoàn vé'\r\n" + //
-                "        ELSE N'Được hoàn vé'\r\n" + //
-                "    END AS RefundStatus,\r\n" + //
-                "\r\n" + //
-                "    -- Thông tin người đặt\r\n" + //
-                "    u.FullName AS UserFullName,\r\n" + //
-                "    u.Email,\r\n" + //
-                "    u.IDCardNumber,\r\n" + //
-                "    u.PhoneNumber\r\n" + //
-                "\r\n" + //
-                "FROM Tickets TK\r\n" + //
-                "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
-                "JOIN Users u ON B.UserID = u.UserID\r\n" + //
-                "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
-                "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
-                "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
-                "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
-                "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
-                "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
-                "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
-                "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
-                "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
-                "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID\r\n" + //
-                "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID\r\n" + //
-                "\r\n" + //
-                "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
-                "LEFT JOIN CancellationPolicies CP ON\r\n" + //
-                "\tTK.IsCancelled = 0 AND\r\n" + //
-                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
-                "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
-                "    (\r\n" + //
-                "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
-                "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
-                "    )\r\n" + //
-                "    AND CP.IsActive = 1\r\n" + //
-                "\r\n" + //
-                "WHERE \r\n" + //
-                "   ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode =  ? AND u.Email = ?));\r\n" + //
-                "";
+        String sql = 
+                        "SELECT \r\n" + //
+                        "    P.FullName AS PassengerFullName,\r\n" + //
+                        "    P.IDCardNumber AS PassengerIDCard,\r\n" + //
+                        "    TK.TicketCode,\r\n" + //
+                        "    TK.TicketID,\r\n" + //
+                        "    PT.TypeName AS PassengerType,\r\n" + //
+                        "    ST.TypeName AS SeatTypeName,\r\n" + //
+                        "    S.SeatNumber,\r\n" + //
+                        "    C.CoachName,\r\n" + //
+                        "    T.TrainName,\r\n" + //
+                        "    TS1.ScheduledDeparture AS ScheduledDepartureTime,\r\n" + //
+                        "    TK.TicketStatus,\r\n" + //
+                        "    TK.Price,\r\n" + //
+                        "    StartStation.StationName AS StartStationName,\r\n" + //
+                        "    EndStation.StationName AS EndStationName,\r\n" + //
+                        "\r\n" + //
+                        "    CASE \r\n" + //
+                        "\t\tWHEN TK.IsRefundable = 0 AND TK.IsCancelled = 1 THEN (SELECT AppliedPolicyID FROM Refunds RT WHERE RT.TicketID = TK.TicketID)\r\n" + //
+                        "\t\tWHEN TK.IsCancelled = 1 THEN 1\r\n" + //
+                        "\t\tELSE CP.PolicyID\r\n" + //
+                        "\tEND AS PolicyID,\r\n" + //
+                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) AS HoursBeforeDeparture,\r\n" + //
+                        "\r\n" + //
+                        "    -- Thông tin hoàn vé\r\n" + //
+                        "    CASE \r\n" + //
+                        "\t\tWHEN TK.IsRefundable = 0 THEN 0\r\n" + //
+                        "        WHEN TK.isCancelled = 1 THEN 1\r\n" + //
+                        "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 OR TK.IsRefundable = 0 THEN 0 \r\n" + //
+                        "        ELSE ISNULL(CP.IsRefundable, 0) \r\n" + //
+                        "    END AS IsRefundable,\r\n" + //
+                        "\r\n" + //
+                        "    CASE \r\n" + //
+                        "\t\tWHEN TK.IsRefundable = 0 AND TK.TicketStatus = 'Cancelled' THEN N'Vé đã được người dùng hủy trước khi tàu bị hủy. Không được hoàn tiền theo chính sách tàu hủy chuyến.'\r\n" + //
+                        "        WHEN TK.isCancelled = 1 THEN N'Hoàn tiền 100% chuyến đi bị hủy'\r\n" + //
+                        "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Không áp dụng' \r\n" + //
+                        "        ELSE ISNULL(CP.PolicyName, N'Không áp dụng')\r\n" + //
+                        "    END AS RefundPolicy,\r\n" + //
+                        "\r\n" + //
+                        "    -- Tính phí hoàn vé\r\n" + //
+                        "    CASE\r\n" + //
+                        "    -- Nếu đã hoàn trước khi tàu hủy, tra phí từ bảng Refunds\r\n" + //
+                        "    WHEN TK.IsRefundable = 0 AND TK.TicketStatus = 'Cancelled' THEN \r\n" + //
+                        "        (\r\n" + //
+                        "            SELECT \r\n" + //
+                        "                CASE \r\n" + //
+                        "                    WHEN (TK.Price * CP2.FeePercentage / 100.0) > CP2.FixedFeeAmount \r\n" + //
+                        "                    THEN (TK.Price * CP2.FeePercentage / 100.0)\r\n" + //
+                        "                    ELSE CP2.FixedFeeAmount\r\n" + //
+                        "                END\r\n" + //
+                        "            FROM Refunds R\r\n" + //
+                        "            JOIN CancellationPolicies CP2 ON R.AppliedPolicyID = CP2.PolicyID\r\n" + //
+                        "            WHERE R.TicketID = TK.TicketID\r\n" + //
+                        "        )\r\n" + //
+                        "\r\n" + //
+                        "    WHEN TK.IsCancelled = 1 THEN 0\r\n" + //
+                        "\r\n" + //
+                        "    WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                        "        CASE \r\n" + //
+                        "            WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount \r\n" + //
+                        "            THEN (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
+                        "            ELSE CP.FixedFeeAmount\r\n" + //
+                        "        END\r\n" + //
+                        "    ELSE 0\r\n" + //
+                        "END AS RefundFee,\r\n" + //
+                        "\r\n" + //
+                        "    -- Tính số tiền được hoàn lại\r\n" + //
+                        "    CASE \r\n" + //
+                        "    -- Nếu đã hoàn trước khi tàu hủy, tính số tiền dựa trên chính sách lúc đó\r\n" + //
+                        "    WHEN TK.IsRefundable = 0 AND TK.TicketStatus = 'Cancelled' THEN \r\n" + //
+                        "        (\r\n" + //
+                        "            SELECT \r\n" + //
+                        "                CASE \r\n" + //
+                        "                    WHEN (TK.Price * CP2.FeePercentage / 100.0) > CP2.FixedFeeAmount \r\n" + //
+                        "                    THEN TK.Price - (TK.Price * CP2.FeePercentage / 100.0)\r\n" + //
+                        "                    ELSE TK.Price - CP2.FixedFeeAmount\r\n" + //
+                        "                END\r\n" + //
+                        "            FROM Refunds R\r\n" + //
+                        "            JOIN CancellationPolicies CP2 ON R.AppliedPolicyID = CP2.PolicyID\r\n" + //
+                        "            WHERE R.TicketID = TK.TicketID\r\n" + //
+                        "        )\r\n" + //
+                        "\r\n" + //
+                        "    WHEN TK.IsCancelled = 1 THEN TK.Price\r\n" + //
+                        "\r\n" + //
+                        "    WHEN CP.IsRefundable = 1 THEN \r\n" + //
+                        "        CASE \r\n" + //
+                        "            WHEN (TK.Price * CP.FeePercentage / 100.0) > CP.FixedFeeAmount \r\n" + //
+                        "            THEN TK.Price - (TK.Price * CP.FeePercentage / 100.0)\r\n" + //
+                        "            ELSE TK.Price - CP.FixedFeeAmount\r\n" + //
+                        "        END\r\n" + //
+                        "    ELSE 0\r\n" + //
+                        "END AS RefundAmount,\r\n" + //
+                        "\r\n" + //
+                        "    -- Trạng thái hoàn vé\r\n" + //
+                        "    CASE \r\n" + //
+                        "        WHEN TK.TicketStatus IN ('Used', 'Expired') THEN N'Không thể hoàn vé (vé đã sử dụng hoặc hết hạn)'\r\n" + //
+                        "        WHEN TK.TicketStatus = 'Refunded' THEN N'Yêu cầu được chấp nhận'\r\n" + //
+                        "        WHEN TK.TicketStatus = 'RejectedRefund' THEN N'Yêu cầu bị từ chối'\r\n" + //
+                        "        WHEN TK.TicketStatus = 'Processing' THEN N'Đang trong quá trình xử lý hoàn vé'\r\n" + //
+                        "\t\tWHEN TK.IsRefundable = 0 AND TK.IsCancelled = 1  THEN N'Không được hoàn vé (do đã hoàn vé trước khi chuyến đi bị hủy)'\r\n" + //
+                        "\t\tWHEN TK.IsCancelled = 1 THEN N'Được hoàn vé (do chuyến đi bị hủy)'\r\n" + //
+                        "        WHEN DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < 0 THEN N'Tàu đã đi không trả vé'\r\n" + //
+                        "        WHEN CP.PolicyName IS NULL THEN N'Không có chính sách hoàn vé'\r\n" + //
+                        "        WHEN CP.IsRefundable = 0 THEN N'Không đủ điều kiện hoàn vé'\r\n" + //
+                        "        ELSE N'Được hoàn vé'\r\n" + //
+                        "    END AS RefundStatus,\r\n" + //
+                        "\r\n" + //
+                        "    -- Thông tin người đặt\r\n" + //
+                        "    u.FullName AS UserFullName,\r\n" + //
+                        "    u.Email,\r\n" + //
+                        "    u.IDCardNumber,\r\n" + //
+                        "    u.PhoneNumber\r\n" + //
+                        "\r\n" + //
+                        "FROM Tickets TK\r\n" + //
+                        "JOIN Bookings B ON TK.BookingID = B.BookingID\r\n" + //
+                        "JOIN Users u ON B.UserID = u.UserID\r\n" + //
+                        "JOIN Passengers P ON TK.PassengerID = P.PassengerID \r\n" + //
+                        "JOIN PassengerTypes PT ON P.PassengerTypeID = PT.PassengerTypeID \r\n" + //
+                        "JOIN Seats S ON TK.SeatID = S.SeatID\r\n" + //
+                        "JOIN SeatTypes ST ON ST.SeatTypeID = S.SeatTypeID\r\n" + //
+                        "JOIN Coaches C ON S.CoachID = C.CoachID\r\n" + //
+                        "JOIN Trains T ON C.TrainID = T.TrainID\r\n" + //
+                        "JOIN Trips TR ON TK.TripID = TR.TripID\r\n" + //
+                        "JOIN TripStations TS1 ON TS1.StationID = TK.StartStationID AND TS1.TripID = TR.TripID\r\n" + //
+                        "JOIN TripStations TS2 ON TS2.StationID = TK.EndStationID AND TS2.TripID = TR.TripID\r\n" + //
+                        "JOIN Stations StartStation ON StartStation.StationID = TS1.StationID\r\n" + //
+                        "JOIN Stations EndStation ON EndStation.StationID = TS2.StationID\r\n" + //
+                        "\r\n" + //
+                        "-- JOIN chính sách hoàn vé, có kiểm tra thời gian hợp lệ\r\n" + //
+                        "LEFT JOIN CancellationPolicies CP ON\r\n" + //
+                        "\tTK.IsCancelled = 0 AND\r\n" + //
+                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= 0 AND\r\n" + //
+                        "    DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) >= CP.HoursBeforeDeparture_Min AND\r\n" + //
+                        "    (\r\n" + //
+                        "        CP.HoursBeforeDeparture_Max IS NULL\r\n" + //
+                        "        OR DATEDIFF(HOUR, GETDATE(), TS1.ScheduledDeparture) < CP.HoursBeforeDeparture_Max\r\n" + //
+                        "    )\r\n" + //
+                        "    AND CP.IsActive = 1\r\n" + //
+                        "\r\n" + //
+                        "WHERE \r\n" + //
+                        "   ((B.BookingCode = ? AND u.PhoneNumber = ?) OR (B.BookingCode =  ? AND u.Email = ?));\r\n" + //
+                        "";
 
         CheckInforRefundTicketDTO checkInforRefundTicketDTO = null;
         List<RefundTicketDTO> refundTicketDTOs = new ArrayList<>();
@@ -598,7 +627,7 @@ public class TicketRepositoryImpl implements TicketRepository {
         String insertSQL = "INSERT INTO TempRefundRequests (TicketID, AppliedPolicyID, FeeAmount, ActualRefundAmount, NoteSTK)\r\n"
                 + //
                 "VALUES (?, ?, ?, ?, ?);";
-        String updateTicketStatusSQL = "UPDATE Tickets SET TicketStatus = 'Processing', IsRefundable = 0 WHERE TicketID = ?;";
+        String updateTicketStatusSQL = "UPDATE Tickets SET TicketStatus = ?, IsRefundable = 0 WHERE TicketID = ?;";
 
         String[] parts = ticketInfo.split("\\|");
         String ticketCode = parts[0];
@@ -622,7 +651,12 @@ public class TicketRepositoryImpl implements TicketRepository {
 
             // Cập nhật TicketStatus thành 'Processing'
             try (PreparedStatement psUpdate = conn.prepareStatement(updateTicketStatusSQL)) {
-                psUpdate.setInt(1, ticketID);
+                if (policyID == 1) {
+                    psUpdate.setString(1, "Cancelled");
+                } else {
+                    psUpdate.setString(1, "Processing");
+                }
+                psUpdate.setInt(2, ticketID);
                 psUpdate.executeUpdate();
             }
 
@@ -772,7 +806,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     }
 
     public void rejectRefundTicket(String ticketInfo, String imageFileName) throws SQLException {
-        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'RejectedRefund' WHERE TicketID = ?;";
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = ? WHERE TicketID = ?;";
         String updateRefunds = "INSERT INTO Refunds (\r\n" + //
                 "    TicketID,\r\n" + //
                 "    BookingID,\r\n" + //
@@ -808,7 +842,12 @@ public class TicketRepositoryImpl implements TicketRepository {
             conn.setAutoCommit(false); // dùng transaction
 
             try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
-                ps.setInt(1, ticketID);
+                if (policyID == 1) {
+                    ps.setString(1, "Cancelled");
+                } else {
+                    ps.setString(1, "RejectedRefund");
+                }
+                ps.setInt(2, ticketID);
                 ps.executeUpdate();
             }
 
@@ -843,7 +882,7 @@ public class TicketRepositoryImpl implements TicketRepository {
     }
 
     public void approveRefundTicket(String ticketInfo, String imageFileName) throws SQLException {
-        String updateTicketSql = "UPDATE Tickets SET TicketStatus = 'Refunded' WHERE TicketID = ?;";
+        String updateTicketSql = "UPDATE Tickets SET TicketStatus = ? WHERE TicketID = ?;";
         String updateRefunds = "INSERT INTO Refunds (\r\n" + //
                 "    TicketID,\r\n" + //
                 "    BookingID,\r\n" + //
@@ -880,7 +919,13 @@ public class TicketRepositoryImpl implements TicketRepository {
             conn.setAutoCommit(false); // dùng transaction
 
             try (PreparedStatement ps = conn.prepareStatement(updateTicketSql)) {
-                ps.setInt(1, ticketID);
+                if (policyID == 1) {
+                    ps.setString(1, "Cancelled");
+                } else {
+                    ps.setString(1, "Refunded");
+                    
+                }
+                ps.setInt(2, ticketID);
                 ps.executeUpdate();
             }
 
