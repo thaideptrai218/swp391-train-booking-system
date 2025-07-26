@@ -16,5 +16,5 @@ public interface TripService {
      * @throws SQLException if a database access error occurs.
      * @throws Exception for any other errors during the search process.
      */
-    List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId, LocalDate departureDate) throws SQLException, Exception;
+    List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId, LocalDate departureDate, int passengerCount) throws SQLException, Exception;
 }
