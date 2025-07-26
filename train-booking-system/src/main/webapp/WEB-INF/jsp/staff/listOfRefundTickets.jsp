@@ -1,227 +1,238 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<fmt:setLocale value="vi_VN" />
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+            <fmt:setLocale value="vi_VN" />
+            <!DOCTYPE html>
+            <html lang="vi">
 
-<!DOCTYPE html>
-<html lang="vi">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Kiểm tra hoàn vé</title>
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/staff-message.css" />
+                <link rel="stylesheet"
+                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+                <style>
+                    .chat-container {
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 12px;
+                        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                    }
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kiểm tra hoàn vé</title>
-    
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/staff-message.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+                    .table-wrapper {
+                        width: 100%;
+                        overflow-x: auto;
+                        overflow-y: visible;
+                        border-radius: 8px;
+                        margin-top: 15px;
+                    }
 
-    <!-- Internal Styles -->
-    <style>
-        .chat-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
+                    .table-wrapper::-webkit-scrollbar {
+                        height: 8px;
+                    }
 
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: visible;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
+                    .table-wrapper::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 4px;
+                    }
 
-        .table-wrapper::-webkit-scrollbar {
-            height: 8px;
-        }
+                    .table-wrapper::-webkit-scrollbar-thumb {
+                        background: #667eea;
+                        border-radius: 4px;
+                    }
 
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
+                    .table-wrapper::-webkit-scrollbar-thumb:hover {
+                        background: #5a6fd8;
+                    }
 
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
-        }
+                    table {
+                        width: 100%;
+                        min-width: 1600px;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        background: white;
+                    }
 
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #5a6fd8;
-        }
+                    th,
+                    td {
+                        padding: 10px 8px;
+                        border: 1px solid #ddd;
+                        vertical-align: top;
+                        text-align: left;
+                    }
 
-        table {
-            width: 100%;
-            min-width: 1600px;
-            border-collapse: collapse;
-            font-size: 13px;
-            background: white;
-        }
+                    th:nth-child(1),
+                    td:nth-child(1) {
+                        width: 40px;
+                        min-width: 40px;
+                        text-align: center;
+                    }
 
-        th,
-        td {
-            padding: 10px 8px;
-            border: 1px solid #ddd;
-            vertical-align: top;
-            text-align: left;
-        }
+                    th:nth-child(2),
+                    td:nth-child(2) {
+                        width: 100px;
+                        min-width: 100px;
+                    }
 
-        th:nth-child(1),
-        td:nth-child(1) {
-            width: 40px;
-            min-width: 40px;
-            text-align: center;
-        }
+                    th:nth-child(3),
+                    td:nth-child(3) {
+                        width: 140px;
+                        min-width: 140px;
+                    }
 
-        th:nth-child(2),
-        td:nth-child(2) {
-            width: 100px;
-            min-width: 100px;
-        }
+                    th:nth-child(4),
+                    td:nth-child(4) {
+                        width: 130px;
+                        min-width: 130px;
+                    }
 
-        th:nth-child(3),
-        td:nth-child(3) {
-            width: 140px;
-            min-width: 140px;
-        }
+                    th:nth-child(5),
+                    td:nth-child(5) {
+                        width: 100px;
+                        min-width: 100px;
+                        text-align: center;
+                    }
 
-        th:nth-child(4),
-        td:nth-child(4) {
-            width: 130px;
-            min-width: 130px;
-        }
+                    th:nth-child(6),
+                    td:nth-child(6) {
+                        width: 160px;
+                        min-width: 160px;
+                    }
 
-        th:nth-child(5),
-        td:nth-child(5) {
-            width: 100px;
-            min-width: 100px;
-            text-align: center;
-        }
+                    th:nth-child(7),
+                    td:nth-child(7) {
+                        width: 120px;
+                        min-width: 120px;
+                        text-align: center;
+                    }
 
-        th:nth-child(6),
-        td:nth-child(6) {
-            width: 160px;
-            min-width: 160px;
-        }
+                    th:nth-child(8),
+                    td:nth-child(8) {
+                        width: 120px;
+                        min-width: 120px;
+                        text-align: center;
+                    }
 
-        th:nth-child(7),
-        td:nth-child(7) {
-            width: 120px;
-            min-width: 120px;
-            text-align: center;
-        }
+                    th:nth-child(9),
+                    td:nth-child(9) {
+                        width: 150px;
+                        min-width: 150px;
+                    }
 
-        th:nth-child(8),
-        td:nth-child(8) {
-            width: 120px;
-            min-width: 120px;
-            text-align: center;
-        }
+                    th:nth-child(10),
+                    td:nth-child(10) {
+                        width: 150px;
+                        min-width: 150px;
+                    }
 
-        th:nth-child(9),
-        td:nth-child(9) {
-            width: 150px;
-            min-width: 150px;
-        }
+                    th:nth-child(11),
+                    td:nth-child(11) {
+                        width: 180px;
+                        min-width: 180px;
+                    }
 
-        th:nth-child(10),
-        td:nth-child(10) {
-            width: 150px;
-            min-width: 150px;
-        }
+                    th:nth-child(12),
+                    td:nth-child(12) {
+                        width: 140px;
+                        min-width: 140px;
+                    }
 
-        th:nth-child(11),
-        td:nth-child(11) {
-            width: 180px;
-            min-width: 180px;
-        }
+                    th:nth-child(13),
+                    td:nth-child(13) {
+                        width: 80px;
+                        min-width: 80px;
+                        text-align: center;
+                    }
 
-        th:nth-child(12),
-        td:nth-child(12) {
-            width: 140px;
-            min-width: 140px;
-        }
+                    th {
+                        background-color: #f0f4fa;
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 12px;
+                        position: sticky;
+                        top: 0;
+                        z-index: 10;
+                    }
 
-        th:nth-child(13),
-        td:nth-child(13) {
-            width: 80px;
-            min-width: 80px;
-            text-align: center;
-        }
+                    tr:nth-child(even) {
+                        background-color: #f9fcff;
+                    }
 
-        th {
-            background-color: #f0f4fa;
-            text-align: center;
-            font-weight: bold;
-            font-size: 12px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
+                    td[colspan="9"] {
+                        background: #eef5ff !important;
+                        font-weight: bold;
+                        text-align: center;
+                        padding: 12px;
+                        color: #1565c0;
+                    }
 
-        tr:nth-child(even) {
-            background-color: #f9fcff;
-        }
+                    td:first-child {
+                        font-weight: bold;
+                    }
 
-        td[colspan="9"] {
-            background: #eef5ff !important;
-            font-weight: bold;
-            text-align: center;
-            padding: 12px;
-            color: #1565c0;
-        }
+                    input[type="text"] {
+                        border: 1px solid #ccc;
+                        padding: 6px 8px;
+                        border-radius: 4px;
+                        width: 100%;
+                        font-size: 12px;
+                        box-sizing: border-box;
+                    }
 
-        td:first-child {
-            font-weight: bold;
-        }
+                    input[type="file"] {
+                        width: 100%;
+                        padding: 4px;
+                        border: 1px dashed #ccc;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        background-color: #f8f9fa;
+                    }
 
-        input[type="text"] {
-            border: 1px solid #ccc;
-            padding: 6px 8px;
-            border-radius: 4px;
-            width: 100%;
-            font-size: 12px;
-            box-sizing: border-box;
-        }
+                    button {
+                        padding: 6px 12px;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: white;
+                        font-size: 12px;
+                        min-width: 60px;
+                    }
 
-        input[type="file"] {
-            width: 100%;
-            padding: 4px;
-            border: 1px dashed #ccc;
-            border-radius: 4px;
-            font-size: 11px;
-            background-color: #f8f9fa;
-        }
+                    button[name="action"][value="approve"] {
+                        background-color: #28a745;
+                    }
 
-        button {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-            font-size: 12px;
-            min-width: 60px;
-        }
+                    button[name="action"][value="reject"] {
+                        background-color: #dc3545;
+                    }
 
-        button[name="action"][value="approve"] {
-            background-color: #28a745;
-        }
+                    button[name="saveBtn"] {
+                        background-color: #007bff;
+                    }
 
-        button[name="action"][value="reject"] {
-            background-color: #dc3545;
-        }
+                    button:hover {
+                        opacity: 0.9;
+                        transform: translateY(-1px);
+                        transition: all 0.2s ease;
+                    }
 
-        button[name="saveBtn"] {
-            background-color: #007bff;
-        }
+                    .message {
+                        padding: 8px;
+                        background-color: #ffe5e5;
+                        border: 1px solid #ff8888;
+                        border-radius: 6px;
+                        margin-bottom: 12px;
+                    }
 
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            transition: all 0.2s ease;
-        }
+                    .section-header {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #d50000;
+                        margin-bottom: 10px;
+                    }
 
                     /* Pagination Styles */
                     .pagination-container {
@@ -291,53 +302,68 @@
                         font-size: 14px;
                     }
 
-        .message {
-            padding: 8px;
-            background-color: #ffe5e5;
-            border: 1px solid #ff8888;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
+                    @media (max-width: 768px) {
+                        table {
+                            min-width: 1400px;
+                            font-size: 11px;
+                        }
 
-        .section-header {
-            font-size: 18px;
-            font-weight: bold;
-            color: #d50000;
-            margin-bottom: 10px;
-        }
+                        th,
+                        td {
+                            padding: 8px 6px;
+                        }
 
-        @media (max-width: 768px) {
-            table {
-                min-width: 1400px;
-                font-size: 11px;
-            }
+                        input[type="text"],
+                        input[type="file"],
+                        button {
+                            font-size: 10px;
+                            padding: 4px 6px;
+                        }
+                    }
+                </style>
+            </head>
 
-            th,
-            td {
-                padding: 8px 6px;
-            }
+            <body>
+                <div class="dashboard-container">
+                    <aside class="sidebar">
+                        <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
+                            <i class="fa-solid fa-house fa-xl home-icon"></i>
+                        </a>
+                        <h2>Bảng điều khiển nhân viên</h2>
+                        <nav>
+                            <ul>
+                                <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
+                                </li>
+                                <li><a href="#">Quản lý đặt chỗ</a></li>
+                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
+                                        vé đã hoàn</a></li>
+                                <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>
+                                </li>
+                                <li><a href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
+                            </ul>
+                        </nav>
+                    </aside>
 
-            input[type="text"],
-            input[type="file"],
-            button {
-                font-size: 10px;
-                padding: 4px 6px;
-            }
-        }
-    </style>
-</head>
+                    <main class="main-content">
+                        <header class="header">
+                            <h1>Kiểm tra hoàn vé</h1>
+                            <div class="user-info">
+                                <span>Đăng nhập với tư cách: Người dùng nhân viên</span>
+                            </div>
+                        </header>
 
-<body>
-    <div class="dashboard-container">
-        
-        <!-- Sidebar -->
-        <jsp:include page="sidebar.jsp" />
+                        <div class="chat-container">
+                            <div class="section-header">Danh sách yêu cầu trả vé</div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="header">
-                <h1>Kiểm tra hoàn vé</h1>
-            </header>
+                            <c:if test="${not empty message}">
+                                <div class="message">${message}</div>
+                            </c:if>
 
                             <!-- ✅ ADD TABLE WRAPPER -->
                             <div class="table-wrapper">
@@ -367,7 +393,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>${startRecord + i.index}</td>
+                                                <td>${i.index + 1}</td>
                                                 <td><strong>${req.ticketCode}</strong></td>
                                                 <td>
                                                     <b>${req.passengerFullName}</b><br />
@@ -522,4 +548,4 @@
                 </script>
             </body>
 
-</html>
+            </html>
