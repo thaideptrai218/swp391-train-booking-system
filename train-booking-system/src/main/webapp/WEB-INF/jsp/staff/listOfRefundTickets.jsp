@@ -234,6 +234,74 @@
                         margin-bottom: 10px;
                     }
 
+                    /* Pagination Styles */
+                    .pagination-container {
+                        margin-top: 20px;
+                        padding: 15px 0;
+                        border-top: 1px solid #e0e0e0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                    }
+
+                    .pagination-info {
+                        color: #666;
+                        font-size: 14px;
+                    }
+
+                    .pagination {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+
+                    .pagination a,
+                    .pagination span {
+                        padding: 8px 12px;
+                        text-decoration: none;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        color: #333;
+                        font-size: 14px;
+                        min-width: 40px;
+                        text-align: center;
+                        display: inline-block;
+                    }
+
+                    .pagination a:hover {
+                        background-color: #f5f5f5;
+                        color: #667eea;
+                    }
+
+                    .pagination .current {
+                        background-color: #667eea;
+                        color: white;
+                        border-color: #667eea;
+                    }
+
+                    .pagination .disabled {
+                        background-color: #f8f9fa;
+                        color: #6c757d;
+                        cursor: not-allowed;
+                        border-color: #dee2e6;
+                    }
+
+                    .page-size-selector {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-size: 14px;
+                    }
+
+                    .page-size-selector select {
+                        padding: 5px 8px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        font-size: 14px;
+                    }
+
                     @media (max-width: 768px) {
                         table {
                             min-width: 1400px;
@@ -325,7 +393,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>${i.index + 1}</td>
+                                                <td>${startRecord + i.index}</td>
                                                 <td><strong>${req.ticketCode}</strong></td>
                                                 <td>
                                                     <b>${req.passengerFullName}</b><br />
@@ -391,9 +459,93 @@
                                 </table>
                             </div>
                             <!-- ✅ END TABLE WRAPPER -->
+
+                            <!-- Pagination Section -->
+                            <c:if test="${totalPages > 1}">
+                                <div class="pagination-container">
+                                    <div class="pagination-info">
+                                        Hiển thị ${startRecord} - ${endRecord} trong tổng số ${totalRecords} kết quả
+                                    </div>
+                                    
+                                    <div class="pagination">
+                                        <!-- First Page -->
+                                        <c:choose>
+                                            <c:when test="${currentPage == 1}">
+                                                <span class="disabled">❮❮</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="?page=1&pageSize=${pageSize}">❮❮</a>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <!-- Previous Page -->
+                                        <c:choose>
+                                            <c:when test="${currentPage == 1}">
+                                                <span class="disabled">❮</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="?page=${currentPage - 1}&pageSize=${pageSize}">❮</a>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <!-- Page Numbers -->
+                                        <c:forEach var="i" begin="${currentPage - 2 < 1 ? 1 : currentPage - 2}" 
+                                                 end="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}">
+                                            <c:choose>
+                                                <c:when test="${i == currentPage}">
+                                                    <span class="current">${i}</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="?page=${i}&pageSize=${pageSize}">${i}</a>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:forEach>
+
+                                        <!-- Next Page -->
+                                        <c:choose>
+                                            <c:when test="${currentPage == totalPages}">
+                                                <span class="disabled">❯</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="?page=${currentPage + 1}&pageSize=${pageSize}">❯</a>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <!-- Last Page -->
+                                        <c:choose>
+                                            <c:when test="${currentPage == totalPages}">
+                                                <span class="disabled">❯❯</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="?page=${totalPages}&pageSize=${pageSize}">❯❯</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+
+                                    <div class="page-size-selector">
+                                        <label for="pageSize">Hiển thị:</label>
+                                        <select id="pageSize" onchange="changePageSize(this.value)">
+                                            <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                                            <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                            <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                                            <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                        </select>
+                                        <span>kết quả/trang</span>
+                                    </div>
+                                </div>
+                            </c:if>
                         </div>
                     </main>
                 </div>
+
+                <script>
+                    function changePageSize(newPageSize) {
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('pageSize', newPageSize);
+                        currentUrl.searchParams.set('page', '1'); // Reset về trang đầu
+                        window.location.href = currentUrl.toString();
+                    }
+                </script>
             </body>
 
             </html>

@@ -124,7 +124,7 @@ public class RefundProcessingServlet extends HttpServlet {
 
             // Set subject with UTF-8 encoding
             mimeMessage.setSubject(
-                    MimeUtility.encodeText("Yêu cầu cung cấp lại số tài khoản hoàn tiền - Vetaure", "UTF-8", "B"));
+                    MimeUtility.encodeText("Yêu cầu hoàn tiền đã được thông qua - Vetaure", "UTF-8", "B"));
 
             String messageContent = """
                         <html>
@@ -132,7 +132,8 @@ public class RefundProcessingServlet extends HttpServlet {
                             <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>
                                 <h2 style='color: #2c3e50;'>Thông báo từ Vetaure</h2>
                                 <p>Xin chào,</p>
-                                <p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>
+                                <p>Yêu cầu xử lý hoàn tiền của bạn đã hoàn thành. Chúng tôi sẽ chuyển tiền hoàn lại vào tài khoản ngân hàng mà bạn đã cung cấp.</p>
+                                <p>Tiền sẽ được hoàn lại trong vòng 24 giờ. Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi.</p>
                                 <p>Xin cảm ơn!</p>
                                 <br/>
                                 <p>Trân trọng,</p>
