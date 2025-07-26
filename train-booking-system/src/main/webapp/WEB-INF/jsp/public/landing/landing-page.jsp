@@ -38,10 +38,10 @@
     <body data-context-path="${pageContext.request.contextPath}">
 
       <c:if test="${not empty sessionScope.refundSuccessMessage}">
-        <div id="toast" class="toast">${sessionScope.refundSuccessMessage}</div>
+        <div id="refundToast" class="toast">${sessionScope.refundSuccessMessage}</div>
         <script>
           window.onload = () => {
-            const toast = document.getElementById("toast");
+            const toast = document.getElementById("refundToast");
             toast.classList.add("show");
             setTimeout(() => {
               toast.classList.remove("show");
