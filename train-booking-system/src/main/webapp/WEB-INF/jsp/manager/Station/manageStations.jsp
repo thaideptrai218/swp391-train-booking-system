@@ -10,11 +10,11 @@ prefix="c" %>
     <link rel="stylesheet" href="<c:url value='/css/common.css'/>" />
     <link
       rel="stylesheet"
-      href="<c:url value='/css/manager/manager-dashboard.css'/>"
+      href="<c:url value='/css/manager/stations/manageStations.css'/>"
     />
     <link
       rel="stylesheet"
-      href="<c:url value='/css/manager/stations/manageStations.css'/>"
+      href="<c:url value='/css/manager/manager-dashboard.css'/>"
     />
     <script src="<c:url value='/js/manager/stations/manageStations.js'/>" defer></script>
     <link
@@ -91,22 +91,27 @@ prefix="c" %>
                       <a href="editStation?id=${station.stationID}" class="edit-btn${station.locked ? ' disabled-link' : ''}" ${station.locked ? 'tabindex="-1"' : ''}>
                         <i class="fas fa-edit"></i> Sửa
                       </a>
+
                       <form action="manageStations" method="POST" style="display:inline-block; margin-left:8px; pointer-events:auto; opacity:1;">
                         <input type="hidden" name="command" value="${station.locked ? 'unlockStation' : 'lockStation'}" />
                         <input type="hidden" name="stationID" value="${station.stationID}" />
                         <button type="submit" class="lock-btn${station.locked ? ' locked' : ''}" style="pointer-events:auto; opacity:1;">
-                          <i class="fas ${station.locked ? 'fa-lock-open' : 'fa-lock'}"></i> <span>${station.locked ? 'Mở khóa' : 'Khóa'}</span>
+                          <i class="fas ${station.locked ? 'fa-lock-open' : 'fa-lock'}"></i> 
+                          <span>${station.locked ? 'Mở khóa' : 'Khóa'}</span>
                         </button>
                       </form>
+
                       <c:if test="${!station.active}">
                         <form action="manageStations" method="POST" style="display:inline-block; margin-left:8px;">
                           <input type="hidden" name="command" value="deleteStation" />
                           <input type="hidden" name="stationID" value="${station.stationID}" />
-                          <button type="submit" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa ga này không?');">
+                          <button type="submit" class="delete-btn" 
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa ga này không?');">
                             <i class="fas fa-trash"></i> Xóa
                           </button>
                         </form>
                       </c:if>
+
                     </td>
                   </tr>
                 </c:forEach>

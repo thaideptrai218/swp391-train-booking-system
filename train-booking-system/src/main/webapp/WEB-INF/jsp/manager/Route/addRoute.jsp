@@ -35,12 +35,14 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
       }
       .main-content {
         max-width: 600px;
+        width: 100%;
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.10);
         padding: 36px 48px 32px 48px;
         margin: 40px auto;
         transition: box-shadow 0.2s;
+        text-align: center;
       }
       .main-content:hover {
         box-shadow: 0 8px 32px rgba(0,0,0,0.13);
@@ -53,9 +55,11 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         padding-bottom: 12px;
         font-size: 2em;
         letter-spacing: 0.5px;
+        text-align: center;
       }
       .form-group {
         margin-bottom: 1.5rem;
+        text-align: center;
       }
       .form-group label {
         display: block;
@@ -63,11 +67,14 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         font-weight: 600;
         color: #374151;
         letter-spacing: 0.2px;
+        text-align: center;
       }
       .form-group input[type="text"],
       .form-group select,
       .form-group textarea {
         width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
         padding: 0.65rem 1rem;
         font-size: 1rem;
         color: #374151;
@@ -76,6 +83,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         border-radius: 6px;
         transition: border-color 0.18s, box-shadow 0.18s;
         box-sizing: border-box;
+        display: block;
       }
       .form-group input:focus,
       .form-group select:focus,
@@ -89,6 +97,10 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         min-height: 90px;
         resize: vertical;
       }
+      .btn-container {
+        text-align: center;
+        margin-top: 2rem;
+      }
       .btn.btn-primary {
         background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
         color: #fff;
@@ -101,6 +113,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         margin-right: 12px;
         box-shadow: 0 2px 8px rgba(37,99,235,0.08);
         transition: background 0.18s, box-shadow 0.18s;
+        display: inline-block;
       }
       .btn.btn-primary:hover {
         background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
@@ -116,6 +129,8 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         font-weight: 500;
         cursor: pointer;
         transition: background 0.18s, border 0.18s;
+        display: inline-block;
+        text-decoration: none;
       }
       .btn.btn-secondary:hover {
         background-color: #e5e7eb;
@@ -129,6 +144,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         padding: 12px 16px;
         margin-bottom: 22px;
         font-size: 1rem;
+        text-align: center;
       }
       .success-message {
         background: #d1fae5;
@@ -138,10 +154,23 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         padding: 12px 16px;
         margin-bottom: 22px;
         font-size: 1rem;
+        text-align: center;
+      }
+      .container {
+        text-align: center;
+      }
+      form {
+        text-align: center;
       }
       @media (max-width: 700px) {
         .main-content {
-          padding: 18px 8px;
+          padding: 18px 24px;
+          margin: 20px;
+        }
+        .form-group input[type="text"],
+        .form-group select,
+        .form-group textarea {
+          max-width: 100%;
         }
       }
     </style>
@@ -200,14 +229,16 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <label for="description">Mô Tả:</label>
             <textarea id="description" name="description"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Lưu Tuyến Đường
-          </button>
-          <a
-            href="${pageContext.request.contextPath}/manageRoutes"
-            class="btn btn-secondary"
-            >Quay Lại</a
-          >
+          <div class="btn-container">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Lưu Tuyến Đường
+            </button>
+            <a
+              href="${pageContext.request.contextPath}/manageRoutes"
+              class="btn btn-secondary"
+              >Quay Lại</a
+            >
+          </div>
         </form>
       </div>
     </div>

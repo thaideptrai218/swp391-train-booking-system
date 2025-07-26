@@ -27,10 +27,10 @@ public class AddRouteServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<Station> allStations = stationRepository.findAll();
-            request.setAttribute("allStations", allStations);
+            List<Station> activeStations = stationRepository.findByActive(true);
+            request.setAttribute("allStations", activeStations);
         } catch (SQLException e) {
-            request.setAttribute("errorMessage", "Error fetching stations: " + e.getMessage());
+            request.setAttribute("errorMessage", "Lỗi khi lấy thông tin ga: " + e.getMessage());
         }
         request.getRequestDispatcher("/WEB-INF/jsp/manager/Route/addRoute.jsp").forward(request, response);
     }

@@ -40,7 +40,7 @@
             <form id="filterStatusForm" method="get" action="${pageContext.request.contextPath}/manageTrips" style="display:inline-block;margin-left:16px;">
               <select name="filterStatus" onchange="this.form.submit()" style="padding:7px 12px;border-radius:6px;">
                 <option value="">Tất cả trạng thái</option>
-                <option value="Scheduled" ${param.filterStatus == 'Scheduled' ? 'selected' : ''}>Lên lịch</option>
+                <option value="Scheduled" ${param.filterStatus == 'Scheduled' || (param.filterStatus == null || param.filterStatus.isEmpty()) ? 'selected' : ''}>Lên lịch</option>
                 <option value="In Progress" ${param.filterStatus == 'In Progress' ? 'selected' : ''}>Đang diễn ra</option>
                 <option value="Completed" ${param.filterStatus == 'Completed' ? 'selected' : ''}>Đã hoàn thành</option>
                 <option value="Cancelled" ${param.filterStatus == 'Cancelled' ? 'selected' : ''}>Hủy chuyến</option>

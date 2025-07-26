@@ -264,16 +264,38 @@ public class ManageTrainsSeatsServlet extends HttpServlet {
     }
 
     private void deleteCoach(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        coachRepository.deleteCoach(id);
-        response.sendRedirect("manage-trains-seats");
+        try {
+            coachRepository.deleteCoach(id);
+            response.sendRedirect("manage-trains-seats");
+        } catch (IllegalStateException e) {
+            request.setAttribute("error", e.getMessage());
+            try {
+                doGet(request, response);
+            } catch (ServletException ex) {
+                throw new IOException(ex);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 
     private void deleteSeat(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        seatRepository.deleteSeat(id);
-        response.sendRedirect("manage-trains-seats");
+        try {
+            seatRepository.deleteSeat(id);
+            response.sendRedirect("manage-trains-seats");
+        } catch (IllegalStateException e) {
+            request.setAttribute("error", e.getMessage());
+            try {
+                doGet(request, response);
+            } catch (ServletException ex) {
+                throw new IOException(ex);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 }

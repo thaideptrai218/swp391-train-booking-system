@@ -17,7 +17,7 @@ import vn.vnrailway.dto.RouteStationDetailDTO;
 
 // Using concrete implementations
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
-import vn.vnrailway.dao.RouteRepository; // Keep interface for type
+import vn.vnrailway.dao.RouteRepository;
 
 @WebServlet("/manager/routeDetail")
 public class RouteDetailServlet extends HttpServlet {

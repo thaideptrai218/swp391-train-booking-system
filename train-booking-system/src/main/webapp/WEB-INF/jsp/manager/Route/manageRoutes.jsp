@@ -42,24 +42,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
           <c:remove var="errorMessage" scope="session"/>
       </c:if>
 
-      <!-- Confirmation Dialog for Deleting Route with Trips -->
-      <c:if test="${confirmDeleteRouteWithTrips}">
-        <div class="confirmation-dialog" style="border: 1px solid #ffc107; background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-            <h4>Xác Nhận Xóa Tuyến Đường</h4>
-            <p>
-                Tuyến đường "<strong><c:out value="${routeNameToDelete}"/></strong>" (ID: ${routeIdToDelete}) hiện có <strong>${numberOfTrips}</strong> chuyến đi liên quan.
-                <br/>Bạn có chắc chắn muốn xóa tuyến đường này VÀ TẤT CẢ các chuyến đi liên quan không? Hành động này không thể hoàn tác.
-            </p>
-            <form action="${pageContext.request.contextPath}/manageRoutes" method="post" style="display: inline-block; margin-right: 10px;">
-                <input type="hidden" name="action" value="deleteRoute"/>
-                <input type="hidden" name="routeId" value="${routeIdToDelete}"/>
-                <input type="hidden" name="confirmedDelete" value="true"/>
-                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Có, Xóa Tất Cả</button>
-            </form>
-            <a href="${pageContext.request.contextPath}/manageRoutes" class="btn btn-secondary"><i class="fas fa-times"></i> Không, Hủy Bỏ</a>
-        </div>
-      </c:if>
-
       <c:if test="${not empty successMessage}">
         <div
           class="success-message"
@@ -133,7 +115,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
                     >
                       <i class="fas fa-edit"></i> Sửa
                     </a>
-                    <!-- Đã loại bỏ button Xóa ở đây -->
                   </td>
                 </tr>
               </c:forEach>
@@ -143,7 +124,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
         </c:otherwise>
       </c:choose>
 
-      <!-- Edit Route Form (conditionally shown or populated) -->
       <c:set var="editFormContainerClass" value=""/>
       <c:if test="${empty routeToEditOnPage}">
           <c:set var="editFormContainerClass" value="edit-form-hidden"/>

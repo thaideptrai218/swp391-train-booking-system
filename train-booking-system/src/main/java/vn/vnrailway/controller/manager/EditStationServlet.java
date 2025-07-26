@@ -51,26 +51,28 @@ public class EditStationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String command = request.getParameter("command");
-        if ("edit".equals(command)) {
-            try {
-                int editStationId = Integer.parseInt(request.getParameter("stationID"));
-                Station existingStation = stationRepository.findById(editStationId)
-                        .orElseThrow(() -> new SQLException("Station not found for ID: " + editStationId));
-                // Không cập nhật stationCode nữa
-                existingStation.setStationName(request.getParameter("stationName"));
-                existingStation.setAddress(request.getParameter("address"));
-                existingStation.setCity(request.getParameter("city"));
-                existingStation.setRegion(request.getParameter("region"));
-                existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
-                stationRepository.update(existingStation);
-                response.sendRedirect("manageStations?message=Station+updated+successfully!");
-            } catch (SQLException | NumberFormatException e) {
-                e.printStackTrace();
-                response.sendRedirect("manageStations?message=Error+updating+station.");
-            }
-        } else {
-            response.sendRedirect("manageStations");
-        }
+        // String command = request.getParameter("command");
+        // if ("edit".equals(command)) {
+        // try {
+        // int editStationId = Integer.parseInt(request.getParameter("stationID"));
+        // Station existingStation = stationRepository.findById(editStationId)
+        // .orElseThrow(() -> new SQLException("Station not found for ID: " +
+        // editStationId));
+
+        // existingStation.setStationName(request.getParameter("stationName"));
+        // existingStation.setAddress(request.getParameter("address"));
+        // existingStation.setCity(request.getParameter("city"));
+        // existingStation.setRegion(request.getParameter("region"));
+        // existingStation.setPhoneNumber(request.getParameter("phoneNumber"));
+        // stationRepository.update(existingStation);
+
+        // response.sendRedirect("manageStations?message=Station+updated+successfully!");
+        // } catch (SQLException | NumberFormatException e) {
+        // e.printStackTrace();
+        // response.sendRedirect("manageStations?message=Error+updating+station.");
+        // }
+        // } else {
+        // response.sendRedirect("manageStations");
+        // }
     }
 }

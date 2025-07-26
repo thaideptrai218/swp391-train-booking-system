@@ -53,8 +53,26 @@ public class CoachRepositoryImpl implements CoachRepository {
         }
     }
 
+    // Kiểm tra xem coach có ghế nào còn vé tham chiếu không
+    public boolean hasTicketsInCoach(int coachId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Tickets t JOIN Seats s ON t.SeatID = s.SeatID WHERE s.CoachID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, coachId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean deleteCoach(int id) throws SQLException {
+        if (hasTicketsInCoach(id)) {
+            throw new IllegalStateException("Không thể xóa toa này vì đang có vé tham chiếu!");
+        }
         String sql = "DELETE FROM Coaches WHERE CoachID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {

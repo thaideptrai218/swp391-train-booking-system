@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const stationFormContainer = document.getElementById(
     "stationFormContainer"
   );
+
   const formTitle = document.getElementById("formTitle");
   const stationForm = document.getElementById("stationForm");
   const stationIDInput = document.getElementById("stationID");
@@ -47,8 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+//Phân trang và hiển thị các hàng
   function setupPagination() {
-    paginationContainer.innerHTML = "";
+    paginationContainer.innerHTML = ""; //reset cũ
     const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
 
     if (pageCount <= 1) return;
@@ -128,10 +130,12 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener("keyup", filterAndPaginate);
   }
 
+  //chuyển sang add servlet 
   showAddFormBtn.addEventListener("click", function () {
     window.location.href = "addStation";
   });
 
+  //xử lí nút khóa/mở khóa
   document.querySelectorAll(".lock-btn").forEach((button) => {
     button.addEventListener("click", function () {
       const row = this.closest("tr");
@@ -141,9 +145,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const text = this.querySelector("span");
 
       if (isLocked) {
-        editLink.style.pointerEvents = "none";
+        editLink.style.pointerEvents = "none"; //Vô hiệu hóa
         editLink.style.opacity = "0.5";
-        icon.className = "fas fa-lock-open";
+        icon.className = "fas fa-lock-open"; //đổi icon
         text.textContent = "Mở khóa";
       } else {
         editLink.style.pointerEvents = "auto";
@@ -154,12 +158,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Xử lý sự kiện click checkbox hoạt động
+  // Xử lý click checkbox hoạt động
   document.querySelectorAll('.active-checkbox').forEach(function(checkbox) {
     checkbox.addEventListener('change', function() {
       const stationId = this.getAttribute('data-id');
       const isActive = this.checked;
       const confirmMsg = isActive ? 'Bạn có chắc chắn muốn kích hoạt ga này?' : 'Bạn có chắc chắn muốn vô hiệu hóa ga này?';
+
       if (!confirm(confirmMsg)) {
         this.checked = !isActive;
         return;

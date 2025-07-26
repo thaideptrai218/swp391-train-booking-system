@@ -43,6 +43,7 @@ public class AddStationServlet extends HttpServlet {
                 boolean isActive = request.getParameter("isActive") != null;
 
                 String errorMessage = null;
+                // Validation
                 if (stationName == null || stationName.trim().isEmpty()) {
                     errorMessage = "Tên ga không được để trống.";
                 } else if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
@@ -65,7 +66,8 @@ public class AddStationServlet extends HttpServlet {
                     request.setAttribute("region", region);
                     request.setAttribute("phoneNumber", phoneNumber);
                     request.setAttribute("isActive", isActive);
-                    request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/addStation.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/addStation.jsp").forward(request,
+                            response);
                     return;
                 }
 

@@ -154,6 +154,11 @@ public class ManageTripsServlet extends HttpServlet {
             listTrips = listTrips.stream()
                 .filter(trip -> filterStatus.equals(trip.getTripStatus()))
                 .toList();
+        } else {
+            // Mặc định hiển thị trips có trạng thái "Lên Lịch" khi không có filter
+            listTrips = listTrips.stream()
+                .filter(trip -> "Scheduled".equals(trip.getTripStatus()))
+                .toList();
         }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
