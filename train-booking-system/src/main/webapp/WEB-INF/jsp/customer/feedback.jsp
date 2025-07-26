@@ -19,7 +19,7 @@
 
                 <div class="feedback">
                     <div class="feedback-content">
-                        <div style="margin-bottom: 20px;">
+                        <div style="margin-bottom: 150px;">
                             <a href="${pageContext.request.contextPath}/landing" class="back-button">Quay lại trang
                                 chủ</a>
                         </div>
