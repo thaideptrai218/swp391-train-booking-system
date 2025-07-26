@@ -307,10 +307,12 @@
                         </span>
                       </td>
                       <td>
-                        <a href="${pageContext.request.contextPath}/updatePolicy?id=${p.policyID}"
-                          class="btn-action edit">
-                          <i class="fas fa-edit"></i> Sửa
-                        </a>
+                        <c:if test="${p.policyID != 1}">
+                          <a href="${pageContext.request.contextPath}/updatePolicy?id=${p.policyID}"
+                            class="btn-action edit">
+                            <i class="fas fa-edit"></i> Sửa
+                          </a>
+                        </c:if>
                       </td>
                     </tr>
                   </c:forEach>
