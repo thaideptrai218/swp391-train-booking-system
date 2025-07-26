@@ -210,8 +210,8 @@
                         });
                     }
 
-                    // Tự động gọi fetchMessages mỗi 3 giây
-                    setInterval(fetchMessages, 3000);
+                    // Tự động gọi fetchMessages mỗi 0.5 giây
+                    setInterval(fetchMessages, 500);
                 </script>
                     <jsp:include page="../common/footer.jsp" />
             </body>
