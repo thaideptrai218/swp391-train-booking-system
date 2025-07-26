@@ -53,6 +53,7 @@
                                         <tr>
                                             <th>Họ và tên</th>
                                             <th>Email</th>
+                                            <th>Người gửi</th>
                                             <th>Tin nhắn mới nhất</th>
                                             <th>Hành động</th>
                                         </tr>
@@ -68,6 +69,7 @@
                                             <tr>
                                                 <td>${summary.fullName}</td>
                                                 <td>${summary.email}</td>
+                                                <td>${summary.senderType}</td>
                                                 <td>${summary.lastMessage}</td>
                                                 <td>
                                                     <form action="${pageContext.request.contextPath}/staff/messages"
