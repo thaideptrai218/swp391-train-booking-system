@@ -150,21 +150,48 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function filterAndPaginate() {
-      const searchTerm = removeDiacritics(searchInput.value.toLowerCase().trim().replace(/\s+/g, " "));
-      filteredRows = dataRows.filter(row => {
-          const tripIdCell = removeDiacritics(row.cells[0].textContent.toLowerCase());
-          const routeNameCell = removeDiacritics(row.cells[1].textContent.toLowerCase());
-          return tripIdCell.includes(searchTerm) || routeNameCell.includes(searchTerm);
-      });
-      displayRows(1);
-      setupPagination();
+      const searchTerm = searchInput.value.trim();
+      
+      // Tạo form để submit search với các filter hiện tại
+      const searchForm = document.createElement('form');
+      searchForm.method = 'GET';
+      searchForm.action = window.location.pathname;
+      
+      // Thêm các tham số hiện tại
+      const urlParams = new URLSearchParams(window.location.search);
+      for (let [key, value] of urlParams.entries()) {
+          if (key !== 'searchTerm') { // Không override searchTerm
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              searchForm.appendChild(input);
+          }
+      }
+      
+      // Thêm searchTerm mới
+      const searchInputHidden = document.createElement('input');
+      searchInputHidden.type = 'hidden';
+      searchInputHidden.name = 'searchTerm';
+      searchInputHidden.value = searchTerm;
+      searchForm.appendChild(searchInputHidden);
+      
+      document.body.appendChild(searchForm);
+      searchForm.submit();
   }
 
   if (searchInput) {
-      searchInput.addEventListener("keyup", filterAndPaginate);
+      let searchTimeout;
+      searchInput.addEventListener("keyup", function() {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+              filterAndPaginate();
+          }, 500); // Đợi 500ms sau khi user ngừng gõ
+      });
   }
 
-  filterAndPaginate();
+  // Không cần gọi filterAndPaginate() khi load trang nữa
+  // vì giờ search được xử lý bởi backend
 });
 
 document.addEventListener('DOMContentLoaded', function() {

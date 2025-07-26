@@ -18,6 +18,8 @@
       <input type="hidden" name="sortOrder" value="${requestScope.currentSortOrder}" />
       <input type="hidden" name="searchTerm" value="${requestScope.searchTerm}" />
       <input type="hidden" name="currentSortField" value="${requestScope.currentSortField}" />
+      <input type="hidden" name="filterDate" value="${param.filterDate}" />
+      <input type="hidden" name="filterStatus" value="${param.filterStatus}" />
     </form>
     
     <div class="dashboard-container">
@@ -27,9 +29,13 @@
         <section class="content-section">
           <div class="controls-container">
             <div class="search-container">
-              <input type="text" id="tripSearchInput" placeholder="Tìm theo Mã chuyến đi, Tên tuyến...">
+              <input type="text" id="tripSearchInput" placeholder="Tìm theo Mã chuyến đi, Tên tuyến..." value="${param.searchTerm}">
             </div>
             <form id="filterDateForm" method="get" action="${pageContext.request.contextPath}/manageTrips" style="display:inline-block;margin-left:16px;">
+              <input type="hidden" name="filterStatus" value="${param.filterStatus}" />
+              <input type="hidden" name="searchTerm" value="${param.searchTerm}" />
+              <input type="hidden" name="sortField" value="${param.sortField}" />
+              <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
               <select name="filterDate" onchange="this.form.submit()" style="padding:7px 12px;border-radius:6px;">
                 <option value="">Tất cả</option>
                 <option value="TODAY" ${param.filterDate == 'TODAY' ? 'selected' : ''}>Hôm nay</option>
@@ -39,9 +45,13 @@
             </form>
             <!-- Trip Status Filter -->
             <form id="filterStatusForm" method="get" action="${pageContext.request.contextPath}/manageTrips" style="display:inline-block;margin-left:16px;">
+              <input type="hidden" name="filterDate" value="${param.filterDate}" />
+              <input type="hidden" name="searchTerm" value="${param.searchTerm}" />
+              <input type="hidden" name="sortField" value="${param.sortField}" />
+              <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
               <select name="filterStatus" onchange="this.form.submit()" style="padding:7px 12px;border-radius:6px;">
-                <option value="">Tất cả trạng thái</option>
-                <option value="Scheduled" ${param.filterStatus == 'Scheduled' || (param.filterStatus == null || param.filterStatus.isEmpty()) ? 'selected' : ''}>Lên lịch</option>
+                <option value="" ${param.filterStatus == null || param.filterStatus.isEmpty() ? 'selected' : ''}>Tất cả trạng thái</option>
+                <option value="Scheduled" ${param.filterStatus == 'Scheduled' ? 'selected' : ''}>Lên lịch</option>
                 <option value="In Progress" ${param.filterStatus == 'In Progress' ? 'selected' : ''}>Đang diễn ra</option>
                 <option value="Completed" ${param.filterStatus == 'Completed' ? 'selected' : ''}>Đã hoàn thành</option>
                 <option value="Cancelled" ${param.filterStatus == 'Cancelled' ? 'selected' : ''}>Hủy chuyến</option>
