@@ -137,6 +137,21 @@
                     </div>
                   </div>
                 </div>
+                <div class="card mt-3">
+                  <div class="card-body">
+                    <h6 class="d-flex align-items-center mb-3"><i class="material-icons text-info mr-2">Thẻ</i>VIP</h6>
+                    <c:choose>
+                      <c:when test="${not empty userVIPCard}">
+                        <p><strong>Loại thẻ:</strong> ${userVIPCard.vipCardTypeID}</p>
+                        <p><strong>Ngày hết hạn:</strong> <fmt:formatDate value="${userVIPCard.expiryDate}" pattern="dd-MM-yyyy" /></p>
+                      </c:when>
+                      <c:otherwise>
+                        <p>Bạn chưa có thẻ VIP.</p>
+                        <a href="${pageContext.request.contextPath}/vip-purchase" class="btn btn-primary">Mua thẻ VIP</a>
+                      </c:otherwise>
+                    </c:choose>
+                  </div>
+                </div>
               </div>
             </div>
             <style type="text/css">

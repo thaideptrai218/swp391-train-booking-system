@@ -62,7 +62,8 @@ public class RoleFilter implements Filter {
             Pattern.compile("^/api/payment/.*"),
             Pattern.compile("^/api/vip/.*"),
             Pattern.compile("^/vip/.*"),
-            Pattern.compile("^/tripInfomation/.*"));
+            Pattern.compile("^/tripInfomation/.*"),
+            Pattern.compile("^/manageVIPMembers/.*"));
 
     // Role-specific access patterns
     private static final Map<String, Set<Pattern>> ROLE_PATTERNS = Map.of(
@@ -78,7 +79,10 @@ public class RoleFilter implements Filter {
                     Pattern.compile("^/(editPriceRule|editStation|routeDetail|tripDetail)$"),
                     Pattern.compile("^/manage(Price|Routes|Staffs|Stations|TrainsSeats|Trips)$"),
                     Pattern.compile("^/(manageCancellationPolicies|createPolicy|updatePolicy)$"),
-                    Pattern.compile("^/(sidebar|train_form)$")),
+                    Pattern.compile("^/(sidebar|train_form)$"),
+                    Pattern.compile("^/manageVIPMembers$"),
+                    Pattern.compile("^/manageVIPMembers$")),
+
             "STAFF", Set.of(
                     Pattern.compile("^/staff/.*"),
                     Pattern.compile("^/staff-dashboard$"),

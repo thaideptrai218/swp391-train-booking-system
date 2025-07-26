@@ -1,4 +1,4 @@
-package vn.vnrailway.controller.vip;
+package vn.vnrailway.controller.customer;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

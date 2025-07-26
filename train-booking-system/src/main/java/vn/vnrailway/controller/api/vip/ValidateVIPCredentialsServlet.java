@@ -1,6 +1,8 @@
 package vn.vnrailway.controller.api.vip;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.servlet.ServletException;
@@ -11,10 +13,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import vn.vnrailway.dao.UserRepository;
 import vn.vnrailway.dao.UserVIPCardRepository;
+import vn.vnrailway.dao.VIPCardTypeRepository;
 import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.dao.impl.UserVIPCardRepositoryImpl;
+import vn.vnrailway.dao.impl.VIPCardTypeRepositoryImpl;
 import vn.vnrailway.model.User;
 import vn.vnrailway.model.UserVIPCard;
+import vn.vnrailway.model.VIPCardType;
 import vn.vnrailway.utils.JsonUtils;
 
 /**
@@ -26,12 +31,14 @@ public class ValidateVIPCredentialsServlet extends HttpServlet {
     
     private UserRepository userRepository;
     private UserVIPCardRepository userVIPCardRepository;
+    private VIPCardTypeRepository vipCardTypeRepository;
 
     @Override
     public void init() throws ServletException {
         try {
             userRepository = new UserRepositoryImpl();
             userVIPCardRepository = new UserVIPCardRepositoryImpl();
+            vipCardTypeRepository = new VIPCardTypeRepositoryImpl();
         } catch (Exception e) {
             throw new ServletException("Failed to initialize repositories", e);
         }
@@ -72,15 +79,15 @@ public class ValidateVIPCredentialsServlet extends HttpServlet {
             User user = userOpt.get();
             
             // Check for active VIP card
-            Optional<UserVIPCard> vipCardOpt = userVIPCardRepository.findActiveByUserId(user.getUserID());
+            List<UserVIPCard> vipCards = userVIPCardRepository.findActiveByUserId(user.getUserID());
             
-            if (!vipCardOpt.isPresent()) {
+            if (vipCards.isEmpty()) {
                 sendVIPValidationResponse(response, false, "Thành viên này không có thẻ VIP hoặc thẻ VIP đã hết hạn", 
                                         0.0, null, null, user.getFullName());
                 return;
             }
             
-            UserVIPCard vipCard = vipCardOpt.get();
+            UserVIPCard vipCard = vipCards.get(0); // Get the most relevant active card
             
             // Validate VIP card is still valid (not expired)
             if (!vipCard.isValid()) {
@@ -92,11 +99,19 @@ public class ValidateVIPCredentialsServlet extends HttpServlet {
             // Get VIP discount percentage
             double discountPercentage = userVIPCardRepository.getVIPDiscountPercentage(user.getUserID());
             
+            // Load VIP Card Type details
+            Optional<VIPCardType> vipCardTypeOpt = vipCardTypeRepository.findById(vipCard.getVipCardTypeID());
+            if (!vipCardTypeOpt.isPresent()) {
+                sendErrorResponse(response, "Không tìm thấy thông tin loại thẻ VIP.", 500);
+                return;
+            }
+            VIPCardType vipCardType = vipCardTypeOpt.get();
+            
             // User has valid VIP membership
             sendVIPValidationResponse(response, true, "Xác thực thành công! Thẻ VIP hợp lệ.", 
                                     discountPercentage, 
-                                    vipCard.getVipCardType().getBaseTypeName(), 
-                                    vipCard.getVipCardType().getVIPIcon(),
+                                    vipCardType.getBaseTypeName(), 
+                                    vipCardType.getVIPIcon(),
                                     user.getFullName());
             
         } catch (Exception e) {

@@ -76,9 +76,9 @@ public class VIPPaymentInitiateServlet extends HttpServlet {
             VIPCardType selectedVIPCard = vipCardTypeOpt.get();
 
             // Check if user already has an active VIP card
-            Optional<UserVIPCard> existingVIPCardOpt = userVIPCardRepository.findActiveByUserId(loggedInUser.getUserID());
-            if (existingVIPCardOpt.isPresent()) {
-                UserVIPCard existingVIPCard = existingVIPCardOpt.get();
+            List<UserVIPCard> existingVIPCards = userVIPCardRepository.findActiveByUserId(loggedInUser.getUserID());
+            if (!existingVIPCards.isEmpty()) {
+                UserVIPCard existingVIPCard = existingVIPCards.get(0); // Get the most relevant card
                 
                 // Check if trying to buy the same VIP card type
                 if (existingVIPCard.getVipCardTypeID() == selectedVIPCard.getVipCardTypeID()) {

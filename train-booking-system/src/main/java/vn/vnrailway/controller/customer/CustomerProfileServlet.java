@@ -3,6 +3,12 @@ package vn.vnrailway.controller.customer;
 import vn.vnrailway.dao.UserRepository;
 import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.model.User;
+import vn.vnrailway.dao.UserVIPCardRepository;
+import vn.vnrailway.dao.VIPCardTypeRepository;
+import vn.vnrailway.dao.impl.UserVIPCardRepositoryImpl;
+import vn.vnrailway.dao.impl.VIPCardTypeRepositoryImpl;
+import vn.vnrailway.model.UserVIPCard;
+import vn.vnrailway.model.VIPCardType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,11 +28,14 @@ import java.time.ZoneId;
 @WebServlet("/customerprofile")
 public class CustomerProfileServlet extends HttpServlet {
     private UserRepository userRepository;
+    private UserVIPCardRepository userVIPCardRepository;
+    private VIPCardTypeRepository vipCardTypeRepository;
 
     @Override
-    public void init() throws ServletException {
-        super.init();
+    public void init() {
         userRepository = new UserRepositoryImpl();
+        userVIPCardRepository = new UserVIPCardRepositoryImpl();
+        vipCardTypeRepository = new VIPCardTypeRepositoryImpl();
     }
 
     @Override
@@ -52,7 +62,21 @@ public class CustomerProfileServlet extends HttpServlet {
                 if (dateOfBirth != null) {
                     date = Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
-  request.setAttribute("dateOfBirth", date);
+                request.setAttribute("dateOfBirth", date);
+
+                List<UserVIPCard> userVIPCards = userVIPCardRepository.findActiveByUserId(user.getUserID());
+                if (!userVIPCards.isEmpty()) {
+                    UserVIPCard userVIPCard = userVIPCards.get(0); // Get the most relevant card
+                    Optional<VIPCardType> vipCardTypeOpt = vipCardTypeRepository.findById(userVIPCard.getVipCardTypeID());
+                    if (vipCardTypeOpt.isPresent()) {
+                        VIPCardType vipCardType = vipCardTypeOpt.get();
+                        request.setAttribute("userVIPCard", userVIPCard);
+                        request.setAttribute("vipCardType", vipCardType);
+
+                        Date expiryDate = Date.from(userVIPCard.getExpiryDate().atZone(ZoneId.systemDefault()).toInstant());
+                        request.setAttribute("vipExpiryDate", expiryDate);
+                    }
+                }
 
   String avatarURL = "";
   if ("Male".equals(user.getGender())) {

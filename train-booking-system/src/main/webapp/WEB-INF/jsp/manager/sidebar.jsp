@@ -72,6 +72,11 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       </a>
     </li>
     <li>
+      <a href="${pageContext.request.contextPath}/manageVIPCardTypes">
+        <i class="fas fa-crown"></i> Quản Lý Thẻ VIP
+      </a>
+    </li>
+    <li>
       <a href="${pageContext.request.contextPath}/logout">
         <i class="fas fa-sign-out-alt"></i> Đăng Xuất
       </a>

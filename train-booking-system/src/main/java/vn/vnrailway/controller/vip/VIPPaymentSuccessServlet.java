@@ -70,7 +70,7 @@ public class VIPPaymentSuccessServlet extends HttpServlet {
             UserVIPCard userVIPCard = userVIPCardOpt.get();
             
             // Verify VIP card is active
-            if (!userVIPCard.isValid()) {
+            if (!userVIPCard.isActive()) {
                 response.sendRedirect(request.getContextPath() + "/");
                 return;
             }

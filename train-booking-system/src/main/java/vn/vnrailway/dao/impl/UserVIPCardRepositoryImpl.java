@@ -3,111 +3,38 @@ package vn.vnrailway.dao.impl;
 import vn.vnrailway.config.DBContext;
 import vn.vnrailway.dao.UserVIPCardRepository;
 import vn.vnrailway.model.UserVIPCard;
-import vn.vnrailway.model.VIPCardType;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Implementation of UserVIPCardRepository for database operations.
- */
 public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
 
-    /**
-     * Maps ResultSet to UserVIPCard object
-     */
-    private UserVIPCard mapResultSetToUserVIPCard(ResultSet rs) throws SQLException {
-        UserVIPCard userVIPCard = new UserVIPCard();
-        userVIPCard.setUserVIPCardID(rs.getInt("UserVIPCardID"));
-        userVIPCard.setUserID(rs.getInt("UserID"));
-        userVIPCard.setVipCardTypeID(rs.getInt("VIPCardTypeID"));
-        
-        Timestamp purchaseDateTimestamp = rs.getTimestamp("PurchaseDate");
-        if (purchaseDateTimestamp != null) {
-            userVIPCard.setPurchaseDate(purchaseDateTimestamp.toLocalDateTime());
-        }
-        
-        Timestamp expiryDateTimestamp = rs.getTimestamp("ExpiryDate");
-        if (expiryDateTimestamp != null) {
-            userVIPCard.setExpiryDate(expiryDateTimestamp.toLocalDateTime());
-        }
-        
-        userVIPCard.setActive(rs.getBoolean("IsActive"));
-        userVIPCard.setTransactionReference(rs.getString("TransactionReference"));
-        
-        return userVIPCard;
-    }
-
-    /**
-     * Maps ResultSet to UserVIPCard object with joined VIPCardType data
-     */
-    private UserVIPCard mapResultSetToUserVIPCardWithType(ResultSet rs) throws SQLException {
-        UserVIPCard userVIPCard = mapResultSetToUserVIPCard(rs);
-        
-        // Map VIPCardType if available in the ResultSet
-        try {
-            VIPCardType vipCardType = new VIPCardType();
-            vipCardType.setVipCardTypeID(rs.getInt("VIPCardTypeID"));
-            vipCardType.setTypeName(rs.getString("TypeName"));
-            vipCardType.setPrice(rs.getBigDecimal("Price"));
-            vipCardType.setDiscountPercentage(rs.getBigDecimal("DiscountPercentage"));
-            vipCardType.setDurationMonths(rs.getInt("DurationMonths"));
-            vipCardType.setDescription(rs.getString("Description"));
-            
-            userVIPCard.setVipCardType(vipCardType);
-        } catch (SQLException e) {
-            // VIPCardType columns not available in ResultSet, leave as null
-        }
-        
-        return userVIPCard;
-    }
-
     @Override
-    public UserVIPCard create(UserVIPCard userVIPCard) throws SQLException {
-        String sql = "INSERT INTO UserVIPCards (UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            statement.setInt(1, userVIPCard.getUserID());
-            statement.setInt(2, userVIPCard.getVipCardTypeID());
-            statement.setTimestamp(3, Timestamp.valueOf(userVIPCard.getPurchaseDate()));
-            statement.setTimestamp(4, Timestamp.valueOf(userVIPCard.getExpiryDate()));
-            statement.setBoolean(5, userVIPCard.isActive());
-            statement.setString(6, userVIPCard.getTransactionReference());
-            
-            int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creating user VIP card failed, no rows affected.");
-            }
-            
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    userVIPCard.setUserVIPCardID(generatedKeys.getInt(1));
-                    return userVIPCard;
-                } else {
-                    throw new SQLException("Creating user VIP card failed, no ID obtained.");
-                }
-            }
+    public void save(UserVIPCard userVIPCard) throws SQLException {
+        String sql = "INSERT INTO UserVIPCards (UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userVIPCard.getUserID());
+            ps.setInt(2, userVIPCard.getVipCardTypeID());
+            ps.setTimestamp(3, Timestamp.valueOf(userVIPCard.getPurchaseDate()));
+            ps.setTimestamp(4, Timestamp.valueOf(userVIPCard.getExpiryDate()));
+            ps.setBoolean(5, userVIPCard.isActive());
+            ps.setString(6, userVIPCard.getTransactionReference());
+            ps.executeUpdate();
         }
     }
 
     @Override
-    public Optional<UserVIPCard> findById(int userVIPCardID) throws SQLException {
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE UserVIPCardID = ?";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userVIPCardID);
-            try (ResultSet rs = statement.executeQuery()) {
+    public Optional<UserVIPCard> findByUserId(int userId) throws SQLException {
+        String sql = "SELECT * FROM UserVIPCards WHERE UserID = ? AND IsActive = 1 ORDER BY ExpiryDate DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUserVIPCard(rs));
+                    return Optional.of(mapRowToUserVIPCard(rs));
                 }
             }
         }
@@ -115,57 +42,30 @@ public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
     }
 
     @Override
-    public Optional<UserVIPCard> findActiveByUserId(int userID) throws SQLException {
-        String sql = "SELECT uvc.UserVIPCardID, uvc.UserID, uvc.VIPCardTypeID, uvc.PurchaseDate, uvc.ExpiryDate, uvc.IsActive, uvc.TransactionReference, " +
-                    "vct.TypeName, vct.Price, vct.DiscountPercentage, vct.DurationMonths, vct.Description " +
-                    "FROM UserVIPCards uvc " +
-                    "JOIN VIPCardTypes vct ON uvc.VIPCardTypeID = vct.VIPCardTypeID " +
-                    "WHERE uvc.UserID = ? AND uvc.IsActive = 1 AND uvc.ExpiryDate > GETDATE()";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userID);
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToUserVIPCardWithType(rs));
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public List<UserVIPCard> findAllByUserId(int userID) throws SQLException {
-        List<UserVIPCard> userVIPCards = new ArrayList<>();
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE UserID = ? ORDER BY PurchaseDate DESC";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userID);
-            try (ResultSet rs = statement.executeQuery()) {
+    public List<UserVIPCard> findActiveByUserId(int userId) throws SQLException {
+        List<UserVIPCard> cards = new ArrayList<>();
+        String sql = "SELECT * FROM UserVIPCards WHERE UserID = ? AND IsActive = 1";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    userVIPCards.add(mapResultSetToUserVIPCard(rs));
+                    cards.add(mapRowToUserVIPCard(rs));
                 }
             }
         }
-        return userVIPCards;
+        return cards;
     }
 
     @Override
     public Optional<UserVIPCard> findByTransactionReference(String transactionReference) throws SQLException {
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE TransactionReference = ?";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setString(1, transactionReference);
-            try (ResultSet rs = statement.executeQuery()) {
+        String sql = "SELECT * FROM UserVIPCards WHERE TransactionReference = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, transactionReference);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToUserVIPCard(rs));
+                    return Optional.of(mapRowToUserVIPCard(rs));
                 }
             }
         }
@@ -173,109 +73,60 @@ public class UserVIPCardRepositoryImpl implements UserVIPCardRepository {
     }
 
     @Override
-    public boolean updateStatus(int userVIPCardID, boolean isActive) throws SQLException {
-        String sql = "UPDATE UserVIPCards SET IsActive = ? WHERE UserVIPCardID = ?";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setBoolean(1, isActive);
-            statement.setInt(2, userVIPCardID);
-            
-            return statement.executeUpdate() > 0;
+    public void deactivateAllForUser(int userId) throws SQLException {
+        String sql = "UPDATE UserVIPCards SET IsActive = 0 WHERE UserID = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
         }
     }
 
     @Override
-    public int deactivateAllForUser(int userID) throws SQLException {
-        String sql = "UPDATE UserVIPCards SET IsActive = 0 WHERE UserID = ? AND IsActive = 1";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userID);
-            return statement.executeUpdate();
+    public void create(UserVIPCard userVIPCard) throws SQLException {
+        save(userVIPCard);
+    }
+
+    @Override
+    public void update(UserVIPCard userVIPCard) throws SQLException {
+        String sql = "UPDATE UserVIPCards SET UserID = ?, VIPCardTypeID = ?, PurchaseDate = ?, ExpiryDate = ?, IsActive = ?, TransactionReference = ? WHERE UserVIPCardID = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userVIPCard.getUserID());
+            ps.setInt(2, userVIPCard.getVipCardTypeID());
+            ps.setTimestamp(3, Timestamp.valueOf(userVIPCard.getPurchaseDate()));
+            ps.setTimestamp(4, Timestamp.valueOf(userVIPCard.getExpiryDate()));
+            ps.setBoolean(5, userVIPCard.isActive());
+            ps.setString(6, userVIPCard.getTransactionReference());
+            ps.setInt(7, userVIPCard.getUserVIPCardID());
+            ps.executeUpdate();
         }
     }
 
     @Override
-    public List<UserVIPCard> findExpired() throws SQLException {
-        List<UserVIPCard> expiredCards = new ArrayList<>();
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE IsActive = 1 AND ExpiryDate <= GETDATE()";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-            
-            while (rs.next()) {
-                expiredCards.add(mapResultSetToUserVIPCard(rs));
-            }
-        }
-        return expiredCards;
-    }
-
-    @Override
-    public int deactivateExpired() throws SQLException {
-        String sql = "UPDATE UserVIPCards SET IsActive = 0 WHERE IsActive = 1 AND ExpiryDate <= GETDATE()";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            return statement.executeUpdate();
-        }
-    }
-
-    @Override
-    public boolean hasActiveVIPCard(int userID) throws SQLException {
-        String sql = "SELECT 1 FROM UserVIPCards WHERE UserID = ? AND IsActive = 1 AND ExpiryDate > GETDATE()";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userID);
-            try (ResultSet rs = statement.executeQuery()) {
-                return rs.next();
-            }
-        }
-    }
-
-    @Override
-    public double getVIPDiscountPercentage(int userID) throws SQLException {
-        String sql = "SELECT vct.DiscountPercentage FROM UserVIPCards uvc " +
-                    "JOIN VIPCardTypes vct ON uvc.VIPCardTypeID = vct.VIPCardTypeID " +
-                    "WHERE uvc.UserID = ? AND uvc.IsActive = 1 AND uvc.ExpiryDate > GETDATE()";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, userID);
-            try (ResultSet rs = statement.executeQuery()) {
+    public float getVIPDiscountPercentage(int userId) throws SQLException {
+        String sql = "SELECT vct.DiscountPercentage FROM UserVIPCards uvc JOIN VIPCardTypes vct ON uvc.VIPCardTypeID = vct.VIPCardTypeID WHERE uvc.UserID = ? AND uvc.IsActive = 1 AND uvc.ExpiryDate > GETDATE()";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getDouble("DiscountPercentage");
+                    return rs.getFloat("DiscountPercentage");
                 }
             }
         }
-        return 0.0; // No active VIP card
+        return 0;
     }
 
-    @Override
-    public List<UserVIPCard> findExpiringSoon(int daysFromNow) throws SQLException {
-        List<UserVIPCard> expiringSoonCards = new ArrayList<>();
-        String sql = "SELECT UserVIPCardID, UserID, VIPCardTypeID, PurchaseDate, ExpiryDate, IsActive, TransactionReference " +
-                    "FROM UserVIPCards WHERE IsActive = 1 AND ExpiryDate > GETDATE() " +
-                    "AND ExpiryDate <= DATEADD(DAY, ?, GETDATE()) ORDER BY ExpiryDate ASC";
-        
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            
-            statement.setInt(1, daysFromNow);
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    expiringSoonCards.add(mapResultSetToUserVIPCard(rs));
-                }
-            }
-        }
-        return expiringSoonCards;
+    private UserVIPCard mapRowToUserVIPCard(ResultSet rs) throws SQLException {
+        return new UserVIPCard(
+                rs.getInt("UserVIPCardID"),
+                rs.getInt("UserID"),
+                rs.getInt("VIPCardTypeID"),
+                rs.getTimestamp("PurchaseDate").toLocalDateTime(),
+                rs.getTimestamp("ExpiryDate").toLocalDateTime(),
+                rs.getBoolean("IsActive"),
+                rs.getString("TransactionReference")
+        );
     }
 }

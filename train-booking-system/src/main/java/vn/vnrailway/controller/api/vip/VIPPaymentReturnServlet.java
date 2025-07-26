@@ -180,7 +180,7 @@ public class VIPPaymentReturnServlet extends HttpServlet {
                     vipTransactionRef
                 );
                 
-                userVIPCard = userVIPCardRepository.create(userVIPCard);
+                userVIPCardRepository.create(userVIPCard);
                 
                 // Create payment transaction record
                 PaymentTransaction paymentTransaction = new PaymentTransaction();
