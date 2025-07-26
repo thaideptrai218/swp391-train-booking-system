@@ -81,7 +81,7 @@
                 <c:if test="${pendingRefundsCount > 0}">
                     <div class="task-item">
                         <p>Có ${pendingRefundsCount} yêu cầu hoàn vé đang chờ xử lý.</p>
-                        <a href="${pageContext.request.contextPath}/checkRefundTicket" class="btn">Xử lý ngay</a>
+                        <a href="${pageContext.request.contextPath}/staff/refund-requests" class="btn">Xử lý ngay</a>
                     </div>
                 </c:if>
 
@@ -97,7 +97,7 @@
                 <c:if test="${unansweredUsersCount > 0}">
                     <div class="task-item">
                         <p>Có ${unansweredUsersCount} khách hàng đang chờ được trả lời tin nhắn.</p>
-                        <a href="${pageContext.request.contextPath}/staff-message" class="btn">Trả lời ngay</a>
+                        <a href="${pageContext.request.contextPath}/staff/messages" class="btn">Trả lời ngay</a>
                     </div>
                 </c:if>
 

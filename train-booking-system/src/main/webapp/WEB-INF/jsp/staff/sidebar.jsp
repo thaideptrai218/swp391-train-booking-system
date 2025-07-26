@@ -34,18 +34,18 @@
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/checkRefundTicket">
-        <i class="fas fa-ticket-alt"></i> Kiểm tra hoàn vé
+      <a href="${pageContext.request.contextPath}/staff/refund-requests">
+        <i class="fas fa-undo-alt"></i> Yêu cầu hoàn tiền
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/staff-message">
-        <i class="fas fa-headset"></i> Hỗ trợ khách hàng
+      <a href="${pageContext.request.contextPath}/staff/refund-list">
+        <i class="fas fa-list-ul"></i> Danh sách hoàn tiền
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/checkConfirmRefundRequest?userID=${loggedInUser.userID}">
-        <i class="fas fa-check-circle"></i> Danh sách các vé đã hoàn
+      <a href="${pageContext.request.contextPath}/staff/messages">
+        <i class="fas fa-envelope"></i> Tin nhắn
       </a>
     </li>
     <li>
@@ -54,7 +54,7 @@
       </a>
     </li>
     <li>
-      <a href="${pageContext.request.contextPath}/customer-info">
+      <a href="${pageContext.request.contextPath}/staff/customer-info">
         <i class="fas fa-users"></i> Thông tin khách hàng
       </a>
     </li>

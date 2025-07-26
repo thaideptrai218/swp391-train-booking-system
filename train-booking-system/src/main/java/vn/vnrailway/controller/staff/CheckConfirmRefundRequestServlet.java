@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet(name = "CheckConfirmRefundRequestServlet", urlPatterns = { "/checkConfirmRefundRequest" })
+@WebServlet(name = "CheckConfirmRefundRequestServlet", urlPatterns = { "/staff/refund-list" })
 public class CheckConfirmRefundRequestServlet extends HttpServlet {
     private TicketRepository ticketRepository = new TicketRepositoryImpl();
 

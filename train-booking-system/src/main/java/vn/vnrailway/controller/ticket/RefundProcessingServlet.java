@@ -49,7 +49,7 @@ import java.util.UUID;
         maxFileSize = 1024 * 1024 * 10, // 10MB
         maxRequestSize = 1024 * 1024 * 15 // 15MB
 )
-@WebServlet(name = "RefundProcessingServlet", urlPatterns = { "/refundProcessing" })
+@WebServlet(name = "RefundProcessingServlet", urlPatterns = { "/staff/refundProcessing" })
 public class RefundProcessingServlet extends HttpServlet {
     private TicketRepository ticketRepository;
     private static final String EMAIL_FROM = "assasinhp619@gmail.com";
@@ -69,7 +69,7 @@ public class RefundProcessingServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+        response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
 
     }
 
@@ -150,26 +150,26 @@ public class RefundProcessingServlet extends HttpServlet {
             if ("approve".equals(action)) {
                 try {
                     ticketRepository.approveRefundTicket(ticketInfo, dbFilePath);
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 }
             } else if ("reject".equals(action)) {
                 try {
                     ticketRepository.rejectRefundTicket(ticketInfo, dbFilePath);
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+                    response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("message", "Không thể gửi email. Vui lòng thử lại sau.");
-            response.sendRedirect(request.getContextPath() + "/checkRefundTicket");
+            response.sendRedirect(request.getContextPath() + "/staff/refund-requests");
         }
     }
 

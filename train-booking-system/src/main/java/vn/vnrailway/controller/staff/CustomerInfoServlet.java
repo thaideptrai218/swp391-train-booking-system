@@ -12,7 +12,7 @@ import vn.vnrailway.dao.CustomerInfoDAO;
 import vn.vnrailway.dao.impl.CustomerInfoImpl;
 import vn.vnrailway.model.User;
 
-@WebServlet("/customer-info")
+@WebServlet("/staff/customer-info")
 public class CustomerInfoServlet extends HttpServlet {
 
     private CustomerInfoDAO customerInfoDAO = new CustomerInfoImpl();

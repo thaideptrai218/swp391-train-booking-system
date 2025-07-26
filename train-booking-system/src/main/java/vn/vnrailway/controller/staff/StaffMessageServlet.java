@@ -14,7 +14,7 @@ import vn.vnrailway.dao.impl.MessageImpl;
 import vn.vnrailway.model.MessageSummary;
 import vn.vnrailway.model.User;
 
-@WebServlet("/staff-message")
+@WebServlet("/staff/messages")
 public class StaffMessageServlet extends HttpServlet {
     private static final int ITEMS_PER_PAGE = 5;
     private MessageDAO messageDAO = new MessageImpl();
@@ -61,7 +61,7 @@ public class StaffMessageServlet extends HttpServlet {
             messageDAO.saveMessage(userId, staffId, message, "Staff");
         }
         String pageParam = request.getParameter("page");
-        String redirectUrl = request.getContextPath() + "/staff-message?userId=" + userId;
+        String redirectUrl = request.getContextPath() + "/staff/messages?userId=" + userId;
         if (pageParam != null && !pageParam.isEmpty()) {
             redirectUrl += "&page=" + pageParam;
         }

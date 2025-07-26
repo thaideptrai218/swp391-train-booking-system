@@ -325,37 +325,11 @@
 
             <body>
                 <div class="dashboard-container">
-                    <aside class="sidebar">
-                        <a href="${pageContext.request.contextPath}/searchTrip" class="home-link">
-                            <i class="fa-solid fa-house fa-xl home-icon"></i>
-                        </a>
-                        <h2>Bảng điều khiển nhân viên</h2>
-                        <nav>
-                            <ul>
-                                <li><a href="${pageContext.request.contextPath}/staff/dashboard">Bảng điều khiển</a>
-                                </li>
-                                <li><a href="#">Quản lý đặt chỗ</a></li>
-                                <li><a href="${pageContext.request.contextPath}/checkRefundTicket">Kiểm tra hoàn vé</a>
-                                </li>
-                                <li><a href="${pageContext.request.contextPath}/staff-message">Hỗ trợ khách hàng</a>
-                                </li>
-                                <li><a href="${pageContext.request.contextPath}/checkConfirmRefundRequest">Danh sách các
-                                        vé đã hoàn</a></li>
-                                <li><a href="${pageContext.request.contextPath}/staff/feedback">Góp ý của khách hàng</a>
-                                </li>
-                                <li><a href="${pageContext.request.contextPath}/customer-info">Thông tin khách hàng</a>
-                                </li>
-                                <li><a href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
-                            </ul>
-                        </nav>
-                    </aside>
+                    <jsp:include page="sidebar.jsp" />
 
                     <main class="main-content">
                         <header class="header">
                             <h1>Kiểm tra hoàn vé</h1>
-                            <div class="user-info">
-                                <span>Đăng nhập với tư cách: Người dùng nhân viên</span>
-                            </div>
                         </header>
 
                         <div class="chat-container">

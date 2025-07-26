@@ -195,7 +195,7 @@
 
                 <!-- Search and Filter Form -->
                 <div class="filter-container">
-                    <form action="${pageContext.request.contextPath}/customer-info" method="get" id="filterForm">
+                    <form action="${pageContext.request.contextPath}/staff/customer-info" method="get" id="filterForm">
                         <select name="searchField">
                             <option value="fullName" ${param.searchField == 'fullName' ? 'selected' : ''}>Tên</option>
                             <option value="email" ${param.searchField == 'email' ? 'selected' : ''}>Email</option>
