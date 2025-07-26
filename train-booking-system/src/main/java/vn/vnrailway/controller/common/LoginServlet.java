@@ -53,7 +53,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String identifier = request.getParameter("identifier");
+        String identifier = request.getParameter("identifier").trim();
         String password = request.getParameter("password");
         String rememberMe = request.getParameter("rememberMe"); // "on" if checked, null otherwise
 
