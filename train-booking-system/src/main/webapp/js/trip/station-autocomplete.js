@@ -7,8 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const destinationSuggestionsContainer = document.getElementById("destination-station-suggestions");
 
     let allStations = [];
-    // activeAutocompleteInput is no longer strictly needed with individual suggestion states
-    // let activeAutocompleteInput = null; 
+
 
     function removeDiacritics(str) {
         if (!str) return "";

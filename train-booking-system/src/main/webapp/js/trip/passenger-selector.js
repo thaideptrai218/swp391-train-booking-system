@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Passenger Selector Logic ---
+    
     const passengerSelector = document.querySelector(".passenger-selector");
     if (passengerSelector) {
         const passengerSummary =

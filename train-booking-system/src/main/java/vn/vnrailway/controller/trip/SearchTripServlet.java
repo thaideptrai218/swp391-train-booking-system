@@ -90,11 +90,7 @@ public class SearchTripServlet extends HttpServlet {
         } catch (SQLException e) {
             System.err.println("SearchTripServlet: SQL error fetching passenger types: " + e.getMessage());
             e.printStackTrace(); // Consider using a proper logger
-            request.setAttribute("passengerTypes", new ArrayList<PassengerType>()); // Set an empty list to avoid JSP
-                                                                                    // errors
-            // Optionally, set an error message for the user, though this page is primarily
-            // for search input
-            // request.setAttribute("errorMessage", "Lỗi tải danh sách loại hành khách.");
+            request.setAttribute("passengerTypes", new ArrayList<PassengerType>()); 
         }
         request.getRequestDispatcher("/WEB-INF/jsp/public/trip/searchTrip.jsp").forward(request, response);
     }
