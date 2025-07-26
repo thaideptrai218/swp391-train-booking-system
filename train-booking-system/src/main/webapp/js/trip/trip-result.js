@@ -1,42 +1,68 @@
-var contextPath = "/train-booking-system"; // Fallback if not set, though it should be.
+const bookingController = {
+    // --- Constants ---
+    SESSION_STORAGE_CART_KEY: "VNR_userShoppingCart",
+    HOLD_DURATION_MS: 5 * 60 * 1000, // 5 minutes
 
-let currentCoachInfo = null; // To store coach metadata for use in createSeatElement if needed
-let shoppingCart = []; // To store selected seat DTOs, with tripId for context
-let seatHoldTimers = {}; // To store timers for individual seat holds { seatId: timerId }
-const HOLD_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-const SESSION_STORAGE_CART_KEY = "VNR_userShoppingCart";
+    // --- State ---
+    contextPath: "/train-booking-system",
+    shoppingCart: [],
+    seatHoldTimers: {},
+    currentCarriage: null,
+    lastFetchCoachLayoutParams: null,
 
-let currentCarriage;
-let lastFetchCoachLayoutParams = null;
+    // --- Initialization ---
+    init() {
+        document.addEventListener("DOMContentLoaded", () => {
+            this.loadCartFromSession();
+            this.updateCartDisplay();
+            this.initEventListeners();
+        });
+    },
 
-// Function to load cart from session storage
-function loadCartFromSession() {
-    const storedCart = sessionStorage.getItem(SESSION_STORAGE_CART_KEY);
-    if (storedCart) {
+    initEventListeners() {
+        const trainItems = document.querySelectorAll(".train-item");
+        trainItems.forEach((item) => {
+            const collapsedSummary = item.querySelector(
+                ".train-item-collapsed-summary"
+            );
+            if (collapsedSummary) {
+                collapsedSummary.addEventListener("click", () =>
+                    this.toggleTrainItemDetails(item)
+                );
+            }
+
+            const expandedDetails = item.querySelector(".expanded-details");
+            if (expandedDetails) {
+                expandedDetails.addEventListener("click", (event) => {
+                    const carriageItem = event.target.closest(".carriage-item");
+                    if (carriageItem && carriageItem !== this.currentCarriage) {
+                        this.selectCarriage(carriageItem, item);
+                        this.currentCarriage = carriageItem;
+                    }
+                });
+            }
+        });
+    },
+
+    // --- Cart Management ---
+    loadCartFromSession() {
+        const storedCart = sessionStorage.getItem(
+            this.SESSION_STORAGE_CART_KEY
+        );
+        if (!storedCart) return;
+
         try {
             const parsedCart = JSON.parse(storedCart);
             const now = new Date();
-            const validItems = [];
-
-            parsedCart.forEach((item) => {
-                if (item.holdExpiresAt) {
-                    const expiresAtDate = new Date(item.holdExpiresAt);
-                    if (expiresAtDate > now) {
-                        validItems.push(item);
-                    } else {
-                        console.log(
-                            `Seat ${item.seatName} (Trip: ${item.tripId}) hold expired, removing from session-loaded cart.`
-                        );
-                    }
-                } else {
-                    console.log(
-                        `Seat ${item.seatName} (Trip: ${item.tripId}) has no holdExpiresAt, removing from session-loaded cart.`
-                    );
-                }
+            const validItems = parsedCart.filter((item) => {
+                if (!item.holdExpiresAt) return false;
+                const expiresAtDate = new Date(item.holdExpiresAt);
+                return expiresAtDate > now;
             });
-            shoppingCart = validItems;
-            shoppingCart.forEach((item) => {
-                startSeatHoldTimer(item);
+
+            this.shoppingCart = validItems;
+            this.shoppingCart.forEach((item) => {
+                this.startSeatHoldTimer(item);
                 const trainItemElem = document.querySelector(
                     `.train-item[data-trip-id="${item.tripId}"]`
                 );
@@ -44,18 +70,8 @@ function loadCartFromSession() {
                     const seatElementOnMap = trainItemElem.querySelector(
                         `.seat[data-seat-id="${item.seatID}"]`
                     );
-                    if (
-                        seatElementOnMap &&
-                        seatElementOnMap.classList.contains("available")
-                    ) {
+                    if (seatElementOnMap) {
                         seatElementOnMap.classList.remove("available");
-                        seatElementOnMap.classList.add("selected");
-                    } else if (
-                        seatElementOnMap &&
-                        !seatElementOnMap.classList.contains("selected")
-                    ) {
-                        // If it exists but isn't 'selected', ensure it is.
-                        // This handles cases where the seat map might have been re-rendered without full cart awareness.
                         seatElementOnMap.classList.add("selected");
                     }
                 }
@@ -65,791 +81,626 @@ function loadCartFromSession() {
                 "Error parsing shopping cart from session storage:",
                 e
             );
-            sessionStorage.removeItem(SESSION_STORAGE_CART_KEY); // Clear corrupted data
+            sessionStorage.removeItem(this.SESSION_STORAGE_CART_KEY);
         }
-    }
-}
+    },
 
-function updateItemHoldExpiration() {
-    const now = new Date();
-    shoppingCart.forEach((item) => {
-        if (item.holdExpiresAt) {
-            const newExpiresAt = new Date(now.getTime() + HOLD_DURATION_MS);
-            item.holdExpiresAt = newExpiresAt.toISOString();
-        }
-    });
-    saveCartToSession(); // Save updated cart to session storage
-}
-
-// Function to save cart to session storage
-function saveCartToSession() {
-    sessionStorage.setItem(
-        SESSION_STORAGE_CART_KEY,
-        JSON.stringify(shoppingCart)
-    );
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    loadCartFromSession(); // Load cart from session storage first
-    updateCartDisplay(); // Then update the display based on loaded cart
-
-    const trainItems = document.querySelectorAll(".train-item");
-    trainItems.forEach((item) => {
-        const collapsedSummary = item.querySelector(
-            ".train-item-collapsed-summary"
+    saveCartToSession() {
+        sessionStorage.setItem(
+            this.SESSION_STORAGE_CART_KEY,
+            JSON.stringify(this.shoppingCart)
         );
-        if (collapsedSummary) {
-            collapsedSummary.addEventListener("click", () =>
-                toggleTrainItemDetails(item)
-            );
-        }
+    },
 
-        const expandedDetails = item.querySelector(".expanded-details");
-        if (expandedDetails) {
-            expandedDetails.addEventListener("click", function (event) {
-                const carriageItem = event.target.closest(".carriage-item");
-                if (carriageItem && carriageItem !== currentCarriage) {
-                    // If a different carriage is clicked, select it
-                    selectCarriage(carriageItem, item);
-                    currentCarriage = carriageItem; // Update global currentCarriage
-                }
-            });
-        }
-    });
-});
+    updateItemHoldExpiration() {
+        const now = new Date();
+        this.shoppingCart.forEach((item) => {
+            if (item.holdExpiresAt) {
+                item.holdExpiresAt = new Date(
+                    now.getTime() + this.HOLD_DURATION_MS
+                ).toISOString();
+            }
+        });
+        this.saveCartToSession();
+    },
 
-function toggleTrainItemDetails(trainItemElement) {
-    const details = trainItemElement.querySelector(".expanded-details");
-    const isExpanded = details.style.display === "block";
-    details.style.display = isExpanded ? "none" : "block";
-    trainItemElement.classList.toggle("expanded", !isExpanded);
-}
-
-function selectCarriage(selectedCarriageElement, trainItemElement) {
-    const compositionDisplay = selectedCarriageElement.closest(
-        ".train-composition-display"
-    );
-    if (!compositionDisplay) return;
-
-    compositionDisplay
-        .querySelectorAll(".carriage-item")
-        .forEach((c) => c.classList.remove("active"));
-    selectedCarriageElement.classList.add("active");
-
-    const coachId = selectedCarriageElement.dataset.coachId;
-    const coachTypeName = selectedCarriageElement.dataset.coachTypename;
-    const coachPosition = selectedCarriageElement.dataset.coachPosition;
-    const coachDescription = selectedCarriageElement.dataset.coachDescription;
-    const coachCapacity = parseInt(
-        selectedCarriageElement.dataset.coachCapacity
-    );
-    const isCompartmented =
-        selectedCarriageElement.dataset.coachIsCompartmented == "true";
-    const defaultCompartmentCapacity = selectedCarriageElement.dataset
-        .coachDefaultCompartmentCapacity
-        ? parseInt(
-              selectedCarriageElement.dataset.coachDefaultCompartmentCapacity
-          )
-        : null;
-
-    const tripId = selectedCarriageElement.dataset.tripId;
-    const tripLeg = selectedCarriageElement.dataset.tripLeg;
-
-    const legOriginStationId = trainItemElement.dataset.legOriginStationId;
-    const legDestStationId = trainItemElement.dataset.legDestStationId;
-
-    // Update description block
-    const descriptionBlockId = `carriageDescription-${tripLeg}-${tripId}`;
-    const descriptionBlock = document.getElementById(descriptionBlockId);
-    if (descriptionBlock) {
-        let descHtml = `<strong>${coachTypeName} - Toa ${coachPosition}</strong>`;
+    addToCart(seatData, tripId) {
+        const cartItem = { ...seatData, tripId };
         if (
-            coachDescription &&
-            coachDescription !== "null" &&
-            coachDescription.trim() !== ""
+            !this.shoppingCart.find(
+                (item) =>
+                    item.seatID === cartItem.seatID &&
+                    item.tripId === cartItem.tripId
+            )
         ) {
-            descHtml += `<br>${coachDescription}`;
+            this.shoppingCart.push(cartItem);
         }
-        descriptionBlock.innerHTML = `<p>${descHtml}</p>`;
-    }
+        this.updateCartDisplay();
+        this.saveCartToSession();
+    },
 
-    const seatDetailsBlockId = `seatDetailsBlock-${tripLeg}-${tripId}`;
-    const seatDetailsBlock = document.getElementById(seatDetailsBlockId);
+    // --- UI Updates ---
+    toggleTrainItemDetails(trainItemElement) {
+        const details = trainItemElement.querySelector(".expanded-details");
+        const isExpanded = details.style.display === "block";
+        details.style.display = isExpanded ? "none" : "block";
+        trainItemElement.classList.toggle("expanded", !isExpanded);
+    },
 
-    const coachLayoutInfo = {
-        capacity: coachCapacity,
-        isCompartmented: isCompartmented,
-        defaultCompartmentCapacity: defaultCompartmentCapacity,
-        coachTypeName: coachTypeName,
-    };
-    const carriageContext = {
-        coachId: coachId,
-        coachPosition: coachPosition,
-        tripLeg: tripLeg,
-    };
+    selectCarriage(selectedCarriageElement, trainItemElement) {
+        const compositionDisplay = selectedCarriageElement.closest(
+            ".train-composition-display"
+        );
+        if (!compositionDisplay) return;
 
-    if (seatDetailsBlock) {
-        fetchAndRenderCoachLayout(
-            tripId,
-            coachId,
-            legOriginStationId,
-            legDestStationId,
-            seatDetailsBlock,
+        compositionDisplay
+            .querySelectorAll(".carriage-item")
+            .forEach((c) => c.classList.remove("active"));
+        selectedCarriageElement.classList.add("active");
+
+        const coachData = selectedCarriageElement.dataset;
+        const tripData = trainItemElement.dataset;
+
+        const coachLayoutInfo = {
+            capacity: parseInt(coachData.coachCapacity),
+            isCompartmented: coachData.coachIsCompartmented === "true",
+            defaultCompartmentCapacity:
+                coachData.coachDefaultCompartmentCapacity
+                    ? parseInt(coachData.coachDefaultCompartmentCapacity)
+                    : null,
+            coachTypeName: coachData.coachTypename,
+        };
+
+        const carriageContext = {
+            coachId: coachData.coachId,
+            coachPosition: coachData.coachPosition,
+            tripLeg: coachData.tripLeg,
+        };
+
+        this.updateCarriageDescription(coachData);
+        this.fetchAndRenderCoachLayout(
+            coachData.tripId,
+            coachData.coachId,
+            tripData.legOriginStationId,
+            tripData.legDestStationId,
             coachLayoutInfo,
             carriageContext,
             trainItemElement
         );
-    }
-}
+    },
 
-function generateSeatLayout(
-    seatDetailsBlock,
-    seatDataList,
-    coachLayoutInfo,
-    carriageContext
-) {
-    // Added carriageContext
-    seatDetailsBlock.innerHTML = ""; // Clear loading message or previous seats
-
-    if (!seatDataList || seatDataList.length === 0) {
-        seatDetailsBlock.innerHTML =
-            "<p>Không có thông tin ghế cho toa này.</p>";
-        return;
-    }
-
-    if (
-        coachLayoutInfo.isCompartmented &&
-        coachLayoutInfo.defaultCompartmentCapacity > 0
-    ) {
-        generateCompartmentLayout(
-            seatDetailsBlock,
-            seatDataList,
-            coachLayoutInfo
-        );
-    } else {
-        generateOpenSeatingLayout(
-            seatDetailsBlock,
-            seatDataList,
-            coachLayoutInfo
-        );
-    }
-    addSeatClickListeners(seatDetailsBlock, carriageContext); // Pass carriageContext
-}
-
-function generateOpenSeatingLayout(
-    seatDetailsBlock,
-    seatDataList,
-    coachLayoutInfo
-) {
-    const seatGrid = document.createElement("div");
-    seatGrid.className = "seat-grid open-seating-grid";
-
-    const seatsPerRowVisual = 14;
-    const aisleAfterIndex = 6;
-
-    let currentVisualRow = document.createElement("div");
-    currentVisualRow.className = "seat-row";
-    seatGrid.appendChild(currentVisualRow);
-    let seatsInCurrentVisualRow = 0;
-
-    seatDataList.forEach((seatDto) => {
-        if (seatsInCurrentVisualRow === seatsPerRowVisual) {
-            currentVisualRow = document.createElement("div");
-            currentVisualRow.className = "seat-row";
-            seatGrid.appendChild(currentVisualRow);
-            seatsInCurrentVisualRow = 0;
+    updateCarriageDescription(coachData) {
+        const descriptionBlockId = `carriageDescription-${coachData.tripLeg}-${coachData.tripId}`;
+        const descriptionBlock = document.getElementById(descriptionBlockId);
+        if (descriptionBlock) {
+            let descHtml = `<strong>${coachData.coachTypename} - Toa ${coachData.coachPosition}</strong>`;
+            if (
+                coachData.coachDescription &&
+                coachData.coachDescription !== "null" &&
+                coachData.coachDescription.trim() !== ""
+            ) {
+                descHtml += `<br>${coachData.coachDescription}`;
+            }
+            descriptionBlock.innerHTML = `<p>${descHtml}</p>`;
         }
+    },
 
-        const seatDiv = createSeatElement(seatDto);
-        currentVisualRow.appendChild(seatDiv);
-        seatsInCurrentVisualRow++;
+    // --- Seat Layout Generation ---
+    generateSeatLayout(
+        seatDetailsBlock,
+        seatDataList,
+        coachLayoutInfo,
+        carriageContext
+    ) {
+        seatDetailsBlock.innerHTML = ""; // Clear loading message
+
+        if (!seatDataList || seatDataList.length === 0) {
+            seatDetailsBlock.innerHTML =
+                "<p>Không có thông tin ghế cho toa này.</p>";
+            return;
+        }
 
         if (
-            seatsInCurrentVisualRow === aisleAfterIndex + 1 &&
-            seatsInCurrentVisualRow < seatsPerRowVisual
+            coachLayoutInfo.isCompartmented &&
+            coachLayoutInfo.defaultCompartmentCapacity > 0
         ) {
-            const aisleDiv = document.createElement("div");
-            aisleDiv.className = "aisle-spacer";
-            currentVisualRow.appendChild(aisleDiv);
+            this.generateCompartmentLayout(
+                seatDetailsBlock,
+                seatDataList,
+                coachLayoutInfo
+            );
+        } else {
+            this.generateOpenSeatingLayout(seatDetailsBlock, seatDataList);
         }
-    });
-    seatDetailsBlock.appendChild(seatGrid);
-}
+        this.addSeatClickListeners(seatDetailsBlock, carriageContext);
+    },
 
-function generateCompartmentLayout(
-    seatDetailsBlock,
-    seatDataList,
-    coachLayoutInfo
-) {
-    const compartmentGrid = document.createElement("div");
-    compartmentGrid.className = "seat-grid compartment-grid";
+    generateOpenSeatingLayout(seatDetailsBlock, seatDataList) {
+        const seatGrid = document.createElement("div");
+        seatGrid.className = "seat-grid open-seating-grid";
+        const seatsPerRowVisual = 14;
+        const aisleAfterIndex = 6;
 
-    const numCompartments = Math.ceil(
-        coachLayoutInfo.capacity / coachLayoutInfo.defaultCompartmentCapacity
-    );
-    let seatIndex = 0;
+        let currentVisualRow = document.createElement("div");
+        currentVisualRow.className = "seat-row";
+        seatGrid.appendChild(currentVisualRow);
+        let seatsInCurrentVisualRow = 0;
 
-    const berthLevels = document.createElement("div");
-    berthLevels.className = "berth-levels";
-    for (let i = 0; i < coachLayoutInfo.defaultCompartmentCapacity / 2; i++) {
-        const berthLevelDiv = document.createElement("div");
-        berthLevelDiv.className = `berth-level berth-${i + 1}`;
-        berthLevelDiv.textContent = `T${i + 1}`;
-        berthLevels.appendChild(berthLevelDiv);
-    }
-    compartmentGrid.appendChild(berthLevels);
-
-    for (let i = 0; i < numCompartments; i++) {
-        const compartmentDiv = document.createElement("div");
-        compartmentDiv.className = "compartment";
-        compartmentDiv.innerHTML = `<div class="compartment-label">Khoang ${
-            i + 1
-        }</div>`;
-
-        const berthsContainer = document.createElement("div");
-        berthsContainer.className = "berths-container";
-
-        for (let j = 0; j < 2; j++) {
-            const berthItem = document.createElement("div");
-            berthItem.className = "berth-item";
-
-            for (
-                let k = 0;
-                k < coachLayoutInfo.defaultCompartmentCapacity / 2;
-                k++
-            ) {
-                if (seatIndex < seatDataList.length) {
-                    // Boundary check
-                    const seatDto = seatDataList[seatIndex];
-                    const seatDiv = createSeatElement(seatDto);
-                    if (seatDto.berthLevel) {
-                        seatDiv.classList.add(
-                            `berth-${seatDto.berthLevel.toLowerCase()}`
-                        );
-                    }
-                    berthItem.appendChild(seatDiv);
-                    seatIndex++;
-                }
+        seatDataList.forEach((seatDto) => {
+            if (seatsInCurrentVisualRow === seatsPerRowVisual) {
+                currentVisualRow = document.createElement("div");
+                currentVisualRow.className = "seat-row";
+                seatGrid.appendChild(currentVisualRow);
+                seatsInCurrentVisualRow = 0;
             }
-            berthsContainer.appendChild(berthItem);
-        }
-        compartmentDiv.appendChild(berthsContainer);
-        compartmentGrid.appendChild(compartmentDiv);
-    }
-    seatDetailsBlock.appendChild(compartmentGrid);
-}
 
-function fetchAndRenderCoachLayout(
-    tripId,
-    coachId,
-    legOriginStationId,
-    legDestinationStationId,
-    seatDetailsBlock,
-    coachLayoutInfo,
-    carriageContext,
-    trainItemElement
-) {
-    // Store the current parameters for potential later use
-    lastFetchCoachLayoutParams = {
+            currentVisualRow.appendChild(this.createSeatElement(seatDto));
+            seatsInCurrentVisualRow++;
+
+            if (
+                seatsInCurrentVisualRow === aisleAfterIndex + 1 &&
+                seatsInCurrentVisualRow < seatsPerRowVisual
+            ) {
+                const aisleDiv = document.createElement("div");
+                aisleDiv.className = "aisle-spacer";
+                currentVisualRow.appendChild(aisleDiv);
+            }
+        });
+        seatDetailsBlock.appendChild(seatGrid);
+    },
+
+    generateCompartmentLayout(seatDetailsBlock, seatDataList, coachLayoutInfo) {
+        const compartmentGrid = document.createElement("div");
+        compartmentGrid.className = "seat-grid compartment-grid";
+        const numCompartments = Math.ceil(
+            coachLayoutInfo.capacity /
+                coachLayoutInfo.defaultCompartmentCapacity
+        );
+        let seatIndex = 0;
+
+        const berthLevels = document.createElement("div");
+        berthLevels.className = "berth-levels";
+        for (
+            let i = 0;
+            i < coachLayoutInfo.defaultCompartmentCapacity / 2;
+            i++
+        ) {
+            const berthLevelDiv = document.createElement("div");
+            berthLevelDiv.className = `berth-level berth-${i + 1}`;
+            berthLevelDiv.textContent = `T${i + 1}`;
+            berthLevels.appendChild(berthLevelDiv);
+        }
+        compartmentGrid.appendChild(berthLevels);
+
+        for (let i = 0; i < numCompartments; i++) {
+            const compartmentDiv = document.createElement("div");
+            compartmentDiv.className = "compartment";
+            compartmentDiv.innerHTML = `<div class="compartment-label">Khoang ${
+                i + 1
+            }</div>`;
+
+            const berthsContainer = document.createElement("div");
+            berthsContainer.className = "berths-container";
+
+            for (let j = 0; j < 2; j++) {
+                const berthItem = document.createElement("div");
+                berthItem.className = "berth-item";
+                for (
+                    let k = 0;
+                    k < coachLayoutInfo.defaultCompartmentCapacity / 2;
+                    k++
+                ) {
+                    if (seatIndex < seatDataList.length) {
+                        const seatDto = seatDataList[seatIndex];
+                        const seatDiv = this.createSeatElement(seatDto);
+                        if (seatDto.berthLevel) {
+                            seatDiv.classList.add(
+                                `berth-${seatDto.berthLevel.toLowerCase()}`
+                            );
+                        }
+                        berthItem.appendChild(seatDiv);
+                        seatIndex++;
+                    }
+                }
+                berthsContainer.appendChild(berthItem);
+            }
+            compartmentDiv.appendChild(berthsContainer);
+            compartmentGrid.appendChild(compartmentDiv);
+        }
+        seatDetailsBlock.appendChild(compartmentGrid);
+    },
+
+    createSeatElement(seatDto) {
+        const seatDiv = document.createElement("div");
+        seatDiv.className = "seat";
+        seatDiv.dataset.seatId = seatDto.seatID;
+        seatDiv.dataset.seatName = seatDto.seatName;
+        seatDiv.dataset.seatInfo = JSON.stringify(seatDto);
+        seatDiv.textContent = seatDto.seatNumberInCoach;
+
+        let titleText =
+            seatDto.availabilityStatus || "Trạng thái không xác định";
+        if (
+            seatDto.availabilityStatus?.toLowerCase() === "available" &&
+            seatDto.calculatedPrice !== null &&
+            seatDto.enabled
+        ) {
+            titleText += `: ${seatDto.calculatedPrice.toLocaleString(
+                "vi-VN"
+            )} VND`;
+        }
+        seatDiv.title = titleText;
+
+        if (!seatDto.enabled) {
+            seatDiv.classList.add("disabled");
+        } else {
+            switch (seatDto.availabilityStatus.toLowerCase()) {
+                case "available":
+                    seatDiv.classList.add("available");
+                    break;
+                case "occupied":
+                    seatDiv.classList.add("occupied");
+                    break;
+                case "heldbyyou":
+                    seatDiv.classList.add("selected");
+                    break;
+                case "heldbyother":
+                    seatDiv.classList.add("occupied");
+                    break;
+                case "disabled":
+                    seatDiv.classList.add("disabled");
+                    break;
+                default:
+                    seatDiv.classList.add("unavailable");
+            }
+        }
+        return seatDiv;
+    },
+
+    // --- API Calls ---
+    fetchAndRenderCoachLayout(
         tripId,
         coachId,
         legOriginStationId,
         legDestinationStationId,
-        seatDetailsBlock, // Note: Storing DOM element references
         coachLayoutInfo,
         carriageContext,
-        trainItemElement, // Note: Storing DOM element references
-    };
-
-    seatDetailsBlock.innerHTML = "<p>Đang làm mới sơ đồ ghế...</p>"; // Loading indicator
-
-    const bookingDateTimeISO = new Date().toISOString().slice(0, 19);
-    const mainResultsContent = trainItemElement.closest(
-        ".main-results-content"
-    );
-    const isRoundTripForFetch = mainResultsContent
-        ? mainResultsContent.dataset.isRoundTrip === "true"
-        : false;
-
-    const fetchUrl = `${contextPath}/api/seats/getSeat?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestinationStationId}&bookingDateTime=${encodeURIComponent(
-        bookingDateTimeISO
-    )}&isRoundTrip=${isRoundTripForFetch}`;
-
-    fetch(fetchUrl)
-        .then((response) => {
-            if (!response.ok) {
-                return response.json().then((err) => {
-                    throw new Error(err.error || "Lỗi mạng khi tải ghế.");
-                });
-            }
-            return response.json();
-        })
-        .then((seatDataList) => {
-            generateSeatLayout(
-                seatDetailsBlock,
-                seatDataList,
-                coachLayoutInfo,
-                carriageContext
-            );
-        })
-        .catch((error) => {
-            console.error("Error refreshing seat data:", error);
-            seatDetailsBlock.innerHTML = `<p>Lỗi khi làm mới sơ đồ ghế: ${error.message}</p>`;
-        });
-}
-
-function createSeatElement(seatDto) {
-    const seatDiv = document.createElement("div");
-    seatDiv.className = "seat";
-    seatDiv.dataset.seatId = seatDto.seatID;
-    seatDiv.dataset.seatName = seatDto.seatName;
-    seatDiv.dataset.seatInfo = JSON.stringify(seatDto);
-    seatDiv.textContent = seatDto.seatNumberInCoach;
-
-    let titleText = seatDto.availabilityStatus || "Trạng thái không xác định";
-    if (
-        seatDto.availabilityStatus &&
-        seatDto.availabilityStatus.toLowerCase() === "available" &&
-        seatDto.calculatedPrice !== null &&
-        seatDto.enabled
+        trainItemElement
     ) {
-        titleText += `: ${seatDto.calculatedPrice.toLocaleString("vi-VN")} VND`;
-    }
-    seatDiv.title = titleText;
+        const seatDetailsBlockId = `seatDetailsBlock-${carriageContext.tripLeg}-${tripId}`;
+        const seatDetailsBlock = document.getElementById(seatDetailsBlockId);
+        if (!seatDetailsBlock) return;
 
-    if (!seatDto.enabled) {
-        seatDiv.classList.add("disabled");
-    } else {
-        switch (seatDto.availabilityStatus.toLowerCase()) {
-            case "available":
-                seatDiv.classList.add("available");
-                break;
-            case "occupied":
-                seatDiv.classList.add("occupied");
-                break;
-            case "heldbyyou":
-                seatDiv.classList.add("selected");
-                break;
-            case "heldbyother":
-                seatDiv.classList.add("occupied");
-                break;
-            case "disabled":
-                seatDiv.classList.add("disabled");
-                break;
-            default:
-                console.warn(
-                    "Unknown availability status:",
-                    seatDto.availabilityStatus
-                );
-                seatDiv.classList.add("unavailable");
-        }
-    }
-    return seatDiv;
-}
+        this.lastFetchCoachLayoutParams = {
+            tripId,
+            coachId,
+            legOriginStationId,
+            legDestinationStationId,
+            coachLayoutInfo,
+            carriageContext,
+            trainItemElement,
+        };
+        seatDetailsBlock.innerHTML = "<p>Đang làm mới sơ đồ ghế...</p>";
 
-// --- NEW FUNCTIONS FOR SEAT HOLDING, TIMERS, AND BOOKING PROCESS ---
+        const bookingDateTimeISO = new Date().toISOString().slice(0, 19);
+        const isRoundTripForFetch =
+            trainItemElement.closest(".main-results-content")?.dataset
+                .isRoundTrip === "true";
+        const fetchUrl = `${
+            this.contextPath
+        }/api/seats/getSeat?tripId=${tripId}&coachId=${coachId}&legOriginStationId=${legOriginStationId}&legDestinationStationId=${legDestinationStationId}&bookingDateTime=${encodeURIComponent(
+            bookingDateTimeISO
+        )}&isRoundTrip=${isRoundTripForFetch}`;
 
-async function handleSeatSelectionAttempt(seatDataForCart, seatElement) {
-    console.log("Attempting to hold seat:", seatDataForCart.seatName);
-    seatElement.classList.add("pending-hold");
+        fetch(fetchUrl)
+            .then((response) => {
+                if (!response.ok)
+                    return response.json().then((err) => {
+                        throw new Error(err.error || "Lỗi mạng khi tải ghế.");
+                    });
+                return response.json();
+            })
+            .then((seatDataList) =>
+                this.generateSeatLayout(
+                    seatDetailsBlock,
+                    seatDataList,
+                    coachLayoutInfo,
+                    carriageContext
+                )
+            )
+            .catch((error) => {
+                console.error("Error refreshing seat data:", error);
+                seatDetailsBlock.innerHTML = `<p>Lỗi khi làm mới sơ đồ ghế: ${error.message}</p>`;
+            });
+    },
 
-    try {
-        const response = await fetch(`${contextPath}/api/seats/hold`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                tripId: seatDataForCart.tripId,
-                seatId: seatDataForCart.seatID,
-                coachId: seatDataForCart.coachId,
-                legOriginStationId: seatDataForCart.legOriginStationId,
-                legDestinationStationId:
-                    seatDataForCart.legDestinationStationId,
-            }),
-        });
+    async handleSeatSelectionAttempt(seatDataForCart, seatElement) {
+        seatElement.classList.add("pending-hold");
+        try {
+            const response = await fetch(`${this.contextPath}/api/seats/hold`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    tripId: seatDataForCart.tripId,
+                    seatId: seatDataForCart.seatID,
+                    coachId: seatDataForCart.coachId,
+                    legOriginStationId: seatDataForCart.legOriginStationId,
+                    legDestinationStationId:
+                        seatDataForCart.legDestinationStationId,
+                }),
+            });
 
-        seatElement.classList.remove("pending-hold");
-        const responseData = await response.json();
-        console.log(
-            "Server response from /api/seats/hold:",
-            JSON.stringify(responseData)
-        );
-
-        if (response.ok && responseData.status === "success") {
-            console.log("Seat hold successful. Server data:", responseData);
-            seatElement.classList.add("selected");
-            seatElement.classList.remove("available");
-
-            const expiresAtFromServer =
-                responseData.data && responseData.data.holdExpiresAt
-                    ? responseData.data.holdExpiresAt
-                    : null;
-            console.log(
-                "Value of expiresAtFromServer (from responseData.data.holdExpiresAt):",
-                expiresAtFromServer
-            );
-
-            const finalCartItem = {
-                ...seatDataForCart,
-                holdExpiresAt: expiresAtFromServer,
-            };
-            console.log(
-                "Final cart item constructed before adding to cart:",
-                JSON.stringify(finalCartItem)
-            );
-
-            addToCart(finalCartItem, finalCartItem.tripId);
-        } else {
-            console.error("Seat hold failed:", responseData.message);
-            alert(
-                `Không thể giữ ghế ${seatDataForCart.seatName}: ${
-                    responseData.message || "Lỗi không xác định."
-                }`
-            );
-            seatElement.classList.remove("selected");
+            const responseData = await response.json();
             seatElement.classList.remove("pending-hold");
-            seatElement.classList.add("available"); // Reset to available if hold fails
 
-            const messageLowerCase = responseData.message
-                ? responseData.message.toLowerCase()
-                : "";
-            if (
-                messageLowerCase.includes("seat is already occupied") ||
-                messageLowerCase.includes("seat taken") ||
-                messageLowerCase.includes("held by another user")
-            ) {
-                console.log(
-                    "Seat hold failed because seat is taken. Refreshing coach layout."
+            if (response.ok && responseData.status === "success") {
+                seatElement.classList.add("selected");
+                seatElement.classList.remove("available");
+                const finalCartItem = {
+                    ...seatDataForCart,
+                    holdExpiresAt: responseData.data?.holdExpiresAt,
+                };
+                this.addToCart(finalCartItem, finalCartItem.tripId);
+            } else {
+                alert(
+                    `Không thể giữ ghế ${seatDataForCart.seatName}: ${
+                        responseData.message || "Lỗi không xác định."
+                    }`
                 );
-                if (lastFetchCoachLayoutParams) {
-                    fetchAndRenderCoachLayout(
-                        lastFetchCoachLayoutParams.tripId,
-                        lastFetchCoachLayoutParams.coachId,
-                        lastFetchCoachLayoutParams.legOriginStationId,
-                        lastFetchCoachLayoutParams.legDestinationStationId,
-                        lastFetchCoachLayoutParams.seatDetailsBlock,
-                        lastFetchCoachLayoutParams.coachLayoutInfo,
-                        lastFetchCoachLayoutParams.carriageContext,
-                        lastFetchCoachLayoutParams.trainItemElement
-                    );
-                } else {
-                    console.warn(
-                        "Could not gather all necessary data to refresh coach layout after hold failure."
-                    );
+                seatElement.classList.remove("selected", "pending-hold");
+                seatElement.classList.add("available");
+                const messageLowerCase =
+                    responseData.message?.toLowerCase() || "";
+                if (
+                    messageLowerCase.includes("seat is already occupied") ||
+                    messageLowerCase.includes("seat taken") ||
+                    messageLowerCase.includes("held by another user")
+                ) {
+                    if (this.lastFetchCoachLayoutParams) {
+                        const p = this.lastFetchCoachLayoutParams;
+                        this.fetchAndRenderCoachLayout(
+                            p.tripId,
+                            p.coachId,
+                            p.legOriginStationId,
+                            p.legDestinationStationId,
+                            p.coachLayoutInfo,
+                            p.carriageContext,
+                            p.trainItemElement
+                        );
+                    }
                 }
             }
+        } catch (error) {
+            seatElement.classList.remove("pending-hold", "selected");
+            console.error("Error during seat hold API call:", error);
+            alert("Lỗi kết nối khi cố gắng giữ ghế. Vui lòng thử lại.");
         }
-    } catch (error) {
-        seatElement.classList.remove("pending-hold");
-        seatElement.classList.remove("selected");
-        console.error("Error during seat hold API call:", error);
-        alert("Lỗi kết nối khi cố gắng giữ ghế. Vui lòng thử lại.");
-    }
-}
+    },
 
-async function handleSeatDeselectionAttempt(cartItem, seatElementOnMap) {
-    console.log("Attempting to release seat:", cartItem.seatName);
-
-    try {
-        const response = await fetch(`${contextPath}/api/seats/release`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                tripId: cartItem.tripId,
-                seatId: cartItem.seatID,
-                legOriginStationId: cartItem.legOriginStationId,
-                legDestinationStationId: cartItem.legDestinationStationId,
-            }),
-        });
-        const responseData = await response.json();
-        if (response.ok && responseData.status === "success") {
-            console.log(
-                `Seat release for ${cartItem.seatName} successful on server.`
+    async handleSeatDeselectionAttempt(cartItem, seatElementOnMap) {
+        try {
+            const response = await fetch(
+                `${this.contextPath}/api/seats/release`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        tripId: cartItem.tripId,
+                        seatId: cartItem.seatID,
+                        legOriginStationId: cartItem.legOriginStationId,
+                        legDestinationStationId:
+                            cartItem.legDestinationStationId,
+                    }),
+                }
             );
-        } else {
-            console.warn(
-                `Failed to release seat ${cartItem.seatName} on server: ${responseData.message}`
+            if (!response.ok) {
+                const responseData = await response.json();
+                console.warn(
+                    `Failed to release seat ${cartItem.seatName} on server: ${responseData.message}`
+                );
+            }
+        } catch (error) {
+            console.error("Error during seat release API call:", error);
+        } finally {
+            this.clearTimerAndRemoveFromClientCart(
+                cartItem.seatID,
+                cartItem.tripId
+            );
+            if (seatElementOnMap) {
+                seatElementOnMap.classList.remove("selected");
+                seatElementOnMap.classList.add("available");
+            }
+        }
+    },
+
+    async initiateBookingProcess() {
+        if (this.shoppingCart.length === 0) {
+            alert("Vui lòng chọn ít nhất một vé để tiếp tục.");
+            return;
+        }
+        if (this.shoppingCart.length > 10) {
+            alert("Bạn chỉ có thể đặt tối đa 10 vé cùng một lúc.");
+            return;
+        }
+
+        const seatsToBook = this.shoppingCart.map((item) => ({
+            tripId: item.tripId,
+            seatId: item.seatID,
+            coachId: item.coachId,
+            legOriginStationId: item.legOriginStationId,
+            legDestinationStationId: item.legDestinationStationId,
+        }));
+
+        try {
+            const response = await fetch(
+                `${this.contextPath}/api/booking/initiateBooking`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(seatsToBook),
+                }
+            );
+            const responseData = await response.json();
+
+            if (response.ok && responseData.status === "success") {
+                this.updateItemHoldExpiration();
+                window.location.href = `${this.contextPath}/ticketPayment`;
+            } else {
+                alert(
+                    `Lỗi khi khởi tạo đặt vé: ${
+                        responseData.message ||
+                        "Không thể tiếp tục, vui lòng thử lại."
+                    }`
+                );
+            }
+        } catch (error) {
+            console.error("Error initiating booking:", error);
+            alert(
+                "Lỗi kết nối khi khởi tạo đặt vé. Vui lòng kiểm tra kết nối và thử lại."
             );
         }
-    } catch (error) {
-        console.error("Error during seat release API call:", error);
-    } finally {
-        clearTimerAndRemoveFromClientCart(cartItem.seatID, cartItem.tripId);
+    },
 
-        if (seatElementOnMap) {
-            console.log("test");
-            seatElementOnMap.classList.remove("selected");
-            seatElementOnMap.classList.add("available"); // Reset to available if release is successful
-        }
-    }
-}
+    // --- Timers and Expiration ---
+    startSeatHoldTimer(cartItem) {
+        const timerKey = `${cartItem.tripId}_${cartItem.seatID}`;
+        if (this.seatHoldTimers[timerKey])
+            clearInterval(this.seatHoldTimers[timerKey]);
 
-function startSeatHoldTimer(cartItem) {
-    const timerKey = `${cartItem.tripId}_${cartItem.seatID}`;
+        const expiresAtDate = new Date(cartItem.holdExpiresAt);
+        const intervalId = setInterval(() => {
+            const now = new Date();
+            const timeLeftSeconds = Math.round(
+                (expiresAtDate.getTime() - now.getTime()) / 1000
+            );
+            const listItemElement = document.querySelector(
+                `.cart-item-entry[data-trip-id="${cartItem.tripId}"][data-seat-id="${cartItem.seatID}"]`
+            );
+            const timerDisplayElement = listItemElement?.querySelector(
+                ".cart-item-remove-icon"
+            );
 
-    if (seatHoldTimers[timerKey]) {
-        clearInterval(seatHoldTimers[timerKey]);
-    }
-
-    const expiresAtDate = new Date(cartItem.holdExpiresAt);
-
-    const intervalId = setInterval(() => {
-        const now = new Date();
-        const timeLeftSeconds = Math.round(
-            (expiresAtDate.getTime() - now.getTime()) / 1000
-        );
-
-        const listItemElement = document.querySelector(
-            `.cart-item-entry[data-trip-id="${cartItem.tripId}"][data-seat-id="${cartItem.seatID}"]`
-        );
-        const timerDisplayElement = listItemElement
-            ? listItemElement.querySelector(".cart-item-remove-icon")
-            : null;
-
-        if (timeLeftSeconds > 0) {
-            if (timerDisplayElement) {
-                const minutes = Math.floor(timeLeftSeconds / 60);
-                const seconds = timeLeftSeconds % 60;
-                timerDisplayElement.innerHTML = `<span class="timer-countdown" title="Thời gian giữ vé: ${minutes}m ${seconds}s">${minutes}:${seconds
-                    .toString()
-                    .padStart(2, "0")}</span>`;
-                if (!timerDisplayElement.classList.contains("timer-active")) {
+            if (timeLeftSeconds > 0) {
+                if (timerDisplayElement) {
+                    const minutes = Math.floor(timeLeftSeconds / 60);
+                    const seconds = timeLeftSeconds % 60;
+                    timerDisplayElement.innerHTML = `<span class="timer-countdown" title="Thời gian giữ vé: ${minutes}m ${seconds}s">${minutes}:${seconds
+                        .toString()
+                        .padStart(2, "0")}</span>`;
                     timerDisplayElement.classList.add("timer-active");
                 }
-            }
-        } else {
-            console.log(
-                "Timer expired for seat:",
-                cartItem.seatName,
-                cartItem.seatID
-            );
-            clearInterval(intervalId);
-            delete seatHoldTimers[timerKey];
-
-            if (timerDisplayElement) {
-                timerDisplayElement.innerHTML = '<i class="fas fa-trash"></i>';
-                timerDisplayElement.classList.remove("timer-active");
-            }
-            handleHoldExpired(cartItem);
-        }
-    }, 1000);
-    seatHoldTimers[timerKey] = intervalId;
-}
-
-async function handleHoldExpired(expiredCartItem) {
-    alert(
-        `Thời gian giữ vé cho ghế ${expiredCartItem.seatName} (Tàu ${
-            expiredCartItem.trainName || "N/A"
-        }) đã hết. Vé đã được tự động hủy.`
-    );
-
-    try {
-        const response = await fetch(`${contextPath}/api/seats/release`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                tripId: expiredCartItem.tripId,
-                seatId: expiredCartItem.seatID,
-                legOriginStationId: expiredCartItem.legOriginStationId,
-                legDestinationStationId:
-                    expiredCartItem.legDestinationStationId,
-            }),
-        });
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.warn(
-                `Server failed to release expired hold for seat ${
-                    expiredCartItem.seatID
-                }: ${response.status} - ${
-                    errorData.message || "Unknown server error"
-                }`
-            );
-        } else {
-            const result = await response.json();
-            if (result.status === "success") {
-                console.log(
-                    `Successfully released expired hold for seat ${expiredCartItem.seatID} on server.`
-                );
             } else {
-                console.warn(
-                    `Server reported failure to release expired hold for seat ${expiredCartItem.seatID}: ${result.message}`
-                );
+                clearInterval(intervalId);
+                delete this.seatHoldTimers[timerKey];
+                if (timerDisplayElement) {
+                    timerDisplayElement.innerHTML =
+                        '<i class="fas fa-trash"></i>';
+                    timerDisplayElement.classList.remove("timer-active");
+                }
+                this.handleHoldExpired(cartItem);
+            }
+        }, 1000);
+        this.seatHoldTimers[timerKey] = intervalId;
+    },
+
+    async handleHoldExpired(expiredCartItem) {
+        alert(
+            `Thời gian giữ vé cho ghế ${expiredCartItem.seatName} (Tàu ${
+                expiredCartItem.trainName || "N/A"
+            }) đã hết. Vé đã được tự động hủy.`
+        );
+        try {
+            await fetch(`${this.contextPath}/api/seats/release`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    tripId: expiredCartItem.tripId,
+                    seatId: expiredCartItem.seatID,
+                    legOriginStationId: expiredCartItem.legOriginStationId,
+                    legDestinationStationId:
+                        expiredCartItem.legDestinationStationId,
+                }),
+            });
+        } catch (error) {
+            console.error(
+                "Error releasing expired seat hold on server:",
+                error
+            );
+        }
+        this.clearTimerAndRemoveFromClientCart(
+            expiredCartItem.seatID,
+            expiredCartItem.tripId
+        );
+        if (this.currentCarriage) {
+            const trainItemElement =
+                this.currentCarriage.closest(".train-item");
+            if (trainItemElement)
+                this.selectCarriage(this.currentCarriage, trainItemElement);
+        }
+    },
+
+    clearTimerAndRemoveFromClientCart(seatId, tripId) {
+        const timerKey = `${tripId}_${seatId}`;
+        if (this.seatHoldTimers[timerKey]) {
+            clearInterval(this.seatHoldTimers[timerKey]);
+            delete this.seatHoldTimers[timerKey];
+        }
+
+        const itemIndex = this.shoppingCart.findIndex(
+            (item) =>
+                item.seatID.toString() === seatId.toString() &&
+                item.tripId === tripId
+        );
+        if (itemIndex > -1) this.shoppingCart.splice(itemIndex, 1);
+
+        const trainItemElem = document.querySelector(
+            `.train-item[data-trip-id="${tripId}"]`
+        );
+        if (trainItemElem) {
+            const seatElementOnMap = trainItemElem.querySelector(
+                `.seat[data-seat-id="${seatId}"]`
+            );
+            if (seatElementOnMap) {
+                seatElementOnMap.classList.add("available");
+                seatElementOnMap.classList.remove("selected");
             }
         }
-    } catch (error) {
-        console.error("Error releasing expired seat hold on server:", error);
-    }
+        this.updateCartDisplay();
+        this.saveCartToSession();
+    },
 
-    clearTimerAndRemoveFromClientCart(
-        expiredCartItem.seatID,
-        expiredCartItem.tripId
-    );
-    // After hold expires and is cleared, refresh the current coach view
-    if (currentCarriage) {
-        const trainItemElement = currentCarriage.closest(".train-item");
-        if (trainItemElement) {
-            selectCarriage(currentCarriage, trainItemElement); // Re-select to refresh
-        }
-    }
-}
+    // --- Event Listeners ---
+    addSeatClickListeners(seatGridContainer, carriageContext) {
+        const trainItemElement = seatGridContainer.closest(".train-item");
+        if (!trainItemElement) return;
 
-function clearTimerAndRemoveFromClientCart(seatId, tripId) {
-    const timerKey = `${tripId}_${seatId}`;
-    if (seatHoldTimers[timerKey]) {
-        clearInterval(seatHoldTimers[timerKey]);
-        delete seatHoldTimers[timerKey];
-    }
-
-    const itemIndex = shoppingCart.findIndex(
-        (item) =>
-            item.seatID.toString() === seatId.toString() &&
-            item.tripId === tripId
-    );
-    if (itemIndex > -1) {
-        console.log(itemIndex);
-        shoppingCart.splice(itemIndex, 1);
-        console.log(
-            `Removed seat ${seatId} (Trip: ${tripId}) from client cart.`
-        );
-    }
-
-    const trainItemElem = document.querySelector(
-        `.train-item[data-trip-id="${tripId}"]`
-    );
-    console.log(trainItemElem);
-    console.log(currentCarriage);
-    console.log(shoppingCart[itemIndex]?.coachId.toString());
-
-    const seatElementOnMap = trainItemElem.querySelector(
-        `.seat[data-seat-id="${seatId}"]`
-    );
-    console.log("Seat element on map:", seatElementOnMap);
-    if (seatElementOnMap) {
-        console.log("Lol");
-        seatElementOnMap.classList.add("available"); // Reset to available
-        seatElementOnMap.classList.remove("selected");
-    }
-    updateCartDisplay();
-    saveCartToSession();
-}
-
-async function initiateBookingProcess() {
-    if (shoppingCart.length === 0) {
-        alert("Vui lòng chọn ít nhất một vé để tiếp tục.");
-        return;
-    }
-
-    if (shoppingCart.length > 10) {
-        // MAX_PASSENGERS, assuming 10
-        alert("Bạn chỉ có thể đặt tối đa 10 vé cùng một lúc.");
-        return;
-    }
-
-    const seatsToBook = shoppingCart.map((item) => ({
-        tripId: item.tripId,
-        seatId: item.seatID,
-        coachId: item.coachId,
-        legOriginStationId: item.legOriginStationId,
-        legDestinationStationId: item.legDestinationStationId,
-    }));
-
-    console.log("Initiating booking with seats:", seatsToBook);
-
-    try {
-        const response = await fetch(`${contextPath}/api/booking/initiateBooking`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(seatsToBook),
-        });
-        const responseData = await response.json();
-
-        if (response.ok && responseData.status === "success") {
-            console.log(
-                "Booking initiated successfully, redirecting...",
-                responseData
-            );
-            updateItemHoldExpiration(); // Update hold expiration times in the cart
-            window.location.href = `${contextPath}/ticketPayment`; // Rely on server-provided redirect URL
-        } else {
-            alert(
-                `Lỗi khi khởi tạo đặt vé: ${
-                    responseData.message ||
-                    "Không thể tiếp tục, vui lòng thử lại."
-                }`
-            );
-        }
-    } catch (error) {
-        console.error("Error initiating booking:", error);
-        alert(
-            "Lỗi kết nối khi khởi tạo đặt vé. Vui lòng kiểm tra kết nối và thử lại."
-        );
-    }
-}
-
-function addSeatClickListeners(seatGridContainer, carriageContext) {
-    let tripIdFromScope = null;
-    let legOriginStationIdFromScope = null;
-    let legDestinationStationIdFromScope = null;
-
-    const trainItemElement = seatGridContainer.closest(".train-item");
-    if (trainItemElement && trainItemElement.dataset.tripId) {
-        tripIdFromScope = trainItemElement.dataset.tripId;
-        legOriginStationIdFromScope =
+        const tripIdFromScope = trainItemElement.dataset.tripId;
+        const legOriginStationIdFromScope =
             trainItemElement.dataset.legOriginStationId;
-        legDestinationStationIdFromScope =
+        const legDestinationStationIdFromScope =
             trainItemElement.dataset.legDestStationId;
-    }
 
-    if (!tripIdFromScope) {
-        console.warn(
-            "Could not reliably determine tripId for seat grid:",
-            seatGridContainer.id
-        );
-    }
-    if (!legOriginStationIdFromScope || !legDestinationStationIdFromScope) {
-        console.warn(
-            "Could not reliably determine leg origin/destination station IDs for seat grid:",
-            seatGridContainer.id,
-            trainItemElement.dataset
-        );
-    }
-
-    seatGridContainer
-        .querySelectorAll(".seat") // Attach to all seats to handle deselection of 'selected' ones too
-        .forEach((seatElement) => {
+        seatGridContainer.querySelectorAll(".seat").forEach((seatElement) => {
             if (
                 seatElement.classList.contains("disabled") ||
-                seatElement.classList.contains("occupied")
+                (seatElement.classList.contains("occupied") &&
+                    !seatElement.classList.contains("selected"))
             ) {
-                if (!seatElement.classList.contains("selected")) {
-                    // if it's occupied but not by you
-                    return; // Don't add click listener to disabled or occupied (by others) seats
-                }
+                return;
             }
 
-            seatElement.addEventListener("click", async function () {
-                // Made async for await inside
-                const seatInfoString = this.dataset.seatInfo;
-                if (!seatInfoString) {
-                    console.warn("No seatInfo found for clicked seat:", this);
-                    return;
-                }
+            seatElement.addEventListener("click", async () => {
+                const seatInfoString = seatElement.dataset.seatInfo;
+                if (!seatInfoString) return;
 
                 const seatDataObject = JSON.parse(seatInfoString);
                 const effectiveTripId =
                     tripIdFromScope || seatDataObject.tripId;
-
-                if (!effectiveTripId) {
-                    console.error(
-                        "CRITICAL: tripId is missing for seat operation. Seat:",
-                        seatDataObject.seatName,
-                        this
-                    );
-                    return;
-                }
+                if (!effectiveTripId) return;
 
                 const isCurrentlySelectedOnUI =
-                    this.classList.contains("selected");
-                const cartItemExists = shoppingCart.find(
+                    seatElement.classList.contains("selected");
+                const cartItemExists = this.shoppingCart.find(
                     (item) =>
                         item.seatID === seatDataObject.seatID &&
                         item.tripId === effectiveTripId
@@ -864,22 +715,22 @@ function addSeatClickListeners(seatGridContainer, carriageContext) {
                     tripLeg: carriageContext?.tripLeg,
                     coachPosition: carriageContext?.coachPosition,
                     trainName: trainItemElement
-                        ?.querySelector(
+                        .querySelector(
                             ".train-item-collapsed-summary .train-name"
                         )
                         ?.textContent.trim(),
                     originStationName: trainItemElement
-                        ?.querySelector(
+                        .querySelector(
                             ".train-item-collapsed-summary .departure-info .trip-station"
                         )
                         ?.textContent.trim(),
                     destinationStationName: trainItemElement
-                        ?.querySelector(
+                        .querySelector(
                             ".train-item-collapsed-summary .arrival-info .trip-station"
                         )
                         ?.textContent.trim(),
                     scheduledDepartureDisplay: trainItemElement
-                        ?.querySelector(
+                        .querySelector(
                             ".train-item-collapsed-summary .departure-info .trip-time"
                         )
                         ?.textContent.trim(),
@@ -890,92 +741,76 @@ function addSeatClickListeners(seatGridContainer, carriageContext) {
                     !seatDataForAction.legOriginStationId ||
                     !seatDataForAction.legDestinationStationId
                 ) {
-                    console.error(
-                        "CRITICAL: Missing coachId, legOriginStationId, or legDestinationStationId for API call.",
-                        seatDataForAction
-                    );
                     alert(
                         "Lỗi: Không đủ thông tin để xử lý yêu cầu cho ghế này. Vui lòng thử làm mới trang."
                     );
                     return;
                 }
 
-                // If the seat is available to be selected (not disabled, not occupied by others)
-                if (this.classList.contains("available")) {
-                    console.log(
-                        `Attempting to select available seat: ${seatDataForAction.seatName}`
+                if (seatElement.classList.contains("available")) {
+                    await this.handleSeatSelectionAttempt(
+                        seatDataForAction,
+                        seatElement
                     );
-                    await handleSeatSelectionAttempt(seatDataForAction, this);
                 } else if (isCurrentlySelectedOnUI && cartItemExists) {
-                    // If seat is selected by this user, try to deselect
-                    console.log(
-                        `Attempting to deselect seat: ${seatDataForAction.seatName}`
-                    );
-                    await handleSeatDeselectionAttempt(cartItemExists, this);
-                } else {
-                    // Seat is occupied by others or disabled, and not selected by this user. Do nothing or inform.
-                    console.log(
-                        `Seat ${seatDataForAction.seatName} is not available for selection or deselection by you.`
+                    await this.handleSeatDeselectionAttempt(
+                        cartItemExists,
+                        seatElement
                     );
                 }
             });
         });
-}
+    },
 
-function addToCart(seatData, tripId) {
-    const cartItem = { ...seatData, tripId: tripId };
-    if (
-        !shoppingCart.find(
-            (item) =>
-                item.seatID === cartItem.seatID &&
-                item.tripId === cartItem.tripId
-        )
-    ) {
-        shoppingCart.push(cartItem);
-        console.log(
-            `Seat ${cartItem.seatName} (Trip: ${cartItem.tripId}) added to cart.`
+    // --- Cart Display ---
+    updateCartDisplay() {
+        const cartPlaceholder = document.querySelector(
+            ".shopping-cart-placeholder"
         );
-    }
-    updateCartDisplay();
-    saveCartToSession();
-}
+        if (!cartPlaceholder) return;
 
-function updateCartDisplay() {
-    console.log("Current Cart:", shoppingCart);
-    let totalPrice = 0;
-    shoppingCart.forEach((item) => {
-        if (item.calculatedPrice !== undefined) {
-            totalPrice += item.calculatedPrice;
+        let cartSummaryDetails = cartPlaceholder.querySelector(
+            "#cart-summary-details"
+        );
+        if (!cartSummaryDetails) {
+            cartSummaryDetails = this.createCartSummaryDOM(cartPlaceholder);
+        }
+
+        const cartItemsListElement =
+            cartSummaryDetails.querySelector("#cart-items-list");
+        const proceedButton = cartSummaryDetails.querySelector(
+            "#proceed-to-booking-btn"
+        );
+        const emptyMessageElement = cartItemsListElement.querySelector(
+            ".cart-empty-message"
+        );
+
+        // Clear existing items except the empty message template
+        cartItemsListElement
+            .querySelectorAll(".cart-item-entry")
+            .forEach((el) => el.remove());
+
+        if (this.shoppingCart.length === 0) {
+            emptyMessageElement.style.display = "list-item";
+            proceedButton.style.display = "none";
         } else {
-            console.warn(
-                `Seat ${item.seatName} (Trip: ${item.tripId}, ID: ${item.seatID}) is missing calculatedPrice information.`
-            );
+            emptyMessageElement.style.display = "none";
+            this.shoppingCart.forEach((cartItem) => {
+                const listItem = this.createCartItemElement(cartItem);
+                cartItemsListElement.insertBefore(
+                    listItem,
+                    emptyMessageElement
+                );
+            });
+            proceedButton.style.display = "block";
         }
-    });
-    console.log(`Total Price: ${totalPrice.toFixed(2)}`);
+    },
 
-    const cartPlaceholder = document.querySelector(
-        ".shopping-cart-placeholder"
-    );
-    if (!cartPlaceholder) {
-        console.error("Shopping cart placeholder not found in DOM.");
-        return;
-    }
-
-    let cartSummaryDetails = cartPlaceholder.querySelector(
-        "#cart-summary-details"
-    );
-
-    if (!cartSummaryDetails) {
+    createCartSummaryDOM(cartPlaceholder) {
         const initialMessage = cartPlaceholder.querySelector("p");
-        if (
-            initialMessage &&
-            initialMessage.textContent.includes("Chưa có vé nào")
-        ) {
-            initialMessage.remove();
-        }
+        if (initialMessage) initialMessage.remove();
 
-        cartSummaryDetails = document.createElement("div");
+        const cartSummaryDetails = document.createElement("div");
         cartSummaryDetails.id = "cart-summary-details";
         cartSummaryDetails.innerHTML = `
             <ul id="cart-items-list" class="cart-items-list-modern">
@@ -985,11 +820,9 @@ function updateCartDisplay() {
         `;
         cartPlaceholder.appendChild(cartSummaryDetails);
 
-        const cartItemsList =
-            cartSummaryDetails.querySelector("#cart-items-list");
-        if (cartItemsList) {
-            cartItemsList.addEventListener("click", async function (event) {
-                // Made async
+        cartSummaryDetails
+            .querySelector("#cart-items-list")
+            .addEventListener("click", async (event) => {
                 const removeIcon = event.target.closest(
                     ".cart-item-remove-icon"
                 );
@@ -997,123 +830,75 @@ function updateCartDisplay() {
                     const listItem = removeIcon.closest(".cart-item-entry");
                     const seatIdToRemove = listItem?.dataset.seatId;
                     const tripIdToRemove = listItem?.dataset.tripId;
-
                     if (seatIdToRemove && tripIdToRemove) {
-                        const itemInCart = shoppingCart.find(
+                        const itemInCart = this.shoppingCart.find(
                             (item) =>
                                 item.seatID.toString() === seatIdToRemove &&
                                 item.tripId === tripIdToRemove
                         );
                         if (itemInCart) {
-                            await handleSeatDeselectionAttempt(
+                            await this.handleSeatDeselectionAttempt(
                                 itemInCart,
                                 null
                             );
-                        } else {
-                            console.error(
-                                "Could not find item in cart to remove (trash icon click) for seatId:",
-                                seatIdToRemove,
-                                "and tripId:",
-                                tripIdToRemove
-                            );
                         }
-                    } else {
-                        console.error(
-                            "Missing seatId or tripId for removal from cart item:",
-                            listItem
-                        );
                     }
                 }
             });
-        }
-    }
 
-    const cartItemsListElement =
-        cartSummaryDetails.querySelector("#cart-items-list");
-    const proceedButton = cartSummaryDetails.querySelector(
-        "#proceed-to-booking-btn"
-    );
-    const emptyMessageElement = cartItemsListElement.querySelector(
-        ".cart-empty-message"
-    );
+        const proceedButton = cartSummaryDetails.querySelector(
+            "#proceed-to-booking-btn"
+        );
+        proceedButton.addEventListener("click", () =>
+            this.initiateBookingProcess()
+        );
 
-    if (cartItemsListElement) {
-        while (
-            cartItemsListElement.firstChild &&
-            !cartItemsListElement.firstChild.classList?.contains(
-                "cart-empty-message"
-            )
+        return cartSummaryDetails;
+    },
+
+    createCartItemElement(cartItem) {
+        const listItem = document.createElement("li");
+        listItem.className = "cart-item-entry";
+        listItem.dataset.seatId = cartItem.seatID;
+        listItem.dataset.tripId = cartItem.tripId;
+
+        if (
+            cartItem.holdExpiresAt &&
+            !this.seatHoldTimers[`${cartItem.tripId}_${cartItem.seatID}`]
         ) {
-            cartItemsListElement.removeChild(cartItemsListElement.firstChild);
+            this.startSeatHoldTimer(cartItem);
         }
 
-        if (shoppingCart.length === 0) {
-            if (emptyMessageElement)
-                emptyMessageElement.style.display = "list-item";
-        } else {
-            if (emptyMessageElement) emptyMessageElement.style.display = "none";
-            shoppingCart.forEach((cartItem) => {
-                const listItem = document.createElement("li");
-                listItem.className = "cart-item-entry";
-                listItem.dataset.seatId = cartItem.seatID;
-                listItem.dataset.tripId = cartItem.tripId;
+        const legTypeDisplay =
+            cartItem.tripLeg === "outbound"
+                ? "Chiều đi"
+                : cartItem.tripLeg === "return"
+                ? "Chiều về"
+                : "Chuyến";
+        const trainRouteDisplay = `${cartItem.trainName || "N/A"}: ${
+            cartItem.originStationName || "N/A"
+        } - ${cartItem.destinationStationName || "N/A"}`;
+        const departureDisplay = cartItem.scheduledDepartureDisplay || "N/A";
+        const seatDetailsDisplay = `${cartItem.seatName || "N/A"} (Toa ${
+            cartItem.coachPosition || "N/A"
+        }, Chỗ ${cartItem.seatNumberInCoach || "N/A"})`;
+        const priceInfo =
+            cartItem.calculatedPrice !== undefined
+                ? `${cartItem.calculatedPrice.toLocaleString("vi-VN")} VND`
+                : "N/A";
 
-                if (cartItem.holdExpiresAt) {
-                    const timerKey = `${cartItem.tripId}_${cartItem.seatID}`;
-                    if (!seatHoldTimers[timerKey]) {
-                        startSeatHoldTimer(cartItem);
-                    }
-                }
+        listItem.innerHTML = `
+            <div class="cart-item-info-block">
+                <div class="cart-item-leg-type">${legTypeDisplay}</div>
+                <div class="cart-item-train-route">${trainRouteDisplay}</div>
+                <div class="cart-item-departure">${departureDisplay}</div>
+                <div class="cart-item-seat-info">${seatDetailsDisplay}</div>
+                <div class="cart-item-price">${priceInfo}</div>
+            </div>
+            <span class="cart-item-remove-icon" title="Xóa vé này"><i class="fas fa-trash"></i></span>
+        `;
+        return listItem;
+    },
+};
 
-                const legTypeDisplay =
-                    cartItem.tripLeg === "outbound"
-                        ? "Chiều đi"
-                        : cartItem.tripLeg === "return"
-                        ? "Chiều về"
-                        : "Chuyến";
-                const trainRouteDisplay = `${cartItem.trainName || "N/A"}: ${
-                    cartItem.originStationName || "N/A"
-                } - ${cartItem.destinationStationName || "N/A"}`;
-                const departureDisplay =
-                    cartItem.scheduledDepartureDisplay || "N/A";
-                const seatDetailsDisplay = `${
-                    cartItem.seatName || "N/A"
-                } (Toa ${cartItem.coachPosition || "N/A"}, Chỗ ${
-                    cartItem.seatNumberInCoach || "N/A"
-                })`;
-                const priceInfo =
-                    cartItem.calculatedPrice !== undefined
-                        ? cartItem.calculatedPrice.toLocaleString("vi-VN", {
-                              style: "decimal",
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                          }) + " VND"
-                        : "N/A";
-
-                listItem.innerHTML = `
-                    <div class="cart-item-info-block">
-                        <div class="cart-item-leg-type">${legTypeDisplay}</div>
-                        <div class="cart-item-train-route">${trainRouteDisplay}</div>
-                        <div class="cart-item-departure">${departureDisplay}</div>
-                        <div class="cart-item-seat-info">${seatDetailsDisplay}</div>
-                        <div class="cart-item-price">${priceInfo}</div>
-                    </div>
-                    <span class="cart-item-remove-icon" title="Xóa vé này"><i class="fas fa-trash"></i></span>
-                `;
-                cartItemsListElement.insertBefore(
-                    listItem,
-                    emptyMessageElement
-                );
-            });
-        }
-    }
-
-    if (proceedButton) {
-        proceedButton.style.display =
-            shoppingCart.length > 0 ? "block" : "none";
-        if (!proceedButton.dataset.listenerAttached) {
-            proceedButton.addEventListener("click", initiateBookingProcess);
-            proceedButton.dataset.listenerAttached = "true";
-        }
-    }
-}
+bookingController.init();
