@@ -152,12 +152,6 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         }
       }
 
-      function validateDateTime() {
-        // No longer needed as arrival time is removed, but keep if other validations are added.
-        // For now, it can be an empty function or removed if no other client-side validation.
-        return true;
-      }
-
       function toggleHolidayFields() {
         var isHoliday =
           document.getElementById("isHolidayTrip").value === "true";
@@ -267,9 +261,7 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                 >
                   <option value="">-- Chọn Tàu --</option>
                   <c:forEach var="train" items="${requestScope.allTrains}">
-                    <option value="${train.trainID}">
-                      ${train.trainName} (ID: ${train.trainID})
-                    </option>
+                    <option value="${train.trainID}">${train.trainName}</option>
                   </c:forEach>
                 </select>
               </div>
@@ -284,9 +276,7 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                 >
                   <option value="">-- Chọn Tuyến --</option>
                   <c:forEach var="route" items="${requestScope.allRoutes}">
-                    <option value="${route.routeID}">
-                      ${route.routeName} (ID: ${route.routeID})
-                    </option>
+                    <option value="${route.routeID}">${route.routeName}</option>
                   </c:forEach>
                 </select>
               </div>
@@ -301,8 +291,6 @@ uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
                   required
                 />
               </div>
-
-              <%-- Arrival DateTime form group removed --%>
 
               <div class="form-group">
                 <label for="isHolidayTrip">Chuyến Lễ:</label>

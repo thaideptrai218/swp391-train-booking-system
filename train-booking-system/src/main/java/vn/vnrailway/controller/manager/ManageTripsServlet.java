@@ -15,36 +15,29 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import vn.vnrailway.dao.RouteRepository;
 import vn.vnrailway.dao.TrainRepository;
-import vn.vnrailway.dao.TrainTypeRepository; // Added
+import vn.vnrailway.dao.TrainTypeRepository;
 import vn.vnrailway.dao.TripRepository;
-import vn.vnrailway.dao.TripStationRepository; // Added
+import vn.vnrailway.dao.TripStationRepository;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dao.impl.TrainRepositoryImpl;
-import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.TrainTypeRepositoryImpl;
 import vn.vnrailway.dao.impl.TripRepositoryImpl;
-import vn.vnrailway.dao.impl.TripStationRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.TripStationRepositoryImpl;
+import vn.vnrailway.dao.impl.UserRepositoryImpl;
 import vn.vnrailway.dto.ManageTripViewDTO;
-import vn.vnrailway.dto.RouteStationDetailDTO; // Added
+import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Train;
-import vn.vnrailway.model.TrainType; // Added
+import vn.vnrailway.model.TrainType;
 import vn.vnrailway.model.Trip;
-import vn.vnrailway.model.TripStation; // Added
-import java.math.RoundingMode; // Added
-import java.util.Comparator; // Added
-import java.util.Optional; // Added
+import vn.vnrailway.model.TripStation;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.Optional;
 import vn.vnrailway.dao.HolidayPriceRepository;
+import vn.vnrailway.dao.impl.BookingRepositoryImpl;
 import vn.vnrailway.dao.impl.HolidayPriceRepositoryImpl;
 import vn.vnrailway.model.HolidayPrice;
-import jakarta.mail.Authenticator;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeUtility;
 
 @WebServlet("/manageTrips")
 public class ManageTripsServlet extends HttpServlet {
@@ -52,8 +45,8 @@ public class ManageTripsServlet extends HttpServlet {
     private TripRepository tripRepository;
     private RouteRepository routeRepository;
     private TrainRepository trainRepository;
-    private TripStationRepository tripStationRepository; // Added
-    private TrainTypeRepository trainTypeRepository; // Added
+    private TripStationRepository tripStationRepository;
+    private TrainTypeRepository trainTypeRepository;
     private HolidayPriceRepository holidayPriceRepository;
 
     @Override
@@ -62,7 +55,7 @@ public class ManageTripsServlet extends HttpServlet {
         tripRepository = new TripRepositoryImpl();
         routeRepository = new RouteRepositoryImpl();
         trainRepository = new TrainRepositoryImpl();
-        tripStationRepository = new TripStationRepositoryImpl(); // Added
+        tripStationRepository = new TripStationRepositoryImpl();
         trainTypeRepository = new TrainTypeRepositoryImpl(); // Added
         try {
             holidayPriceRepository = new HolidayPriceRepositoryImpl();
@@ -78,7 +71,6 @@ public class ManageTripsServlet extends HttpServlet {
         if (action == null) {
             action = "list";
         }
-
         try {
             switch (action) {
                 case "showAddForm":
@@ -135,7 +127,8 @@ public class ManageTripsServlet extends HttpServlet {
             java.time.LocalDate endOfWeek = today.with(java.time.DayOfWeek.SUNDAY);
             java.time.YearMonth thisMonth = java.time.YearMonth.now();
             listTrips = listTrips.stream().filter(trip -> {
-                if (trip.getDepartureDateTime() == null) return false;
+                if (trip.getDepartureDateTime() == null)
+                    return false;
                 java.time.LocalDate depDate = trip.getDepartureDateTime().toLocalDate();
                 switch (filterDate) {
                     case "TODAY":
@@ -152,13 +145,13 @@ public class ManageTripsServlet extends HttpServlet {
         String filterStatus = request.getParameter("filterStatus");
         if (filterStatus != null && !filterStatus.isEmpty()) {
             listTrips = listTrips.stream()
-                .filter(trip -> filterStatus.equals(trip.getTripStatus()))
-                .toList();
+                    .filter(trip -> filterStatus.equals(trip.getTripStatus()))
+                    .toList();
         } else {
             // Mặc định hiển thị trips có trạng thái "Lên Lịch" khi không có filter
             listTrips = listTrips.stream()
-                .filter(trip -> "Scheduled".equals(trip.getTripStatus()))
-                .toList();
+                    .filter(trip -> "Scheduled".equals(trip.getTripStatus()))
+                    .toList();
         }
         List<HolidayPrice> allHolidays = holidayPriceRepository.getActiveHolidayPrices();
         request.setAttribute("listTrips", listTrips);
@@ -206,9 +199,11 @@ public class ManageTripsServlet extends HttpServlet {
                         HolidayPrice holiday = holidayPriceRepository.getHolidayPriceById(holidayId);
                         if (holiday != null) {
                             isHolidayTrip = true;
-                            basePriceMultiplier = new BigDecimal(holiday.getDiscountPercentage()).divide(new BigDecimal("100"));
+                            basePriceMultiplier = new BigDecimal(holiday.getDiscountPercentage())
+                                    .divide(new BigDecimal("100"));
                         }
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {
+                    }
                 }
                 String tripStatus = request.getParameter("tripStatus");
 
@@ -304,10 +299,12 @@ public class ManageTripsServlet extends HttpServlet {
 
                     for (int i = 0; i < routeStations.size(); i++) {
                         RouteStationDetailDTO rsDetail = routeStations.get(i);
-                        BigDecimal currentEstimateTimeHours = rsDetail.getDistanceFromStart() != null ?
-                                rsDetail.getDistanceFromStart().divide(averageVelocity, 4, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+                        BigDecimal currentEstimateTimeHours = rsDetail.getDistanceFromStart() != null
+                                ? rsDetail.getDistanceFromStart().divide(averageVelocity, 4, RoundingMode.HALF_UP)
+                                : BigDecimal.ZERO;
                         int defaultStopTimeMinutes = rsDetail.getDefaultStopTime();
-                        if (defaultStopTimeMinutes < 0) defaultStopTimeMinutes = 0;
+                        if (defaultStopTimeMinutes < 0)
+                            defaultStopTimeMinutes = 0;
 
                         LocalDateTime arrivalAtCurrentStation;
                         LocalDateTime departureFromCurrentStation;
@@ -316,7 +313,8 @@ public class ManageTripsServlet extends HttpServlet {
                             arrivalAtCurrentStation = newTrip.getDepartureDateTime();
                             departureFromCurrentStation = newTrip.getDepartureDateTime();
                         } else {
-                            BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours.subtract(previousEstimateTimeHours);
+                            BigDecimal travelTimeHoursDecimal = currentEstimateTimeHours
+                                    .subtract(previousEstimateTimeHours);
                             long travelTimeSeconds = (long) (travelTimeHoursDecimal.doubleValue() * 3600);
                             arrivalAtCurrentStation = previousDepartureDateTime.plusSeconds(travelTimeSeconds);
                             departureFromCurrentStation = arrivalAtCurrentStation.plusMinutes(defaultStopTimeMinutes);
@@ -425,15 +423,16 @@ public class ManageTripsServlet extends HttpServlet {
                             ex.printStackTrace();
                         }
                         // Gửi email hoàn tiền cho mỗi khách (1 email/booking)
-                        vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
-                        vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
+                        vn.vnrailway.dao.UserRepository userRepository = new UserRepositoryImpl();
+                        vn.vnrailway.dao.BookingRepository bookingRepository = new BookingRepositoryImpl();
                         java.util.Set<Integer> bookingIds = new java.util.HashSet<>();
                         for (vn.vnrailway.model.Ticket ticket : tickets) {
                             bookingIds.add(ticket.getBookingID());
                         }
                         java.util.Set<String> sentEmails = new java.util.HashSet<>();
                         for (Integer bookingId : bookingIds) {
-                            java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository.findById(bookingId);
+                            java.util.Optional<vn.vnrailway.model.Booking> bookingOpt = bookingRepository
+                                    .findById(bookingId);
                             if (bookingOpt.isPresent()) {
                                 vn.vnrailway.model.Booking booking = bookingOpt.get();
                                 int userId = booking.getUserID();
@@ -451,35 +450,40 @@ public class ManageTripsServlet extends HttpServlet {
                                             props.put("mail.smtp.starttls.enable", "true");
                                             final String EMAIL_FROM = "assasinhp619@gmail.com";
                                             final String EMAIL_PASSWORD = "slos bctt epxv osla";
-                                            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
-                                                @Override
-                                                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                                                    return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
-                                                }
-                                            });
-                                            jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
-                                            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM, "Vetaure", "UTF-8"));
-                                            mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(email));
+                                            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props,
+                                                    new jakarta.mail.Authenticator() {
+                                                        @Override
+                                                        protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                                                            return new jakarta.mail.PasswordAuthentication(EMAIL_FROM,
+                                                                    EMAIL_PASSWORD);
+                                                        }
+                                                    });
+                                            jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(
+                                                    mailSession);
+                                            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress(EMAIL_FROM,
+                                                    "Vetaure", "UTF-8"));
+                                            mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO,
+                                                    jakarta.mail.internet.InternetAddress.parse(email));
                                             mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
                                             mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
-                                            mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText("Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
+                                            mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(
+                                                    "Chuyến tàu của bạn đã bị hủy - Vetaure", "UTF-8", "B"));
                                             String messageContent = String.format(
-                                                "<html>"
-                                              + "<body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>"
-                                              +   "<div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>"
-                                              +     "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
-                                              +     "<p>Xin chào, <b>%s</b>!</p>"
-                                              +     "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
-                                              +     "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>"
-                                              +     "<p>Xin cảm ơn!</p>"
-                                              +     "<br/>"
-                                              +     "<p>Trân trọng,</p>"
-                                              +     "<p><strong>Đội ngũ Vetaure</strong></p>"
-                                              +   "</div>"
-                                              + "</body>"
-                                              + "</html>",
-                                              user.getFullName()
-                                            );
+                                                    "<html>"
+                                                            + "<body style='font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;'>"
+                                                            + "<div style='background-color: #ffffff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto;'>"
+                                                            + "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
+                                                            + "<p>Xin chào, <b>%s</b>!</p>"
+                                                            + "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
+                                                            + "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>"
+                                                            + "<p>Xin cảm ơn!</p>"
+                                                            + "<br/>"
+                                                            + "<p>Trân trọng,</p>"
+                                                            + "<p><strong>Đội ngũ Vetaure</strong></p>"
+                                                            + "</div>"
+                                                            + "</body>"
+                                                            + "</html>",
+                                                    user.getFullName());
                                             mimeMessage.setContent(messageContent, "text/html; charset=UTF-8");
                                             jakarta.mail.Transport.send(mimeMessage);
                                             sentEmails.add(email);
@@ -515,13 +519,6 @@ public class ManageTripsServlet extends HttpServlet {
         } else if ("deleteTrip".equals(action)) {
             try {
                 int tripId = Integer.parseInt(request.getParameter("tripId"));
-                // Before deleting a trip, ensure related TripStations are deleted to avoid FK
-                // constraints
-                // The TripStationRepository might have a deleteByTripId method, or handle it
-                // here.
-                // For now, assuming TripRepository.deleteById handles or cascades, or DB
-                // handles it.
-                // If not, add: tripStationRepository.deleteByTripId(tripId);
                 boolean deleted = tripRepository.deleteById(tripId);
                 if (deleted) {
                     request.getSession().setAttribute("successMessage",
@@ -543,37 +540,13 @@ public class ManageTripsServlet extends HttpServlet {
                 String msg = isLocked ? "Chuyến đi đã được khóa." : "Chuyến đi đã được mở khóa.";
                 request.getSession().setAttribute("successMessage", msg);
             } catch (Exception e) {
-                request.getSession().setAttribute("errorMessage", "Lỗi khi cập nhật trạng thái khóa: " + e.getMessage());
+                request.getSession().setAttribute("errorMessage",
+                        "Lỗi khi cập nhật trạng thái khóa: " + e.getMessage());
                 e.printStackTrace();
             }
             response.sendRedirect(request.getContextPath() + "/manageTrips");
         } else {
             doGet(request, response);
         }
-    }
-
-    private void sendEmail(String to, String subject, String content) throws jakarta.mail.MessagingException, java.io.IOException {
-        java.util.Properties props = new java.util.Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-
-        jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, new jakarta.mail.Authenticator() {
-            @Override
-            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new jakarta.mail.PasswordAuthentication("assasinhp619@gmail.com", "slos bctt epxv osla");
-            }
-        });
-
-        jakarta.mail.Message mimeMessage = new jakarta.mail.internet.MimeMessage(mailSession);
-        mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress("assasinhp619@gmail.com", "Vetaure", "UTF-8"));
-        mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, jakarta.mail.internet.InternetAddress.parse(to));
-        mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
-        mimeMessage.setHeader("Content-Transfer-Encoding", "8bit");
-        mimeMessage.setSubject(jakarta.mail.internet.MimeUtility.encodeText(subject, "UTF-8", "B"));
-        mimeMessage.setContent(content, "text/html; charset=UTF-8");
-
-        jakarta.mail.Transport.send(mimeMessage);
     }
 }

@@ -99,11 +99,10 @@
                     <h2><c:out value="${currentRoute.routeName}" /> (ID: ${currentRoute.routeID})</h2>
                     <div class="route-actions">
                         <a href="${pageContext.request.contextPath}/manageRoutes?action=editRoute&routeId=${currentRoute.routeID}#editRouteForm" class="btn btn-warning"><i class="fas fa-edit"></i> Sửa</a>
-                        <!-- Đã loại bỏ button Xóa ở đây -->
+
                     </div>
                 </div>
                 <p><strong>Mô tả:</strong> <c:out value="${currentRoute.description}" /></p>
-                
                 <h3>Các Trạm Trong Tuyến:</h3>
                 <table class="stations-table">
                     <thead>

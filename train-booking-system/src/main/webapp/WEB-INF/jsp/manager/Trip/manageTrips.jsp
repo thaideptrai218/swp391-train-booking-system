@@ -19,6 +19,7 @@
       <input type="hidden" name="searchTerm" value="${requestScope.searchTerm}" />
       <input type="hidden" name="currentSortField" value="${requestScope.currentSortField}" />
     </form>
+    
     <div class="dashboard-container">
       <jsp:include page="../sidebar.jsp" />
       <div class="main-content">

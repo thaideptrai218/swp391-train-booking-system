@@ -356,12 +356,12 @@ public class RouteRepositoryImpl implements RouteRepository {
                 try {
                     psPhase1.close();
                 } catch (SQLException e) {
-                    /* ignored */ }
+                }
             if (psPhase2 != null)
                 try {
                     psPhase2.close();
                 } catch (SQLException e) {
-                    /* ignored */ }
+                }
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true); // Reset auto-commit

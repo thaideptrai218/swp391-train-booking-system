@@ -15,14 +15,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.vnrailway.dao.RouteRepository;
+import vn.vnrailway.dao.impl.BookingRepositoryImpl;
 import vn.vnrailway.dao.impl.RouteRepositoryImpl;
 import vn.vnrailway.dao.impl.StationRepositoryImpl;
+import vn.vnrailway.dao.impl.TicketRepositoryImpl;
 import vn.vnrailway.dto.RouteStationDetailDTO;
 import vn.vnrailway.dao.StationRepository;
 import vn.vnrailway.model.Route;
 import vn.vnrailway.model.Station;
 import vn.vnrailway.dao.TripRepository; // Added
 import vn.vnrailway.dao.impl.TripRepositoryImpl; // Added
+import vn.vnrailway.dao.impl.UserRepositoryImpl;
 
 @WebServlet("/manageRoutes")
 public class ManageRoutesServlet extends HttpServlet {
@@ -93,9 +96,9 @@ public class ManageRoutesServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         int routeId = Integer.parseInt(request.getParameter("routeId"));
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new ServletException("Route not found with ID: " + routeId));
+                .orElseThrow(() -> new ServletException("Không tìm thấy tuyến đường với ID: " + routeId));
         request.setAttribute("routeToEdit", route);
-        listRoutesAndStations(request, response); // To repopulate lists for the main page view
+        listRoutesAndStations(request, response);
     }
 
     private void showEditRouteStationForm(HttpServletRequest request, HttpServletResponse response)
@@ -103,7 +106,6 @@ public class ManageRoutesServlet extends HttpServlet {
         int routeId = Integer.parseInt(request.getParameter("routeId"));
         int stationId = Integer.parseInt(request.getParameter("stationId"));
 
-        // Find the specific RouteStationDetailDTO to edit
         RouteStationDetailDTO routeStationToEdit = routeRepository.getAllRouteStationDetails().stream()
                 .filter(rsd -> rsd.getRouteID() == routeId && rsd.getStationID() == stationId)
                 .findFirst()
@@ -111,7 +113,7 @@ public class ManageRoutesServlet extends HttpServlet {
                         "RouteStation not found for Route ID: " + routeId + " and Station ID: " + stationId));
 
         request.setAttribute("routeStationToEdit", routeStationToEdit);
-        listRoutesAndStations(request, response); // To repopulate lists for the main page view
+        listRoutesAndStations(request, response);
     }
 
     private void showEditFormOnManageRoutesPage(HttpServletRequest request, HttpServletResponse response)
@@ -123,25 +125,20 @@ public class ManageRoutesServlet extends HttpServlet {
                             "Route not found with ID: " + routeId + " for editing on manage routes page."));
             request.setAttribute("routeToEditOnPage", routeToEdit);
 
-            // Fetch stations for this route to display start and end points
             List<RouteStationDetailDTO> stationsInRoute = routeRepository.findStationDetailsByRouteId(routeId);
             if (stationsInRoute != null && !stationsInRoute.isEmpty()) {
-                // Assuming stations are ordered by sequence number
+
                 request.setAttribute("departureStationIdForEdit", stationsInRoute.get(0).getStationID());
                 request.setAttribute("arrivalStationIdForEdit",
                         stationsInRoute.get(stationsInRoute.size() - 1).getStationID());
-                // Also pass names for display if needed, though dropdowns will handle it
+
                 request.setAttribute("departureStationNameForEdit", stationsInRoute.get(0).getStationName());
                 request.setAttribute("arrivalStationNameForEdit",
                         stationsInRoute.get(stationsInRoute.size() - 1).getStationName());
             } else {
-                // This case should ideally not happen if routes are created with start/end
-                // stations.
-                // If it can, we might need a different way to determine original stations or
-                // prevent editing.
                 request.setAttribute("errorMessage", "Không thể xác định trạm đầu/cuối cho tuyến này để chỉnh sửa.");
             }
-            // Ensure allStations is available for the dropdowns
+
             request.setAttribute("allStations",
                     routeRepository.getAllStations().stream().filter(Station::isActive).toList());
 
@@ -150,7 +147,6 @@ public class ManageRoutesServlet extends HttpServlet {
         } catch (ServletException e) {
             request.setAttribute("errorMessage", e.getMessage());
         }
-        // Still need to populate other lists for the page
         listRoutesAndStations(request, response);
     }
 
@@ -161,7 +157,6 @@ public class ManageRoutesServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/manageRoutes");
             return;
         }
-
         try {
             switch (action) {
                 case "addRoute":
@@ -190,9 +185,9 @@ public class ManageRoutesServlet extends HttpServlet {
                     if (!isActive) {
                         try {
                             List<vn.vnrailway.model.Trip> trips = tripRepository.findByRouteId(routeId);
-                            vn.vnrailway.dao.TicketRepository ticketRepository = new vn.vnrailway.dao.impl.TicketRepositoryImpl();
-                            vn.vnrailway.dao.BookingRepository bookingRepository = new vn.vnrailway.dao.impl.BookingRepositoryImpl();
-                            vn.vnrailway.dao.UserRepository userRepository = new vn.vnrailway.dao.impl.UserRepositoryImpl();
+                            vn.vnrailway.dao.TicketRepository ticketRepository = new TicketRepositoryImpl();
+                            vn.vnrailway.dao.BookingRepository bookingRepository = new BookingRepositoryImpl();
+                            vn.vnrailway.dao.UserRepository userRepository = new UserRepositoryImpl();
                             java.util.Set<String> sentEmails = new java.util.HashSet<>();
                             for (vn.vnrailway.model.Trip trip : trips) {
                                 tripRepository.updateTripStatus(trip.getTripID(), "Cancelled");
@@ -567,7 +562,7 @@ public class ManageRoutesServlet extends HttpServlet {
             String stationsOrderJson = request.getParameter("stationsOrder");
 
             if (stationsOrderJson == null || stationsOrderJson.isEmpty()) {
-                throw new IllegalArgumentException("Stations order data is missing.");
+                throw new IllegalArgumentException("Thứ tự trạm không được để trống.");
             }
 
             TypeReference<List<StationOrderUpdateDTO>> typeRef = new TypeReference<List<StationOrderUpdateDTO>>() {

@@ -39,7 +39,7 @@ public class ManageStationsServlet extends HttpServlet {
             request.setAttribute("stations", stations);
             request.setAttribute("activeFilter", activeFilter == null ? "active" : activeFilter);
         } catch (SQLException e) {
-            request.setAttribute("errorMessage", "Error retrieving stations: " + e.getMessage());
+            request.setAttribute("errorMessage", "Lỗi khi truy vấn: " + e.getMessage());
             e.printStackTrace();
         }
         request.getRequestDispatcher("/WEB-INF/jsp/manager/Station/manageStations.jsp").forward(request, response);
