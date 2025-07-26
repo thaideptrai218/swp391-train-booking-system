@@ -1,24 +1,40 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+
+<!--
+  Audit Log Page
+  This page displays a log of all changes made by administrators.
+-->
+
 <!DOCTYPE html>
 <html>
+
 <head>
+    <!-- Meta tags and Title -->
     <meta charset="UTF-8">
     <title>Lịch sử sửa đổi</title>
+
+    <!-- External Stylesheets -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Internal Styles -->
     <style>
+        /* Styling for the filter container */
         .filter-container {
             margin-bottom: 20px;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 5px;
         }
+
         .filter-container form {
             display: flex;
             align-items: center;
             gap: 15px;
         }
+
+        /* Styling for form inputs */
         .filter-container input[type="text"],
         .filter-container input[type="date"],
         .filter-container select {
@@ -27,6 +43,8 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
+        /* Styling for the filter button */
         .filter-container button {
             padding: 8px 20px;
             background-color: #007bff;
@@ -36,19 +54,32 @@
             cursor: pointer;
             font-size: 14px;
         }
+
         .filter-container button:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
+    <!-- Main container for the dashboard -->
     <div class="dashboard-container">
+        
+        <!-- Include admin layout (sidebar, etc.) -->
         <jsp:include page="adminLayout.jsp" />
+
+        <!-- Main content area -->
         <main class="main-content">
+            
+            <!-- Header section -->
             <header class="header">
                 <h1>Lịch sử sửa đổi</h1>
             </header>
+
+            <!-- Audit log table and filters -->
             <section class="user-table-container">
+                
+                <!-- Filter controls -->
                 <div class="filter-container" style="display: flex; justify-content: space-between; align-items: center;">
                     <form action="auditLog" method="get" style="display: flex; align-items: center; gap: 15px; flex-grow: 1;">
                         <input type="text" name="searchTerm" placeholder="Tìm theo Email đối tượng..." value="${searchTerm}">
@@ -66,6 +97,8 @@
                         <button type="submit">Lọc</button>
                     </form>
                 </div>
+                
+                <!-- Audit Log Table -->
                 <table class="user-table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -92,10 +125,13 @@
                         </c:forEach>
                     </tbody>
                 </table>
+                
+                <!-- Pagination controls -->
                 <div class="pagination">
                     <c:if test="${currentPage > 1}">
                         <a href="?page=${currentPage - 1}&searchTerm=${searchTerm}&action=${selectedAction}&startDate=${startDate}&endDate=${endDate}">Trang trước</a>
                     </c:if>
+                    
                     <c:forEach begin="1" end="${totalPages}" var="i">
                         <c:choose>
                             <c:when test="${currentPage eq i}">
@@ -106,6 +142,7 @@
                             </c:otherwise>
                         </c:choose>
                     </c:forEach>
+                    
                     <c:if test="${currentPage < totalPages}">
                         <a href="?page=${currentPage + 1}&searchTerm=${searchTerm}&action=${selectedAction}&startDate=${startDate}&endDate=${endDate}">Trang sau</a>
                     </c:if>
@@ -113,7 +150,11 @@
             </section>
         </main>
     </div>
+
+    <!-- External JavaScript -->
     <script src="${pageContext.request.contextPath}/js/admin.js"></script>
+    
+    <!-- Inline script to trim search term -->
     <script>
         document.querySelector('form[action="auditLog"]').addEventListener('submit', function(e) {
             const searchTermInput = e.target.querySelector('input[name="searchTerm"]');
@@ -123,4 +164,5 @@
         });
     </script>
 </body>
+
 </html>

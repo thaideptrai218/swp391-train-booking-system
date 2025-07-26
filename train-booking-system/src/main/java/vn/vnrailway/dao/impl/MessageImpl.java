@@ -107,17 +107,17 @@ public class MessageImpl implements MessageDAO {
     @Override
     public List<MessageSummary> getChatSummariesWithPagination(int offset, int limit) {
         List<MessageSummary> summaries = new ArrayList<>();
-        String sql = "SELECT u.UserID, u.FullName, u.Email, cm.Content AS LastMessage " +
+        String sql = "SELECT u.UserID, u.FullName, u.Email, cm.Content AS LastMessage, cm.SenderType " +
                 "FROM Users u " +
-                "LEFT JOIN (SELECT c1.UserID, c1.Content, c1.Timestamp " +
-                "           FROM Messages c1 " +
-                "           INNER JOIN (SELECT UserID, MAX(Timestamp) AS MaxTimestamp " +
-                "                       FROM Messages " +
-                "                       WHERE SenderType = 'Customer' " +
-                "                       GROUP BY UserID) c2 " +
-                "           ON c1.UserID = c2.UserID AND c1.Timestamp = c2.MaxTimestamp " +
-                "           WHERE c1.SenderType = 'Customer') cm " +
-                "ON u.UserID = cm.UserID " +
+                "LEFT JOIN ( " +
+                "   SELECT m1.UserID, m1.Content, m1.SenderType, m1.Timestamp " +
+                "   FROM Messages m1 " +
+                "   INNER JOIN ( " +
+                "       SELECT UserID, MAX(Timestamp) AS MaxTimestamp " +
+                "       FROM Messages " +
+                "       GROUP BY UserID " +
+                "   ) m2 ON m1.UserID = m2.UserID AND m1.Timestamp = m2.MaxTimestamp " +
+                ") cm ON u.UserID = cm.UserID " +
                 "WHERE EXISTS (SELECT 1 FROM Messages WHERE UserID = u.UserID AND SenderType = 'Customer') " +
                 "ORDER BY u.UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = DBContext.getConnection();
@@ -130,7 +130,8 @@ public class MessageImpl implements MessageDAO {
                             rs.getInt("UserID"),
                             rs.getString("FullName"),
                             rs.getString("Email"),
-                            rs.getString("LastMessage"));
+                            rs.getString("LastMessage"),
+                            rs.getString("SenderType"));
                     summaries.add(summary);
                 }
             }

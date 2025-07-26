@@ -33,6 +33,7 @@ public interface TicketRepository {
     Ticket save(Ticket ticket) throws SQLException;
 
     InfoPassengerDTO findTicketByTicketCode(String ticketCode) throws SQLException; // For checking ticket status
+    List<String> getAllStationNames() throws SQLException; // For autocomplete in the form
 
     boolean update(Ticket ticket) throws SQLException; // Mainly for status changes
 
@@ -42,14 +43,14 @@ public interface TicketRepository {
 
     double getTotalRevenue() throws SQLException;
     
-    void insertTempRefundRequests(String ticketCode) throws SQLException; // Insert temporary refund requests
+    void insertTempRefundRequests(String ticketCode, String noteSTK) throws SQLException; // Insert temporary refund requests
 
-    void rejectRefundTicket(String ticketInfo) throws SQLException;
+    void rejectRefundTicket(String ticketInfo, String imageFileName) throws SQLException;
 
-    void approveRefundTicket(String ticketInfo) throws SQLException;
+    void approveRefundTicket(String ticketInfo, String imageFileName) throws SQLException;
 
     List<InfoPassengerDTO> findListTicketBooking(String id) throws SQLException;
 
     void refundAllTicketsForTrip(int tripId) throws SQLException;
-    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests(String userID) throws SQLException;
+    List<ConfirmRefundRequestDTO> getAllConfirmedRefundRequests() throws SQLException;
 }

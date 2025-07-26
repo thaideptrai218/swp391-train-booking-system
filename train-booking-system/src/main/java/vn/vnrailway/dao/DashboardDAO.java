@@ -77,6 +77,14 @@ public class DashboardDAO {
         return 0;
     }
 
+    public double getExpectedRevenue() throws SQLException {
+        return 0;
+    }
+
+    public double getActualRevenue(int months) throws SQLException {
+        return 0;
+    }
+
     public double getTotalRefunds() throws SQLException {
         return 0;
     }
@@ -91,5 +99,13 @@ public class DashboardDAO {
 
     public List<Map<String, Object>> getPopularTrips() throws SQLException {
         return null;
+    }
+
+    public int getTotalTicketsSold() throws SQLException {
+        return 0;
+    }
+
+    public int getRefundableTicketsCount() throws SQLException {
+        return 0;
     }
 }

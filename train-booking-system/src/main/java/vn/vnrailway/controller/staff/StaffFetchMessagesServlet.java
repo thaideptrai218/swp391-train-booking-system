@@ -16,7 +16,7 @@ import vn.vnrailway.dao.MessageDAO;
 import vn.vnrailway.dao.impl.MessageImpl;
 import vn.vnrailway.model.Message;
 
-@WebServlet("/fetch-messages")
+@WebServlet("/staff/fetch-messages")
 public class StaffFetchMessagesServlet extends HttpServlet {
     private MessageDAO messageDAO = new MessageImpl();
 

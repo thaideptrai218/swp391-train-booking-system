@@ -153,6 +153,9 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+                          <jsp:include page="../common/footer.jsp" />
             <style type="text/css">
               body {
                 margin-top: 20px;
@@ -230,6 +233,5 @@
               });
             </script>
       </body>
-                  <jsp:include page="../common/footer.jsp" />
       </html>
 

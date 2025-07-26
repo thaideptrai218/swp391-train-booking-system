@@ -15,18 +15,17 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet(name = "CheckConfirmRefundRequestServlet", urlPatterns = { "/checkConfirmRefundRequest" })
+@WebServlet(name = "CheckConfirmRefundRequestServlet", urlPatterns = { "/staff/refund-list" })
 public class CheckConfirmRefundRequestServlet extends HttpServlet {
     private TicketRepository ticketRepository = new TicketRepositoryImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                String userID = request.getParameter("userID");
 
         List<ConfirmRefundRequestDTO> confirmRefundRequests;
         try {
-            confirmRefundRequests = ticketRepository.getAllConfirmedRefundRequests(userID);
+            confirmRefundRequests = ticketRepository.getAllConfirmedRefundRequests();
             if (confirmRefundRequests == null || confirmRefundRequests.isEmpty()) {
                 request.setAttribute("message", "Không có yêu cầu hoàn vé nào.");
                 request.getRequestDispatcher("/WEB-INF/jsp/staff/listOfRefundTickets.jsp").forward(request, response);

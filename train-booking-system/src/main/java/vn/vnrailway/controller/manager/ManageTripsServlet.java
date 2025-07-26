@@ -411,8 +411,8 @@ public class ManageTripsServlet extends HttpServlet {
                         java.util.List<vn.vnrailway.model.Ticket> tickets = ticketRepository.findByTripId(tripId);
                         try (java.sql.Connection conn = vn.vnrailway.config.DBContext.getConnection()) {
                             conn.setAutoCommit(false);
-                            // 1. Cập nhật TicketStatus = 'Cancelled' cho tất cả vé
-                            String updateTicketStatusSql = "UPDATE Tickets SET TicketStatus = 'Cancelled' WHERE TripID = ?";
+                            // 1. Cập nhật isCancelled = 1 cho tất cả vé
+                            String updateTicketStatusSql = "UPDATE Tickets SET isCancelled = 1 WHERE TripID = ?";
                             try (java.sql.PreparedStatement ps = conn.prepareStatement(updateTicketStatusSql)) {
                                 ps.setInt(1, tripId);
                                 ps.executeUpdate();
@@ -475,8 +475,8 @@ public class ManageTripsServlet extends HttpServlet {
                                                             + "<h2 style='color: #e74c3c;'>Chuyến tàu đã bị hủy</h2>"
                                                             + "<p>Xin chào, <b>%s</b>!</p>"
                                                             + "<p>Chúng tôi xin thông báo chuyến tàu bạn đã đặt đã bị <strong>hủy</strong> vì lý do bất khả kháng.</p>"
-                                                            + "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng phản hồi email này kèm theo <strong>số tài khoản ngân hàng</strong> để chúng tôi chuyển tiền hoàn.</p>"
-                                                            + "<p>Xin cảm ơn!</p>"
+                                                            + "<p>Để tiếp tục xử lý yêu cầu hoàn tiền của bạn, vui lòng vào website để hủy vé, chúng tôi sẽ hoàn tiền lại cho bạn.</p>"
+                                                            + "<p>Xin lỗi vì sự bất tiện này. Xin cảm ơn!</p>"
                                                             + "<br/>"
                                                             + "<p>Trân trọng,</p>"
                                                             + "<p><strong>Đội ngũ Vetaure</strong></p>"

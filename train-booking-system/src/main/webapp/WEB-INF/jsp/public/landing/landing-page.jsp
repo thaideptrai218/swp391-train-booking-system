@@ -20,7 +20,7 @@
           position: fixed;
           z-index: 9999;
           left: 50%;
-          top: 50%;
+          top: 20%;
           transform: translate(-50%, -50%);
           opacity: 0;
           transition: opacity 0.3s, visibility 0.3s;
@@ -36,19 +36,13 @@
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
-
-      <c:if test="${not empty sessionScope.successMessage}">
-        <div id="toast" class="toast">${sessionScope.successMessage}</div>
+      <c:if test="${not empty sessionScope.refundSuccessMessage}">
         <script>
-          window.onload = () => {
-            const toast = document.getElementById("toast");
-            toast.classList.add("show");
-            setTimeout(() => {
-              toast.classList.remove("show");
-            }, 8000); // Tự ẩn sau 8 giây
-          };
+            window.addEventListener('DOMContentLoaded', (event) => {
+                showToast("${sessionScope.refundSuccessMessage}");
+            });
         </script>
-        <c:remove var="successMessage" scope="session" />
+        <c:remove var="refundSuccessMessage" scope="session" />
       </c:if>
 
 

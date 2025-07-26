@@ -57,15 +57,23 @@
                       <td><input type="text" name="trainCode" placeholder="Nhập mác tàu" value="${trainCode}" /></td>
                     </tr>
                     <tr>
-                      <td style="padding-right: 20px;"><strong>Ga đi</strong></strong></td>
+                      <td style="padding-right: 20px;"><strong>Ga đi</strong></td>
                       <td style="padding-right: 40px;"><input type="text" name="departureStation" id="departureStation"
                           placeholder="Nhập ga đi" list="departureSuggestions" value="${departureStation}" />
-                        <datalist id="departureSuggestions"></datalist>
+                        <datalist id="departureSuggestions">
+                          <c:forEach var="station" items="${stationList}">
+                            <option value="${station}" />
+                          </c:forEach>
+                        </datalist>
                       </td>
-                      <td style="padding-right: 20px;"><strong>Ga đến</strong></strong></td>
+                      <td style="padding-right: 20px;"><strong>Ga đến</strong></td>
                       <td><input type="text" name="arrivalStation" id="arrivalStation" placeholder="Nhập ga đến"
                           list="arrivalSuggestions" autocomplete="off" value="${arrivalStation}" />
-                        <datalist id="arrivalSuggestions"></datalist>
+                        <datalist id="arrivalSuggestions">
+                          <c:forEach var="station" items="${stationList}">
+                            <option value="${station}" />
+                          </c:forEach>
+                        </datalist>
                       </td>
                     </tr>
                     <tr>
@@ -129,30 +137,30 @@
                       </td>
                       <td>
                         <c:choose>
-                              <c:when test="${infoPassenger.ticketStatus == 'Valid'}">
-                                <span style="color: #28a745; font-weight: bold;">Hợp lệ</span> <!-- xanh lá đẹp -->
-                              </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'Used'}">
-                                <span style="color: #007bff; font-weight: bold;">Đã sử dụng</span>
-                                <!-- xanh dương tươi -->
-                              </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'Processing'}">
-                                <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
-                              </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'Refunded'}">
-                                <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
-                              </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'RejectedRefund'}">
-                                <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
-                              </c:when>
-                              <c:when test="${infoPassenger.ticketStatus == 'Expired'}">
-                                <span style="color: #6c757d; font-weight: bold;">Đã hết hạn</span>
-                                <!-- xám trung tính -->
-                              </c:when>
-                              <c:otherwise>
-                                <span style="color: #343a40; font-weight: bold;">Không xác định</span> <!-- đen xám -->
-                              </c:otherwise>
-                            </c:choose>
+                          <c:when test="${infoPassenger.ticketStatus == 'Valid'}">
+                            <span style="color: #28a745; font-weight: bold;">Hợp lệ</span> <!-- xanh lá đẹp -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'Used'}">
+                            <span style="color: #007bff; font-weight: bold;">Đã sử dụng</span>
+                            <!-- xanh dương tươi -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'Processing'}">
+                            <span style="color: #fd7e14; font-weight: bold;">Đang xử lý</span> <!-- cam nổi bật -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'Refunded'}">
+                            <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'RejectedRefund'}">
+                            <span style="color: #dc3545; font-weight: bold;">Đã hủy</span> <!-- đỏ đậm -->
+                          </c:when>
+                          <c:when test="${infoPassenger.ticketStatus == 'Expired'}">
+                            <span style="color: #6c757d; font-weight: bold;">Đã hết hạn</span>
+                            <!-- xám trung tính -->
+                          </c:when>
+                          <c:otherwise>
+                            <span style="color: #343a40; font-weight: bold;">Không xác định</span> <!-- đen xám -->
+                          </c:otherwise>
+                        </c:choose>
                       </td>
                     </tr>
                   </tbody>
