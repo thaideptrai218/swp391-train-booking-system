@@ -368,6 +368,56 @@ public class DashboardDAOImpl extends DashboardDAO {
     }
 
     @Override
+    public double getExpectedRevenue() throws SQLException {
+        double actualRevenueLast6Months = getActualRevenue(6);
+
+        String futureRevenueQuery = "SELECT SUM(ISNULL(b.TotalPrice, 0)) " +
+                                    "FROM Bookings b " +
+                                    "JOIN Tickets t ON b.BookingID = t.BookingID " +
+                                    "JOIN Trips tr ON t.TripID = tr.TripID " +
+                                    "WHERE b.PaymentStatus = 'Paid' " +
+                                    "AND tr.DepartureDateTime > GETDATE()";
+
+        double futureRevenue = 0;
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(futureRevenueQuery);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                futureRevenue = rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return actualRevenueLast6Months + futureRevenue;
+    }
+
+    @Override
+    public double getActualRevenue(int months) throws SQLException {
+        // Simplified logic: Revenue from trips that have already departed in the selected time frame.
+        String query = "SELECT SUM(ISNULL(b.TotalPrice, 0)) " +
+               "FROM Bookings b " +
+               "JOIN Tickets t ON b.BookingID = t.BookingID " +
+               "JOIN Trips tr ON t.TripID = tr.TripID " +
+               "WHERE b.PaymentStatus = 'Paid' " +
+               "AND tr.DepartureDateTime < GETDATE() " +
+               "AND tr.DepartureDateTime >= DATEADD(month, ?, GETDATE())";
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, -months);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
     public double getTotalRefunds() throws SQLException {
         String query = "SELECT SUM(ActualRefundAmount) FROM Refunds WHERE Status = 'Accepted'";
         try (Connection conn = new DBContext().getConnection();
@@ -458,5 +508,46 @@ public class DashboardDAOImpl extends DashboardDAO {
             e.printStackTrace();
         }
         return popularTrips;
+    }
+
+    @Override
+    public int getTotalTicketsSold() throws SQLException {
+        String query = "SELECT COUNT(t.TicketCode) FROM Tickets t JOIN Bookings b ON t.BookingID = b.BookingID WHERE b.PaymentStatus = 'Paid'";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int getRefundableTicketsCount() throws SQLException {
+        String query = "SELECT COUNT(t.TicketCode) " +
+               "FROM Tickets t " +
+               "JOIN Bookings b ON t.BookingID = b.BookingID " +
+               "JOIN Trips tr ON t.TripID = tr.TripID " +
+               "WHERE b.PaymentStatus = 'Paid' AND tr.DepartureDateTime > GETDATE() " +
+               "AND EXISTS ( " +
+               "    SELECT 1 FROM CancellationPolicies cp " +
+               "    WHERE cp.IsRefundable = 1 AND cp.IsActive = 1 " +
+               "      AND GETDATE() BETWEEN cp.EffectiveFromDate AND ISNULL(cp.EffectiveToDate, '9999-12-31') " +
+               "      AND DATEDIFF(hour, GETDATE(), tr.DepartureDateTime) >= cp.HoursBeforeDeparture_Min " +
+               "      AND DATEDIFF(hour, GETDATE(), tr.DepartureDateTime) < cp.HoursBeforeDeparture_Max " +
+               ")";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }
