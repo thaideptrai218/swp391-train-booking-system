@@ -440,7 +440,7 @@
             }
             toast.textContent = message;
             toast.classList.add("show");
-            setTimeout(function(){ toast.classList.remove("show"); }, 5000);
+            setTimeout(function(){ toast.classList.remove("show"); }, 3000);
         }
       </script>
 
