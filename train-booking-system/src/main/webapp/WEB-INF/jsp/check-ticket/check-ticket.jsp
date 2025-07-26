@@ -7,11 +7,15 @@
       <head>
         <title>Tra cứu thông tin đặt vé</title>
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/check-booking.css" />
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
 
       <body>
-        <header>
+                    <jsp:include page="../common/header.jsp" />
+
+        <!-- <header>
           <div class="navbar">
             <a href="${pageContext.request.contextPath}/landing">
               <img src="${pageContext.request.contextPath}/assets/images/logo.png" class="logo" alt="Logo" />
@@ -39,7 +43,7 @@
               </c:otherwise>
             </c:choose>
           </div>
-        </header>
+        </header> -->
 
         <main class="main-content">
           <section class="check-info">

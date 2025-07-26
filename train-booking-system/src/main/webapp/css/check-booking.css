@@ -4,47 +4,14 @@ body {
   background-color: #f8f9fa;
 }
 
-.navbar {
-  background-color: #042c57;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 30px;
-  align-items: center;
-  height: 80px;
-}
-
-.navbar a {
-  color: white;
-  margin: 27px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.logo {
-  height: 100px; /* Ưu tiên dùng height để giữ tỉ lệ ảnh */
-  width: auto;  /* Giữ tỉ lệ ảnh đúng, không bị méo */
-  object-fit: contain;
-}
-
-.auth a {
-  margin-left: 10px;
-  padding: 5px 10px;
-}
-
-.register {
-  background-color: #007bff;
-  color: white;
-  border-radius: 20px;
-}
-
 .main-content {
+  margin-top: 150px;
   display: flex;
   justify-content: center;
   /* align-items: flex-start; */
   gap: 30px;
   padding: 20px;
-  margin: 20px;
+  /* margin: 20px; */
 }
 
 .check-info {

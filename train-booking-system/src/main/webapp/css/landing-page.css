@@ -1,6 +1,6 @@
 :root {
-    --font-primary: Inter, sans-serif;
-    --font-secondary: Sora, sans-serif;
+    --font-primary: "Inter", sans-serif; /* From existing body style */
+    --font-secondary: "Sora", sans-serif; /* For profile dropdown */
     --font-tertiary: "Plus Jakarta Sans", sans-serif;
 
     --color-text-default: #333;
@@ -266,13 +266,14 @@ table {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 2000px;
     width: 90%;
     margin: 0 auto;
     padding: 20px;
 }
 
 .btn {
+    font-family: "Inter", sans-serif;
     border-radius: var(--border-radius-main);
     background: var(--color-accent-cyan);
     color: var(--color-white);
@@ -302,7 +303,7 @@ table {
 }
 
 .navbar {
-    background-color: transparent;
+    /* background-color: transparent; */
     color: var(--color-white);
     position: absolute;
     top: 0;
@@ -338,9 +339,10 @@ table {
 }
 
 .navbar .nav-list li a {
+    font-family: "Inter", sans-serif;
     text-decoration: none;
     color: var(--color-white);
-    font-size: 16px;
+    font-size: 20px;
     font-style: normal;
     font-weight: 700;
     line-height: 150%;

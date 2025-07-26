@@ -40,7 +40,7 @@
 
         .main-content {
             max-width: 1200px;
-            margin: 2rem auto;
+            margin: 150px auto;
             padding: 2rem;
             background-color: #ffffff;
             border-radius: 12px;

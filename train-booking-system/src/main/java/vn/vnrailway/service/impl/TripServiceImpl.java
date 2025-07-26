@@ -31,16 +31,19 @@ public class TripServiceImpl implements TripService {
     }
 
     // Constructor for allowing injection
-    public TripServiceImpl(TripRepository tripRepository, CoachRepository coachRepository, CoachTypeRepository coachTypeRepository) {
+    public TripServiceImpl(TripRepository tripRepository, CoachRepository coachRepository,
+            CoachTypeRepository coachTypeRepository) {
         this.tripRepository = tripRepository;
         this.coachRepository = coachRepository;
         this.coachTypeRepository = coachTypeRepository;
     }
 
     @Override
-    public List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId, LocalDate departureDate) throws SQLException, Exception {
+    public List<TripSearchResultDTO> searchAvailableTrips(int originStationId, int destinationStationId,
+            LocalDate departureDate, int passengerCount) throws SQLException, Exception {
         try {
-            List<TripSearchResultDTO> trips = tripRepository.searchAvailableTrips(originStationId, destinationStationId, departureDate);
+            List<TripSearchResultDTO> trips = tripRepository.searchAvailableTrips(originStationId, destinationStationId,
+                    departureDate, passengerCount);
 
             if (trips == null) {
                 return new ArrayList<>(); // Return empty list if null
@@ -61,15 +64,19 @@ public class TripServiceImpl implements TripService {
                             coachInfo.setCoachTypeDescription(coachType.getDescription());
                             coachInfo.setCapacity(coach.getCapacity());
                             coachInfo.setCompartmented(coachType.isCompartmented()); // Populate from CoachType model
-                            coachInfo.setDefaultCompartmentCapacity(coachType.getDefaultCompartmentCapacity()); // Populate from CoachType model
+                            coachInfo.setDefaultCompartmentCapacity(coachType.getDefaultCompartmentCapacity()); // Populate
+                                                                                                                // from
+                                                                                                                // CoachType
+                                                                                                                // model
                             coachInfoList.add(coachInfo);
                         } else {
-                            System.err.println("Warning: CoachType not found for ID: " + coach.getCoachTypeID() + " for CoachID: " + coach.getCoachID());
+                            System.err.println("Warning: CoachType not found for ID: " + coach.getCoachTypeID()
+                                    + " for CoachID: " + coach.getCoachID());
                         }
                     }
                     tripDto.setCoaches(coachInfoList);
                 } else {
-                     tripDto.setCoaches(new ArrayList<>()); // Set empty list if no valid trainId
+                    tripDto.setCoaches(new ArrayList<>()); // Set empty list if no valid trainId
                 }
             }
             return trips;

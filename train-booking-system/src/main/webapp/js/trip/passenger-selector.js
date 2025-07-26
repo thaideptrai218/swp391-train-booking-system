@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const passengerTotalText = passengerSelector.querySelector(
             ".passenger-total-text"
         );
+        const passengerTotalNumber = passengerSelector.querySelector(
+            ".passenger-total-number"
+        );
         const passengerContainer = passengerSelector.querySelector(
             ".passenger-container"
         );
@@ -46,6 +49,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     subQuantityElements[type].textContent = count;
                 }
             }
+            if (passengerTotalNumber)
+                passengerTotalNumber.value = `${totalPassengers}`;
+
             if (passengerTotalText)
                 passengerTotalText.textContent = `${totalPassengers} Hành khách`;
 

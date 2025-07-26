@@ -259,8 +259,12 @@ uri="jakarta.tags.core" %> <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
                                                     >
                                                 </span>
                                                 <span class="seats-info">
-                                                    Còn trống: -- <br /> Đã đặt:
-                                                    --
+                                                    <span class="seats-info">
+                                                        Còn trống:
+                                                        ${trip.availableSeat}
+                                                        <br /> Đã đặt:
+                                                        ${trip.occupiedSeat}
+                                                    </span>
                                                 </span>
                                             </div>
                                             <div

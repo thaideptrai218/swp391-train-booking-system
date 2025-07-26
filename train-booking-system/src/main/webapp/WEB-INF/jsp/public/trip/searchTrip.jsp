@@ -145,7 +145,9 @@
                                     <div class="passenger-summary" tabindex="0">
                                         <div class="passenger-count-display">
                                             <span class="passenger-icon"><i class="fa-solid fa-user-group"></i></span>
-                                            <span class="passenger-total-text">1 Hành khách</span> <%-- This will be updated by JS --%>
+                                            <input type="hidden" class="passenger-total-number" name="passenger-total-number"></input>
+                                            <span class="passenger-total-text"> 1 Hành khách</span>
+
                                         </div>
                                         <div class="passenger-container">
                                             <c:forEach var="pt" items="${passengerTypes}">

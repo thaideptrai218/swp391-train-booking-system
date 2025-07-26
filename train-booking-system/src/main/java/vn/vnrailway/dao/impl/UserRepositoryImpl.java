@@ -325,7 +325,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean update(User user) throws SQLException {
-        String sql = "UPDATE Users SET FullName = ?, PhoneNumber = ?, IDCardNumber = ?, Role = ?, IsActive = ?, LastLogin = ?, DateOfBirth = ?, Gender = ?, Address = ?, Email = ? WHERE UserID = ?";
+        String sql = "UPDATE Users SET FullName = ?, PhoneNumber = ?, IDCardNumber = ?, Role = ?, IsActive = ?, LastLogin = ?, DateOfBirth = ?, Gender = ?, Address = ?, Email = ?, PasswordHash = ? WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -350,7 +350,8 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(8, user.getGender());
             ps.setString(9, user.getAddress());
             ps.setString(10, user.getEmail());
-            ps.setInt(11, user.getUserID());
+            ps.setNString(11, user.getPasswordHash());
+            ps.setInt(12, user.getUserID());
 
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;

@@ -28,8 +28,8 @@ import="java.util.List, vn.vnrailway.model.PassengerType" %>
 
         <link
             rel="stylesheet"
-            href="${pageContext.request.contextPath}/css/common.css"
-        />
+            href="${pageContext.request.contextPath}/css/common.css">
+        
         <link
             rel="stylesheet"
             href="${pageContext.request.contextPath}/css/trip-info.css"
@@ -45,6 +45,7 @@ import="java.util.List, vn.vnrailway.model.PassengerType" %>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     </head>
     <body data-context-path="${pageContext.request.contextPath}">
+
         <%@include file="../../common/header.jsp" %>
 
         <main class="trip-info-main">
