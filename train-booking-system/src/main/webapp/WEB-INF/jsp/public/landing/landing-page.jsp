@@ -36,17 +36,11 @@
     </head>
 
     <body data-context-path="${pageContext.request.contextPath}">
-
       <c:if test="${not empty sessionScope.refundSuccessMessage}">
-        <div id="refundToast" class="toast">${sessionScope.refundSuccessMessage}</div>
         <script>
-          window.onload = () => {
-            const toast = document.getElementById("refundToast");
-            toast.classList.add("show");
-            setTimeout(() => {
-              toast.classList.remove("show");
-            }, 8000); // Tự ẩn sau 8 giây
-          };
+            window.addEventListener('DOMContentLoaded', (event) => {
+                showToast("${sessionScope.refundSuccessMessage}");
+            });
         </script>
         <c:remove var="refundSuccessMessage" scope="session" />
       </c:if>
@@ -446,7 +440,7 @@
             }
             toast.textContent = message;
             toast.classList.add("show");
-            setTimeout(function(){ toast.classList.remove("show"); }, 3000);
+            setTimeout(function(){ toast.classList.remove("show"); }, 5000);
         }
       </script>
 
