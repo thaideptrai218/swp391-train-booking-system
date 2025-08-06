@@ -30,7 +30,7 @@ public interface TripRepository {
         List<TripSearchResultDTO> searchAvailableTrips(
                         int originStationId,
                         int destinationStationId,
-                        LocalDate departureDate, int numberOfPassenger) throws SQLException;
+                        LocalDate departureDate) throws SQLException;
 
         List<BestSellerLocationDTO> getBestSellerLocations(int limit) throws SQLException;
 

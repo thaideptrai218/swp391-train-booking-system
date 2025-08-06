@@ -366,9 +366,6 @@
                 <p>(Khu vực lựa chọn hình thức thanh toán - sẽ được triển khai)</p>
                  <select id="paymentMethod" name="paymentMethod">
                     <option value="VNPAY">VNPAY</option>
-                    <option value="MOMO">MOMO</option>
-                    <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
-                    <%-- Add other payment methods as needed --%>
                 </select>
             </section>
 

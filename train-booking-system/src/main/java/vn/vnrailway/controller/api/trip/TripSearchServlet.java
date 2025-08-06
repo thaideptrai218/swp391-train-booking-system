@@ -44,7 +44,6 @@ public class TripSearchServlet extends HttpServlet {
             String originStationIdParam = request.getParameter("originStationId");
             String destinationStationIdParam = request.getParameter("destinationStationId");
             String departureDateParam = request.getParameter("departureDate");
-            String passengerNUmber = request.getParameter("passenger-total-number");
 
             // Validate required parameters
             if (originStationIdParam == null || destinationStationIdParam == null || departureDateParam == null) {
@@ -57,12 +56,12 @@ public class TripSearchServlet extends HttpServlet {
             int originStationId;
             int destinationStationId;
             LocalDate departureDate;
-            int passengerNumberInt;
 
             try {
                 originStationId = Integer.parseInt(originStationIdParam);
                 destinationStationId = Integer.parseInt(destinationStationIdParam);
-                passengerNumberInt = Integer.parseInt(passengerNUmber);
+
+                // Try YYYY-MM-DD format first (from date picker), then dd/MM/yyyy format
                 try {
                     departureDate = LocalDate.parse(departureDateParam);
                 } catch (DateTimeParseException e1) {
@@ -89,7 +88,7 @@ public class TripSearchServlet extends HttpServlet {
             List<TripSearchResultDTO> trips = tripRepository.searchAvailableTrips(
                     originStationId,
                     destinationStationId,
-                    departureDate, passengerNumberInt);
+                    departureDate);
 
             // Build response
             Map<String, Object> responseData = new HashMap<>();
